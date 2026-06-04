@@ -14,6 +14,7 @@ import gameEngine from './core/game-engine.js'
 // 场景
 import LandingScene from './pages/landing.js'
 import MenuScene from './pages/menu.js'
+import PrologueScene from './pages/prologue.js'
 
 // ==================== 初始化 ====================
 
@@ -29,8 +30,9 @@ gameEngine.init(app)
 // 注册场景
 gameEngine.sceneManager.register('landing', LandingScene)
 gameEngine.sceneManager.register('menu', MenuScene)
+gameEngine.sceneManager.register('prologue', PrologueScene)
 
 // 启动：进入着陆页
 gameEngine.switchScene('landing')
 
-console.log('[Main] 《卅一景》已启动')
+console.log('[Main] 《卅一景》已启动 — v2 with prologue')

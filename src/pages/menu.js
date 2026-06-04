@@ -95,11 +95,6 @@ export default class MenuScene {
         <div class="menu-bg-mist"></div>
       </div>
 
-      <!-- 人物立绘 -->
-      <div class="menu-character">
-        <img src="${characterImage}" alt="人物与灯笼" />
-      </div>
-
       <!-- 返回按钮 -->
       <button class="menu-back" id="btn-back">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -135,14 +130,6 @@ export default class MenuScene {
                    data-scene="${ch.scene}"
                    ${!unlocked ? 'data-locked="true"' : ''}
                    style="--delay: ${i * 0.1}s">
-                <div class="chapter-marker">
-                  ${(() => {
-                    const num = String(i + 1).padStart(2, '0');
-                    if (completed) return '<div class="seal seal--done">已阅</div>';
-                    if (unlocked) return '<div class="chapter-num">' + num + '</div>';
-                    return '<div class="chapter-num chapter-num--dim">' + num + '</div>';
-                  })()}
-                </div>
                 <div class="chapter-info">
                   <div class="chapter-header">
                     <span class="chapter-name">${ch.name}</span>
@@ -151,41 +138,48 @@ export default class MenuScene {
                   </div>
                   <p class="chapter-tagline">${ch.tagline}</p>
                 </div>
-                ${!unlocked ? `
-                  <div class="chapter-lock-icon">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
-                      <path d="M5 7V5C5 3.34315 6.34315 2 8 2C9.65685 2 11 3.34315 11 5V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                    </svg>
+                <div class="chapter-side">
+                  <div class="chapter-marker">
+                    ${(() => {
+                      const num = String(i + 1).padStart(2, '0');
+                      if (completed) return '<div class="seal seal--done">已阅</div>';
+                      if (unlocked) return '<div class="chapter-num">' + num + '</div>';
+                      return '<div class="chapter-num chapter-num--dim">' + num + '</div>';
+                    })()}
                   </div>
-                ` : `
-                  <div class="chapter-arrow">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                  <div class="chapter-status-icon">
+                    ${!unlocked ? `
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+                        <path d="M5 7V5C5 3.34315 6.34315 2 8 2C9.65685 2 11 3.34315 11 5V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                      </svg>
+                    ` : `
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="chapter-arrow">
+                        <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    `}
                   </div>
-                `}
+                </div>
                 <div class="chapter-ink-hover"></div>
               </div>`;
             }).join('')}
           </nav>
 
-          <!-- 底部操作 -->
-          <footer class="menu-footer">
-            ${hasSave ? `
-              <button class="btn btn--outline btn--sm" id="btn-continue">
-                <span>继续旅程</span>
-              </button>
-            ` : ''}
-            <button class="btn btn--primary" id="btn-new">
-              <span>${hasSave ? '重新开始' : '新的旅程'}</span>
-            </button>
-            <button class="btn btn--ghost btn--sm" id="btn-clear">
-              <span>清除存档</span>
-            </button>
-          </footer>
         </div>
       </div>
+
+      <!-- 底部全局操作 -->
+      <footer class="menu-footer-global">
+        <button class="action-btn ${hasSave ? 'action-btn--secondary' : 'action-btn--primary'}" id="btn-new">
+          ${hasSave ? '重新开始' : '新的旅程'}
+        </button>
+        <button class="action-btn ${hasSave ? 'action-btn--primary' : 'action-btn--secondary'}" id="btn-continue" ${hasSave ? '' : 'disabled'}>
+          继续游戏
+        </button>
+        <button class="action-btn action-btn--ghost" id="btn-clear" style="${hasSave ? '' : 'display:none;'}">
+          清除存档
+        </button>
+      </footer>
     `;
 
     // === 绑定事件 ===
@@ -343,7 +337,7 @@ export default class MenuScene {
       /* 往后退一点，露出地面（将位置对齐到底部） */
       background-size: cover;
       background-position: center bottom; 
-      filter: grayscale(0.85) brightness(1.15) contrast(0.9); /* 灰白氛围 */
+      filter: brightness(1.05) contrast(0.95); /* 保持原始颜色 */
       pointer-events: none;
       z-index: 0;
       animation: menuBgDrift 40s ease-in-out infinite alternate;
@@ -411,7 +405,6 @@ export default class MenuScene {
       height: 95vh;
       z-index: 5;
       pointer-events: none;
-      animation: charFloat 6s ease-in-out infinite alternate;
       filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
     }
 
@@ -523,17 +516,13 @@ export default class MenuScene {
        Content Area
        =========================== */
     .menu-content {
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-      border-radius: 24px;
-      padding: 2rem 2.5rem;
+      background: transparent;
+      padding: 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 0;
+      position: relative;
     }
 
     .menu-content::-webkit-scrollbar {
@@ -548,66 +537,60 @@ export default class MenuScene {
        Header
        =========================== */
     .menu-header {
-      text-align: center;
+      text-align: left;
       position: relative;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 1rem 1.5rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .menu-header-ink {
-      position: absolute;
-      top: -0.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.2), transparent);
-      border-radius: 2px;
+      display: none;
     }
 
     .menu-title {
       font-family: var(--font-serif);
-      font-size: clamp(2rem, 4vw, 2.5rem);
-      font-weight: 700;
-      color: #2c2416;
-      letter-spacing: 0.2em;
-      margin: 0 0 0.4rem;
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.95);
+      letter-spacing: 0.15em;
+      margin: 0 0 0.5rem;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     .menu-subtitle {
       font-family: var(--font-handwrite);
       font-size: 0.9rem;
-      color: #7a6b5a;
+      color: rgba(255, 255, 255, 0.6);
       letter-spacing: 0.15em;
-      margin: 0 0 1rem;
+      margin: 0 0 1.5rem;
     }
 
     .menu-progress {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      justify-content: center;
+      gap: 1rem;
+      justify-content: flex-start;
     }
 
     .progress-track {
-      width: 120px;
-      height: 3px;
-      background: rgba(0, 0, 0, 0.08);
-      border-radius: 2px;
+      width: 140px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1px;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #8ba8a8, #5a7d7d);
-      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 1px;
       transition: width 0.6s ease;
     }
 
     .progress-text {
       font-family: var(--font-handwrite);
-      font-size: 0.75rem;
-      color: #7a6b5a;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
       letter-spacing: 0.1em;
     }
 
@@ -615,25 +598,34 @@ export default class MenuScene {
        Chapter List
        =========================== */
     .chapter-list {
-      display: grid;
-      grid-template-columns: 1fr; /* single column */
-      gap: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: rgba(20, 18, 15, 0.4);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
     }
 
     .chapter-item {
       position: relative;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.8rem;
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid transparent;
-      transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      flex-direction: row;
+      align-items: stretch;
+      padding: 0;
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
       cursor: pointer;
       overflow: hidden;
-      opacity: 0;
-      animation: chapterSlideIn 0.8s var(--delay, 0s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .chapter-item:last-child {
+      border-bottom: none;
     }
 
     /* Transparent Glass texture - replace noise */
@@ -641,61 +633,29 @@ export default class MenuScene {
       display: none;
     }
 
-    @keyframes chapterSlideIn {
-      from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
-      to { opacity: 1; transform: translateY(0); filter: blur(0); }
-    }
-
-    /* 解锁状态 - 悬浮层级效果 (白色透明玻璃) */
+    /* 解锁状态 - 悬浮层级效果 */
     .chapter-item--unlocked {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-color: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); 
+      background: transparent;
     }
 
     .chapter-item--unlocked:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
-      border-color: #fff;
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
-      z-index: 2;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     /* 锁定状态 */
     .chapter-item--locked {
       cursor: not-allowed;
-      opacity: 0.65;
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(8px);
-      border-color: rgba(255, 255, 255, 0.4);
-      box-shadow: none;
+      opacity: 0.5;
+      background: transparent;
     }
 
     .chapter-item--locked:hover {
-      background: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.02);
     }
 
     /* 发光 hover */
     .chapter-ink-hover {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 0;
-      background: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.05) 0%,
-        rgba(0, 0, 0, 0.02) 60%,
-        transparent 100%
-      );
-      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-      pointer-events: none;
-    }
-
-    .chapter-item--unlocked:hover .chapter-ink-hover {
-      width: 100%;
+      display: none;
     }
 
     /* 抖动动画（锁定点击） */
@@ -712,12 +672,20 @@ export default class MenuScene {
     }
 
     /* ===========================
-       Chapter Marker
+       Chapter Side & Marker
        =========================== */
+    .chapter-side {
+      width: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      background: transparent;
+    }
+
     .chapter-marker {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.2rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -732,16 +700,16 @@ export default class MenuScene {
       justify-content: center;
       font-family: var(--font-handwrite);
       font-size: 0.8rem;
-      color: #5a7d7d;
-      background: rgba(90, 125, 125, 0.1);
-      border: 1px solid rgba(90, 125, 125, 0.2);
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       letter-spacing: 0.05em;
     }
 
     .chapter-num--dim {
-      color: #9a8b7a;
-      background: rgba(154, 139, 122, 0.1);
-      border-color: rgba(154, 139, 122, 0.15);
+      color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(255, 255, 255, 0.05);
     }
 
     /* 朱砂印章 */
@@ -754,9 +722,9 @@ export default class MenuScene {
       justify-content: center;
       font-family: var(--font-handwrite);
       font-size: 0.7rem;
-      color: #c84032;
-      background: rgba(200, 64, 50, 0.08);
-      border: 1px solid rgba(200, 64, 50, 0.2);
+      color: #ff5e4d;
+      background: rgba(255, 94, 77, 0.1);
+      border: 1px solid rgba(255, 94, 77, 0.3);
       letter-spacing: 0.1em;
       transform: rotate(-3deg);
     }
@@ -765,11 +733,13 @@ export default class MenuScene {
        Chapter Info
        =========================== */
     .chapter-info {
-      width: 100%;
+      flex: 1;
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      padding: 1.5rem 2rem;
     }
 
     .chapter-header {
@@ -779,14 +749,14 @@ export default class MenuScene {
       gap: 0.35em;
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
     }
 
     .chapter-name {
       font-family: var(--font-serif);
       font-size: 1.15rem;
       font-weight: 600;
-      color: #2c2416;
+      color: rgba(255, 255, 255, 0.95);
       letter-spacing: 0.05em;
     }
 
@@ -797,119 +767,121 @@ export default class MenuScene {
     .chapter-subtitle {
       font-family: var(--font-handwrite);
       font-size: 0.85rem;
-      color: #5a4d3a;
+      color: rgba(255, 255, 255, 0.6);
       letter-spacing: 0.05em;
     }
 
     .chapter-tagline {
       font-family: var(--font-handwrite);
       font-size: 0.8rem;
-      color: #7a6b5a;
+      color: rgba(255, 255, 255, 0.4);
       line-height: 1.6;
       margin: 0;
       letter-spacing: 0.03em;
     }
 
     .chapter-item--unlocked:hover .chapter-tagline {
-      color: #3a2d1a;
+      color: rgba(255, 255, 255, 0.7);
     }
 
     /* ===========================
        Chapter Lock / Arrow
        =========================== */
+    .chapter-status-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .chapter-lock-icon,
     .chapter-arrow {
-      position: absolute;
-      bottom: 1.2rem;
-      right: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .chapter-lock-icon {
-      color: rgba(0, 0, 0, 0.25);
+      color: rgba(255, 255, 255, 0.2);
     }
 
     .chapter-arrow {
-      color: rgba(0, 0, 0, 0.4);
+      color: rgba(255, 255, 255, 0.6);
       transition: all 0.3s ease;
     }
 
     .chapter-item--unlocked:hover .chapter-arrow {
-      color: rgba(0, 0, 0, 0.8);
+      color: #fff;
       transform: translateX(4px);
     }
 
     /* ===========================
-       Footer Buttons
+       Global Footer Buttons
        =========================== */
-    .menu-footer {
+    .menu-footer-global {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      z-index: 20;
+      width: max-content;
+    }
+
+    .action-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.7rem 1.8rem;
-      border-radius: 100px;
+      min-width: 180px;
+      padding: 0.8rem 2rem;
       font-family: var(--font-serif);
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      border: none;
-      outline: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn--sm {
-      padding: 0.5rem 1.2rem;
-      font-size: 0.8rem;
-    }
-
-    .btn--primary {
-      background: linear-gradient(135deg, rgba(74, 109, 124, 0.9) 0%, rgba(58, 93, 108, 0.9) 100%);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(74, 109, 124, 0.3);
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(74, 109, 124, 0.25);
-    }
-
-    .btn--primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(74, 109, 124, 0.35);
-      background: linear-gradient(135deg, rgba(82, 125, 140, 0.9) 0%, rgba(66, 109, 124, 0.9) 100%);
-      border-color: rgba(74, 109, 124, 0.5);
-    }
-
-    .btn--outline {
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(8px);
-      color: #5a4d3a;
-      border: 1.5px solid rgba(139, 119, 79, 0.3);
-    }
-
-    .btn--outline:hover {
-      border-color: rgba(74, 109, 124, 0.5);
-      color: #4a6d7c;
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    .btn--ghost {
-      background: transparent;
-      color: #b0a090;
+      transition: all 0.2s ease;
       border: 1px solid transparent;
     }
 
-    .btn--ghost:hover {
-      color: #c84032;
-      background: rgba(200, 64, 50, 0.05);
-      border-color: rgba(200, 64, 50, 0.25);
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .action-btn--primary {
+      background: rgba(255, 255, 255, 0.9);
+      color: #1a1a1a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .action-btn--primary:hover:not(:disabled) {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .action-btn--secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .action-btn--secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .action-btn--ghost {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.9rem;
+      padding: 0.5rem;
+    }
+    .action-btn--ghost:hover {
+      color: #ff5e4d;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     /* ===========================
