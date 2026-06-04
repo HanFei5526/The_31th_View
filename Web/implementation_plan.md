@@ -99,6 +99,8 @@ e:\Vibe_Coding\卅一景\
 │   │   ├── hint-system.js      # 提示系统
 │   │   ├── dialogue.js         # 对话系统
 │   │   ├── save-system.js      # 存档系统 (localStorage)
+│   │   ├── ai-service.js       # DeepSeek API 统一封装
+│   │   ├── ai-prompts.js       # AI System Prompt 模板
 │   │   └── audio.js            # 音频管理（预留）
 │   ├── components/
 │   │   ├── dialogue-box.js     # 对话框组件
@@ -106,7 +108,9 @@ e:\Vibe_Coding\卅一景\
 │   │   ├── hint-notebook.js    # 笔记本/提示组件
 │   │   ├── toolbar.js          # 工具栏组件
 │   │   ├── transition.js       # 转场动画组件
-│   │   └── choices.js          # 选项选择组件
+│   │   ├── choices.js          # 选项选择组件
+│   │   ├── chat-panel.js       # 周鹤年 AI 对话浮层（现实世界）
+│   │   └── notebook-panel.js   # AI 笔记本面板（批注 + 查阅）
 │   ├── pages/
 │   │   ├── landing.js          # 着陆页
 │   │   └── menu.js             # 主菜单
@@ -375,3 +379,37 @@ e:\Vibe_Coding\卅一景\
 6. **Phase 6**：第三章（壁画显现）
 7. **Phase 7**：终章（四问 + 三结局）
 8. **Phase 8**：打磨 & 串联测试
+
+---
+
+## AI 功能模块（已实现）
+
+> 以下 AI 功能已落地实现。详细设计见 `非剧情文档/AI_提示词_后端数据设计.md` 第五章。
+
+#### [NEW] [ai-service.js](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/core/ai-service.js)
+- DeepSeek V4 Pro API 统一封装（OpenAI 兼容格式）
+- 4 个对外接口：`chatWithZhou`、`queryNotebook`、`generateAnnotation`、`generateReport`
+- 内含降级处理和错误兜底
+
+#### [NEW] [ai-prompts.js](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/core/ai-prompts.js)
+- 4 种 System Prompt 模板：周鹤年对话、笔记本查阅、沈念批注、修复报告
+- 动态注入游戏上下文（章节、物件、进度标记、已有批注）
+
+#### [NEW] [chat-panel.js](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/components/chat-panel.js)
+- 周鹤年 AI 对话浮层（右下角），仅现实世界显示
+- 多轮对话，场景切换时自动清空历史
+
+#### [NEW] [notebook-panel.js](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/components/notebook-panel.js)
+- AI 笔记本面板（居中浮层）
+- 上区：自动生成的沈念批注时间线
+- 下区：画中世界查阅功能（笔记本语气回答）
+
+#### [MODIFY] [game-engine.js](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/core/game-engine.js)
+- 注册 AIService 子系统，init 时从 `.env` 读取 API Key
+- 新增 `getAIContext()` 方法供 prompt 拼接
+
+#### [MODIFY] [main.js](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/main.js)
+- 引入并初始化 ChatPanel、NotebookPanel
+
+#### [MODIFY] [index.css](file:///e:/个人资料/wzx/桌面/卅一景/Web/src/styles/index.css)
+- 追加 AI 组件样式（对话面板、笔记本面板、加载动画、修复报告展示）

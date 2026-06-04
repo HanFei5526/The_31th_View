@@ -77,3 +77,80 @@
 - `endingChoice`（enum：存档 / 守密 / 续笔）决定最终结局分支。
 - 前序章节的线索收集变量影响终章提示完整度，但不阻断主线（无硬失败）。
 - 提示系统读取当前进度变量，按 3 级梯度推送对应文案。
+
+---
+
+## 五、AI LLM 功能实现（已落地）
+
+> 以下内容对应 `Web/src/core/ai-service.js`、`Web/src/core/ai-prompts.js`、`Web/src/components/chat-panel.js`、`Web/src/components/notebook-panel.js` 的实际实现。
+
+### 5.1 技术选型
+
+- **LLM**：DeepSeek V4 Pro（`deepseek-v4-pro`）
+- **API 格式**：OpenAI 兼容（`https://api.deepseek.com/chat/completions`）
+- **认证**：`Authorization: Bearer <API_KEY>`
+- **API Key 存放**：`Web/.env` 文件中的 `VITE_DEEPSEEK_API_KEY`（Vite 环境变量），不得提交至代码仓库
+- **前端直连**：MVP / 路演阶段前端直调 API，如后续公开部署需改为后端代理
+- **无额外依赖**：使用浏览器原生 `fetch` 调用
+
+### 5.2 四种 AI 调用场景
+
+| 场景 | 接口 | 世界限制 | 对话模式 | temperature | max_tokens |
+|------|------|---------|---------|-------------|-----------|
+| 周鹤年对话 | `chatWithZhou` | 仅现实世界 | 多轮 | 0.7 | 300 |
+| 笔记本查阅 | `queryNotebook` | 仅画中世界 | 单轮 | 0.5 | 200 |
+| 沈念批注 | `generateAnnotation` | 双世界 | 单轮（自动） | 0.6 | 150 |
+| 修复报告 | `generateReport` | 终章 | 单轮（一次性） | 0.4 | 800 |
+
+### 5.3 System Prompt 设计要点
+
+**周鹤年对话（现实世界）**：
+- 角色：60 岁古画修复教授，严谨寡言
+- 动态注入当前章节、已收集物件、进度标记
+- 关键约束：不预知画中世界内容；不直接给出谜题答案；不打破第四面墙；chapter >= 3 之前不透露"蘅"字秘密
+- 回答风格：1-3 句话，像真正的老学者
+
+**笔记本查阅（画中世界）**：
+- 角色：笔记本内容本身（不是任何人物）
+- 以"翻到某页""笔记本边注""参考文献摘录"等格式开头
+- 仅回答已记录的内容和通用修复知识
+
+**沈念批注（事件触发）**：
+- 角色：25 岁研究生沈念的第一人称
+- 1-2 句话，像随手写在笔记本边缘的感想
+- 不点明真相，保持探索中的不确定感
+
+**修复报告（终章一次性）**：
+- 根据 endingChoice（存档/守密/续笔）生成不同风格的最终文本
+- 引用全程收集的具体证据（侧光发现、异文比对、朱砂呼应等）
+- 300-500 字，语言克制有分量
+
+### 5.4 事件总线联动
+
+AI 功能通过 GameEngine 的事件系统与游戏流程联动：
+
+| 游戏事件 | 触发 AI 行为 |
+|---------|-------------|
+| `item-collected` | 自动生成沈念批注（笔记本面板） |
+| `hint-shown` | 自动生成沈念批注（笔记本面板） |
+| `zhou-chat-complete` | 对话结束后自动生成沈念批注 |
+| `world-changed` | 显示/隐藏周鹤年对话按钮 |
+| `scene-enter` | 切场景时清空对话历史、更新面板可见性 |
+
+### 5.5 降级策略
+
+- 未配置 API Key 时：对话和查阅显示"（AI 功能未启用，请在 .env 文件中配置 VITE_DEEPSEEK_API_KEY）"
+- API 调用失败时：显示游戏化降级文案（如"笔记本页面有些模糊……""墨迹尚未干透……"）
+- 批注生成失败时：回退为预设固定文案
+- 不影响游戏主流程推进
+
+### 5.6 实现文件对应
+
+| 文件 | 职责 |
+|------|------|
+| `Web/src/core/ai-service.js` | DeepSeek API 统一封装，4 个对外接口 |
+| `Web/src/core/ai-prompts.js` | 4 种 System Prompt 模板，动态注入游戏上下文 |
+| `Web/src/components/chat-panel.js` | 周鹤年对话浮层（右下角，仅现实世界） |
+| `Web/src/components/notebook-panel.js` | AI 笔记本面板（批注时间线 + 画中世界查阅） |
+| `Web/.env` | API Key 存放（已加入 .gitignore） |
+
