@@ -22,10 +22,10 @@
 ├── story_02_卅一景_剧情大纲.md          # 故事设定（人物/梗概/主线/真相/结局）
 ├── 卅一景_chapter_design.md            # 章节细纲（叙事节拍/NPC 对话/张力设计）
 ├── 剧情质疑与解释清单.md                # 常见质疑 / 世界观 / 证据链解释
-├── GPT的修改建议.md                     # 外部修改建议存档
 ├── BgP/                                # 背景参考图（拙政园图/古风改绘）
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
+│   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
 │   ├── menu-test.html                  # 菜单测试页
@@ -33,14 +33,25 @@
 │   ├── 图片/                           # 前端用背景 / 场景图
 │   └── src/                            # 前端源码
 │       ├── main.js                     # 应用入口
-│       ├── core/                       # 引擎 / 场景 / 背包 / 提示 / 对话 / 存档
-│       ├── pages/                      # landing / menu 等页面场景
+│       ├── core/                       # 引擎 / 场景 / 背包 / 提示 / 对话 / 存档 / AI
+│       │   ├── game-engine.js           # 游戏状态机 & 场景管理器
+│       │   ├── scene-manager.js         # 场景切换控制
+│       │   ├── inventory.js             # 物件匣系统
+│       │   ├── hint-system.js           # 提示系统
+│       │   ├── dialogue.js              # 对话系统
+│       │   ├── save-system.js           # 存档系统 (localStorage)
+│       │   ├── ai-service.js            # DeepSeek API 封装（AI 统一调用层）
+│       │   └── ai-prompts.js            # AI System Prompt 模板
+│       ├── pages/                      # landing / menu / prologue 等页面场景
 │       ├── components/                 # 通用组件
+│       │   ├── transition.js            # 转场动画组件
+│       │   ├── chat-panel.js            # 周鹤年 AI 对话面板（现实世界）
+│       │   └── notebook-panel.js        # AI 笔记本面板（批注 + 查阅）
 │       └── styles/                     # 全局样式与转场样式
-├── 其他/
+├── 非剧情文档/
 │   ├── 谜题_场景_线索表设计.md          # 谜题机制/场景地图/物件线索表
 │   ├── 前端_交互_背包设计.md            # 界面风格/转场/交互层/物件匣 UI
-│   └── AI_提示词_后端数据设计.md        # 提示系统/三级提示词/状态变量/存档
+│   └── AI_提示词_后端数据设计.md        # AI 功能/提示词/状态变量/存档
 └── 备选故事/
     ├── story_01_石中记.md              # 备选方案 1
     └── story_03_四时园.md              # 备选方案 3
@@ -52,16 +63,18 @@
 | ------------------------------- | ------------------------------------------ |
 | story_02 + chapter_design       | 剧情统筹（主题/世界观/真相/人物/开头结局） |
 | 剧情质疑与解释清单              | 历史虚构边界 / 机制解释 / 证据链自洽       |
-| 谜题_场景_线索表                | 谜题设计 / 场景地图 / 线索表               |
-| 前端_交互_背包                  | 前端页面 / 交互方式 / 物件匣               |
-| AI_提示词_后端数据              | AI 功能 / 提示词 / 后端数据                |
-| Web                             | 可运行前端原型 / 游戏引擎 / 页面场景       |
+| 非剧情文档/谜题_场景_线索表     | 谜题设计 / 场景地图 / 线索表               |
+| 非剧情文档/前端_交互_背包       | 前端页面 / 交互方式 / 物件匣 / AI 面板 UI  |
+| 非剧情文档/AI_提示词_后端数据   | AI 功能 / 提示词 / 后端数据                |
+| Web                             | 可运行前端原型 / 游戏引擎 / AI 模块        |
 
 ## 当前前端状态
 
 - 前端目录为 `Web/`，技术栈为 Vite + 原生 JavaScript / CSS。
-- 当前注册场景：`landing`、`menu`。
-- 已有核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`。
+- 当前注册场景：`landing`、`menu`、`prologue`。
+- 已有核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`。
+- 已有 AI 组件：`chat-panel`（周鹤年对话面板，仅现实世界）、`notebook-panel`（AI 笔记本，批注 + 查阅）。
+- AI 接入 DeepSeek V4 Pro，API Key 通过 `Web/.env` 中的 `VITE_DEEPSEEK_API_KEY` 配置。
 - 前端资源集中放在 `Web/图片/` 与 `BgP/`。
 - 如需启动前端，先进入 `Web/`，安装依赖后运行 `npm run dev`。
 
@@ -74,5 +87,8 @@
 - 王蘅为虚构人物，不做历史考证式写法
 - 所有叙事修改须确认是否触及三基准；触及则须剧情统筹确认
 - 谜题/前端/后端文档各自独立维护，叙事节拍中以锚点指向谜题文档
-- 前端实现应优先遵循 `其他/前端_交互_背包设计.md` 与 `Web/implementation_plan.md`
+- 前端实现应优先遵循 `非剧情文档/前端_交互_背包设计.md` 与 `Web/implementation_plan.md`
 - 修改前端时避免破坏已拍板剧情基准，涉及叙事文案的改动需回看 `story_02_卅一景_剧情大纲.md` 与 `卅一景_chapter_design.md`
+- AI Prompt 修改须回看 `非剧情文档/AI_提示词_后端数据设计.md`，确保与提示系统约束一致
+- 周鹤年 AI 对话仅限现实世界；画中世界通过笔记本查阅（非周鹤年身份）
+- `.env` 文件中的 API Key 不得提交到代码仓库

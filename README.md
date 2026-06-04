@@ -25,20 +25,20 @@
 ├── story_02_卅一景_剧情大纲.md          # 故事设定、人物、主线、真相、结局
 ├── 卅一景_chapter_design.md            # 章节细纲、叙事节拍、NPC 对话
 ├── 剧情质疑与解释清单.md                # 常见质疑、世界观解释、证据链自洽
-├── GPT的修改建议.md                     # 外部修改建议存档
 ├── BgP/                                # 背景参考图
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
+│   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
 │   ├── menu-test.html                  # 菜单测试页
 │   ├── public/                         # 静态图标等资源
 │   ├── 图片/                           # 前端场景图与背景图
 │   └── src/                            # 前端源码
-├── 其他/
+├── 非剧情文档/
 │   ├── 谜题_场景_线索表设计.md          # 谜题机制、场景地图、线索表
 │   ├── 前端_交互_背包设计.md            # 界面风格、转场、交互层、物件匣 UI
-│   └── AI_提示词_后端数据设计.md        # AI 功能、提示词、后端数据
+│   └── AI_提示词_后端数据设计.md        # AI 功能、提示词、状态变量、存档
 └── 备选故事/
     ├── story_01_石中记.md
     └── story_03_四时园.md
@@ -52,6 +52,12 @@
 cd Web
 npm install
 npm run dev
+```
+
+AI 功能需要配置 DeepSeek API Key，请在 `Web/.env` 中填入：
+
+```env
+VITE_DEEPSEEK_API_KEY=你的_DEEPSEEK_API_KEY
 ```
 
 构建检查：
@@ -72,14 +78,15 @@ npm run preview
 
 当前前端已包含：
 
-- 注册场景：`landing`、`menu`
-- 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`
-- 页面模块：着陆页、主菜单页
+- 注册场景：`landing`、`menu`、`prologue`
+- 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`
+- AI 组件：`chat-panel`（周鹤年对话，仅现实世界）、`notebook-panel`（AI 笔记本，批注 + 查阅）
+- 页面模块：着陆页、主菜单页、序章
 - 资源目录：`Web/图片/` 与 `BgP/`
 
 前端实现应优先遵循：
 
-- `其他/前端_交互_背包设计.md`
+- `非剧情文档/前端_交互_背包设计.md`
 - `Web/implementation_plan.md`
 
 涉及叙事文案时，应同时回看：
@@ -104,10 +111,10 @@ npm run preview
 | `story_02_卅一景_剧情大纲.md` | 故事设定、人物、主线、真相、结局 |
 | `卅一景_chapter_design.md` | 章节细纲、叙事节拍、NPC 对话、张力设计 |
 | `剧情质疑与解释清单.md` | 历史虚构边界、机制解释、证据链自洽 |
-| `其他/谜题_场景_线索表设计.md` | 谜题设计、场景地图、物件线索表 |
-| `其他/前端_交互_背包设计.md` | 前端页面、交互方式、物件匣 |
-| `其他/AI_提示词_后端数据设计.md` | AI 功能、提示词、状态变量、存档 |
-| `Web/` | 可运行前端原型、游戏引擎、页面场景 |
+| `非剧情文档/谜题_场景_线索表设计.md` | 谜题设计、场景地图、物件线索表 |
+| `非剧情文档/前端_交互_背包设计.md` | 前端页面、交互方式、物件匣、AI 面板 UI |
+| `非剧情文档/AI_提示词_后端数据设计.md` | AI 功能、提示词、状态变量、存档 |
+| `Web/` | 可运行前端原型、游戏引擎、AI 模块 |
 
 ## 协作约定
 
