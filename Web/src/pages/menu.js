@@ -1,5 +1,5 @@
-import bgImage from '../../../BgP/拙政园正门_章节选择.png';
-import characterImage from '../../图片/8.png';
+import bgImage from '../../../TestPic/拙政园正门_章节选择.png';
+import characterImage from '../../../TestPic/8.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu

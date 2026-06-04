@@ -1,4 +1,4 @@
-import bgImage from '../../图片/微信图片_20260601122604_385_460.png';
+import bgImage from '../../../TestPic/拙政园鸟瞰_首屏.png';
 
 /**
  * 《卅一景》 — 着陆页 / Landing Page
