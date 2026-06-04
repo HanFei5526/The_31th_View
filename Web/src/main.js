@@ -15,6 +15,8 @@ import gameEngine from './core/game-engine.js'
 import LandingScene from './pages/landing.js'
 import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
+import { ChatPanel } from './components/chat-panel.js'
+import { NotebookPanel } from './components/notebook-panel.js'
 
 // ==================== 初始化 ====================
 
@@ -26,6 +28,14 @@ if (!app) {
 
 // 初始化引擎
 gameEngine.init(app)
+
+// 初始化 AI 组件并挂载到引擎
+const chatPanel = new ChatPanel(gameEngine)
+const notebookPanel = new NotebookPanel(gameEngine)
+chatPanel.init()
+notebookPanel.init()
+gameEngine.chatPanel = chatPanel
+gameEngine.notebookPanel = notebookPanel
 
 // 注册场景
 gameEngine.sceneManager.register('landing', LandingScene)

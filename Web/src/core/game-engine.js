@@ -21,6 +21,7 @@ import { Inventory } from './inventory.js';
 import { HintSystem } from './hint-system.js';
 import { DialogueSystem } from './dialogue.js';
 import { SaveSystem } from './save-system.js';
+import { AIService } from './ai-service.js';
 
 export class GameEngine {
   constructor() {
@@ -52,6 +53,8 @@ export class GameEngine {
     this.dialogueSystem = new DialogueSystem(this);
     /** @type {SaveSystem} */
     this.saveSystem = new SaveSystem(this);
+    /** @type {AIService} */
+    this.aiService = new AIService(this);
 
     /* ---- DOM ---- */
 
@@ -80,6 +83,9 @@ export class GameEngine {
 
     // 设置初始世界主题
     this._applyWorldTheme();
+
+    // 配置 AIService，从环境变量中读取 API Key
+    this.aiService.configure(import.meta.env.VITE_DEEPSEEK_API_KEY || '');
 
     console.log('[GameEngine] 引擎初始化完成');
   }
@@ -288,6 +294,20 @@ export class GameEngine {
           ? 'var(--paint-bg-deep)'
           : 'var(--real-bg-deep)';
     }
+  }
+
+  /**
+   * 获取 AI 上下文快照（供 prompt 拼接）
+   * @returns {object}
+   */
+  getAIContext() {
+    return {
+      chapter: this.currentChapter,
+      world: this.currentWorld,
+      items: this.inventory.getItems(),
+      progress: { ...this.gameProgress },
+      annotations: this.notebookPanel ? this.notebookPanel.getAnnotations() : [],
+    };
   }
 }
 
