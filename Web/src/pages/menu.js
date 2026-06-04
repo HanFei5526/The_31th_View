@@ -1,4 +1,4 @@
-import bgImage from '../../图片/拙政园正门_章节选择.png';
+import bgImage from '../../../BgP/拙政园正门_章节选择.png';
 import characterImage from '../../图片/8.png';
 
 /**
@@ -83,9 +83,6 @@ export default class MenuScene {
 
     const hasSave = this._hasSaveData();
     const progress = this._getProgress();
-    const completedCount = CHAPTERS.filter(ch =>
-      ch.alwaysUnlocked || progress[ch.unlockKey]
-    ).length;
 
     root.innerHTML = `
       <!-- 背景装饰 -->
@@ -112,12 +109,6 @@ export default class MenuScene {
             <div class="menu-header-ink"></div>
             <h1 class="menu-title">卅一景</h1>
             <p class="menu-subtitle">选择你要进入的章节</p>
-            <div class="menu-progress">
-              <div class="progress-track">
-                <div class="progress-fill" style="width: ${(completedCount / CHAPTERS.length) * 100}%"></div>
-              </div>
-              <span class="progress-text">${completedCount} / ${CHAPTERS.length}</span>
-            </div>
           </header>
 
           <!-- 章节列表 -->
@@ -335,16 +326,9 @@ export default class MenuScene {
       inset: 0;
       background-image: url("${bgImage}");
       background-size: cover;
-      background-position: 58% bottom;
-      filter: none;
+      background-position: center bottom;
       pointer-events: none;
       z-index: 0;
-      animation: menuBgDrift 40s ease-in-out infinite alternate;
-    }
-
-    @keyframes menuBgDrift {
-      from { transform: scale(1) translateX(-8px); }
-      to { transform: scale(1.015) translateX(-24px); }
     }
 
 
@@ -364,32 +348,11 @@ export default class MenuScene {
     }
 
     .menu-bg-mountain {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 35%;
-      background:
-        radial-gradient(ellipse 100% 80% at 20% 100%, rgba(255, 248, 232, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 80% 60% at 70% 100%, rgba(255, 248, 232, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255, 248, 232, 0.05) 0%, transparent 40%);
+      display: none;
     }
 
     .menu-bg-mist {
-      position: absolute;
-      bottom: 20%;
-      left: -10%;
-      right: -10%;
-      height: 20%;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 250, 240, 0.06) 30%,
-        rgba(255, 250, 240, 0.08) 50%,
-        rgba(255, 250, 240, 0.06) 70%,
-        transparent 100%
-      );
-      filter: blur(40px);
+      display: none;
     }
 
     /* 人物立绘 */
@@ -454,21 +417,21 @@ export default class MenuScene {
     .menu-panel {
       position: relative;
       z-index: 10;
-      width: 420px; /* narrowed to fit the red box */
+      width: 360px;
       max-width: calc(100vw - 2rem);
       max-height: calc(100vh - 4rem);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      padding: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.58);
-      border-radius: 16px;
-      background: rgba(246, 241, 230, 0.64);
-      backdrop-filter: blur(18px) saturate(1.08);
-      -webkit-backdrop-filter: blur(18px) saturate(1.08);
+      padding: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 14px;
+      background: rgba(246, 241, 230, 0.42);
+      backdrop-filter: blur(12px) saturate(1.04);
+      -webkit-backdrop-filter: blur(12px) saturate(1.04);
       box-shadow:
-        0 18px 48px rgba(72, 58, 40, 0.14),
-        inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        0 14px 34px rgba(72, 58, 40, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.52);
       animation: panelSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
@@ -545,8 +508,8 @@ export default class MenuScene {
     .menu-header {
       text-align: left;
       position: relative;
-      padding: 0.15rem 0.5rem 0.85rem;
-      border-bottom: 1px solid rgba(96, 78, 52, 0.14);
+      padding: 0.1rem 0.45rem 0.85rem;
+      border-bottom: none;
     }
 
     .menu-header-ink {
@@ -555,7 +518,7 @@ export default class MenuScene {
 
     .menu-title {
       font-family: var(--font-serif);
-      font-size: clamp(2.35rem, 4.5vw, 3.25rem);
+      font-size: clamp(2.05rem, 3.6vw, 2.75rem);
       font-weight: 300;
       color: rgba(55, 43, 29, 0.94);
       letter-spacing: 0.15em;
@@ -568,36 +531,7 @@ export default class MenuScene {
       font-size: 0.9rem;
       color: rgba(83, 67, 45, 0.72);
       letter-spacing: 0.15em;
-      margin: 0 0 1.5rem;
-    }
-
-    .menu-progress {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      justify-content: flex-start;
-    }
-
-    .progress-track {
-      width: 140px;
-      height: 2px;
-      background: rgba(92, 74, 50, 0.18);
-      border-radius: 1px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: rgba(86, 66, 42, 0.72);
-      border-radius: 1px;
-      transition: width 0.6s ease;
-    }
-
-    .progress-text {
-      font-family: var(--font-handwrite);
-      font-size: 0.85rem;
-      color: rgba(83, 67, 45, 0.72);
-      letter-spacing: 0.1em;
+      margin: 0;
     }
 
     /* ===========================
@@ -607,16 +541,16 @@ export default class MenuScene {
       display: flex;
       flex-direction: column;
       gap: 0;
-      background: rgba(255, 252, 244, 0.58);
-      backdrop-filter: blur(20px) saturate(1.05);
-      -webkit-backdrop-filter: blur(20px) saturate(1.05);
-      border: 1px solid rgba(255, 255, 255, 0.62);
-      border-radius: 12px;
+      background: rgba(255, 252, 244, 0.34);
+      backdrop-filter: blur(12px) saturate(1.02);
+      -webkit-backdrop-filter: blur(12px) saturate(1.02);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
       overflow: hidden auto;
       flex: 0 0 auto;
       box-shadow:
-        0 12px 32px rgba(72, 58, 40, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.64);
+        0 10px 24px rgba(72, 58, 40, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.48);
     }
 
     .chapter-item {
@@ -632,7 +566,7 @@ export default class MenuScene {
       cursor: pointer;
       overflow: hidden;
       flex: 0 0 auto;
-      min-height: 92px;
+      min-height: 78px;
     }
 
     .chapter-item:last-child {
@@ -686,14 +620,14 @@ export default class MenuScene {
        Chapter Side & Marker
        =========================== */
     .chapter-side {
-      width: 70px;
+      width: 58px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
       border-left: 1px solid rgba(94, 76, 50, 0.12);
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .chapter-marker {
@@ -703,8 +637,8 @@ export default class MenuScene {
     }
 
     .chapter-num {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -712,7 +646,7 @@ export default class MenuScene {
       font-family: var(--font-handwrite);
       font-size: 0.8rem;
       color: rgba(63, 49, 31, 0.86);
-      background: rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.22);
       border: 1px solid rgba(94, 76, 50, 0.16);
       letter-spacing: 0.05em;
     }
@@ -750,7 +684,7 @@ export default class MenuScene {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 1.05rem 1.55rem;
+      padding: 0.8rem 1.25rem;
     }
 
     .chapter-header {
@@ -758,14 +692,14 @@ export default class MenuScene {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.35em;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
+      padding-bottom: 0.35rem;
       border-bottom: 1px dashed rgba(94, 76, 50, 0.16);
     }
 
     .chapter-name {
       font-family: var(--font-serif);
-      font-size: 1.15rem;
+      font-size: 1.02rem;
       font-weight: 600;
       color: rgba(46, 35, 21, 0.96);
       letter-spacing: 0.05em;
@@ -777,14 +711,14 @@ export default class MenuScene {
 
     .chapter-subtitle {
       font-family: var(--font-handwrite);
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       color: rgba(70, 55, 34, 0.74);
       letter-spacing: 0.05em;
     }
 
     .chapter-tagline {
       font-family: var(--font-handwrite);
-      font-size: 0.8rem;
+      font-size: 0.74rem;
       color: rgba(58, 46, 29, 0.7);
       line-height: 1.6;
       margin: 0;
