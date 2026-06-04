@@ -1,0 +1,412 @@
+/* ============================================
+   转场动画系统
+   ============================================ */
+
+/* --- 墨迹扩散转场 (跌入画中) --- */
+.transition-ink-spread {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.transition-ink-spread .ink-drop {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--paint-ink);
+  transform: scale(0);
+  opacity: 0;
+}
+
+.transition-ink-spread.active .ink-drop {
+  animation: inkDropSpread var(--transition-dramatic) forwards;
+}
+
+@keyframes inkDropSpread {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+    border-radius: 50%;
+  }
+  40% {
+    opacity: 1;
+    border-radius: 45% 55% 48% 52%;
+  }
+  70% {
+    border-radius: 40% 60% 55% 45%;
+  }
+  100% {
+    transform: scale(50);
+    opacity: 1;
+    border-radius: 50%;
+  }
+}
+
+/* --- 褪色转场 (返回现实) --- */
+.transition-fade-wash {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  pointer-events: none;
+  background: var(--real-bg);
+  opacity: 0;
+}
+
+.transition-fade-wash.active {
+  pointer-events: all;
+  animation: fadeWash 2.5s ease forwards;
+}
+
+@keyframes fadeWash {
+  0% { opacity: 0; filter: saturate(1); }
+  30% { opacity: 0.3; filter: saturate(0.5); }
+  60% { opacity: 0.7; filter: saturate(0.2); }
+  100% { opacity: 1; filter: saturate(0); }
+}
+
+/* Then fade to real world */
+.transition-fade-wash.reveal {
+  animation: fadeWashReveal 1.5s ease forwards;
+}
+
+@keyframes fadeWashReveal {
+  0% { opacity: 1; filter: saturate(0); }
+  100% { opacity: 0; filter: saturate(1); }
+}
+
+/* --- 卷轴展开转场 (章节切换) --- */
+.transition-scroll {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  pointer-events: none;
+  display: flex;
+  overflow: hidden;
+}
+
+.transition-scroll .scroll-half {
+  width: 50%;
+  height: 100%;
+}
+
+.transition-scroll .scroll-left {
+  background: linear-gradient(to right, var(--paint-bg-deep) 90%, var(--paint-border));
+  transform: translateX(-100%);
+}
+
+.transition-scroll .scroll-right {
+  background: linear-gradient(to left, var(--paint-bg-deep) 90%, var(--paint-border));
+  transform: translateX(100%);
+}
+
+.transition-scroll.closing .scroll-left {
+  animation: scrollClose 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.transition-scroll.closing .scroll-right {
+  animation: scrollClose 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes scrollClose {
+  to { transform: translateX(0); }
+}
+
+.transition-scroll.opening .scroll-left {
+  transform: translateX(0);
+  animation: scrollOpenLeft 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.transition-scroll.opening .scroll-right {
+  transform: translateX(0);
+  animation: scrollOpenRight 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes scrollOpenLeft {
+  to { transform: translateX(-100%); }
+}
+
+@keyframes scrollOpenRight {
+  to { transform: translateX(100%); }
+}
+
+/* --- Chapter title card shown during scroll transition --- */
+.transition-chapter-card {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-transition) + 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--paint-bg-deep);
+}
+
+.transition-chapter-card.visible {
+  opacity: 1;
+  animation: chapterCardReveal 3s ease forwards;
+}
+
+@keyframes chapterCardReveal {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.transition-chapter-card .chapter-number {
+  font-family: var(--font-handwrite);
+  font-size: var(--font-size-xl);
+  color: var(--paint-text-dim);
+  letter-spacing: 0.3em;
+  margin-bottom: 1rem;
+}
+
+.transition-chapter-card .chapter-name {
+  font-family: var(--font-handwrite);
+  font-size: var(--font-size-4xl);
+  color: var(--paint-ink);
+  letter-spacing: 0.2em;
+  position: relative;
+}
+
+.transition-chapter-card .chapter-name::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: var(--paint-vermillion);
+}
+
+.transition-chapter-card .chapter-subtitle {
+  font-family: var(--font-handwrite);
+  font-size: var(--font-size-lg);
+  color: var(--paint-text-dim);
+  margin-top: 1.5rem;
+  letter-spacing: 0.15em;
+}
+
+/* --- 简单淡入淡出 (通用) --- */
+.transition-fade {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  pointer-events: none;
+  background: black;
+  opacity: 0;
+}
+
+.transition-fade.fade-in {
+  pointer-events: all;
+  animation: simpleFadeIn 0.8s ease forwards;
+}
+
+.transition-fade.fade-out {
+  pointer-events: all;
+  animation: simpleFadeOut 0.8s ease forwards;
+}
+
+@keyframes simpleFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes simpleFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* --- 墨迹文字显现 (渗字效果) --- */
+.seep-text {
+  position: relative;
+  display: inline-block;
+}
+
+.seep-text .seep-char {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(8px);
+  transform: scale(1.2);
+  animation: seepReveal 2s ease forwards;
+}
+
+@keyframes seepReveal {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(1.2);
+  }
+  30% {
+    opacity: 0.3;
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 0.6;
+    filter: blur(2px);
+    transform: scale(1.05);
+  }
+  80% {
+    opacity: 0.8;
+    filter: blur(1px);
+  }
+  90% {
+    opacity: 0.9;
+    filter: blur(0);
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.7; /* 不完全显现，保持朦胧感 */
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+/* Stagger each character */
+.seep-char:nth-child(1) { animation-delay: 0s; }
+.seep-char:nth-child(2) { animation-delay: 0.8s; }
+.seep-char:nth-child(3) { animation-delay: 1.6s; }
+.seep-char:nth-child(4) { animation-delay: 2.4s; }
+.seep-char:nth-child(5) { animation-delay: 3.2s; }
+
+/* --- 朱砂发光效果 (第三章) --- */
+.vermillion-glow {
+  position: relative;
+}
+
+.vermillion-glow::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: var(--paint-vermillion);
+  opacity: 0;
+  filter: blur(8px);
+  animation: vermillionPulse 2s ease-in-out infinite;
+}
+
+@keyframes vermillionPulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.4; }
+}
+
+/* --- 画面逐步显现 (终章) --- */
+.painting-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.painting-reveal .painting-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.painting-reveal .painting-layer.visible {
+  opacity: 1;
+}
+
+/* Blank canvas to finished painting */
+.painting-reveal .canvas-blank {
+  background: var(--paint-bg);
+}
+
+.painting-reveal .canvas-figure {
+  z-index: 2;
+}
+
+.painting-reveal .canvas-landscape {
+  z-index: 3;
+}
+
+.painting-reveal .canvas-complete {
+  z-index: 4;
+}
+
+/* --- 结局画面 --- */
+.ending-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  opacity: 0;
+  animation: fadeIn 2s ease forwards;
+}
+
+.ending-screen .ending-text {
+  max-width: 600px;
+  font-family: var(--font-handwrite);
+  font-size: var(--font-size-xl);
+  line-height: 2.2;
+  color: var(--paint-ink);
+  text-align: center;
+}
+
+.ending-screen .ending-text p {
+  margin-bottom: 1.5em;
+  animation: fadeIn 1s ease forwards;
+  opacity: 0;
+}
+
+.ending-screen .ending-final-line {
+  font-size: var(--font-size-sm);
+  color: var(--paint-text-dim);
+  margin-top: 3rem;
+  font-style: italic;
+  animation: fadeIn 1s ease 3s forwards;
+  opacity: 0;
+}
+
+/* ===========================
+   Intro Transition Overlay
+   =========================== */
+.intro-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #e8e0d0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(139, 119, 79, 0.03) 3px,
+      rgba(139, 119, 79, 0.03) 6px
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 3s ease-in-out;
+}
+.intro-transition-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.intro-transition-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+.intro-transition-text {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: #2c2416;
+  line-height: 2.4;
+  max-width: 800px;
+  padding: 0 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  letter-spacing: 0.1em;
+}

@@ -1,0 +1,113 @@
+/**
+ * 《卅一景》物品系统
+ *
+ * 管理游戏中可收集的物品。每件物品有唯一 id、名称、描述和图标。
+ * 物品操作会通过引擎事件系统发出通知。
+ */
+
+/**
+ * 预定义物品模板
+ * 场景代码可直接引用这些模板，也可传入自定义物品
+ */
+export const ITEM_TEMPLATES = {
+  notebook: {
+    id: 'notebook',
+    name: '修复笔记本',
+    description: '周鹤年随身携带的笔记本，记录着修复过程中的种种发现。封面已经磨损，但内页整洁。',
+    icon: '📓',
+  },
+  hairpin: {
+    id: 'hairpin',
+    name: '断簪',
+    description: '在拙政园遗址中发现的一根断簪，簪头雕刻着细密的梅花纹样。明代工艺，可能属于一位女性。',
+    icon: '📌',
+  },
+  inkstone: {
+    id: 'inkstone',
+    name: '残砚',
+    description: '一方残破的砚台，砚底刻有一行小字，已被岁月侵蚀得难以辨认。',
+    icon: '🪨',
+  },
+  letter: {
+    id: 'letter',
+    name: '王蘅的信',
+    description: '一封写在泛黄宣纸上的信件，落款为"蘅"。字迹娟秀，墨色深浅不一，似乎写了很久。',
+    icon: '✉️',
+  },
+};
+
+export class Inventory {
+  constructor(engine) {
+    /** @type {import('./game-engine.js').GameEngine} */
+    this.engine = engine;
+
+    /** @type {Array<{id: string, name: string, description: string, icon: string, used?: boolean}>} */
+    this.items = [];
+  }
+
+  /**
+   * 添加物品
+   * @param {object} item - 物品对象 { id, name, description, icon }
+   */
+  addItem(item) {
+    // 避免重复添加
+    if (this.hasItem(item.id)) {
+      console.warn(`[Inventory] 物品 "${item.id}" 已存在，跳过添加`);
+      return;
+    }
+
+    const newItem = { ...item, used: false };
+    this.items.push(newItem);
+    this.engine.emit('item-collected', newItem);
+    console.log(`[Inventory] 获得物品: ${item.name}`);
+  }
+
+  /**
+   * 检查是否拥有某物品
+   * @param {string} id
+   * @returns {boolean}
+   */
+  hasItem(id) {
+    return this.items.some((item) => item.id === id);
+  }
+
+  /**
+   * 使用物品（标记为已使用）
+   * @param {string} id
+   * @returns {boolean} 是否成功使用
+   */
+  useItem(id) {
+    const item = this.items.find((i) => i.id === id);
+    if (!item) {
+      console.warn(`[Inventory] 物品 "${id}" 不存在`);
+      return false;
+    }
+    if (item.used) {
+      console.warn(`[Inventory] 物品 "${id}" 已被使用`);
+      return false;
+    }
+
+    item.used = true;
+    this.engine.emit('item-used', item);
+    console.log(`[Inventory] 使用物品: ${item.name}`);
+    return true;
+  }
+
+  /**
+   * 获取所有物品
+   * @returns {Array}
+   */
+  getItems() {
+    return [...this.items];
+  }
+
+  /**
+   * 从存档数据恢复物品列表
+   * @param {Array} savedItems
+   */
+  restore(savedItems) {
+    if (Array.isArray(savedItems)) {
+      this.items = savedItems.map((item) => ({ ...item }));
+    }
+  }
+}

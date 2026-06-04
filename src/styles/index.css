@@ -1,0 +1,918 @@
+/* ============================================
+   《卅一景》 — 全局设计系统
+   ============================================ */
+
+/* --- CSS Custom Properties --- */
+:root {
+  /* 古典宣纸 · 暖灰米色系 */
+  --real-bg-deep: #f0ebe3;
+  --real-bg: #f5f0e8;
+  --real-surface: #eae3d8;
+  --real-surface-hover: #e0d6c8;
+  --real-border: #c8b8a0;
+  --real-text: #2c2416;
+  --real-text-dim: #7a6b5a;
+  --real-accent: #4a6d7c;
+  --real-accent-glow: rgba(74, 109, 124, 0.2);
+  --real-scanner-green: #5a8a6e;
+  --real-scanner-line: rgba(74, 109, 124, 0.5);
+
+  /* 画中世界 · 暖旧黄 */
+  --paint-bg: #f5e6c8;
+  --paint-bg-deep: #e8d5a8;
+  --paint-surface: #ede0c8;
+  --paint-surface-hover: #e5d4b0;
+  --paint-border: #c4a97a;
+  --paint-text: #3d2b1f;
+  --paint-text-dim: #7a6352;
+  --paint-accent: #8b4513;
+  --paint-ink: #2c1810;
+  --paint-ink-light: rgba(44, 24, 16, 0.6);
+  --paint-vermillion: #c84032;
+  --paint-vermillion-glow: rgba(200, 64, 50, 0.3);
+  --paint-gold: #b8860b;
+
+  /* 共用 */
+  --font-serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+  --font-handwrite: 'LXGW WenKai', 'KaiTi', 'STKaiti', serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 2.5rem;
+  --font-size-5xl: 3.5rem;
+  --font-size-hero: 5rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.2);
+  --shadow-glow-blue: 0 0 20px var(--real-accent-glow);
+  --shadow-glow-red: 0 0 20px var(--paint-vermillion-glow);
+
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.5s ease;
+  --transition-slow: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-dramatic: 2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --z-scene: 1;
+  --z-ui: 10;
+  --z-dialogue: 50;
+  --z-overlay: 100;
+  --z-transition: 200;
+  --z-loading: 300;
+}
+
+/* --- Global Reset --- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-serif);
+  background: var(--real-bg);
+  color: var(--real-text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  line-height: 1.8;
+  /* 宣纸纹理 */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(139, 119, 79, 0.03) 3px,
+      rgba(139, 119, 79, 0.03) 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(139, 119, 79, 0.02) 3px,
+      rgba(139, 119, 79, 0.02) 6px
+    );
+}
+
+#app {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* --- Layout Utilities --- */
+.full-viewport {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.absolute-fill {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- Scene Container --- */
+.scene-container {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: var(--z-scene);
+}
+
+/* --- World Themes --- */
+
+/* 现实世界 */
+.real-world {
+  background: var(--real-bg);
+  color: var(--real-text);
+  font-family: var(--font-serif);
+}
+
+.real-world .scene-title {
+  color: var(--real-accent);
+  text-shadow: var(--shadow-glow-blue);
+}
+
+/* 画中世界 */
+.paint-world {
+  background: var(--paint-bg);
+  color: var(--paint-text);
+  font-family: var(--font-handwrite);
+}
+
+.paint-world .scene-title {
+  color: var(--paint-ink);
+}
+
+/* Paper texture overlay for paint world */
+.paint-world::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 69, 19, 0.02) 2px,
+      rgba(139, 69, 19, 0.02) 4px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --- Narrative Text --- */
+.narrative-text {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-size: var(--font-size-lg);
+  line-height: 2;
+  letter-spacing: 0.05em;
+}
+
+.paint-world .narrative-text {
+  font-family: var(--font-handwrite);
+  font-size: var(--font-size-xl);
+  line-height: 2.2;
+  color: var(--paint-ink);
+}
+
+.narrative-text p {
+  margin-bottom: 1.5em;
+  text-indent: 2em;
+}
+
+.narrative-text .emphasis {
+  color: var(--paint-vermillion);
+  font-weight: 600;
+}
+
+/* Ink text - appears with ink wash effect */
+.ink-text {
+  opacity: 0;
+  filter: blur(4px);
+  animation: inkReveal 1.5s ease forwards;
+}
+
+@keyframes inkReveal {
+  0% { opacity: 0; filter: blur(4px); transform: scale(0.98); }
+  60% { opacity: 0.8; filter: blur(1px); }
+  100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+/* --- Dialogue System --- */
+.dialogue-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-dialogue);
+  pointer-events: none;
+}
+
+.dialogue-box {
+  pointer-events: all;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  animation: dialogueSlideUp 0.4s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.real-world .dialogue-box {
+  background: rgba(245, 240, 232, 0.95);
+  border: 1px solid var(--real-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.paint-world .dialogue-box {
+  background: rgba(237, 224, 200, 0.95);
+  border: 1px solid var(--paint-border);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-handwrite);
+}
+
+.dialogue-speaker {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+}
+
+.real-world .dialogue-speaker {
+  color: var(--real-accent);
+}
+
+.paint-world .dialogue-speaker {
+  color: var(--paint-accent);
+}
+
+.dialogue-content {
+  font-size: var(--font-size-lg);
+  line-height: 1.8;
+}
+
+.dialogue-indicator {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1.5rem;
+  font-size: var(--font-size-sm);
+  opacity: 0.5;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes dialogueSlideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* --- Choice Buttons --- */
+.choices-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  z-index: var(--z-ui);
+}
+
+.choice-btn {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  padding: 1.2rem 2rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+  text-align: left;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.real-world .choice-btn {
+  background: var(--real-surface);
+  border: 1px solid var(--real-border);
+  color: var(--real-text);
+}
+
+.real-world .choice-btn:hover {
+  background: var(--real-surface-hover);
+  border-color: var(--real-accent);
+  box-shadow: var(--shadow-glow-blue);
+  transform: translateX(4px);
+}
+
+.paint-world .choice-btn {
+  background: var(--paint-surface);
+  border: 1px solid var(--paint-border);
+  color: var(--paint-text);
+  font-family: var(--font-handwrite);
+}
+
+.paint-world .choice-btn:hover {
+  background: var(--paint-surface-hover);
+  border-color: var(--paint-accent);
+  transform: translateX(4px);
+}
+
+.choice-btn .choice-hesitation {
+  display: none;
+  font-size: var(--font-size-sm);
+  color: var(--paint-text-dim);
+  margin-top: 0.5rem;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.choice-btn:hover .choice-hesitation {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+/* --- Tool Buttons --- */
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  z-index: var(--z-ui);
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.real-world .tool-btn {
+  background: var(--real-surface);
+  border: 1px solid var(--real-border);
+  color: var(--real-text);
+}
+
+.real-world .tool-btn:hover {
+  background: var(--real-surface-hover);
+  border-color: var(--real-accent);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.real-world .tool-btn.active {
+  background: rgba(99, 179, 237, 0.15);
+  border-color: var(--real-accent);
+  color: var(--real-accent);
+}
+
+.real-world .tool-btn.used {
+  opacity: 0.6;
+}
+
+.real-world .tool-btn.used::after {
+  content: '✓';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--real-scanner-green);
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Item Cards --- */
+.item-card {
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  max-width: 400px;
+  animation: itemReveal 0.8s ease;
+}
+
+.real-world .item-card {
+  background: var(--real-surface);
+  border: 1px solid var(--real-border);
+}
+
+.paint-world .item-card {
+  background: var(--paint-surface);
+  border: 1px solid var(--paint-border);
+  font-family: var(--font-handwrite);
+}
+
+.item-card .item-name {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.item-card .item-desc {
+  font-size: var(--font-size-base);
+  line-height: 1.8;
+  opacity: 0.85;
+}
+
+@keyframes itemReveal {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* --- Inventory Panel --- */
+.inventory-toggle {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  z-index: var(--z-ui);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-md);
+}
+
+.real-world .inventory-toggle {
+  background: var(--real-surface);
+  border: 1px solid var(--real-border);
+}
+
+.paint-world .inventory-toggle {
+  background: var(--paint-surface);
+  border: 1px solid var(--paint-border);
+}
+
+.inventory-toggle:hover {
+  transform: scale(1.1);
+}
+
+.inventory-toggle .item-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--paint-vermillion);
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inventory-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  z-index: var(--z-overlay);
+  padding: 2rem;
+  overflow-y: auto;
+  transition: right var(--transition-medium);
+  box-shadow: var(--shadow-lg);
+}
+
+.inventory-panel.open {
+  right: 0;
+}
+
+.real-world .inventory-panel {
+  background: var(--real-bg);
+  border-left: 1px solid var(--real-border);
+}
+
+.paint-world .inventory-panel {
+  background: var(--paint-bg);
+  border-left: 1px solid var(--paint-border);
+}
+
+.inventory-panel-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.3;
+}
+
+.inventory-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* --- Hint Notebook --- */
+.hint-notebook {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 600px;
+  max-height: 80vh;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  z-index: var(--z-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-medium);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+}
+
+.hint-notebook.visible {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.hint-notebook {
+  background: #faf3e0;
+  border: 2px solid var(--paint-border);
+  font-family: var(--font-handwrite);
+  color: var(--paint-ink);
+}
+
+.hint-notebook .hint-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--paint-accent);
+}
+
+.hint-notebook .hint-content {
+  font-size: var(--font-size-lg);
+  line-height: 2;
+  padding: 1rem;
+  border-left: 3px solid var(--paint-vermillion);
+  margin: 1rem 0;
+}
+
+.hint-notebook .hint-annotation {
+  font-size: var(--font-size-sm);
+  color: var(--paint-text-dim);
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+/* --- Puzzle Area --- */
+.puzzle-area {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Scanner UI (Prologue) --- */
+.scanner-frame {
+  border: 2px solid var(--real-accent);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--real-scanner-line);
+  box-shadow: 0 0 10px var(--real-accent);
+  animation: scanLine 3s ease-in-out infinite;
+}
+
+@keyframes scanLine {
+  0%, 100% { top: 0; }
+  50% { top: calc(100% - 2px); }
+}
+
+/* --- Split View (Chapter 2 poem comparison) --- */
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  height: 100%;
+}
+
+.split-pane {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.split-pane-left {
+  border-right: 1px solid var(--paint-border);
+}
+
+.split-pane .pane-title {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+}
+
+/* --- Reflection Effect (Chapter 1) --- */
+.reflection-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: 800px;
+}
+
+.reflection-real {
+  width: 100%;
+  position: relative;
+}
+
+.reflection-mirror {
+  width: 100%;
+  position: relative;
+  transform: scaleY(-1);
+  filter: brightness(0.85) contrast(0.9);
+  opacity: 0.7;
+  border-top: 2px solid rgba(99, 179, 237, 0.3);
+}
+
+.reflection-mirror.ripple {
+  animation: waterRipple 2s ease-in-out;
+}
+
+@keyframes waterRipple {
+  0% { filter: brightness(0.85) contrast(0.9) blur(0); }
+  30% { filter: brightness(0.9) contrast(0.85) blur(2px); }
+  60% { filter: brightness(0.85) contrast(0.9) blur(1px); }
+  100% { filter: brightness(0.85) contrast(0.9) blur(0); }
+}
+
+/* Flipped state */
+.reflection-container.flipped {
+  flex-direction: column-reverse;
+}
+
+.reflection-container.flipped .reflection-real {
+  transform: scaleY(-1);
+  filter: brightness(0.85) contrast(0.9);
+  opacity: 0.7;
+}
+
+.reflection-container.flipped .reflection-mirror {
+  transform: none;
+  filter: none;
+  opacity: 1;
+}
+
+/* --- Wall / Mural (Chapter 3) --- */
+.mural-wall {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16/10;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.mural-plaster {
+  position: absolute;
+  inset: 0;
+  background: #b8a98a;
+  transition: opacity 1.5s ease;
+}
+
+.mural-lines {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.mural-lines.visible {
+  opacity: 1;
+}
+
+.mural-painting {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+.mural-painting.revealed {
+  opacity: 1;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.slide-up {
+  animation: slideUp 0.6s ease forwards;
+}
+
+.delay-1 { animation-delay: 0.2s; }
+.delay-2 { animation-delay: 0.4s; }
+.delay-3 { animation-delay: 0.6s; }
+.delay-4 { animation-delay: 0.8s; }
+.delay-5 { animation-delay: 1s; }
+
+/* --- Transition Overlay --- */
+.transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  pointer-events: none;
+}
+
+.transition-overlay.active {
+  pointer-events: all;
+}
+
+/* Ink spread transition */
+.ink-transition {
+  background: radial-gradient(circle at center, var(--paint-ink) 0%, transparent 70%);
+  opacity: 0;
+}
+
+.ink-transition.spreading {
+  animation: inkSpread 2s ease forwards;
+}
+
+@keyframes inkSpread {
+  0% { opacity: 0; background-size: 0% 0%; }
+  50% { opacity: 1; }
+  100% { opacity: 1; background-size: 300% 300%; background: var(--paint-ink); }
+}
+
+/* Color shift transition */
+.world-shift {
+  transition: background-color var(--transition-dramatic);
+}
+
+.world-shift.to-paint {
+  background-color: var(--paint-bg);
+}
+
+.world-shift.to-real {
+  background-color: var(--real-bg);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  :root {
+    --font-size-hero: 3rem;
+    --font-size-5xl: 2.5rem;
+    --font-size-4xl: 2rem;
+  }
+
+  .narrative-text {
+    padding: 1.5rem;
+    font-size: var(--font-size-base);
+  }
+
+  .dialogue-box {
+    margin: 0 1rem 1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .split-view {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .inventory-panel {
+    width: 100%;
+    right: -100%;
+  }
+
+  .hint-notebook {
+    width: calc(100vw - 2rem);
+  }
+}
