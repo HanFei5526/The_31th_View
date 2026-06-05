@@ -291,60 +291,97 @@ a {
   pointer-events: all;
   max-width: 800px;
   margin: 0 auto 2rem;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 2rem 2.2rem;
   border-radius: var(--radius-lg);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   animation: dialogueSlideUp 0.4s ease;
   cursor: pointer;
   user-select: none;
+  /* 固定外框高度，防止逐字生成时高度跳动 */
+  min-height: 7.5rem;
+  position: relative;
 }
 
 .real-world .dialogue-box {
-  background: rgba(245, 240, 232, 0.95);
+  background: rgba(245, 240, 232, 0.96);
   border: 1px solid var(--real-border);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 -2px 30px rgba(0,0,0,0.07), var(--shadow-lg);
 }
 
 .paint-world .dialogue-box {
-  background: rgba(237, 224, 200, 0.95);
+  background: rgba(237, 224, 200, 0.96);
   border: 1px solid var(--paint-border);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 -2px 30px rgba(0,0,0,0.1), var(--shadow-lg);
   font-family: var(--font-handwrite);
+}
+
+/* 旁白模式：无说话人，文字居中、斜体 */
+.dialogue-box.dialogue-narration {
+  text-align: center;
 }
 
 .dialogue-speaker {
   font-size: var(--font-size-sm);
   font-weight: 600;
   margin-bottom: 0.5rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
 }
 
-.real-world .dialogue-speaker {
-  color: var(--real-accent);
+.real-world .dialogue-speaker { color: var(--real-accent); }
+.paint-world .dialogue-speaker { color: var(--paint-accent); }
+
+/* 固定高度内容区，防止文字多少引发外框高度跳变 */
+.dialogue-content-wrap {
+  min-height: 4.5em;
+  display: flex;
+  align-items: flex-start;
 }
 
-.paint-world .dialogue-speaker {
-  color: var(--paint-accent);
+.dialogue-box.dialogue-narration .dialogue-content-wrap {
+  align-items: center;
+  justify-content: center;
 }
 
 .dialogue-content {
   font-size: var(--font-size-lg);
-  line-height: 1.8;
+  line-height: 1.9;
+  width: 100%;
+}
+
+/* 旁白文字区别样式 */
+.dialogue-box.dialogue-narration .dialogue-content {
+  font-style: italic;
+  letter-spacing: 0.06em;
+}
+
+.real-world .dialogue-box.dialogue-narration .dialogue-content {
+  color: rgba(44, 36, 22, 0.65);
+}
+
+.paint-world .dialogue-box.dialogue-narration .dialogue-content {
+  color: var(--paint-text-dim);
 }
 
 .dialogue-indicator {
   position: absolute;
   bottom: 0.75rem;
   right: 1.5rem;
-  font-size: var(--font-size-sm);
-  opacity: 0.5;
-  animation: pulse 1.5s ease-in-out infinite;
+  font-size: var(--font-size-xs);
+  opacity: 0.4;
+  animation: indicatorBob 1.5s ease-in-out infinite;
+}
+
+@keyframes indicatorBob {
+  0%, 100% { opacity: 0.2; transform: translateY(0); }
+  50% { opacity: 0.7; transform: translateY(3px); }
 }
 
 @keyframes dialogueSlideUp {
-  from { transform: translateY(30px); opacity: 0; }
+  from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
 
 /* --- Choice Buttons --- */
 .choices-container {
