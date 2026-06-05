@@ -1,4 +1,4 @@
-import bgImage from '../../../TestPic/拙政园鸟瞰_首屏.png';
+const bgImage = '/images/landing-panorama.png';
 
 /**
  * 《卅一景》 — 着陆页 / Landing Page

@@ -24,16 +24,17 @@
 卅一景/
 ├── story_02_卅一景_剧情大纲.md          # 故事设定、人物、主线、真相、结局
 ├── 卅一景_chapter_design.md            # 章节细纲、叙事节拍、NPC 对话
+├── 卅一景_游戏开发文档.md              # 团队开发总览、MVP 范围、路演路线
 ├── 剧情质疑与解释清单.md                # 常见质疑、世界观解释、证据链自洽
-├── BgP/                                # 背景参考图
+├── TestPic/                            # 过程图片、生成图、临时参考图
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
 │   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
 │   ├── menu-test.html                  # 菜单测试页
-│   ├── public/                         # 静态图标等资源
-│   ├── 图片/                           # 前端场景图与背景图
+│   ├── public/                         # 正式静态资源
+│   │   └── images/                     # 正式使用的背景图 / 场景图
 │   └── src/                            # 前端源码
 ├── 非剧情文档/
 │   ├── 谜题_场景_线索表设计.md          # 谜题机制、场景地图、线索表
@@ -82,7 +83,8 @@ npm run preview
 - 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`
 - AI 组件：`chat-panel`（周鹤年对话，仅现实世界）、`notebook-panel`（AI 笔记本，批注 + 查阅）
 - 页面模块：着陆页、主菜单页、序章
-- 资源目录：`Web/图片/` 与 `BgP/`
+- 正式图片目录：`Web/public/images/`
+- 过程图片目录：`TestPic/`，不作为正式代码引用目录
 
 前端实现应优先遵循：
 
@@ -122,5 +124,6 @@ npm run preview
 - 所有叙事修改须确认是否触及三条剧情基准；触及则需要剧情统筹确认。
 - 谜题、前端、后端文档各自独立维护，叙事节拍中以锚点指向谜题文档。
 - 前端改动应保持与现有 Vite + 原生 JavaScript / CSS 结构一致。
+- 正式图片统一放入 `Web/public/images/` 并用 `/images/文件名` 引用；`TestPic/` 只保留过程图、草图和临时参考。
 - 未经明确要求，不引入额外框架、遥测、分析或网络请求。
 

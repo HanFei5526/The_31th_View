@@ -13,7 +13,8 @@
  */
 
 import GameSceneBase from './game-scene.js';
-import prologueBg from '../../../TestPic/prologue_bg.png';
+
+const prologueBg = '/images/prologue-bg.png';
 
 /** 序章旁白文本（占位） */
 const NARRATIONS_INTRO = [
