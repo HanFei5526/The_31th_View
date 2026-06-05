@@ -5,6 +5,7 @@
  * - 注册场景类 (register)
  * - 管理场景切换生命周期：exit → 过渡动画 → enter
  * - 维护场景渲染容器 (scene-viewport)
+ * - 提供多种转场风格切换（默认淡入淡出、墨迹扩散、卷轴展开）
  *
  * 每个场景类应实现:
  *   constructor(engine)
@@ -13,10 +14,15 @@
  *   update()          — 帧更新（可选）
  */
 
+import { TransitionManager } from '../components/transition.js';
+
 export class SceneManager {
   constructor(engine) {
     /** @type {import('./game-engine.js').GameEngine} */
     this.engine = engine;
+
+    /** 转场动画管理器 */
+    this.transition = new TransitionManager();
 
     /** 已注册的场景类 @type {Map<string, Function>} */
     this._registry = new Map();
@@ -116,5 +122,68 @@ export class SceneManager {
    */
   getCurrentName() {
     return this._currentName;
+  }
+
+  /* ==================== 专用转场切换 ==================== */
+
+  /**
+   * 墨迹扩散转场 — 序章跌入画中专用
+   * @param {string} targetScene — 目标场景名
+   * @returns {Promise<void>}
+   */
+  async switchWithInkSpread(targetScene) {
+    await this.transition.inkSpread(2000);
+    this._doSwitch(targetScene);
+    await this.transition.clearInk(1500);
+  }
+
+  /**
+   * 卷轴展开转场 — 章节间切换专用
+   * @param {string} targetScene — 目标场景名
+   * @param {object} chapterInfo — { number, name, subtitle }
+   * @returns {Promise<void>}
+   */
+  async switchWithScroll(targetScene, chapterInfo) {
+    const scrollDone = this.transition.scrollTransition(chapterInfo, 3500);
+    // 在卷轴合拢的 1s 后执行场景切换
+    await new Promise(r => setTimeout(r, 1200));
+    this._doSwitch(targetScene);
+    await scrollDone;
+  }
+
+  /**
+   * 内部：执行场景切换（无转场动画）
+   * @param {string} name
+   */
+  _doSwitch(name) {
+    const SceneClass = this._registry.get(name);
+    if (!SceneClass) {
+      console.error(`[SceneManager] 未找到场景: "${name}"`);
+      return;
+    }
+
+    if (this._currentScene) {
+      if (typeof this._currentScene.exit === 'function') {
+        this._currentScene.exit();
+      }
+      this.engine.emit('scene-exit', { scene: this._currentName });
+    }
+
+    this._container.innerHTML = '';
+    this._container.classList.remove('real-world', 'paint-world');
+    this._container.classList.add(
+      this.engine.currentWorld === 'paint' ? 'paint-world' : 'real-world'
+    );
+
+    const scene = new SceneClass(this.engine);
+    this._currentScene = scene;
+    this._currentName = name;
+
+    if (typeof scene.enter === 'function') {
+      scene.enter(this._container);
+    }
+
+    this.engine.currentScene = name;
+    this.engine.emit('scene-enter', { scene: name });
   }
 }

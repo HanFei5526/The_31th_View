@@ -2,46 +2,90 @@
    转场动画系统
    ============================================ */
 
-/* --- 墨迹扩散转场 (跌入画中) --- */
+/* --- 宣纸晕染转场 (跌入画中) --- */
+/* 用暖米色宣纸质感从中心向外晕开，配合水墨模糊，替代生硬的黑色圆点扩散 */
 .transition-ink-spread {
   position: fixed;
   inset: 0;
   z-index: var(--z-transition);
   pointer-events: none;
   overflow: hidden;
-}
-
-.transition-ink-spread .ink-drop {
-  position: absolute;
-  border-radius: 50%;
-  background: var(--paint-ink);
-  transform: scale(0);
+  /* 宣纸底色 */
+  background:
+    radial-gradient(ellipse at 50% 48%,
+      #e8dcc0 0%,
+      #d4c49a 35%,
+      #c8b484 60%,
+      #b8a070 100%
+    );
+  /* 宣纸纹理 */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(100, 80, 40, 0.04) 3px,
+      rgba(100, 80, 40, 0.04) 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 4px,
+      rgba(100, 80, 40, 0.02) 4px,
+      rgba(100, 80, 40, 0.02) 8px
+    ),
+    radial-gradient(ellipse at 50% 48%,
+      #e8dcc0 0%,
+      #d4c49a 35%,
+      #c8b484 60%,
+      #b8a070 100%
+    );
   opacity: 0;
+  transform: scale(0.06);
+  border-radius: 50%;
+  filter: blur(12px);
+  transition: none;
 }
 
-.transition-ink-spread.active .ink-drop {
-  animation: inkDropSpread var(--transition-dramatic) forwards;
+.transition-ink-spread.active {
+  animation: xuanzhiYunRan var(--transition-dramatic) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes inkDropSpread {
+@keyframes xuanzhiYunRan {
   0% {
-    transform: scale(0);
-    opacity: 0.8;
+    opacity: 0;
+    transform: scale(0.06);
+    filter: blur(16px);
     border-radius: 50%;
   }
-  40% {
-    opacity: 1;
-    border-radius: 45% 55% 48% 52%;
+  20% {
+    opacity: 0.85;
+    filter: blur(8px);
   }
-  70% {
-    border-radius: 40% 60% 55% 45%;
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+    filter: blur(3px);
+    border-radius: 30%;
+  }
+  80% {
+    transform: scale(2.5);
+    filter: blur(0px);
+    border-radius: 0%;
   }
   100% {
-    transform: scale(50);
     opacity: 1;
-    border-radius: 50%;
+    transform: scale(3);
+    filter: blur(0px);
+    border-radius: 0%;
   }
 }
+
+/* 旧的墨滴元素保留定义但不再使用，避免报错 */
+.transition-ink-spread .ink-drop {
+  display: none;
+}
+
 
 /* --- 褪色转场 (返回现实) --- */
 .transition-fade-wash {

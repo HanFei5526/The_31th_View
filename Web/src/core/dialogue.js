@@ -19,9 +19,6 @@
  *   ]
  */
 
-/** 打字机效果的每字符间隔（毫秒） */
-const TYPEWRITER_INTERVAL = 40;
-
 export class DialogueSystem {
   constructor(engine) {
     /** @type {import('./game-engine.js').GameEngine} */
@@ -38,14 +35,11 @@ export class DialogueSystem {
     /** 点击继续提示 DOM */
     this._indicatorEl = null;
 
-    /** 打字机计时器 */
-    this._typewriterTimer = null;
-    /** 当前是否正在打字 */
-    this._isTyping = false;
-    /** 当前完整文本 */
-    this._fullText = '';
-    /** 当前打到的字符索引 */
-    this._charIndex = 0;
+    /**
+     * 当前行是否处于「等待点击推进」状态
+     * （文字已显示完毕，尚未点击进入下一行）
+     */
+    this._waitingForClick = false;
 
     /** 点击推进的 resolve 函数 */
     this._advanceResolve = null;
@@ -89,28 +83,34 @@ export class DialogueSystem {
       if (speaker && speaker !== 'narrator') {
         this._speakerEl.textContent = speaker;
         this._speakerEl.style.display = 'block';
-        this._boxEl.classList.remove('narration');
+        this._boxEl.classList.remove('dialogue-narration');
       } else {
         this._speakerEl.style.display = 'none';
-        this._boxEl.classList.add('narration');
+        this._boxEl.classList.add('dialogue-narration');
       }
 
-      // 开始打字机效果
-      this._startTypewriter(text);
-
-      // 隐藏继续提示
+      // 整段直接显示 + CSS 淡入
+      this._waitingForClick = false;
       this._indicatorEl.style.display = 'none';
+      this._contentEl.textContent = text;
+      this._contentEl.classList.remove('dialogue-text-visible');
+      // 强制 reflow 触发动画
+      void this._contentEl.offsetWidth;
+      this._contentEl.classList.add('dialogue-text-visible');
+
+      // 动画结束后等待点击
+      const onAnimEnd = () => {
+        this._contentEl.removeEventListener('animationend', onAnimEnd);
+        this._waitingForClick = true;
+        this._indicatorEl.style.display = 'block';
+      };
+      this._contentEl.addEventListener('animationend', onAnimEnd);
 
       // 点击处理
       const clickHandler = () => {
-        if (this._isTyping) {
-          // 跳过打字，直接显示完整文本
-          this._completeTypewriter();
-        } else {
-          // 推进到下一行
-          this._boxEl.removeEventListener('click', clickHandler);
-          resolve();
-        }
+        if (!this._waitingForClick) return; // 淡入未完成时点击无效
+        this._boxEl.removeEventListener('click', clickHandler);
+        resolve();
       };
 
       this._boxEl.addEventListener('click', clickHandler);
@@ -152,49 +152,6 @@ export class DialogueSystem {
   }
 
   /**
-   * 启动打字机效果
-   * @private
-   */
-  _startTypewriter(text) {
-    this._clearTypewriter();
-    this._fullText = text;
-    this._charIndex = 0;
-    this._isTyping = true;
-    this._contentEl.textContent = '';
-
-    this._typewriterTimer = window.setInterval(() => {
-      if (this._charIndex < this._fullText.length) {
-        this._contentEl.textContent += this._fullText[this._charIndex];
-        this._charIndex++;
-      } else {
-        this._completeTypewriter();
-      }
-    }, TYPEWRITER_INTERVAL);
-  }
-
-  /**
-   * 立即完成打字机效果
-   * @private
-   */
-  _completeTypewriter() {
-    this._clearTypewriter();
-    this._contentEl.textContent = this._fullText;
-    this._isTyping = false;
-    this._indicatorEl.style.display = 'block';
-  }
-
-  /**
-   * 清除打字机定时器
-   * @private
-   */
-  _clearTypewriter() {
-    if (this._typewriterTimer) {
-      window.clearInterval(this._typewriterTimer);
-      this._typewriterTimer = null;
-    }
-  }
-
-  /**
    * 显示对话遮罩
    * @private
    */
@@ -220,6 +177,22 @@ export class DialogueSystem {
   _ensureDOM() {
     if (this._overlayEl) return;
 
+    // 注入淡入动画 CSS（仅一次）
+    if (!document.getElementById('dialogue-system-styles')) {
+      const style = document.createElement('style');
+      style.id = 'dialogue-system-styles';
+      style.textContent = `
+        @keyframes dialogueTextFadeIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .dialogue-text-visible {
+          animation: dialogueTextFadeIn 0.35s ease forwards;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     // 对话遮罩层
     const overlay = document.createElement('div');
     overlay.className = 'dialogue-overlay';
@@ -232,9 +205,13 @@ export class DialogueSystem {
     const speaker = document.createElement('div');
     speaker.className = 'dialogue-speaker';
 
-    // 对话内容
+    // 对话内容（固定高度容器，防止高度抖动）
+    const contentWrap = document.createElement('div');
+    contentWrap.className = 'dialogue-content-wrap';
+
     const content = document.createElement('div');
     content.className = 'dialogue-content';
+    contentWrap.appendChild(content);
 
     // 点击继续提示
     const indicator = document.createElement('div');
@@ -242,7 +219,7 @@ export class DialogueSystem {
     indicator.textContent = '▼';
 
     box.appendChild(speaker);
-    box.appendChild(content);
+    box.appendChild(contentWrap);
     box.appendChild(indicator);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
