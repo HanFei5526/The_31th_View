@@ -21,16 +21,17 @@
 卅一景/
 ├── story_02_卅一景_剧情大纲.md          # 故事设定（人物/梗概/主线/真相/结局）
 ├── 卅一景_chapter_design.md            # 章节细纲（叙事节拍/NPC 对话/张力设计）
+├── 卅一景_游戏开发文档.md              # 团队开发总览 / MVP 范围 / 路演路线
 ├── 剧情质疑与解释清单.md                # 常见质疑 / 世界观 / 证据链解释
-├── BgP/                                # 背景参考图（拙政园图/古风改绘）
+├── TestPic/                            # 过程图片 / 生成图 / 临时参考图
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
 │   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
 │   ├── menu-test.html                  # 菜单测试页
-│   ├── public/                         # 图标等静态资源
-│   ├── 图片/                           # 前端用背景 / 场景图
+│   ├── public/                         # 正式静态资源
+│   │   └── images/                     # 正式使用的背景图 / 场景图
 │   └── src/                            # 前端源码
 │       ├── main.js                     # 应用入口
 │       ├── core/                       # 引擎 / 场景 / 背包 / 提示 / 对话 / 存档 / AI
@@ -75,7 +76,8 @@
 - 已有核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`。
 - 已有 AI 组件：`chat-panel`（周鹤年对话面板，仅现实世界）、`notebook-panel`（AI 笔记本，批注 + 查阅）。
 - AI 接入 DeepSeek V4 Pro，API Key 通过 `Web/.env` 中的 `VITE_DEEPSEEK_API_KEY` 配置。
-- 前端资源集中放在 `Web/图片/` 与 `BgP/`。
+- 正式图片集中放在 `Web/public/images/`，代码中使用 `/images/文件名` 引用。
+- `TestPic/` 只作为过程图片、生成图和临时参考图目录，不作为正式代码引用目录。
 - 如需启动前端，先进入 `Web/`，安装依赖后运行 `npm run dev`。
 
 ## 章节结构
@@ -91,4 +93,5 @@
 - 修改前端时避免破坏已拍板剧情基准，涉及叙事文案的改动需回看 `story_02_卅一景_剧情大纲.md` 与 `卅一景_chapter_design.md`
 - AI Prompt 修改须回看 `非剧情文档/AI_提示词_后端数据设计.md`，确保与提示系统约束一致
 - 周鹤年 AI 对话仅限现实世界；画中世界通过笔记本查阅（非周鹤年身份）
+- 正式图片统一放入 `Web/public/images/`；过程图、临时图保留在 `TestPic/`
 - `.env` 文件中的 API Key 不得提交到代码仓库
