@@ -501,21 +501,33 @@ a {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   z-index: var(--z-ui);
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
 .real-world .inventory-toggle {
-  background: var(--real-surface);
-  border: 1px solid var(--real-border);
+  background: #2b2018;
+  border: 2px solid #1a120e;
+  color: #d9c8aa;
+  box-shadow:
+    inset 0 0 0 1px #5c432b,
+    0 8px 24px rgba(0,0,0,0.3);
+}
+
+.real-world .inventory-toggle:hover {
+  transform: translateY(-2px);
+  background: #3b2b20;
+  box-shadow:
+    inset 0 0 0 1px #785a3a,
+    0 12px 30px rgba(0,0,0,0.4);
 }
 
 .paint-world .inventory-toggle {
@@ -670,6 +682,448 @@ a {
 @keyframes scanLine {
   0%, 100% { top: 0; }
   50% { top: calc(100% - 2px); }
+}
+
+/* --- Scanner Split Layout (Prologue) --- */
+.scanner-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-ui);
+  animation: fadeIn 0.8s ease;
+  padding-bottom: 150px;
+}
+
+.scanner-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2px;
+  padding: 4.5rem 1.5rem 0;
+  min-height: 0;
+}
+
+.scanner-pane {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(74, 109, 124, 0.2);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.scanner-pane-label {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  font-size: var(--font-size-xs);
+  color: var(--real-accent);
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0.6rem;
+  background: rgba(245, 240, 232, 0.9);
+  border-radius: var(--radius-sm);
+  z-index: 2;
+  backdrop-filter: blur(4px);
+}
+
+.scanner-pane-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+}
+
+/* Tool effect overlay layers */
+.scanner-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 3;
+}
+
+.scanner-overlay.active {
+  opacity: 1;
+}
+
+/* Magnifier effect: circular focus ring + edge highlight */
+.scanner-overlay-magnify {
+  background:
+    radial-gradient(circle 120px at 75% 35%, transparent 60%, rgba(74, 109, 124, 0.08) 100%),
+    radial-gradient(circle 80px at 85% 25%, rgba(74, 109, 124, 0.12) 0%, transparent 100%);
+}
+
+.scanner-overlay-magnify .magnify-ring {
+  position: absolute;
+  top: 15%;
+  right: 8%;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 2px solid var(--real-accent);
+  box-shadow: 0 0 20px rgba(74, 109, 124, 0.3), inset 0 0 20px rgba(74, 109, 124, 0.1);
+  animation: magnifyPulse 2.5s ease-in-out infinite;
+}
+
+.scanner-overlay-magnify .magnify-label {
+  position: absolute;
+  top: calc(15% + 190px);
+  right: 8%;
+  font-size: var(--font-size-xs);
+  color: var(--real-accent);
+  letter-spacing: 0.05em;
+  text-align: center;
+  width: 180px;
+  animation: fadeIn 0.6s ease 0.3s both;
+}
+
+@keyframes magnifyPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(74, 109, 124, 0.3), inset 0 0 20px rgba(74, 109, 124, 0.1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(74, 109, 124, 0.5), inset 0 0 25px rgba(74, 109, 124, 0.15); }
+}
+
+/* Fiber analysis effect: texture overlay */
+.scanner-overlay-fiber {
+  background:
+    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(74, 109, 124, 0.04) 2px, rgba(74, 109, 124, 0.04) 4px),
+    repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(139, 119, 79, 0.03) 3px, rgba(139, 119, 79, 0.03) 5px);
+  mix-blend-mode: multiply;
+}
+
+.scanner-overlay-fiber .fiber-badge {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  font-size: var(--font-size-xs);
+  color: var(--real-accent);
+  background: rgba(245, 240, 232, 0.95);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(74, 109, 124, 0.2);
+  line-height: 1.6;
+  max-width: 220px;
+  animation: fadeIn 0.6s ease 0.3s both;
+}
+
+/* Sidelight effect: diagonal light sweep */
+.scanner-overlay-sidelight {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.05) 100%);
+}
+
+.scanner-overlay-sidelight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 248, 220, 0.2) 0%, transparent 50%);
+  animation: sideLightSweep 3s ease-in-out infinite alternate;
+}
+
+@keyframes sideLightSweep {
+  0% { opacity: 0.3; transform: translateX(-5%) translateY(-3%); }
+  100% { opacity: 0.8; transform: translateX(2%) translateY(1%); }
+}
+
+/* Remnant text "……所见" */
+.scanner-remnant-text {
+  position: absolute;
+  bottom: 18%;
+  left: 12%;
+  font-family: var(--font-handwrite);
+  font-size: var(--font-size-lg);
+  color: var(--paint-ink);
+  opacity: 0;
+  filter: blur(2px);
+  transition: opacity 1.2s ease, filter 1.2s ease;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.scanner-remnant-text.visible {
+  opacity: 0.55;
+  filter: blur(0.5px);
+  animation: remnantShimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes remnantShimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.65; }
+}
+
+/* Low-position auxiliary construction line */
+.scanner-aux-line {
+  position: absolute;
+  bottom: 22%;
+  left: 5%;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--paint-ink), transparent);
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.scanner-aux-line.visible {
+  opacity: 0.25;
+  animation: remnantShimmer 3s ease-in-out infinite 0.5s;
+}
+
+/* Intersection hotspot (appears after all 3 tools used) */
+.scanner-intersection {
+  position: absolute;
+  bottom: 17%;
+  left: 14%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.scanner-intersection.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+}
+
+.scanner-intersection-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(74, 109, 124, 0.5);
+  box-shadow: 0 0 20px rgba(74, 109, 124, 0.3), 0 0 40px rgba(74, 109, 124, 0.15);
+  animation: intersectionPulse 2s ease-in-out infinite;
+}
+
+.scanner-intersection-inner {
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74, 109, 124, 0.2), transparent 70%);
+}
+
+@keyframes intersectionPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Scanner toolbar */
+.scanner-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(245, 240, 232, 0.6);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(74, 109, 124, 0.1);
+}
+
+.scanner-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-sm);
+  background: var(--real-surface);
+  border: 1px solid var(--real-border);
+  color: var(--real-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  letter-spacing: 0.03em;
+}
+
+.scanner-tool-btn:hover {
+  background: var(--real-surface-hover, rgba(74, 109, 124, 0.08));
+  border-color: var(--real-accent);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.scanner-tool-btn.active {
+  background: rgba(74, 109, 124, 0.12);
+  border-color: var(--real-accent);
+  color: var(--real-accent);
+  box-shadow: 0 0 12px rgba(74, 109, 124, 0.2);
+}
+
+.scanner-tool-btn.used::after {
+  content: '✓';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--real-scanner-green);
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.scanner-tool-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Scanner status bar */
+.scanner-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  font-size: var(--font-size-xs);
+  color: var(--real-text-dim, rgba(44, 36, 22, 0.5));
+  letter-spacing: 0.05em;
+  background: rgba(245, 240, 232, 0.4);
+}
+
+.scanner-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.scanner-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--real-scanner-green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* --- Character Dialogue Bubble (Prologue) --- */
+.dialogue-bubble-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-dialogue);
+  display: flex;
+  justify-content: center;
+  padding: 0 2rem 2rem;
+  pointer-events: none;
+  transform: translateY(100%);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dialogue-bubble-container.visible {
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.dialogue-bubble {
+  max-width: 850px;
+  width: 100%;
+  padding: 2rem 2.5rem;
+  background: #1a1512;
+  background-image: linear-gradient(180deg, #221c17 0%, #110e0c 100%);
+  border-radius: 4px;
+  border: 4px solid #3d2b1f;
+  box-shadow:
+    inset 0 0 0 1px #8c6b4a,
+    inset 0 0 15px rgba(0,0,0,0.8),
+    0 15px 30px rgba(0, 0, 0, 0.6),
+    0 0 0 1px #0a0807;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.dialogue-bubble::before {
+  display: none;
+}
+
+.dialogue-bubble-speaker {
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: #9b2e20;
+  color: #fff1e0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 2px;
+  margin-bottom: 1.2rem;
+  letter-spacing: 0.15em;
+  font-family: var(--font-handwrite), var(--font-serif);
+  border: 1px solid #731e13;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+  display: inline-block;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.dialogue-bubble-text {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  line-height: 2.2;
+  color: #e6d8c3;
+  letter-spacing: 0.08em;
+  min-height: 1.5em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.dialogue-bubble-indicator {
+  position: absolute;
+  bottom: 1rem;
+  right: 2.5rem;
+  font-size: 0.8rem;
+  color: #8c6b4a;
+  animation: gsIndicatorPulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scanner-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 0.6fr;
+    padding: 4rem 0.75rem 0;
+  }
+
+  .scanner-toolbar {
+    gap: 0.5rem;
+    padding: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .scanner-tool-btn {
+    font-size: var(--font-size-xs);
+    padding: 0.5rem 0.8rem;
+  }
+
+  .dialogue-bubble-container {
+    padding: 0 1rem 1rem;
+  }
+
+  .dialogue-bubble {
+    padding: 1rem 1.2rem;
+  }
+
+  .dialogue-bubble-text {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .scanner-overlay-magnify .magnify-ring { animation: none; }
+  .scanner-overlay-sidelight::before { animation: none; opacity: 0.5; }
+  .scanner-remnant-text.visible { animation: none; opacity: 0.5; }
+  .scanner-aux-line.visible { animation: none; opacity: 0.2; }
+  .scanner-intersection-glow { animation: none; opacity: 0.8; }
+  .scanner-container { animation: none; }
+  .dialogue-bubble-container { transition: none; }
+  .dialogue-bubble-indicator { animation: none; }
 }
 
 /* --- Split View (Chapter 2 poem comparison) --- */
@@ -925,34 +1379,39 @@ a {
 .chat-toggle {
   position: fixed;
   bottom: 2rem;
-  right: 6.5rem; /* 位于笔记本按钮左侧 */
+  right: 6.5rem;
   width: auto;
-  height: 56px;
-  border-radius: 28px;
+  height: 52px;
+  border-radius: 4px;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: var(--font-size-base);
+  font-size: 1rem;
+  letter-spacing: 0.15em;
   z-index: var(--z-ui);
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-md);
-  background: var(--real-surface);
-  border: 1px solid var(--real-border);
-  color: var(--real-text);
-  font-family: var(--font-serif);
+  background: #9b2e20;
+  border: 2px solid #6b1d12;
+  color: #fff5e6;
+  font-family: var(--font-handwrite), var(--font-serif);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.15),
+    0 8px 24px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .chat-toggle:hover {
-  transform: scale(1.05);
-  border-color: var(--real-accent);
-  box-shadow: var(--shadow-glow-blue);
+  transform: translateY(-2px);
+  background: #b53625;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.2),
+    0 12px 30px rgba(0,0,0,0.4);
 }
 
 .chat-toggle.active {
-  background: rgba(74, 109, 124, 0.15);
-  border-color: var(--real-accent);
-  color: var(--real-accent);
+  background: #731e13;
+  color: #fff;
 }
 
 .chat-panel {
@@ -1106,6 +1565,26 @@ a {
   transform: translateY(-1px);
 }
 
+/* --- 重试按钮 --- */
+.chat-retry-btn {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  border: 1px solid var(--real-border);
+  border-radius: var(--radius-sm);
+  color: var(--real-text-dim);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.chat-retry-btn:hover {
+  border-color: var(--real-accent);
+  color: var(--real-accent);
+  background: rgba(74, 109, 124, 0.05);
+}
+
 /* --- 跳动的三点动画 --- */
 .chat-loading-dots span {
   animation: loadingDots 1.4s infinite both;
@@ -1124,6 +1603,61 @@ a {
 }
 
 /* --- AI 笔记本面板 (📓 notebook-panel) --- */
+.notebook-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px dashed var(--paint-border);
+  padding: 0 2rem;
+}
+
+.notebook-tab {
+  flex: 1;
+  padding: 0.75rem 0;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-sm);
+  color: var(--paint-text-dim);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.notebook-tab--active {
+  color: var(--paint-accent);
+  border-bottom-color: var(--paint-accent);
+}
+
+.notebook-tab:hover {
+  color: var(--paint-ink);
+}
+
+.notebook-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: rgba(139, 69, 19, 0.1);
+  font-size: 11px;
+  color: var(--paint-text-dim);
+}
+
+.notebook-tab--active .notebook-tab-count {
+  background: var(--paint-accent);
+  color: white;
+}
+
+.notebook-tab.has-new {
+  animation: breatheBorder 1.5s ease-in-out infinite;
+}
+
 .notebook-toggle {
   position: fixed;
   bottom: 2rem;
@@ -1348,6 +1882,59 @@ a {
 .notebook-result-icon {
   margin-right: 0.5rem;
   color: var(--paint-accent);
+}
+
+/* --- 保存状态指示器 --- */
+.save-indicator {
+  position: fixed;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 100px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.real-world .save-indicator {
+  background: var(--real-surface);
+  border: 1px solid var(--real-border);
+  color: var(--real-text-dim);
+}
+
+.paint-world .save-indicator {
+  background: var(--paint-surface);
+  border: 1px solid var(--paint-border);
+  color: var(--paint-text-dim);
+}
+
+.save-indicator--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.save-indicator-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--real-scanner-green);
+}
+
+/* --- 世界切换过渡 --- */
+.world-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  pointer-events: none;
 }
 
 /* --- 修复报告展示 (方案 C) --- */

@@ -39,6 +39,12 @@ export class NotebookPanel {
     /** 所有批注记录 */
     this._annotations = [];
 
+    /** 叙事日志记录 */
+    this._narrativeLogs = [];
+
+    /** 当前标签页: 'annotations' | 'logs' */
+    this._currentTab = 'annotations';
+
     /** 批注去重：防止短时间内对同一事件重复生成 */
     this._recentEventKeys = new Set();
   }
@@ -91,8 +97,21 @@ export class NotebookPanel {
         <div class="notebook-header-title">📓 修复笔记本</div>
         <button class="notebook-close-btn" id="notebook-close-btn">✕</button>
       </div>
+      <div class="notebook-tabs">
+        <button class="notebook-tab notebook-tab--active" data-tab="annotations" id="tab-annotations">
+          <span>批注</span>
+          <span class="notebook-tab-count" id="anno-count">0</span>
+        </button>
+        <button class="notebook-tab" data-tab="logs" id="tab-logs">
+          <span>叙事日志</span>
+          <span class="notebook-tab-count" id="log-count">0</span>
+        </button>
+      </div>
       <div class="notebook-annotations" id="notebook-annotations">
         <div class="notebook-empty">笔记本还是空白的……随着修复的推进，你的思考会记录在这里。</div>
+      </div>
+      <div class="notebook-annotations" id="notebook-logs" style="display: none;">
+        <div class="notebook-empty">还没有记录任何叙事……</div>
       </div>
       <div class="notebook-query-area" id="notebook-query-area">
         <div class="notebook-query-divider">
@@ -115,6 +134,7 @@ export class NotebookPanel {
     document.body.appendChild(panel);
     this._panelEl = panel;
     this._annotationsEl = panel.querySelector('#notebook-annotations');
+    this._logsEl = panel.querySelector('#notebook-logs');
     this._queryAreaEl = panel.querySelector('#notebook-query-area');
     this._queryResultEl = panel.querySelector('#notebook-query-result');
     this._inputEl = panel.querySelector('#notebook-query-input');
@@ -188,6 +208,19 @@ export class NotebookPanel {
     // AI 批注生成完成 → 添加到列表
     this.engine.on('ai-annotation-generated', (data) => {
       this._addAnnotation(data.text, data.chapter, data.eventType);
+    });
+
+    // 叙事旁白记录 → 添加到日志
+    this.engine.on('narration-logged', (data) => {
+      this._addNarrativeLog(data.text, data.chapter, data.scene);
+    });
+
+    // 标签切换
+    const tabs = document.querySelectorAll('.notebook-tab');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        this._switchTab(tab.dataset.tab);
+      });
     });
   }
 
@@ -328,6 +361,62 @@ export class NotebookPanel {
     if (!this._isOpen) {
       this._toggleEl.classList.add('has-new');
       setTimeout(() => this._toggleEl.classList.remove('has-new'), 3000);
+    }
+  }
+
+  /**
+   * 切换标签页
+   * @private
+   */
+  _switchTab(tabName) {
+    this._currentTab = tabName;
+    document.querySelectorAll('.notebook-tab').forEach((t) => {
+      t.classList.toggle('notebook-tab--active', t.dataset.tab === tabName);
+    });
+    this._annotationsEl.style.display = tabName === 'annotations' ? 'flex' : 'none';
+    this._logsEl.style.display = tabName === 'logs' ? 'flex' : 'none';
+  }
+
+  /**
+   * 添加一条叙事日志
+   * @private
+   */
+  _addNarrativeLog(text, chapter, scene) {
+    const chapterNames = ['序章', '第一章', '第二章', '第三章', '终章'];
+    const log = { text, chapter, scene, timestamp: Date.now() };
+    this._narrativeLogs.push(log);
+
+    // 更新计数
+    const countEl = document.getElementById('log-count');
+    if (countEl) countEl.textContent = this._narrativeLogs.length;
+
+    // 移除空白提示
+    const emptyEl = this._logsEl.querySelector('.notebook-empty');
+    if (emptyEl) emptyEl.remove();
+
+    // 添加 DOM
+    const el = document.createElement('div');
+    el.className = 'notebook-annotation-item';
+    el.innerHTML = `
+      <div class="notebook-annotation-meta">${chapterNames[chapter] || ''} · 旁白</div>
+      <div class="notebook-annotation-text">${this._escapeHtml(text)}</div>
+    `;
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(8px)';
+    this._logsEl.appendChild(el);
+    requestAnimationFrame(() => {
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    });
+
+    // 如果日志标签未激活，闪烁提示
+    if (this._currentTab !== 'logs') {
+      const logTab = document.getElementById('tab-logs');
+      if (logTab) {
+        logTab.classList.add('has-new');
+        setTimeout(() => logTab.classList.remove('has-new'), 3000);
+      }
     }
   }
 

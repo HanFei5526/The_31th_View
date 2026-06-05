@@ -1,4 +1,4 @@
-const bgImage = '/images/menu-gate.png';
+const bgImage = '/images/menu-bg.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu
@@ -84,6 +84,17 @@ export default class MenuScene {
     const progress = this._getProgress();
 
     root.innerHTML = `
+      <!-- SVG Filter for Torn Paper Effect -->
+      <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+        <defs>
+          <filter id="paper-tear" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+            <feDropShadow dx="4" dy="8" stdDeviation="8" flood-color="rgba(44,36,22,0.4)" />
+          </filter>
+        </defs>
+      </svg>
+
       <!-- 背景装饰 -->
       <div class="menu-bg">
         <div class="menu-mask"></div>
@@ -177,7 +188,7 @@ export default class MenuScene {
     // 返回
     root.querySelector('#btn-back').addEventListener('click', () => {
       root.classList.add('menu-scene--exiting');
-      setTimeout(() => this.engine.switchScene('landing'), 800);
+      setTimeout(() => this.engine.switchScene('landing'), 1500);
     });
 
     // 新游戏
@@ -213,8 +224,7 @@ export default class MenuScene {
         const scene = item.dataset.scene;
         item.style.transform = 'scale(0.95)';
         setTimeout(() => {
-          root.classList.add('menu-scene--exiting');
-          setTimeout(() => this.engine.switchScene(scene), 800);
+          this._transitionToSceneWithOverlay(root, scene);
         }, 200);
       });
     });
@@ -240,10 +250,7 @@ export default class MenuScene {
     this.engine.inventory.items = [];
     this.engine.currentChapter = 0;
     this.engine.currentWorld = 'real';
-    root.classList.add('menu-scene--exiting');
-    setTimeout(() => {
-      this.engine.switchScene('prologue');
-    }, 800);
+    this._transitionToSceneWithOverlay(root, 'prologue');
   }
 
   _continueGame(root) {
@@ -257,13 +264,95 @@ export default class MenuScene {
       }
     }
     const lastScene = save?.scene || 'prologue';
-    root.classList.add('menu-scene--exiting');
-    setTimeout(() => {
-      this.engine.switchScene(lastScene);
-    }, 800);
+    this._transitionToSceneWithOverlay(root, lastScene);
   }
 
   /* ==================== 辅助方法 ==================== */
+
+  _transitionToSceneWithOverlay(root, scene) {
+    const overlay = document.createElement('div');
+    overlay.className = 'intro-transition-overlay';
+    
+    if (scene === 'prologue') {
+      overlay.classList.add('intro-transition-overlay--prologue');
+      overlay.innerHTML = `
+        <div class="prologue-transition-layout">
+          <div class="intro-prologue-title">序章 · 残页</div>
+          <div class="intro-prologue-text" id="intro-prologue-text"></div>
+        </div>
+      `;
+    } else {
+      overlay.innerHTML = '<div class="intro-transition-text"></div>';
+    }
+    document.body.appendChild(overlay);
+
+    const textContainer = overlay.querySelector(scene === 'prologue' ? '#intro-prologue-text' : '.intro-transition-text');
+
+    setTimeout(() => {
+      overlay.classList.add('active');
+      if (scene === 'prologue') {
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }
+    }, 50);
+
+    root.classList.add('menu-scene--exiting-slow');
+
+    let lines = [];
+    if (scene === 'prologue') {
+      lines = [
+        "美术学院旧楼三层，古画修复工作室。",
+        "操作台上，高精度扫描仪低声嗡鸣。",
+        "一页泛黄的册页被放大到纤维可辨的程度。",
+        "五百年前的秘密，正等待着你的凝视。"
+      ];
+    } else if (scene === 'chapter1') {
+      lines = ["第一章 · 东园", "兰雪堂至芙蓉榭"];
+    } else if (scene === 'chapter2') {
+      lines = ["第二章 · 中园", "远香堂至小飞虹"];
+    } else if (scene === 'chapter3') {
+      lines = ["第三章 · 西园", "卅六鸳鸯馆至留听阁"];
+    } else if (scene === 'finale') {
+      lines = ["终章", "第三十一景"];
+    } else {
+      lines = ["加载中..."];
+    }
+
+    textContainer.innerHTML = '';
+
+    setTimeout(() => {
+      lines.forEach((line, index) => {
+        const p = document.createElement('span');
+        p.textContent = line;
+        p.style.opacity = '0';
+        p.style.transform = scene === 'prologue' ? 'translateY(15px)' : 'translateY(10px)';
+        p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+        p.style.display = 'block';
+        textContainer.appendChild(p);
+
+        setTimeout(() => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        }, index * 1200);
+      });
+
+      const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+
+      setTimeout(() => {
+        this.engine.switchScene(scene, true);
+        overlay.classList.remove('active');
+        overlay.classList.add('fade-out');
+
+        setTimeout(() => {
+          overlay.remove();
+        }, 3000);
+      }, totalDuration);
+
+    }, 1500);
+  }
 
   _hasSaveData() {
     if (this.engine.saveSystem?.hasSave) {
@@ -307,7 +396,11 @@ export default class MenuScene {
     }
 
     .menu-scene--exiting {
-      animation: menuExit 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: menuExit 1.5s cubic-bezier(0.2, 0, 0, 1) forwards;
+    }
+
+    .menu-scene--exiting-slow {
+      animation: menuExit 2.5s cubic-bezier(0.2, 0, 0, 1) forwards;
     }
 
     @keyframes menuEnter {
@@ -315,7 +408,9 @@ export default class MenuScene {
       to { opacity: 1; transform: scale(1); filter: blur(0); }
     }
     @keyframes menuExit {
-      to { opacity: 0; transform: translateY(-20px) scale(0.98); filter: blur(4px); }
+      0% { opacity: 1; filter: blur(0) brightness(1); }
+      50% { filter: blur(4px) brightness(0.8); }
+      100% { opacity: 0; transform: scale(1.05); filter: blur(12px) brightness(0); }
     }
 
     /* 背景图片与滤镜 */
@@ -411,72 +506,40 @@ export default class MenuScene {
     }
 
     /* ===========================
-       Main Panel (Scroll)
+       Main Panel — 卷轴展开
        =========================== */
     .menu-panel {
       position: relative;
       z-index: 10;
-      width: 360px;
-      max-width: calc(100vw - 2rem);
-      max-height: calc(100vh - 4rem);
+      width: 400px;
+      max-width: calc(100vw - 4rem);
+      max-height: calc(100vh - 6rem);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      padding: 0.75rem;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      border-radius: 14px;
-      background: rgba(246, 241, 230, 0.42);
-      backdrop-filter: blur(12px) saturate(1.04);
-      -webkit-backdrop-filter: blur(12px) saturate(1.04);
-      box-shadow:
-        0 14px 34px rgba(72, 58, 40, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.52);
+      overflow: visible; /* Allows the ragged edges to show */
+      background: transparent;
+      padding: 1.5rem; /* Inner padding to keep content off the ragged edges */
       animation: panelSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* 宣纸残页背景 */
+    .menu-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background-color: #d1bfae; /* Base kraft paper color */
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 60%, rgba(101, 77, 49, 0.2) 150%),
+        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+      filter: url(#paper-tear);
+      /* Add some internal borders or shadows just in case the filter doesn't load */
+      box-shadow: inset 0 0 20px rgba(101, 77, 49, 0.1);
     }
 
     @keyframes panelSlideUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===========================
-       Scroll Decorations
-       =========================== */
-    .scroll-top,
-    .scroll-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      padding: 0 1rem;
-    }
-
-    .scroll-rod {
-      flex: 1;
-      height: 6px;
-      background: linear-gradient(
-        90deg,
-        #8a7a68 0%,
-        #a09080 20%,
-        #b8a898 50%,
-        #a09080 80%,
-        #8a7a68 100%
-      );
-      border-radius: 3px;
-      box-shadow:
-        inset 0 1px 2px rgba(255, 255, 255, 0.2),
-        0 1px 3px rgba(44, 36, 22, 0.15);
-    }
-
-    .scroll-knob {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #c4b4a0, #9a8a78);
-      box-shadow:
-        0 2px 6px rgba(44, 36, 22, 0.2),
-        inset 0 1px 2px rgba(255, 255, 255, 0.3);
-      border: 1px solid rgba(120, 105, 85, 0.3);
     }
 
     /* ===========================
@@ -534,72 +597,90 @@ export default class MenuScene {
     }
 
     /* ===========================
-       Chapter List
+       Chapter List — 笺纸书页式
        =========================== */
     .chapter-list {
       display: flex;
       flex-direction: column;
-      gap: 0;
-      background: rgba(255, 252, 244, 0.34);
-      backdrop-filter: blur(12px) saturate(1.02);
-      -webkit-backdrop-filter: blur(12px) saturate(1.02);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      border-radius: 10px;
+      gap: 0.65rem;
+      padding: 0.5rem;
       overflow: hidden auto;
       flex: 0 0 auto;
-      box-shadow:
-        0 10px 24px rgba(72, 58, 40, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.48);
     }
 
     .chapter-item {
       position: relative;
       display: flex;
       flex-direction: row;
-      align-items: stretch;
-      padding: 0;
-      border-radius: 0;
-      border: none;
-      border-bottom: 1px solid rgba(94, 76, 50, 0.12);
-      transition: all 0.3s ease;
+      align-items: center;
+      padding: 0 0.5rem;
+      border-radius: 1px 3px 2px 4px; /* Slightly irregular corners */
+      border: 1px solid rgba(139, 119, 79, 0.4);
+      border-left: 4px dashed rgba(139, 119, 79, 0.4); /* Torn edge illusion */
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       cursor: pointer;
       overflow: hidden;
-      flex: 0 0 auto;
-      min-height: 78px;
+      min-height: 54px; /* Very thin, horizontal slip */
+      /* Kraft Paper Texture & Coloring */
+      background-color: #dfcdba;
+      background-image: 
+        linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.05) 100%),
+        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+      box-shadow:
+        inset 0 0 25px rgba(101, 77, 49, 0.2), /* Oxidized edges */
+        0 4px 6px rgba(44, 36, 22, 0.15),
+        2px 2px 0 rgba(101, 77, 49, 0.15); /* Faux thickness */
     }
 
-    .chapter-item:last-child {
-      border-bottom: none;
+    .chapter-item:nth-child(odd) {
+      transform: rotate(-0.5deg);
+    }
+    
+    .chapter-item:nth-child(even) {
+      transform: rotate(0.5deg);
     }
 
-    /* Transparent Glass texture - replace noise */
-    .chapter-item::before {
-      display: none;
-    }
-
-    /* 解锁状态 - 悬浮层级效果 */
     .chapter-item--unlocked {
-      background: transparent;
+      background-color: #e6d5c3;
     }
 
     .chapter-item--unlocked:hover {
-      background: rgba(255, 255, 255, 0.34);
+      background-color: #eee0d0;
+      box-shadow:
+        inset 0 0 15px rgba(101, 77, 49, 0.1),
+        0 10px 20px rgba(44, 36, 22, 0.25),
+        4px 4px 0 rgba(101, 77, 49, 0.1);
+      transform: translateY(-4px) rotate(0deg) scale(1.02);
+      z-index: 2;
     }
 
-    /* 锁定状态 */
     .chapter-item--locked {
       cursor: not-allowed;
-      opacity: 0.72;
-      background: transparent;
+      opacity: 0.85;
+      background-color: #c0b2a2; /* Darker, more oxidized */
+      filter: sepia(0.3) contrast(1.1);
     }
 
     .chapter-item--locked:hover {
-      background: rgba(255, 255, 255, 0.18);
+      background-color: #c8baa9;
     }
 
-    /* 发光 hover */
-    .chapter-ink-hover {
-      display: none;
+    /* 笺纸右侧红栏（暗示批注/批阅） */
+    .chapter-item::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: rgba(179, 54, 38, 0.7); /* Deep cinnabar */
+      border-left: 1px solid rgba(101, 77, 49, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .chapter-item--unlocked:hover::after {
+      width: 6px;
+      background: rgba(179, 54, 38, 0.9);
     }
 
     /* 抖动动画（锁定点击） */
@@ -608,25 +689,22 @@ export default class MenuScene {
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-4px); }
-      40% { transform: translateX(4px); }
-      60% { transform: translateX(-2px); }
-      80% { transform: translateX(2px); }
+      0%, 100% { transform: translateX(0) rotate(0.5deg); }
+      20% { transform: translateX(-4px) rotate(-1deg); }
+      40% { transform: translateX(4px) rotate(1.5deg); }
+      60% { transform: translateX(-2px) rotate(-0.5deg); }
+      80% { transform: translateX(2px) rotate(1deg); }
     }
 
     /* ===========================
        Chapter Side & Marker
        =========================== */
     .chapter-side {
-      width: 58px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      justify-content: center;
       gap: 0.5rem;
-      border-left: 1px solid rgba(94, 76, 50, 0.12);
-      background: rgba(255, 255, 255, 0.08);
+      padding: 0 0.5rem;
     }
 
     .chapter-marker {
@@ -681,47 +759,41 @@ export default class MenuScene {
       position: relative;
       z-index: 1;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 0.8rem 1.25rem;
+      flex-direction: row;
+      align-items: center;
+      padding: 0 0.5rem;
     }
 
     .chapter-header {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.35em;
-      margin-bottom: 0.35rem;
-      padding-bottom: 0.35rem;
-      border-bottom: 1px dashed rgba(94, 76, 50, 0.16);
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5rem;
+      width: auto;
     }
 
     .chapter-name {
       font-family: var(--font-serif);
-      font-size: 1.02rem;
+      font-size: 1rem;
       font-weight: 600;
       color: rgba(46, 35, 21, 0.96);
       letter-spacing: 0.05em;
     }
 
     .chapter-sep {
-      display: none;
+      display: inline-block;
+      color: rgba(94, 76, 50, 0.4);
     }
 
     .chapter-subtitle {
       font-family: var(--font-handwrite);
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       color: rgba(70, 55, 34, 0.74);
       letter-spacing: 0.05em;
     }
 
     .chapter-tagline {
-      font-family: var(--font-handwrite);
-      font-size: 0.74rem;
-      color: rgba(58, 46, 29, 0.7);
-      line-height: 1.6;
-      margin: 0;
-      letter-spacing: 0.03em;
+      display: none; /* Hide tagline for compact slips */
     }
 
     .chapter-item--unlocked:hover .chapter-tagline {
@@ -797,26 +869,24 @@ export default class MenuScene {
     }
 
     .action-btn--primary {
-      background: rgba(255, 255, 255, 0.9);
-      color: #1a1a1a;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background: #3a5d6c;
+      color: #f5f0e8;
+      box-shadow: 0 4px 12px rgba(58, 93, 108, 0.25);
     }
     .action-btn--primary:hover:not(:disabled) {
-      background: #ffffff;
+      background: #2d4a56;
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 16px rgba(58, 93, 108, 0.35);
     }
 
     .action-btn--secondary {
-      background: rgba(255, 255, 255, 0.46);
+      background: #f0ebe3;
       color: rgba(54, 41, 25, 0.82);
-      border: 1px solid rgba(255, 255, 255, 0.62);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(139, 119, 79, 0.25);
     }
     .action-btn--secondary:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.62);
-      border-color: rgba(255, 255, 255, 0.78);
+      background: #e8e0d0;
+      border-color: rgba(139, 119, 79, 0.4);
     }
 
     .action-btn--ghost {
@@ -827,7 +897,7 @@ export default class MenuScene {
     }
     .action-btn--ghost:hover {
       color: #9a3f31;
-      background: rgba(255, 255, 255, 0.28);
+      background: rgba(200, 64, 50, 0.06);
     }
 
     /* ===========================
