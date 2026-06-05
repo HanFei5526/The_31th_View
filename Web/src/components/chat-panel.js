@@ -163,14 +163,14 @@ export class ChatPanel {
   }
 
   /** @private */
-  async _send() {
-    const text = this._inputEl.value.trim();
+  async _send(retryText = null) {
+    const text = retryText || this._inputEl.value.trim();
     if (!text || this._isLoading) return;
 
-    this._inputEl.value = '';
+    if (!retryText) this._inputEl.value = '';
 
     // 添加玩家消息
-    this._appendMessage('user', text);
+    if (!retryText) this._appendMessage('user', text);
 
     // 显示加载状态
     this._isLoading = true;
@@ -187,11 +187,44 @@ export class ChatPanel {
       this._triggerPostChatAnnotation(text, reply);
     } catch (err) {
       loadingEl.remove();
-      this._appendMessage('zhou', '（周老师沉默了一会儿，似乎在思考……）');
+      this._appendNarrativeError(text);
       console.error('[ChatPanel] AI 调用失败:', err);
     } finally {
       this._isLoading = false;
     }
+  }
+
+  /**
+   * 叙事化的错误降级显示
+   * @private
+   */
+  _appendNarrativeError(originalText) {
+    const fallbacks = [
+      '窗外的雨声忽然大了起来，打断了思绪……（网络有些不稳，可以稍后再试）',
+      '周老师放下手中的放大镜，转身去取一份资料……（连接暂时中断）',
+      '修复室里的老座钟敲了一下，声音在空气中久久不散……（请重试）',
+      '他望着窗外的梧桐树，沉默了好一会儿……（似乎有些走神了，再问问看？）',
+    ];
+    const msg = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+
+    const msgEl = document.createElement('div');
+    msgEl.className = 'chat-msg chat-msg-zhou';
+    msgEl.innerHTML = `
+      <div class="chat-msg-bubble chat-msg-zhou-bubble">
+        <span class="chat-msg-speaker">📓 周鹤年</span>
+        ${msg}
+        <button class="chat-retry-btn" data-retry="${this._escapeHtml(originalText)}">重试</button>
+      </div>
+    `;
+    this._messagesEl.appendChild(msgEl);
+    this._messagesEl.scrollTop = this._messagesEl.scrollHeight;
+
+    // 绑定重试按钮
+    msgEl.querySelector('.chat-retry-btn').addEventListener('click', (e) => {
+      const retryText = e.target.dataset.retry;
+      msgEl.remove();
+      this._send(retryText);
+    });
   }
 
   /**
