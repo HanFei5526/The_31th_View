@@ -418,20 +418,46 @@
   inset: 0;
   z-index: 9999;
   background: #e8e0d0;
-  background-image: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 3px,
-      rgba(139, 119, 79, 0.03) 3px,
-      rgba(139, 119, 79, 0.03) 6px
-    );
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 3s ease-in-out;
+  overflow: hidden;
+}
+
+.intro-transition-overlay--prologue::before {
+  content: '';
+  position: absolute;
+  inset: -2%;
+  z-index: -1;
+  background-image: url('/images/序章过渡页_4.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.65;
+  filter: blur(2px) contrast(0.95) sepia(0.1);
+  transition: transform 10s ease-out;
+}
+
+.intro-transition-overlay--prologue.active::before {
+  transform: scale(1.05); /* Slight Ken Burns effect for atmosphere */
+}
+
+.intro-transition-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(139, 119, 79, 0.02) 3px,
+      rgba(139, 119, 79, 0.02) 6px
+    );
+  pointer-events: none;
 }
 .intro-transition-overlay.active {
   opacity: 1;
@@ -453,4 +479,211 @@
   flex-direction: column;
   gap: 1.5rem;
   letter-spacing: 0.1em;
+}
+
+/* ===========================
+   Prologue Specific Layout
+   =========================== */
+.prologue-transition-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  width: 100%;
+  height: 100%;
+}
+
+.intro-prologue-title {
+  writing-mode: vertical-rl;
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  color: #2c2416;
+  letter-spacing: 0.3em;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 2s ease, transform 2s ease;
+  border-right: 1px solid rgba(44, 36, 22, 0.2);
+  padding-right: 4rem;
+}
+
+.intro-prologue-text {
+  display: flex;
+  flex-direction: row;
+  gap: 3.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: #2c2416;
+  line-height: 2;
+  letter-spacing: 0.15em;
+  height: 60vh;
+  align-items: flex-start;
+}
+
+.intro-prologue-text span {
+  writing-mode: vertical-rl;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 1.5s ease, transform 1.5s ease;
+}
+
+/* ============================================
+   序章 · 跌入画中 转场
+   ============================================ */
+
+/* Phase 1: Cold blue desaturation */
+.fall-transition-desat {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  pointer-events: all;
+  background: rgba(74, 109, 124, 0.05);
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.fall-transition-desat.active {
+  opacity: 1;
+}
+
+/* Phase 2: Ink spread from click origin */
+.fall-transition-ink {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-transition) + 1);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fall-transition-ink .fall-ink-drop {
+  position: absolute;
+  border-radius: 50%;
+  background: #2c1810;
+  transform: scale(0);
+  opacity: 0;
+}
+
+.fall-transition-ink .fall-ink-drop.spreading {
+  animation: fallInkSpread 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fallInkSpread {
+  0% {
+    transform: scale(0);
+    opacity: 0.85;
+    border-radius: 50%;
+  }
+  30% {
+    opacity: 1;
+    border-radius: 48% 52% 45% 55%;
+  }
+  60% {
+    border-radius: 44% 56% 50% 50%;
+  }
+  100% {
+    transform: scale(60);
+    opacity: 1;
+    border-radius: 50%;
+  }
+}
+
+/* Phase 3: Transition text on ink background */
+.fall-transition-text-layer {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-transition) + 2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8rem;
+  padding: 2rem;
+  pointer-events: none;
+}
+
+.fall-transition-line {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 1.15rem;
+  color: rgba(232, 224, 208, 0.9);
+  letter-spacing: 0.12em;
+  line-height: 1.8;
+  text-align: center;
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(10px);
+  transition: opacity 1.2s ease, filter 1.2s ease, transform 1.2s ease;
+}
+
+.fall-transition-line.visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.fall-transition-line.fading {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(-8px);
+}
+
+/* Phase 4: Zhou Henian echo */
+.fall-transition-echo {
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  font-size: 1.3rem;
+  color: rgba(200, 190, 170, 0.8);
+  letter-spacing: 0.15em;
+  text-align: center;
+  opacity: 0;
+  filter: blur(4px);
+  transform: scale(1.05);
+  transition: opacity 1.5s ease, filter 1.5s ease, transform 1.5s ease;
+  margin-top: 1.5rem;
+}
+
+.fall-transition-echo.visible {
+  opacity: 0.85;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.fall-transition-echo.fading {
+  opacity: 0;
+  filter: blur(6px);
+  transform: scale(0.97);
+  transition: opacity 2.5s ease, filter 2.5s ease, transform 2.5s ease;
+}
+
+/* Phase 5: Final fade to next scene */
+.fall-transition-final {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-transition) + 3);
+  background: #2c1810;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+.fall-transition-final.fade-out {
+  opacity: 0;
+}
+
+/* Reduced motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  .fall-transition-desat { transition-duration: 0.3s; }
+  .fall-transition-ink .fall-ink-drop.spreading {
+    animation: fallInkFade 0.6s ease forwards;
+  }
+  @keyframes fallInkFade {
+    from { opacity: 0; transform: scale(60); }
+    to { opacity: 1; transform: scale(60); }
+  }
+  .fall-transition-line {
+    transition-duration: 0.3s;
+    filter: none;
+  }
+  .fall-transition-echo {
+    transition-duration: 0.3s;
+    filter: none;
+  }
 }

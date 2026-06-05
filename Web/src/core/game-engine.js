@@ -181,9 +181,41 @@ export class GameEngine {
   async switchWorld(world) {
     if (world === this.currentWorld) return;
 
+    // 播放世界切换过渡
+    await this._playWorldTransition(world);
+
     this.currentWorld = world;
     this._applyWorldTheme();
     this.emit('world-changed', { world });
+  }
+
+  /**
+   * 世界切换视觉过渡
+   * @private
+   */
+  _playWorldTransition(targetWorld) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'world-transition-overlay';
+      overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 250;
+        background: ${targetWorld === 'paint' ? 'var(--paint-bg-deep)' : 'var(--real-bg-deep)'};
+        opacity: 0; pointer-events: none;
+        transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      `;
+      document.body.appendChild(overlay);
+
+      requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        setTimeout(() => {
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 1200);
+        }, 600);
+      });
+    });
   }
 
   /* ==========================
@@ -208,10 +240,33 @@ export class GameEngine {
   }
 
   /**
-   * 保存当前进度
+   * 保存当前进度（带视觉反馈）
    */
   saveProgress() {
     this.saveSystem.autoSave();
+    this._showSaveIndicator();
+  }
+
+  /**
+   * 显示保存状态指示器
+   * @private
+   */
+  _showSaveIndicator() {
+    let indicator = document.getElementById('save-indicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'save-indicator';
+      indicator.className = 'save-indicator';
+      indicator.innerHTML = `
+        <span class="save-indicator-icon">◉</span>
+        <span class="save-indicator-text">已保存</span>
+      `;
+      document.body.appendChild(indicator);
+    }
+    indicator.classList.add('save-indicator--visible');
+    setTimeout(() => {
+      indicator.classList.remove('save-indicator--visible');
+    }, 2000);
   }
 
   /* ==========================

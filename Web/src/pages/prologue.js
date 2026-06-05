@@ -1,638 +1,371 @@
 /**
  * 《卅一景》序章 — 残页
  *
- * 场景设定：美术学院旧楼三层，修复工作室，白天（现实世界）
- * 玩家扮演研究生沈念，在导师周鹤年的指导下分析第三十一景扫描件。
+ * 场景设定：美术学院旧楼三层，古画修复工作室，白天
+ * 玩家扮演研究生沈念，在导师周鹤年指导下接手第三十一景数字化修复任务。
  *
- * 叙事节拍：
- *   节拍1 · 接手任务：周鹤年 5 句对话 → 获得修复笔记本
- *   节拍2 · 发现异常：三工具扫描谜题（放大镜/纸质分析/侧光照射）
- *   节拍3 · 跌入画中：异象动画 → 墨迹扩散转场 → 进入第一章
+ * 完整流程：
+ *   1. 章节标题淡入淡出「序章 · 残页」
+ *   2. 场景描写旁白（沈念视角）
+ *   3. 节拍1 · 周鹤年对话气泡（5段）
+ *   4. 节拍2 · 扫描比对谜题（三工具渐进发现）
+ *   5. 节拍3 · 跌入画中转场（墨迹扩散 + 过渡文字 + 回声）
+ *   6. 序章完成 → 收集修复笔记本 → 解锁第一章 → 返回菜单
  */
 
 import GameSceneBase from './game-scene.js';
-import { ITEM_TEMPLATES } from '../core/inventory.js';
+import ScannerUI from '../components/scanner-ui.js';
+import FallTransition from '../components/fall-transition.js';
 
-/* ============================
-   叙事数据
-   ============================ */
+const prologueBg = '/images/prologue-workshop.png';
+const paintingImg = '/images/scene-31-painting.png';
 
-/** 节拍1：完整对话序列（旁白 + 周鹤年台词混排，统一使用 DialogueSystem） */
-const ZHOU_DIALOGUE = [
-  { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
-  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。' },
-  { speaker: '周鹤年', text: '现存册页体系完整，学界一般认为内容已无重大缺页问题。公开数据库里，这一页也一直被视为正常的最后一景。' },
-  { speaker: '周鹤年', text: '但这次高精度扫描发现了几个异常。不是它不像文徵明画的。恰恰相反，它太稳、太完整，像一页被处理得很干净的正式作品。' },
-  { speaker: '周鹤年', text: '真正奇怪的是边缘、背纸和装裱层。那里有些东西被压住了。' },
-  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
-  { speaker: null, text: '你坐到扫描仪前，屏幕上是第三十一景的高精度扫描件。' },
+/* ==================== 叙事文本 ==================== */
+
+/** 场景描写旁白（沈念视角） */
+const SCENE_NARRATIONS = [
+  '工作室在美术学院旧楼的三层，窗外是梧桐树。',
+  '面前的操作台上，一台高精度扫描仪正在低声嗡鸣。屏幕上，一页泛黄的册页被放大到纤维可辨的程度。',
+  '这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。',
 ];
 
-/** 节拍2：三工具的反馈旁白 */
+/** 周鹤年对话序列（气泡框显示） */
+const ZHOU_DIALOGUE = [
+  '三十一景图你应该熟悉。本科课上讲过。',
+  '现存册页体系完整，学界一般认为内容已无重大缺页问题。公开数据库里，这一页也一直被视为正常的最后一景。',
+  '但这次高精度扫描发现了几个异常。不是它不像文徵明画的。恰恰相反，它太稳、太完整，像一页被处理得很干净的正式作品。',
+  '真正奇怪的是边缘、背纸和装裱层。那里有些东西被压住了。',
+  '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。',
+];
+
+/** 三工具发现反馈文本 */
 const TOOL_FEEDBACK = {
   magnifier: '装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-  fiber: '背纸与其他三十页不完全一致，显示此页曾经重装。画心本身较稳定，并非整幅新画。',
-  sidelight: '装裱边下方隐约显出旧字残痕……',
+  fiber: '背纸与其他三十页不完全一致，显示此页曾经重装；画心本身较稳定，并非整幅新画。',
+  sidelight: '装裱边下方隐约显出旧字残痕："……所见"；旁边有一条极淡的低位构图辅助线。',
 };
 
-/** 节拍2：提示系统数据 */
-const SCAN_HINTS = [
-  { delay: 30, text: '试试工具栏上的扫描工具，仔细观察画面边缘。' },
-  { delay: 60, text: '三种工具各有用途——放大镜看细节，纸质分析看材料，侧光照射看底层。' },
-  { delay: 90, text: '确保每种工具都使用过。侧光模式下注意装裱边缘的痕迹。' },
-];
+/** 三工具全部使用后的提示 */
+const ALL_TOOLS_HINT = '三种检测都完成了。在侧光模式下，残字与辅助线的交会处似乎在微微发光……';
 
-/* ============================
-   序章场景
-   ============================ */
+/* ==================== 场景阶段 ==================== */
+
+const PHASE = {
+  TITLE: 0,
+  NARRATION: 1,
+  DIALOGUE: 2,
+  SCANNER: 3,
+  TRANSITION: 4,
+  COMPLETE: 5,
+};
+
+/* ==================== 序章场景类 ==================== */
 
 export default class PrologueScene extends GameSceneBase {
   constructor(engine) {
     super(engine);
-    this._usedTools = new Set();    // 已使用的工具 ID
-    this._activeTool = null;        // 当前激活的工具
-    this._scanInterface = null;     // 扫描界面 DOM
-    this._scanToolbar = null;       // 扫描工具栏 DOM
-    this._overlayLayers = {};       // 各工具效果层
-    this._isFalling = false;        // 是否正在跌入画中
+    this._phase = PHASE.TITLE;
+    this._scannerUI = null;
+    this._fallTransition = null;
+    this._dialogueBubbleEl = null;
+    this._autoFeedbackTimer = null;
   }
 
   /* ==================== 生命周期 ==================== */
 
   async enter(container) {
     const root = this._buildSceneShell({
-      bgImage: '/images/prologue-bg.png',
+      bgImage: prologueBg,
       theme: 'light',
-      chapterTitle: '序章',
-      chapterSubtitle: '残页',
     });
+
     container.innerHTML = '';
     container.appendChild(root);
 
-    this._injectPrologueStyles();
+    // 创建对话气泡容器
+    this._createDialogueBubble();
 
-    // ── 节拍1：接手任务 ──
-    await this._showChapterTitle(2500);
-    await this._beat1_TaskBriefing();
+    // 1. 章节阶段初始化（不再显示大字标题）
+    this._phase = PHASE.TITLE;
 
-    // ── 节拍2：发现异常 ──
-    await this._beat2_ScanPuzzle();
+    // 2. 场景描写旁白
+    this._phase = PHASE.NARRATION;
+    await this._showNarrationSequence(SCENE_NARRATIONS);
+    this._hideNarration();
+
+    // 短暂停顿，营造导师站在身后的氛围
+    await this._delay(600);
+    await this._showNarration('导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。');
+    this._hideNarration();
+
+    await this._delay(400);
+
+    // 3. 周鹤年对话（气泡框）
+    this._phase = PHASE.DIALOGUE;
+    await this._playZhouDialogue();
+
+    // 4. 进入扫描比对阶段
+    this._phase = PHASE.SCANNER;
+    await this._showNarration('（使用下方工具检查这页画……）');
+    this._hideNarration();
+    await this._enterScannerPhase();
   }
 
   exit() {
-    this.engine.hintSystem.clearAll();
+    clearTimeout(this._autoFeedbackTimer);
+    // 清理扫描界面
+    if (this._scannerUI) {
+      this._scannerUI.destroy();
+      this._scannerUI = null;
+    }
+    // 清理转场
+    if (this._fallTransition) {
+      this._fallTransition.destroy();
+      this._fallTransition = null;
+    }
+    // 清理对话气泡
+    if (this._dialogueBubbleEl) {
+      this._dialogueBubbleEl.remove();
+      this._dialogueBubbleEl = null;
+    }
     super.exit();
-    // 清理序章专用样式
-    const style = document.getElementById('prologue-styles');
-    if (style) style.remove();
   }
 
-  /* ==================================================
-     节拍1 · 接手任务
-     ================================================== */
+  /* ==================== 对话气泡系统 ==================== */
 
-  async _beat1_TaskBriefing() {
-    // 完整对话序列（旁白 + 周鹤年台词）统一通过 DialogueSystem 渲染
-    await this.engine.showDialogue(ZHOU_DIALOGUE);
+  /**
+   * 创建人物对话气泡 DOM
+   * @private
+   */
+  _createDialogueBubble() {
+    const container = document.createElement('div');
+    container.className = 'dialogue-bubble-container';
+    container.id = 'dialogue-bubble-container';
 
-    // 收集修复笔记本
-    this.engine.collectItem({ ...ITEM_TEMPLATES.notebook });
-  }
-
-  /* ==================================================
-     节拍2 · 发现异常（三工具扫描谜题）
-     ================================================== */
-
-  async _beat2_ScanPuzzle() {
-    // 构建扫描界面
-    this._buildScanInterface();
-
-    // 启动提示系统
-    this.engine.hintSystem.startTimer('prologue-scan', SCAN_HINTS);
-  }
-
-  /** 构建扫描界面 DOM */
-  _buildScanInterface() {
-    const iface = document.createElement('div');
-    iface.className = 'scan-interface';
-    iface.innerHTML = `
-      <div class="scan-status">
-        <span class="scan-status-icon">📡</span>
-        <span class="scan-status-text">高精度扫描模式</span>
-      </div>
-
-      <div class="scan-viewport">
-        <div class="scan-painting"></div>
-        <div class="scan-frame-border"></div>
-
-        <!-- 工具效果层 -->
-        <div class="scan-overlay scan-overlay-magnifier" data-layer="magnifier"></div>
-        <div class="scan-overlay scan-overlay-fiber" data-layer="fiber"></div>
-        <div class="scan-overlay scan-overlay-sidelight" data-layer="sidelight">
-          <div class="ink-trace ink-trace-suojian">……所见</div>
-          <div class="ink-trace ink-trace-line"></div>
-        </div>
-      </div>
-
-      <div class="scan-toolbar">
-        <button class="scan-tool" data-tool="magnifier">
-          <span class="scan-tool-icon">🔍</span>
-          <span class="scan-tool-label">放大镜</span>
-          <span class="scan-tool-check">✓</span>
-        </button>
-        <button class="scan-tool" data-tool="fiber">
-          <span class="scan-tool-icon">🔬</span>
-          <span class="scan-tool-label">纸质分析</span>
-          <span class="scan-tool-check">✓</span>
-        </button>
-        <button class="scan-tool" data-tool="sidelight">
-          <span class="scan-tool-icon">💡</span>
-          <span class="scan-tool-label">侧光照射</span>
-          <span class="scan-tool-check">✓</span>
-        </button>
+    container.innerHTML = `
+      <div class="dialogue-bubble" id="dialogue-bubble">
+        <div class="dialogue-bubble-speaker" id="dialogue-bubble-speaker"></div>
+        <div class="dialogue-bubble-text" id="dialogue-bubble-text"></div>
+        <div class="dialogue-bubble-indicator" id="dialogue-bubble-indicator">▼ 点击继续</div>
       </div>
     `;
 
-    // 存储引用
-    this._scanInterface = iface;
-    this._scanToolbar = iface.querySelector('.scan-toolbar');
-    this._overlayLayers = {
-      magnifier: iface.querySelector('.scan-overlay-magnifier'),
-      fiber: iface.querySelector('.scan-overlay-fiber'),
-      sidelight: iface.querySelector('.scan-overlay-sidelight'),
-    };
+    this._root.appendChild(container);
+    this._dialogueBubbleEl = container;
+    this._bubbleSpeaker = container.querySelector('#dialogue-bubble-speaker');
+    this._bubbleText = container.querySelector('#dialogue-bubble-text');
+    this._bubbleIndicator = container.querySelector('#dialogue-bubble-indicator');
+  }
 
-    // 绑定工具按钮
-    iface.querySelectorAll('.scan-tool').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (this._isFalling) return;
-        this._onToolClick(btn.dataset.tool);
+  /**
+   * 在气泡框中显示一行角色对话（打字机效果），点击后 resolve
+   * @param {string} speaker — 说话人名字
+   * @param {string} text — 对话内容
+   * @returns {Promise<void>}
+   * @private
+   */
+  _showBubbleDialogue(speaker, text) {
+    return new Promise((resolve) => {
+      // 设置说话人
+      this._bubbleSpeaker.textContent = speaker;
+
+      // 隐藏指示器
+      this._bubbleIndicator.style.display = 'none';
+
+      // 显示气泡
+      this._dialogueBubbleEl.classList.add('visible');
+
+      // 打字机效果
+      this._bubbleText.textContent = '';
+      let i = 0;
+      const typeSpeed = 45;
+
+      const typeTimer = setInterval(() => {
+        if (i < text.length) {
+          this._bubbleText.textContent += text[i];
+          i++;
+        } else {
+          clearInterval(typeTimer);
+          this._bubbleIndicator.style.display = 'block';
+        }
+      }, typeSpeed);
+
+      // 点击处理
+      const bubble = this._dialogueBubbleEl.querySelector('#dialogue-bubble');
+      const clickHandler = () => {
+        if (i < text.length) {
+          // 跳过打字，直接显示完整文本
+          clearInterval(typeTimer);
+          this._bubbleText.textContent = text;
+          i = text.length;
+          this._bubbleIndicator.style.display = 'block';
+        } else {
+          // 推进到下一行
+          bubble.removeEventListener('click', clickHandler);
+          resolve();
+        }
+      };
+
+      bubble.addEventListener('click', clickHandler);
+
+      // 记录到叙事日志
+      this.engine.emit('narration-logged', {
+        text: `${speaker}：${text}`,
+        chapter: this.engine.currentChapter,
+        scene: 'prologue',
       });
     });
-
-    // 插入到场景
-    this._root.insertBefore(iface, this._root.querySelector('.gs-narration'));
   }
 
-  /** 工具点击处理 */
-  async _onToolClick(toolId) {
-    // 重置提示计时
-    this.engine.hintSystem.resetTimer('prologue-scan');
-
-    // 如果已经在使用同一个工具，不重复触发
-    if (this._activeTool === toolId) return;
-
-    // 切换工具激活态
-    this._activeTool = toolId;
-
-    // 更新按钮样式
-    this._scanToolbar.querySelectorAll('.scan-tool').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tool === toolId);
-    });
-
-    // 隐藏所有效果层，显示当前工具的效果层
-    Object.entries(this._overlayLayers).forEach(([id, layer]) => {
-      layer.classList.toggle('visible', id === toolId);
-    });
-
-    // 更新状态栏
-    const statusText = this._scanInterface.querySelector('.scan-status-text');
-    const labels = { magnifier: '放大镜观察', fiber: '纸质分析', sidelight: '侧光照射' };
-    statusText.textContent = labels[toolId] || '高精度扫描模式';
-
-    // 标记已使用 + 显示打勾
-    if (!this._usedTools.has(toolId)) {
-      this._usedTools.add(toolId);
-      const btn = this._scanToolbar.querySelector(`[data-tool="${toolId}"]`);
-      btn.classList.add('used');
-    }
-
-    // 显示工具反馈（走统一的 DialogueSystem 对话框）
-    await this.engine.showDialogue([
-      { speaker: null, text: TOOL_FEEDBACK[toolId] },
-    ]);
-
-    // 侧光模式特殊处理：如果三个工具都用过了，显示热点
-    if (toolId === 'sidelight' && this._usedTools.size === 3) {
-      this._revealInkTraces();
-    }
-
-    // 如果三工具全部使用但当前不在侧光模式，提示切回
-    if (this._usedTools.size === 3 && toolId !== 'sidelight') {
-      await this.engine.showDialogue([
-        { speaker: null, text: '侧光下似乎还有东西没看清……' },
-      ]);
+  /**
+   * 隐藏对话气泡
+   * @private
+   */
+  _hideBubbleDialogue() {
+    if (this._dialogueBubbleEl) {
+      this._dialogueBubbleEl.classList.remove('visible');
     }
   }
 
+  /**
+   * 播放周鹤年对话序列
+   * @private
+   */
+  async _playZhouDialogue() {
+    for (const line of ZHOU_DIALOGUE) {
+      await this._showBubbleDialogue('周鹤年', line);
+    }
+    this._hideBubbleDialogue();
 
-  /** 显示底层墨迹 + 可点击热点 */
-  _revealInkTraces() {
-    const sidelightLayer = this._overlayLayers.sidelight;
-    sidelightLayer.classList.add('revealed');
-
-    // 添加交会处热点
-    this._addHotspot({
-      id: 'ink-intersection',
-      x: '62%',
-      y: '45%',
-      w: '80px',
-      h: '80px',
-      label: '残字与辅助线交会处',
-      onClick: () => this._beat3_FallInto(),
-    });
+    // 对话完成后短暂停顿
+    await this._delay(300);
   }
 
-  /* ==================================================
-     节拍3 · 跌入画中
-     ================================================== */
+  /* ==================== 扫描比对阶段 ==================== */
 
-  async _beat3_FallInto() {
-    if (this._isFalling) return;
-    this._isFalling = true;
-
-    // 停止提示系统
-    this.engine.hintSystem.clearAll();
-
-    // 移除热点
-    this._clearHotspots();
-
-    // 发现旁白
-    await this._showNarration('底层不只是修复痕迹……这里有字。"所见"——旁边还有一条极淡的低位构图辅助线。');
+  /**
+   * 进入扫描比对谜题
+   * @private
+   */
+  async _enterScannerPhase() {
+    // 隐藏旁白面板
     this._hideNarration();
 
-    // 周鹤年最后一句（远处传来）
-    await this.engine.showDialogue([
-      { speaker: '周鹤年', text: '记住，表面完整，不等于没有缺失。' },
-    ]);
+    // 短暂延迟后显示扫描界面
+    await this._delay(500);
 
-    // ── 跌入异象动画 ──
-    await this._playInkAnomaly();
+    this._scannerUI = new ScannerUI({
+      mainImage: paintingImg,
+      onToolUsed: (toolId, allUsed) => this._onToolUsed(toolId, allUsed),
+      onIntersectionClick: () => this._onIntersectionClick(),
+      onFeedback: (text) => this._showNarration(text),
+    });
 
-    // 更新游戏状态
-    this.engine.switchWorld('paint');
-    this.engine.gameProgress.prologue = true;
-    this.engine.gameProgress.chapter1 = true;
-    this.engine.currentChapter = 1;
-    this.engine.saveProgress();
-
-    // 墨迹扩散转场 → 切换到第一章
-    await this.engine.sceneManager.switchWithInkSpread('chapter1');
+    // 挂载到场景根元素
+    this._scannerUI.mount(this._root);
   }
 
-  /** 跌入异象动画：墨迹流动 → 画面异变 → 视角吸入 */
-  async _playInkAnomaly() {
-    const viewport = this._scanInterface?.querySelector('.scan-viewport');
-    if (!viewport) return;
+  /**
+   * 工具使用回调（非阻塞：旁白面板在扫描界面下层，不能用 click-to-advance）
+   * @param {string} toolId
+   * @param {boolean} allUsed — 是否三种工具都已使用
+   * @private
+   */
+  _onToolUsed(toolId, allUsed) {
+    // 显示该工具的发现反馈（自动消失，不阻塞）
+    const feedback = TOOL_FEEDBACK[toolId];
+    if (feedback) {
+      this._showAutoFeedback(feedback);
+    }
 
-    // 阶段 1：墨迹开始流动（1.2s）
-    viewport.classList.add('anomaly-phase1');
-    const suojian = this._overlayLayers.sidelight?.querySelector('.ink-trace-suojian');
-    if (suojian) suojian.classList.add('anomaly-glow');
-    await this._delay(1200);
+    // 三工具全部使用后，给出提示并切换到侧光
+    if (allUsed) {
+      setTimeout(() => {
+        this._showAutoFeedback(ALL_TOOLS_HINT, 3500);
+        // 提示消失后自动切换到侧光模式，显示交会热点
+        setTimeout(() => {
+          this._hideNarration();
+          this._scannerUI.activateSidelight();
+        }, 3800);
+      }, 3500);
+    }
+  }
 
-    // 阶段 2：画面色调异变（1.2s）
-    viewport.classList.add('anomaly-phase2');
-    // 隐藏扫描 UI 元素
-    if (this._scanToolbar) this._scanToolbar.classList.add('fading-out');
-    const status = this._scanInterface?.querySelector('.scan-status');
-    if (status) status.classList.add('fading-out');
-    await this._delay(1200);
+  /**
+   * 在旁白面板显示反馈文字，自动消失（不需要玩家点击）
+   * @param {string} text
+   * @param {number} [duration=3000] — 显示时长（毫秒）
+   * @private
+   */
+  _showAutoFeedback(text, duration = 3000) {
+    // 提升旁白面板 z-index 到扫描界面之上
+    this._narrationPanel.style.zIndex = '20';
+    this._narrationPanel.classList.add('gs-narration--visible');
+    this._narrationIndicator.style.display = 'none';
+    this._narrationText.textContent = text;
 
-    // 阶段 3：视角吸入（0.8s）
-    viewport.classList.add('anomaly-phase3');
-    await this._delay(800);
+    this.engine.emit('narration-logged', {
+      text,
+      chapter: this.engine.currentChapter,
+      scene: 'prologue',
+    });
+
+    // 自动隐藏
+    clearTimeout(this._autoFeedbackTimer);
+    this._autoFeedbackTimer = setTimeout(() => {
+      this._narrationPanel.classList.remove('gs-narration--visible');
+    }, duration);
+  }
+
+  /**
+   * 交会热点点击 → 触发跌入画中
+   * @private
+   */
+  async _onIntersectionClick() {
+    this._phase = PHASE.TRANSITION;
+
+    // 获取点击位置（墨迹扩散起点）
+    const origin = this._scannerUI.getIntersectionOrigin();
+
+    // 收集修复笔记本
+    this.engine.collectItem({
+      id: 'notebook',
+      name: '修复笔记本',
+      description: '导师给你的笔记本，封面写着"修复记录——三十一景图"。扉页夹着一张便签，是周老师的字："修复古画的第一课，不是把缺的补上，是理解它为什么缺。"',
+      icon: '📓',
+    });
+
+    // 隐藏扫描界面旁白
+    this._hideNarration();
+
+    // 播放跌入转场
+    this._fallTransition = new FallTransition();
+    await this._fallTransition.play(origin);
+
+    // 标记序章完成
+    this._phase = PHASE.COMPLETE;
+    this.engine.gameProgress.prologue = true;
+    this.engine.gameProgress.chapter1 = true;
+    this.engine.saveProgress();
+
+    // 清理转场元素
+    this._fallTransition.destroy();
+    this._fallTransition = null;
+
+    // 返回菜单（第一章解锁后可进入）
+    this._root.classList.add('game-scene--exiting');
+    setTimeout(() => this.engine.switchScene('menu'), 600);
   }
 
   /* ==================== 工具方法 ==================== */
 
+  /**
+   * 延迟
+   * @param {number} ms
+   * @returns {Promise<void>}
+   * @private
+   */
   _delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  /* ==================== 序章专用样式 ==================== */
-
-  _injectPrologueStyles() {
-    if (document.getElementById('prologue-styles')) return;
-
-    const style = document.createElement('style');
-    style.id = 'prologue-styles';
-    style.textContent = `
-
-    /* ===========================
-       Scan Interface
-       =========================== */
-    .scan-interface {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem 2rem 8rem;
-      pointer-events: none;
-    }
-
-    .scan-interface > * {
-      pointer-events: auto;
-    }
-
-    /* ── Status Bar ── */
-    .scan-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1.2rem;
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      backdrop-filter: blur(10px);
-      margin-bottom: 1.5rem;
-      font-family: var(--font-serif);
-      font-size: 0.85rem;
-      color: rgba(30, 25, 20, 0.6);
-      letter-spacing: 0.05em;
-      transition: opacity 0.8s ease;
-    }
-
-    .scan-status.fading-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* ── Scan Viewport ── */
-    .scan-viewport {
-      position: relative;
-      width: min(75vw, 800px);
-      height: min(50vh, 500px);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow:
-        0 4px 30px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(0, 0, 0, 0.06);
-      transition: transform 1s ease, filter 1.2s ease, opacity 0.8s ease;
-    }
-
-    .scan-painting {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        135deg,
-        hsl(38, 30%, 88%) 0%,
-        hsl(35, 25%, 82%) 30%,
-        hsl(32, 20%, 78%) 60%,
-        hsl(30, 22%, 84%) 100%
-      );
-      /* 宣纸纹理模拟 */
-      background-image:
-        radial-gradient(ellipse at 30% 40%, rgba(120, 90, 50, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 60%, rgba(80, 60, 30, 0.06) 0%, transparent 50%),
-        linear-gradient(135deg, hsl(38, 30%, 88%), hsl(30, 22%, 84%));
-    }
-
-    .scan-frame-border {
-      position: absolute;
-      inset: 8px;
-      border: 1px solid rgba(120, 90, 50, 0.15);
-      border-radius: 4px;
-      pointer-events: none;
-    }
-
-    /* ── Tool Overlays ── */
-    .scan-overlay {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-      pointer-events: none;
-    }
-
-    .scan-overlay.visible {
-      opacity: 1;
-    }
-
-    /* 放大镜效果 */
-    .scan-overlay-magnifier {
-      background:
-        radial-gradient(circle 120px at 35% 30%,
-          rgba(255, 255, 255, 0.15) 0%,
-          transparent 100%);
-      border: none;
-    }
-
-    .scan-overlay-magnifier.visible::after {
-      content: '';
-      position: absolute;
-      top: 18%;
-      left: 23%;
-      width: 160px;
-      height: 160px;
-      border: 2px solid rgba(120, 90, 50, 0.3);
-      border-radius: 50%;
-      box-shadow: 0 0 20px rgba(120, 90, 50, 0.1);
-      animation: magnifierPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes magnifierPulse {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50% { transform: scale(1.05); opacity: 1; }
-    }
-
-    /* 纸质分析效果 */
-    .scan-overlay-fiber {
-      background:
-        repeating-linear-gradient(
-          45deg,
-          transparent,
-          transparent 2px,
-          rgba(180, 150, 100, 0.04) 2px,
-          rgba(180, 150, 100, 0.04) 4px
-        ),
-        repeating-linear-gradient(
-          -45deg,
-          transparent,
-          transparent 3px,
-          rgba(120, 90, 50, 0.03) 3px,
-          rgba(120, 90, 50, 0.03) 6px
-        );
-      mix-blend-mode: multiply;
-    }
-
-    .scan-overlay-fiber.visible::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(200, 180, 140, 0.08);
-      animation: fiberScan 4s ease-in-out infinite;
-    }
-
-    @keyframes fiberScan {
-      0% { clip-path: inset(0 100% 0 0); }
-      50% { clip-path: inset(0 0 0 0); }
-      100% { clip-path: inset(0 0 0 100%); }
-    }
-
-    /* 侧光照射效果 */
-    .scan-overlay-sidelight {
-      background: linear-gradient(
-        135deg,
-        rgba(255, 240, 200, 0.2) 0%,
-        transparent 40%,
-        transparent 60%,
-        rgba(255, 230, 180, 0.1) 100%
-      );
-    }
-
-    .scan-overlay-sidelight.visible {
-      filter: none;
-    }
-
-    /* ── 底层墨迹（"所见"残字 + 辅助线） ── */
-    .ink-trace {
-      position: absolute;
-      opacity: 0;
-      transition: opacity 2s ease;
-    }
-
-    .scan-overlay-sidelight.revealed .ink-trace {
-      opacity: 1;
-    }
-
-    .ink-trace-suojian {
-      right: 18%;
-      bottom: 28%;
-      font-family: var(--font-handwrite, 'LXGW WenKai', serif);
-      font-size: 1.4rem;
-      color: rgba(60, 40, 20, 0.55);
-      letter-spacing: 0.15em;
-      filter: blur(0.5px);
-      animation: inkShimmer 3s ease-in-out infinite;
-      text-shadow: 0 0 8px rgba(60, 40, 20, 0.2);
-    }
-
-    .ink-trace-line {
-      position: absolute;
-      left: 10%;
-      right: 10%;
-      bottom: 32%;
-      height: 0;
-      border-bottom: 1px dashed rgba(100, 70, 30, 0.3);
-      animation: inkShimmer 3s ease-in-out infinite 0.5s;
-    }
-
-    @keyframes inkShimmer {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-
-    /* ── 异象动画 ── */
-    .ink-trace-suojian.anomaly-glow {
-      opacity: 1 !important;
-      color: rgba(60, 40, 20, 0.9);
-      filter: blur(0);
-      text-shadow: 0 0 20px rgba(120, 80, 20, 0.6);
-      transition: all 1s ease;
-    }
-
-    .scan-viewport.anomaly-phase1 {
-      box-shadow:
-        0 4px 30px rgba(0, 0, 0, 0.1),
-        0 0 40px rgba(120, 80, 20, 0.2);
-    }
-
-    .scan-viewport.anomaly-phase2 {
-      filter: sepia(0.4) brightness(1.1) hue-rotate(-10deg);
-    }
-
-    .scan-viewport.anomaly-phase3 {
-      transform: scale(1.8);
-      opacity: 0;
-      filter: sepia(0.6) brightness(1.3) blur(4px);
-    }
-
-    /* ── Scan Toolbar ── */
-    .scan-toolbar {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-      transition: opacity 0.8s ease;
-    }
-
-    .scan-toolbar.fading-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .scan-tool {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.7rem 1.4rem;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 24px;
-      background: rgba(255, 252, 245, 0.8);
-      backdrop-filter: blur(10px);
-      font-family: var(--font-serif);
-      font-size: 0.9rem;
-      color: rgba(30, 25, 20, 0.7);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .scan-tool:hover {
-      background: rgba(255, 250, 235, 0.95);
-      border-color: rgba(180, 140, 60, 0.3);
-      color: rgba(30, 25, 20, 0.9);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    }
-
-    .scan-tool.active {
-      background: rgba(180, 140, 60, 0.12);
-      border-color: rgba(180, 140, 60, 0.4);
-      color: rgba(30, 25, 20, 1);
-      box-shadow: 0 0 0 3px rgba(180, 140, 60, 0.1);
-    }
-
-    .scan-tool-icon {
-      font-size: 1.1rem;
-    }
-
-    .scan-tool-check {
-      display: none;
-      color: rgba(80, 160, 80, 0.8);
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-
-    .scan-tool.used .scan-tool-check {
-      display: inline;
-    }
-
-    /* ===========================
-       Responsive
-       =========================== */
-    @media (max-width: 768px) {
-      .scan-viewport {
-        width: 90vw;
-        height: 40vh;
-      }
-      .scan-toolbar {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .scan-tool {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-      }
-      .ink-trace-suojian {
-        font-size: 1.1rem;
-      }
-    }
-    `;
-
-    document.head.appendChild(style);
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

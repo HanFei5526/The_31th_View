@@ -118,23 +118,23 @@ export default class LandingScene {
               你发现最后一页的画心异常完整，真正被遮蔽的却是边缘的来源痕迹。
               从修复工作室到明代园林，从断簪到残砚，一步步复原王蘅留下的低位视角。
             </p>
-
-            <div class="landing-actions">
-              <button class="btn btn--primary" id="btn-enter">
-                <span>开始游戏</span>
-              </button>
-              <button class="btn btn--outline" data-panel="garden">
-                <span>园林空间</span>
-              </button>
-              <button class="btn btn--outline" data-panel="history">
-                <span>古画秘史</span>
-              </button>
-              <button class="btn btn--outline" data-panel="figures">
-                <span>人物图鉴</span>
-              </button>
-            </div>
           </div>
         </main>
+
+        <div class="landing-actions">
+          <button class="btn btn--primary" id="btn-enter">
+            <span>开始游戏</span>
+          </button>
+          <button class="btn btn--outline" data-panel="garden">
+            <span>园林空间</span>
+          </button>
+          <button class="btn btn--outline" data-panel="history">
+            <span>古画秘史</span>
+          </button>
+          <button class="btn btn--outline" data-panel="figures">
+            <span>人物图鉴</span>
+          </button>
+        </div>
       </div>
     `;
 
@@ -505,17 +505,17 @@ export default class LandingScene {
     .landing-main {
       flex: 1;
       display: flex;
-      align-items: center;
-      padding: 0 4rem 3rem;
+      align-items: flex-start; /* Move content to top half */
+      padding: 12vh 4rem 3rem; /* Add top padding */
       max-width: 1440px;
       width: 100%;
     }
 
     .landing-left {
-      max-width: 560px;
+      max-width: 640px;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.5rem; /* Reset gap, we will use specific margins */
     }
 
     /* ===========================
@@ -524,21 +524,21 @@ export default class LandingScene {
     .landing-label {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 1rem;
       margin-left: 0;
     }
 
     .label-line {
-      width: 32px;
-      height: 2px;
-      background: linear-gradient(90deg, #c84032, transparent);
+      width: 40px;
+      height: 1px;
+      background: #2c2416; /* Replaced red with dark ink */
     }
 
     .label-text {
       font-family: var(--font-serif);
-      font-size: 0.8rem;
-      color: #7a6b5a;
-      letter-spacing: 0.2em;
+      font-size: 0.85rem;
+      color: #5a4b3c;
+      letter-spacing: 0.25em;
     }
 
     /* ===========================
@@ -549,17 +549,27 @@ export default class LandingScene {
       margin: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 1rem;
     }
 
     .title-line {
       display: block;
-      font-size: clamp(2rem, 3.5vw, 3.2rem);
-      font-weight: 600;
       color: #2c2416;
-      letter-spacing: 0.05em;
-      line-height: 1.35;
+      line-height: 1.2;
       animation: titleFadeIn 1.2s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .title-line:first-child {
+      font-size: clamp(3.2rem, 5vw, 4.8rem);
+      font-weight: 700; /* Bold */
+      letter-spacing: 0.12em;
+    }
+
+    .title-line:last-child {
+      font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+      font-weight: 600; /* Bold */
+      color: #4a3e31;
+      letter-spacing: 0.1em;
     }
 
     @keyframes titleFadeIn {
@@ -569,19 +579,21 @@ export default class LandingScene {
 
     .title-verm {
       font-style: normal;
-      color: #c84032;
+      color: #2c2416; /* Removed red */
       position: relative;
+      font-weight: 500;
+      display: inline-block;
     }
 
     .title-verm::after {
       content: '';
       position: absolute;
-      bottom: 2px;
+      bottom: -4px;
       left: 0;
       right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, rgba(200, 64, 50, 0.25), transparent);
-      border-radius: 2px;
+      height: 1px;
+      background: #2c2416;
+      opacity: 0.5;
     }
 
     /* ===========================
@@ -589,10 +601,11 @@ export default class LandingScene {
        =========================== */
     .landing-desc {
       font-family: var(--font-serif);
-      font-size: clamp(0.9rem, 1.1vw, 1.05rem);
-      color: #7a6b5a;
-      line-height: 2;
-      text-indent: 2em;
+      font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+      color: #5a4b3c;
+      line-height: 2.2;
+      max-width: 48ch;
+      margin-top: 6vh; /* Moved up significantly */
       animation: descFadeIn 1.2s 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
@@ -605,10 +618,17 @@ export default class LandingScene {
        Buttons
        =========================== */
     .landing-actions {
+      position: absolute;
+      bottom: 4rem;
+      left: 30%; /* Shifted significantly left */
+      transform: translateX(-50%);
       display: flex;
-      gap: 0.75rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
-      margin-top: 0.5rem;
+      justify-content: center;
+      width: 100%;
+      max-width: 800px;
+      z-index: 10;
       animation: actionsFadeIn 1.2s 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 

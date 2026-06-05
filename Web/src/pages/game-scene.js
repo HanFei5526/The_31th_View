@@ -38,6 +38,10 @@ export default class GameSceneBase {
   exit() {
     this._clearTypewriter();
     if (this._styleEl) this._styleEl.remove();
+    if (this._keyHandler) {
+      document.removeEventListener('keydown', this._keyHandler);
+      this._keyHandler = null;
+    }
   }
 
   /* ==================== 场景构建 ==================== */
@@ -67,7 +71,7 @@ export default class GameSceneBase {
 
       <!-- 顶部工具栏 -->
       <div class="gs-toolbar">
-        <button class="gs-btn-back" id="gs-btn-back">
+        <button class="gs-btn-back" id="gs-btn-back" aria-label="返回菜单">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
             <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -84,20 +88,20 @@ export default class GameSceneBase {
       </div>
 
       <!-- 热点图层 -->
-      <div class="gs-hotspot-layer" id="gs-hotspot-layer"></div>
+      <div class="gs-hotspot-layer" id="gs-hotspot-layer" role="region" aria-label="可交互区域"></div>
 
       <!-- 章节标题 (初始隐藏) -->
-      <div class="gs-chapter-title" id="gs-chapter-title">
+      <div class="gs-chapter-title" id="gs-chapter-title" aria-live="polite" aria-atomic="true">
         <div class="gs-chapter-name">${config.chapterTitle || ''}</div>
         <div class="gs-chapter-divider"></div>
         <div class="gs-chapter-subtitle">${config.chapterSubtitle || ''}</div>
       </div>
 
       <!-- 底部旁白面板 -->
-      <div class="gs-narration" id="gs-narration">
+      <div class="gs-narration" id="gs-narration" role="region" aria-label="叙事旁白" tabindex="0">
         <div class="gs-narration-inner">
-          <div class="gs-narration-text" id="gs-narration-text"></div>
-          <div class="gs-narration-indicator" id="gs-narration-indicator">▼</div>
+          <div class="gs-narration-text" id="gs-narration-text" role="status" aria-live="polite"></div>
+          <div class="gs-narration-indicator" id="gs-narration-indicator">▼ 点击或按空格继续</div>
         </div>
       </div>
     `;
@@ -118,7 +122,67 @@ export default class GameSceneBase {
       console.log('[GameScene] 物品栏按钮点击');
     });
 
+    // 绑定键盘导航
+    this._keyHandler = (e) => this._handleKeyDown(e);
+    document.addEventListener('keydown', this._keyHandler);
+
     return root;
+  }
+
+  /**
+   * 键盘事件处理
+   * @private
+   */
+  _handleKeyDown(e) {
+    // Esc：关闭打开的面板（如果聊天或笔记本打开）
+    if (e.key === 'Escape') {
+      const chatOpen = document.querySelector('.chat-panel.open');
+      const notebookOpen = document.querySelector('.notebook-ai-panel.open');
+      if (chatOpen) {
+        e.preventDefault();
+        document.querySelector('#chat-close-btn')?.click();
+        return;
+      }
+      if (notebookOpen) {
+        e.preventDefault();
+        document.querySelector('#notebook-close-btn')?.click();
+        return;
+      }
+      // 没有面板打开时，Esc 返回菜单
+      e.preventDefault();
+      this._root.classList.add('game-scene--exiting');
+      setTimeout(() => this.engine.switchScene('menu'), 600);
+      return;
+    }
+
+    // 空格/回车：继续旁白或跳过打字机
+    if (e.key === ' ' || e.key === 'Enter') {
+      // 如果输入框有焦点，不处理
+      if (document.activeElement?.tagName === 'INPUT') return;
+
+      // 如果有热点可见，回车触发当前聚焦的热点
+      if (e.key === 'Enter' && document.activeElement?.classList?.contains('gs-hotspot')) {
+        return; // 让按钮自身的 click 事件处理
+      }
+
+      if (this._narrationPanel?.classList.contains('gs-narration--visible')) {
+        e.preventDefault();
+        this._narrationPanel.click();
+        return;
+      }
+    }
+
+    // Tab：在热点之间循环聚焦
+    if (e.key === 'Tab') {
+      const hotspots = this._hotspotLayer?.querySelectorAll('.gs-hotspot');
+      if (hotspots?.length > 0 && !document.activeElement?.classList?.contains('gs-hotspot')) {
+        // 如果当前焦点不在热点上，按 Tab 跳到第一个热点
+        if (!document.activeElement || document.activeElement === document.body) {
+          e.preventDefault();
+          hotspots[0].focus();
+        }
+      }
+    }
   }
 
   /* ==================== 章节标题动画 ==================== */
@@ -151,20 +215,27 @@ export default class GameSceneBase {
    * @returns {Promise<void>}
    */
   _showNarration(text) {
+    // 记录到叙事日志
+    this.engine.emit('narration-logged', {
+      text,
+      chapter: this.engine.currentChapter,
+      scene: this.engine.currentScene,
+    });
+
     return new Promise((resolve) => {
       this._narrationPanel.classList.add('gs-narration--visible');
       this._narrationIndicator.style.display = 'none';
       this._startTypewriter(text);
 
-      const clickHandler = () => {
+      const advanceHandler = () => {
         if (this._isTyping) {
           this._completeTypewriter();
         } else {
-          this._narrationPanel.removeEventListener('click', clickHandler);
+          this._narrationPanel.removeEventListener('click', advanceHandler);
           resolve();
         }
       };
-      this._narrationPanel.addEventListener('click', clickHandler);
+      this._narrationPanel.addEventListener('click', advanceHandler);
     });
   }
 
@@ -205,6 +276,8 @@ export default class GameSceneBase {
     spot.className = 'gs-hotspot';
     spot.id = `hotspot-${config.id}`;
     spot.style.cssText = `left:${config.x}; top:${config.y}; width:${config.w}; height:${config.h};`;
+    spot.setAttribute('tabindex', '0');
+    spot.setAttribute('aria-label', config.label || '可交互区域');
 
     if (config.label) {
       const label = document.createElement('span');
@@ -218,10 +291,15 @@ export default class GameSceneBase {
     glow.className = 'gs-hotspot-glow';
     spot.appendChild(glow);
 
-    spot.addEventListener('click', (e) => {
+    const activate = (e) => {
+      if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+      if (e.type === 'keydown') e.preventDefault();
       e.stopPropagation();
       if (config.onClick) config.onClick();
-    });
+    };
+
+    spot.addEventListener('click', activate);
+    spot.addEventListener('keydown', activate);
 
     this._hotspotLayer.appendChild(spot);
     return spot;
@@ -324,18 +402,16 @@ export default class GameSceneBase {
       pointer-events: none;
     }
 
-    /* 深色主题遮罩 */
+    /* Dark theme vignette */
     .game-scene--dark .gs-overlay {
-      background:
-        radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%),
-        linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%);
+      background: radial-gradient(circle at center, transparent 30%, rgba(10, 8, 5, 0.8) 100%),
+                  linear-gradient(to top, rgba(5, 3, 2, 0.95) 0%, transparent 30%);
     }
 
-    /* 浅色主题遮罩 */
+    /* Light theme adjusted for mystery: dark bottom gradient instead of white haze */
     .game-scene--light .gs-overlay {
-      background:
-        radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.15) 100%),
-        linear-gradient(to top, rgba(255,255,255,0.3) 0%, transparent 30%);
+      background: radial-gradient(circle at center, transparent 40%, rgba(20, 15, 10, 0.6) 100%),
+                  linear-gradient(to top, rgba(10, 8, 5, 0.95) 0%, transparent 30%);
     }
 
     /* ===========================
@@ -497,14 +573,15 @@ export default class GameSceneBase {
        =========================== */
     .gs-narration {
       position: absolute;
-      bottom: 0;
+      bottom: 2rem;
       left: 0;
       right: 0;
-      z-index: 10;
-      transform: translateY(100%);
-      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 40;
+      transform: translateY(150%);
+      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
       cursor: pointer;
       user-select: none;
+      padding: 0 2rem;
     }
 
     .gs-narration--visible {
@@ -512,58 +589,39 @@ export default class GameSceneBase {
     }
 
     .gs-narration-inner {
-      max-width: 900px;
+      max-width: 850px;
       margin: 0 auto;
       padding: 2rem 3rem;
       position: relative;
-      border-radius: 16px 16px 0 0;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-
-    .game-scene--dark .gs-narration-inner {
-      background: rgba(10, 8, 6, 0.7);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-bottom: none;
-    }
-
-    .game-scene--light .gs-narration-inner {
-      background: rgba(255, 252, 245, 0.8);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-bottom: none;
-      box-shadow: 0 -4px 30px rgba(0,0,0,0.08);
+      /* 木刻底板质感 */
+      background: #2b2018;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+      border-radius: 2px;
+      border: 3px solid #1a120e;
+      box-shadow:
+        inset 0 0 0 2px #5c432b,
+        inset 0 0 20px rgba(0,0,0,0.6),
+        0 15px 40px rgba(0,0,0,0.5);
     }
 
     .gs-narration-text {
       font-family: var(--font-serif);
-      font-size: 1.1rem;
-      line-height: 2;
-      letter-spacing: 0.05em;
+      font-size: 1.15rem;
+      line-height: 2.2;
+      color: #d9c8aa;
+      letter-spacing: 0.08em;
       min-height: 2em;
-    }
-
-    .game-scene--dark .gs-narration-text {
-      color: rgba(255,255,255,0.9);
-    }
-
-    .game-scene--light .gs-narration-text {
-      color: rgba(30,25,20,0.85);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
     }
 
     .gs-narration-indicator {
       position: absolute;
-      bottom: 0.8rem;
-      right: 2rem;
+      bottom: 1rem;
+      right: 2.5rem;
       font-size: 0.8rem;
+      color: #9b2e20;
+      letter-spacing: 0.1em;
       animation: gsIndicatorPulse 1.5s ease-in-out infinite;
-    }
-
-    .game-scene--dark .gs-narration-indicator {
-      color: rgba(255,255,255,0.4);
-    }
-
-    .game-scene--light .gs-narration-indicator {
-      color: rgba(30,25,20,0.3);
     }
 
     @keyframes gsIndicatorPulse {
@@ -654,9 +712,33 @@ export default class GameSceneBase {
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .gs-hotspot:hover .gs-hotspot-label {
+    .gs-hotspot:hover .gs-hotspot-label,
+    .gs-hotspot:focus-visible .gs-hotspot-label {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .gs-hotspot:focus-visible {
+      outline: 2px solid rgba(200, 180, 140, 0.6);
+      outline-offset: 4px;
+    }
+
+    .gs-btn-back:focus-visible,
+    .gs-btn-inventory:focus-visible {
+      outline: 2px solid rgba(200, 180, 140, 0.6);
+      outline-offset: 2px;
+    }
+
+    /* ===========================
+       Reduced Motion
+       =========================== */
+    @media (prefers-reduced-motion: reduce) {
+      .gs-bg { animation: none; }
+      .gs-chapter-title { transition: none; }
+      .gs-narration { transition: none; }
+      .gs-hotspot-glow { animation: none; }
+      .gs-narration-indicator { animation: none; }
+      .game-scene { transition: none; }
     }
 
     /* ===========================
