@@ -1,4 +1,4 @@
-import bgImage from '../../../TestPic/拙政园正门_章节选择.png';
+const bgImage = '/images/menu-gate.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu
