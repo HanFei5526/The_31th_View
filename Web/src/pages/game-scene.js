@@ -74,7 +74,7 @@ export default class GameSceneBase {
           <span>返回</span>
         </button>
         <div class="gs-toolbar-right">
-          <button class="gs-btn-inventory" id="gs-btn-inventory">
+          <button class="gs-btn-inventory" id="gs-btn-inventory" aria-label="打开物品栏">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M4 19V5a2 2 0 012-2h8l6 6v10a2 2 0 01-2 2H6a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M14 3v6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -357,6 +357,7 @@ export default class GameSceneBase {
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      min-height: 44px;
       padding: 0.5rem 1rem;
       border-radius: 20px;
       font-family: var(--font-serif);
@@ -393,8 +394,8 @@ export default class GameSceneBase {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.3s ease;

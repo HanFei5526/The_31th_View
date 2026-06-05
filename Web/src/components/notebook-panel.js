@@ -68,6 +68,7 @@ export class NotebookPanel {
     const toggle = document.createElement('button');
     toggle.className = 'notebook-toggle';
     toggle.id = 'notebook-toggle-btn';
+    toggle.setAttribute('aria-label', '打开修复笔记本');
     toggle.innerHTML = `<span class="notebook-toggle-icon">📓</span>`;
     toggle.title = '修复笔记本';
     toggle.style.display = 'none'; // 默认隐藏，进入游戏场景后显示
@@ -89,7 +90,7 @@ export class NotebookPanel {
     panel.innerHTML = `
       <div class="notebook-header">
         <div class="notebook-header-title">📓 修复笔记本</div>
-        <button class="notebook-close-btn" id="notebook-close-btn">✕</button>
+        <button class="notebook-close-btn" id="notebook-close-btn" aria-label="关闭修复笔记本">✕</button>
       </div>
       <div class="notebook-annotations" id="notebook-annotations">
         <div class="notebook-empty">笔记本还是空白的……随着修复的推进，你的思考会记录在这里。</div>

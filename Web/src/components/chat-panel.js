@@ -44,6 +44,7 @@ export class ChatPanel {
     const toggle = document.createElement('button');
     toggle.className = 'chat-toggle';
     toggle.id = 'chat-toggle-btn';
+    toggle.setAttribute('aria-label', '打开周鹤年对话');
     toggle.innerHTML = `<span class="chat-toggle-icon">💬</span><span class="chat-toggle-label">问周老师</span>`;
     toggle.addEventListener('click', () => this._toggle());
     document.body.appendChild(toggle);
@@ -56,7 +57,7 @@ export class ChatPanel {
     panel.innerHTML = `
       <div class="chat-header">
         <div class="chat-header-title">📓 周鹤年</div>
-        <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        <button class="chat-close-btn" id="chat-close-btn" aria-label="关闭周鹤年对话">✕</button>
       </div>
       <div class="chat-messages" id="chat-messages">
         <div class="chat-welcome">
@@ -73,7 +74,7 @@ export class ChatPanel {
           maxlength="200"
           autocomplete="off"
         />
-        <button class="chat-send-btn" id="chat-send-btn">
+        <button class="chat-send-btn" id="chat-send-btn" aria-label="发送消息">
           <span>↑</span>
         </button>
       </div>
