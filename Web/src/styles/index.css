@@ -132,6 +132,12 @@ button {
   color: inherit;
 }
 
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(200, 64, 50, 0.42);
+  outline-offset: 3px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -997,6 +1003,11 @@ a {
 }
 
 .chat-close-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.25rem;
   color: var(--real-text-dim);
   transition: color var(--transition-fast);
@@ -1081,7 +1092,6 @@ a {
   padding: 0.6rem 0.8rem;
   font-size: var(--font-size-base);
   color: var(--real-text);
-  outline: none;
   font-family: inherit;
 }
 
@@ -1090,8 +1100,8 @@ a {
 }
 
 .chat-send-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
   background: var(--real-accent);
   color: white;
@@ -1231,6 +1241,11 @@ a {
 }
 
 .notebook-close-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.5rem;
   color: var(--paint-text-dim);
   transition: color var(--transition-fast);
@@ -1304,7 +1319,6 @@ a {
   padding: 0.6rem 1rem;
   font-size: var(--font-size-base);
   color: var(--paint-ink);
-  outline: none;
   font-family: inherit;
 }
 
@@ -1314,6 +1328,7 @@ a {
 }
 
 .notebook-query-btn {
+  min-height: 44px;
   background: var(--paint-accent);
   color: white;
   border-radius: var(--radius-md);

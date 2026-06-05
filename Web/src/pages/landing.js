@@ -64,7 +64,11 @@ export default class LandingScene {
 
   exit() {
     if (this._styleEl) this._styleEl.remove();
-    if (this._carousel) { this._carousel.remove(); this._carousel = null; }
+    if (this._carousel) {
+      this._carousel._cleanup?.();
+      this._carousel.remove();
+      this._carousel = null;
+    }
   }
 
   /* ==================== DOM 构建 ==================== */
@@ -208,7 +212,11 @@ export default class LandingScene {
     const data = CARDS[key];
     if (!data) return;
 
-    if (this._carousel) this._carousel.remove();
+    if (this._carousel) {
+      this._carousel._cleanup?.();
+      this._carousel.remove();
+      this._carousel = null;
+    }
 
     const currentCards = [...data.items];
     let currentIndex = 0;
@@ -228,7 +236,7 @@ export default class LandingScene {
     el.className = 'carousel-overlay';
     el.innerHTML = `
       <div class="carousel-panel">
-        <button class="carousel-close">
+        <button class="carousel-close" aria-label="关闭资料卡片">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
@@ -238,7 +246,7 @@ export default class LandingScene {
           <span class="carousel-tag"></span>
         </div>
         <div class="carousel-body">
-          <button class="carousel-nav carousel-prev">
+          <button class="carousel-nav carousel-prev" aria-label="上一张资料卡片">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -252,7 +260,7 @@ export default class LandingScene {
               <p class="carousel-desc"></p>
             </div>
           </div>
-          <button class="carousel-nav carousel-next">
+          <button class="carousel-nav carousel-next" aria-label="下一张资料卡片">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -268,15 +276,28 @@ export default class LandingScene {
     this._carousel = el;
     render();
 
-    el.querySelector('.carousel-close').addEventListener('click', () => {
+    let isClosing = false;
+    const cleanup = () => {
+      document.removeEventListener('keydown', keyHandler);
+    };
+    const closeCarousel = () => {
+      if (isClosing) return;
+      isClosing = true;
+      cleanup();
       el.classList.add('carousel-overlay--exit');
-      setTimeout(() => { el.remove(); this._carousel = null; }, 400);
-    });
+      setTimeout(() => {
+        el.remove();
+        if (this._carousel === el) this._carousel = null;
+      }, 400);
+    };
+
+    el._cleanup = cleanup;
+
+    el.querySelector('.carousel-close').addEventListener('click', closeCarousel);
 
     el.addEventListener('click', (e) => {
       if (e.target === el) {
-        el.classList.add('carousel-overlay--exit');
-        setTimeout(() => { el.remove(); this._carousel = null; }, 400);
+        closeCarousel();
       }
     });
 
@@ -293,12 +314,10 @@ export default class LandingScene {
       if (e.key === 'ArrowLeft' && currentIndex > 0) { currentIndex--; render(); }
       if (e.key === 'ArrowRight' && currentIndex < currentCards.length - 1) { currentIndex++; render(); }
       if (e.key === 'Escape') {
-        el.classList.add('carousel-overlay--exit');
-        setTimeout(() => { el.remove(); this._carousel = null; document.removeEventListener('keydown', keyHandler); }, 400);
+        closeCarousel();
       }
     };
     document.addEventListener('keydown', keyHandler);
-    el._keyHandler = keyHandler;
   }
 
   /* ==================== 样式注入 ==================== */
@@ -602,6 +621,7 @@ export default class LandingScene {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      min-height: 44px;
       padding: 0.7rem 1.6rem;
       border-radius: 100px;
       font-family: var(--font-serif);
@@ -610,7 +630,6 @@ export default class LandingScene {
       cursor: pointer;
       transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
       border: none;
-      outline: none;
       position: relative;
       overflow: hidden;
     }
@@ -689,8 +708,8 @@ export default class LandingScene {
       position: absolute;
       top: 1rem;
       right: 1rem;
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -863,8 +882,8 @@ export default class LandingScene {
       }
 
       .carousel-nav {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
       }
     }
 

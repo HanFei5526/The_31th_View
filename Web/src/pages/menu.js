@@ -1,5 +1,4 @@
 import bgImage from '../../../TestPic/拙政园正门_章节选择.png';
-import characterImage from '../../../TestPic/8.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu
@@ -389,6 +388,7 @@ export default class MenuScene {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      min-height: 44px;
       padding: 0.5rem 1rem;
       background: rgba(255, 255, 255, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.8);
@@ -781,6 +781,7 @@ export default class MenuScene {
       align-items: center;
       justify-content: center;
       min-width: 180px;
+      min-height: 44px;
       padding: 0.8rem 2rem;
       font-family: var(--font-serif);
       font-size: 1.1rem;
