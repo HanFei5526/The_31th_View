@@ -1,0 +1,452 @@
+/* ==========================================================================
+   "查看古画" 入口按钮
+   ========================================================================== */
+.view-painting-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 2.5rem;
+  background: #2b2018;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+  border: 2px solid #5c432b;
+  border-radius: 2px;
+  color: #d9c8aa;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: inset 0 0 0 1px #1a120e, inset 0 0 15px rgba(0,0,0,0.4), 0 12px 35px rgba(0,0,0,0.4);
+  z-index: 15;
+}
+.view-painting-btn.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.view-painting-btn:hover {
+  background: #3b2b20;
+  border-color: #785a3a;
+  transform: translate(-50%, -50%) scale(1.03);
+}
+.view-painting-btn.clicked {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* ==========================================================================
+   Painting Viewer — 古画查看器
+   ========================================================================== */
+.painting-viewer {
+  position: fixed;
+  inset: 0 0 240px 0; /* 留出底部 240px 给 dialogue box */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50; /* 低于 prologue-dock 的 60，保证对话框可点击 */
+  background: rgba(14, 11, 8, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn 0.4s ease;
+}
+
+.pv-card-container {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  max-width: none;
+  height: 100%;
+  /* 高级质感：深邃的悬浮画框 */
+  background: rgba(12, 9, 8, 0.95);
+  border: none;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 0;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+.pv-main {
+  flex: 3;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  overflow: hidden;
+  border-right: 1px solid rgba(212, 175, 55, 0.15);
+}
+.pv-painting-card {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  /* Remove border and black background so the image perfectly spans the container */
+  background: transparent;
+  transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  cursor: crosshair;
+}
+.pv-painting-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+}
+.pv-painting-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 改回 contain 保证全显示不裁剪 */
+  display: block;
+  pointer-events: none;
+}
+.pv-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pv-feedback {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(15px);
+  max-width: 70%;
+  background: rgba(26, 20, 16, 0.95);
+  border: 1px solid rgba(160, 120, 90, 0.4);
+  color: #e6dac3;
+  padding: 0.8rem 1.8rem;
+  border-radius: 2px;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  text-align: center;
+  opacity: 0;
+  transition: all 0.4s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+.pv-feedback.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.pv-status {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 12, 10, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #d4af37;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  pointer-events: none;
+  z-index: 5;
+  display: none;
+}
+.pv-circles {
+  letter-spacing: 3px;
+  margin: 0 0.3rem;
+}
+
+/* ── 右侧侧边栏 ── */
+.pv-sidebar {
+  flex: 1;
+  background: rgba(8, 6, 4, 0.95);
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 2.5rem;
+}
+
+.pv-sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: rgba(212, 175, 55, 0.8);
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 1rem;
+}
+
+.pv-tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.pv-tool-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 2px;
+  color: #eae3d8;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.pv-tool-item::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+  transition: left 0.5s;
+}
+
+.pv-tool-item:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.pv-tool-item:hover::before {
+  left: 100%;
+}
+
+.pv-tool-item.active {
+  background: rgba(212, 175, 55, 0.05);
+  border-color: rgba(212, 175, 55, 0.8);
+  color: #d4af37;
+  box-shadow: inset 4px 0 0 rgba(212, 175, 55, 0.8);
+}
+.pv-tool-item.used::after {
+  content: '✓';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #5a8a6e;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pv-sidebar-tip {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212,175,55,0.15);
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  color: #7a6b5a;
+  text-align: center;
+  line-height: 1.6;
+}
+.pv-ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  margin-top: -10px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: pvRippleExpand 1s ease-out forwards;
+  pointer-events: none;
+}
+.pv-ripple-gold { border-color: rgba(212, 175, 55, 0.8); }
+.pv-ripple-grey { border-color: rgba(150, 150, 150, 0.5); }
+@keyframes pvRippleExpand {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+}
+.pv-hint-spot {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  margin-left: -35px;
+  margin-top: -35px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  animation: pvHintPulse 2s infinite ease-in-out;
+  pointer-events: none;
+}
+@keyframes pvHintPulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.15; }
+  50% { transform: scale(1.15); opacity: 0.40; }
+}
+.pv-marker {
+  position: absolute;
+  margin-left: -16px;
+  margin-top: -16px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.pv-marker-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.7) 0%, transparent 70%);
+  animation: pvMarkerBreathe 3s infinite ease-in-out;
+}
+@keyframes pvMarkerBreathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.1); }
+}
+.pv-marker-label {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  color: #d4af37;
+  background: rgba(15,12,10,0.85);
+  padding: 2px 8px;
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.pv-marker:hover .pv-marker-label { opacity: 1; }
+.pv-convergence-line {
+  position: absolute;
+  height: 1px;
+  background: rgba(212, 175, 55, 0.6);
+  animation: pvLineDraw 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes pvLineDraw {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+.pv-convergence-point {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  margin-left: -30px;
+  margin-top: -30px;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+}
+.pv-convergence-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.8) 0%, transparent 60%);
+  animation: pvPointPulse 1.5s infinite;
+}
+@keyframes pvPointPulse {
+  0%   { transform: scale(0.5); opacity: 1; }
+  70%  { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(0.5); opacity: 1; }
+}
+.pv-convergence-label {
+  position: absolute;
+  bottom: -24px;
+  width: 80px;
+  left: -10px;
+  text-align: center;
+  color: #d4af37;
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  opacity: 0;
+  animation: pvTextFade 0.8s forwards 1.2s;
+}
+@keyframes pvTextFade { to { opacity: 0.8; } }
+.pv-explode .pv-convergence-pulse {
+  animation: pvRippleExpand 0.4s ease-out forwards;
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, transparent 60%);
+}
+
+/* ==========================================================================
+   线索弹窗
+   ========================================================================== */
+.clue-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+.clue-popup-plaque {
+  position: relative;
+  width: 500px;
+  max-width: 90vw;
+  background: #1e1511;
+  background-image: radial-gradient(ellipse at center, rgba(40,25,15,0.4) 0%, rgba(10,5,0,0.8) 100%);
+  border: 2px solid #5a4231;
+  border-radius: 2px;
+  padding: 2rem;
+  box-shadow: inset 0 0 20px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.2) inset;
+  font-family: var(--font-serif);
+  color: #e6dac3;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+}
+.clue-popup-header {
+  font-size: 0.9rem;
+  color: #a08c6b;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.clue-popup-dot { color: #d4af37; }
+.clue-popup-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+  margin: 1rem 0;
+}
+.clue-popup-title {
+  font-size: 1.4rem;
+  color: #d4af37;
+  font-weight: normal;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+.clue-popup-desc {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  min-height: 6rem;
+  text-align: justify;
+}
+.clue-popup-footer {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+.clue-popup-btn {
+  background: transparent;
+  border: 1px solid #8a6b4e;
+  color: #d4af37;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.1em;
+}
+.clue-popup-btn:hover {
+  background: rgba(212,175,55,0.1);
+  border-color: #d4af37;
+  box-shadow: 0 0 10px rgba(212,175,55,0.2);
+}
+.clue-popup-plaque.hiding {
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
+}

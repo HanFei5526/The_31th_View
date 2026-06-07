@@ -216,6 +216,13 @@ export class NotebookPanel {
       this._addNarrativeLog(data.text, data.chapter, data.scene);
     });
 
+    // 线索收集 → 添加到批注
+    window.addEventListener('clue-collected', (e) => {
+      if (e.detail && e.detail.text) {
+        this._addAnnotation(e.detail.text, this.engine.currentChapter || 0, 'clue-collected');
+      }
+    });
+
     // 标签切换
     const tabs = document.querySelectorAll('.notebook-tab');
     tabs.forEach((tab) => {

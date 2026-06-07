@@ -19,6 +19,8 @@
 import { SceneManager } from './scene-manager.js';
 import { Inventory } from './inventory.js';
 import { HintSystem } from './hint-system.js';
+import { DiscussionGateManager } from './discussion-gate.js';
+import { GatePanel } from '../components/gate-panel.js';
 import { DialogueSystem } from './dialogue.js';
 import { SaveSystem } from './save-system.js';
 import { AIService } from './ai-service.js';
@@ -55,12 +57,17 @@ export class GameEngine {
     this.saveSystem = new SaveSystem(this);
     /** @type {AIService} */
     this.aiService = new AIService(this);
+    this.discussionManager = new DiscussionGateManager(this);
 
     /* ---- DOM ---- */
 
     /** #app 根元素 */
     this._appElement = null;
-    /** 过渡动画遮罩 */
+
+    /* ---- UI 组件 ---- */
+    this.gatePanel = new GatePanel(this);
+
+    /* ---- 状态 ---- */
     this._transitionEl = null;
   }
 
@@ -84,8 +91,8 @@ export class GameEngine {
     // 设置初始世界主题
     this._applyWorldTheme();
 
-    // 配置 AIService，从环境变量中读取 API Key
-    this.aiService.configure(import.meta.env.VITE_DEEPSEEK_API_KEY || '');
+    // 探测 AI 后端（API Key 留在服务端，前端不持有密钥）
+    this.aiService.configure();
 
     console.log('[GameEngine] 引擎初始化完成');
   }

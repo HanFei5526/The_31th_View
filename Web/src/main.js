@@ -7,6 +7,9 @@
 // 设计系统样式
 import './styles/index.css'
 import './styles/transitions.css'
+import './styles/painting-viewer.css'
+import './styles/gate-panel.css'
+import './styles/prologue-dock.css'
 
 // 游戏引擎
 import gameEngine from './core/game-engine.js'
@@ -16,7 +19,6 @@ import LandingScene from './pages/landing.js'
 import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
 import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
-import { ChatPanel } from './components/chat-panel.js'
 import { NotebookPanel } from './components/notebook-panel.js'
 
 // ==================== 初始化 ====================
@@ -30,12 +32,11 @@ if (!app) {
 // 初始化引擎
 gameEngine.init(app)
 
-// 初始化 AI 组件并挂载到引擎
-const chatPanel = new ChatPanel(gameEngine)
+// 初始化笔记本面板并挂载到引擎
+// 注：旧的"问周老师"浮动入口（ChatPanel）已移除 ——
+// 序章中与周鹤年的对话统一由左下角常驻对话坞（PrologueDock）承担。
 const notebookPanel = new NotebookPanel(gameEngine)
-chatPanel.init()
 notebookPanel.init()
-gameEngine.chatPanel = chatPanel
 gameEngine.notebookPanel = notebookPanel
 
 // 注册场景
