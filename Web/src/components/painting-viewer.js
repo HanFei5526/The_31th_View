@@ -184,18 +184,34 @@ export default class PaintingViewer {
   }
 
   /**
-   * 将指定线索标记为"已记录"（由外部弹窗存入后调用）。
-   * 防止重复标记；三条全部记录后触发汇聚。
+   * 将指定线索标记为"已记录"（由外部研讨通过时调用）。
+   * 现在研讨已降级为辅助讨论，发现即确认；
+   * 但为了保持向后兼容，若研讨管理器调用此方法，静默完成即可。
    * @param {string} clueId
    */
   markClueRecorded(clueId) {
+    // 已在 _autoConfirmClue 中完成，此处做兼容兜底
+    if (!this._clues[clueId]?.recorded) {
+      this._autoConfirmClue(clueId);
+    }
+  }
+
+  /**
+   * 发现线索后自动确认（即时反馈，无需研讨）
+   * @param {string} clueId
+   * @private
+   */
+  _autoConfirmClue(clueId) {
     const clue = this._clues[clueId];
-    if (!clue || clue.recorded) return; // 防重复
+    if (!clue || clue.recorded) return;
     clue.recorded = true;
 
     // 在标记层添加持久标记点
     this._addMarker(clue.x, clue.y, clueId);
     this._updateStatus();
+
+    // 即时反馈
+    this._showFeedback(`✅ 「${clue.title}」已确认并记入笔记本`);
 
     // 判断是否触发汇聚
     this._checkConvergence();
@@ -451,6 +467,10 @@ export default class PaintingViewer {
       // 清除该线索的呼吸光斑（如果有）
       this._removeHintSpot(hitId);
 
+      // 明确反馈：告诉玩家发现了什么，下一步做什么
+      const clueTitle = this._clues[hitId].title;
+      this._showFeedback(`📌 发现线索「${clueTitle}」，在对话坞中与周老师讨论以确认`);
+
       // 回调
       this._opt.onClueFound?.(hitId);
     } else {
@@ -536,16 +556,27 @@ export default class PaintingViewer {
   //  内部 — 状态栏
   // ══════════════════════════════════════════════
 
-  /** 更新底部状态栏（线索 ●○○ 1/3） */
+  /** 更新底部状态栏：●已确认 ◐已发现待确认 ○未发现 */
   _updateStatus() {
     if (!this._statusEl) return;
+    const found = Object.values(this._clues).filter(c => c.found).length;
     const recorded = Object.values(this._clues).filter(c => c.recorded).length;
+
     let circles = '';
     for (let i = 0; i < 3; i++) {
-      circles += i < recorded ? '●' : '○';
+      if (i < recorded) circles += '●';
+      else if (i < found) circles += '◐';
+      else circles += '○';
     }
-    this._statusEl.innerHTML =
-      `线索 <span class="pv-circles">${circles}</span> ${recorded}/3`;
+
+    if (recorded === 3) {
+      this._statusEl.innerHTML =
+        `✅ 三处线索全部确认 <span class="pv-circles">${circles}</span>`;
+    } else {
+      this._statusEl.innerHTML =
+        `线索 <span class="pv-circles">${circles}</span>` +
+        ` <span class="pv-status-detail">${found}/3 已发现${recorded > 0 ? ` · ${recorded}/3 已确认` : ''}</span>`;
+    }
   }
 
   // ══════════════════════════════════════════════
@@ -567,13 +598,11 @@ export default class PaintingViewer {
       this._currentTool = null;
     }
 
-    // ── 第二步：显示旁白 → 汇聚动画 ──
-    // 旁白 1
-    this._opt.onFeedback?.('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
+    // ── 第二步：显示通关提示 → 汇聚动画 ──
+    this._showFeedback('🎉 三处线索全部确认！点击画面中央的交会点，准备进入下一阶段。');
 
     setTimeout(() => {
-      // 旁白 2
-      this._opt.onFeedback?.('试着把它们连在一起看看。');
+      this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
 
       setTimeout(() => {
         // 启动汇聚动画

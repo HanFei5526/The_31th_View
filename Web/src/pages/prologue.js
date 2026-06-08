@@ -243,7 +243,8 @@ export default class PrologueScene extends GameSceneBase {
   /* ==================== 线索研讨（走对话坞） ==================== */
 
   /**
-   * 触发研讨门槛 —— 复用左下角对话坞，切换到研讨模式
+   * 发现线索后即时确认（玩家不需要推理，降低门槛）
+   * 研讨降级为辅助讨论：自动确认后，仍可和周鹤年交流加深理解
    * @param {string} clueId
    * @private
    */
@@ -259,37 +260,38 @@ export default class PrologueScene extends GameSceneBase {
       return;
     }
 
-    // 同一线索的研讨已在进行中，忽略重复触发
+    // 同一线索已在处理中，忽略重复触发
     if (this._activeGateId === gateId) return;
     if (this.engine.discussionManager.isGateCompleted(gateId)) return;
     this._activeGateId = gateId;
 
+    // === 发现即确认：不等待玩家推理，直接标记线索 ===
+    // 研讨降级为辅助讨论，关键信息已在命中时反馈给玩家
+    this._markClueRecorded(clueId);
+
+    // 分发收集线索事件（供笔记本记录）
+    const clueData = CLUE_DATA[clueId];
+    if (clueData) {
+      window.dispatchEvent(new CustomEvent('clue-collected', {
+        detail: { text: clueData.recordText },
+      }));
+    }
+
+    // === 启动辅助讨论（可选，不阻塞进度）===
+    // 自动在对话坞展示线索说明，玩家可继续追问，但不影响通关
     const onGateCompleted = (data) => {
       if (data.gateId === gateId) {
         off();
         this._activeGateId = null;
-
-        // 研讨结束，对话坞恢复原本状态，并确保可以继续通用闲聊
+        // 讨论结束后恢复闲聊模式
         if (this._dock) {
           this._dock.setInteractive(true);
           this._dock._setInputState(false);
         }
-
-        // 分发收集线索事件（供笔记本记录）
-        const clueData = CLUE_DATA[clueId];
-        if (clueData) {
-          window.dispatchEvent(new CustomEvent('clue-collected', {
-            detail: { text: clueData.recordText },
-          }));
-        }
-
-        // 门槛通过后才真正记录线索
-        this._markClueRecorded(clueId);
       }
     };
     const off = this.engine.on('gate-completed', onGateCompleted);
 
-    // 进入研讨：对话坞恢复完全可交互（可输入）
     if (this._dock) {
       this._dock.setInteractive(true);
       this._dock._setInputState(false);
@@ -348,9 +350,13 @@ export default class PrologueScene extends GameSceneBase {
     this._fallTransition.destroy();
     this._fallTransition = null;
 
-    // 返回菜单
+    // 跌入画中：切换世界主题，进入第一章画中世界
+    this.engine.currentWorld = 'paint';
+    this.engine._applyWorldTheme();
+    this.engine.emit('world-changed', { world: 'paint' });
+
     this._root.classList.add('game-scene--exiting');
-    setTimeout(() => this.engine.switchScene('menu'), 600);
+    setTimeout(() => this.engine.switchScene('chapter1'), 600);
   }
 
   /* ==================== 工具方法 ==================== */

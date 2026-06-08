@@ -18,6 +18,7 @@ import gameEngine from './core/game-engine.js'
 import LandingScene from './pages/landing.js'
 import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
+import Chapter1PaintScene from './pages/chapter1-paint.js'
 import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
 import { NotebookPanel } from './components/notebook-panel.js'
 
@@ -43,12 +44,7 @@ gameEngine.notebookPanel = notebookPanel
 gameEngine.sceneManager.register('landing', LandingScene)
 gameEngine.sceneManager.register('menu', MenuScene)
 gameEngine.sceneManager.register('prologue', PrologueScene)
-gameEngine.sceneManager.register('chapter1', createChapterPlaceholderScene({
-  eyebrow: '第一章',
-  title: '东园',
-  subtitle: '兰雪堂至芙蓉榭',
-  description: '第一章的空间、线索与水面倒影谜题还在搭建中。当前入口先保留为章节占位，避免序章解锁后进入空场景。',
-}))
+gameEngine.sceneManager.register('chapter1', Chapter1PaintScene)
 gameEngine.sceneManager.register('chapter2', createChapterPlaceholderScene({
   eyebrow: '第二章',
   title: '中园',

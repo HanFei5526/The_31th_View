@@ -113,12 +113,6 @@ export class PrologueDock {
         }
       };
       row.addEventListener('click', onClick);
-
-      this.engine.emit('narration-logged', {
-        text: speaker ? `${speaker}：${text}` : text,
-        chapter: this.engine.currentChapter,
-        scene: 'prologue',
-      });
     });
   }
 

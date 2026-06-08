@@ -89,6 +89,7 @@ export class DiscussionGateManager {
 
   /**
    * 处理玩家输入（统一入口）
+   * 研讨已降级为辅助讨论：不设通过条件，自由交流即可
    * @param {string} text 玩家输入的文本
    */
   async handlePlayerInput(text) {
@@ -101,148 +102,66 @@ export class DiscussionGateManager {
     // 记录玩家消息到UI
     this.uiCallback.showPlayerMessage(text);
 
-    // 增加轮数（玩家发消息算一轮）
-    const currentRounds = (this.roundCount.get(gateId) || 0) + 1;
-    this.roundCount.set(gateId, currentRounds);
-
     // 记录对话历史
     if (!this.dialogueHistory.has(gateId)) {
       this.dialogueHistory.set(gateId, []);
     }
     this.dialogueHistory.get(gateId).push({ role: 'user', content: text });
 
-    // ===== 核心：关键词判定 =====
-    const analysis = analyzePlayerInput(gateId, text);
-    const understoodConcepts = this.insightProgress.get(gateId);
-
-    // 记录新理解的概念
-    let newConcepts = [];
-    for (const conceptId of analysis.matchedConcepts) {
-      if (!understoodConcepts.has(conceptId)) {
-        understoodConcepts.add(conceptId);
-        newConcepts.push(conceptId);
-      }
-    }
-
-    // 检查是否达到通过条件
-    let shouldShowConfirm = false;
-
-    if (analysis.matched) {
-      // 概念命中了，检查轮数
-      if (currentRounds >= config.minRounds) {
-        shouldShowConfirm = true;
-      }
-    }
-
-    // 检查是否说反了（包含关键词但加了否定）
-    const saidOpposite = analysis.matchedConcepts.length > 0 && _hasNegation(text);
-
-    // ===== 根据模式生成NPC回复 =====
+    // ===== 辅助讨论模式：不设通过条件，只生成回复 =====
     this.uiCallback.setLoading(true);
 
     try {
       if (this.engine.aiService && this.engine.aiService.isAvailable) {
-        // ==== 在线 AI 模式 ====
-        await this._handleOnlineMode(gateId, config, text, analysis, newConcepts, shouldShowConfirm, saidOpposite);
+        await this._handleDiscussionMode(gateId, config, text);
       } else {
-        // ==== 离线降级模式 ====
-        await this._handleOfflineMode(gateId, config, analysis, newConcepts, shouldShowConfirm, saidOpposite);
+        await this._handleOfflineDiscussion(gateId, config);
       }
     } catch (err) {
-      console.error('研讨处理错误:', err);
-      this.uiCallback.showNPCMessage('（网络似乎有些不稳定，换个角度再想想？）');
+      console.error('讨论处理错误:', err);
+      this.uiCallback.showNPCMessage('（网络似乎有些不稳定，稍后再试？）');
     } finally {
       this.uiCallback.setLoading(false);
     }
   }
 
   /**
-   * 在线AI模式处理
+   * 辅助讨论模式：AI自由回复，不设通过条件
    */
-  async _handleOnlineMode(gateId, config, text, analysis, newConcepts, shouldShowConfirm, saidOpposite) {
-    // 如果应该通过了，先给AI一个系统提示让它给出确认式回复
-    let systemHint = '';
-    if (shouldShowConfirm) {
-      systemHint = '【系统提示：玩家的推理已经到位，请给出肯定+总结的回复，并询问玩家是否确认这个推断。】';
-    } else if (saidOpposite) {
-      systemHint = '【系统提示：玩家说到了相关概念但方向反了（加了否定），请温和地纠正，不要直接说"你错了"。】';
-    } else if (newConcepts.length > 0) {
-      systemHint = '【系统提示：玩家的方向是对的，请给予简短肯定，然后继续追问引导到更深的理解。】';
-    } else {
-      systemHint = '【系统提示：玩家还没说到核心概念，请继续引导思考。】';
-    }
-
+  async _handleDiscussionMode(gateId, config, text) {
     const response = await this.engine.aiService.discussWithZhou(
       gateId,
       text,
       this.dialogueHistory.get(gateId),
-      systemHint
+      '【系统提示：这是辅助讨论，不设通过条件。玩家已经发现了线索，现在是在自由交流。请简短回复，1-3句话，保持学者口吻。】'
     );
 
     this.dialogueHistory.get(gateId).push({ role: 'assistant', content: response });
     this.uiCallback.showNPCMessage(response);
-
-    if (shouldShowConfirm) {
-      this.uiCallback.showConfirmButton(() => {
-        this._onPlayerConfirmed(gateId);
-      });
-    }
   }
 
   /**
-   * 离线降级模式处理
+   * 离线辅助讨论模式
    */
-  async _handleOfflineMode(gateId, config, analysis, newConcepts, shouldShowConfirm, saidOpposite) {
-    // 模拟一点网络延迟，让体验更自然
-    await this._delay(600 + Math.random() * 400);
+  async _handleOfflineDiscussion(gateId, config) {
+    // 模拟一点网络延迟
+    await this._delay(400 + Math.random() * 200);
 
-    let response = '';
-
-    if (shouldShowConfirm) {
-      // 理解度达标 → 确认式回复
-      response = config.passResponse;
-      this.uiCallback.showNPCMessage(response);
-      this.uiCallback.showConfirmButton(() => {
-        this._onPlayerConfirmed(gateId);
-      });
-      return;
-    }
-
-    if (saidOpposite) {
-      // 说反了 → 纠正回复
-      const pool = config.correctionPool;
-      const idx = this._getFallbackIndex(gateId, 'correction', pool.length);
-      response = pool[idx];
-    } else if (newConcepts.length > 0) {
-      // 方向对但没达标 → 肯定+继续引导
-      const affirmPool = config.affirmPool;
-      const hintPool = config.hintPool;
-      const affirmIdx = this._getFallbackIndex(gateId, 'affirm', affirmPool.length);
-      const hintIdx = this._getFallbackIndex(gateId, 'hint', hintPool.length);
-      response = affirmPool[affirmIdx] + '\n\n' + hintPool[hintIdx];
-    } else {
-      // 完全没命中 → 引导回复
-      const pool = config.hintPool;
-      const idx = this._getFallbackIndex(gateId, 'hint', pool.length);
-      response = pool[idx];
-    }
+    // 随机选一条简短的引导回复
+    const pool = config.affirmPool;
+    const idx = this._getFallbackIndex(gateId, 'affirm', pool.length);
+    const response = pool[idx];
 
     this.uiCallback.showNPCMessage(response);
   }
 
   /**
-   * 玩家点击"确认推断"按钮
+   * 辅助讨论完成后自动关闭（由外部在切换场景时调用）
    */
-  _onPlayerConfirmed(gateId) {
-    const config = getGateConfig(gateId);
-    this.uiCallback.hideConfirmButton();
-
-    // 展示通过动效
-    this.uiCallback.showPassEffect(config.title);
-
-    setTimeout(() => {
+  closeDiscussion(gateId) {
+    if (this.activeGate === gateId) {
       this.markGateCompleted(gateId);
-    }, 2500);
+    }
   }
 
   /**
