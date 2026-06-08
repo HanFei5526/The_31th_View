@@ -8,7 +8,7 @@
  *
  * 交互流程：
  * 1. 挂载后显示全屏界面，三种工具（放大镜 / 纸质分析 / 侧光照射）
- * 2. 使用放大镜后解锁画面点击探索
+ * 2. 完成三项基础检查后，使用放大镜解锁画面点击探索
  * 3. 点击命中线索区 → 金色涟漪 + 回调；未命中 → 灰色涟漪
  * 4. 连续错误 ≥ 3 → 呼吸光斑提示
  * 5. 三条线索全部记录后 → 汇聚动画 → 回调
@@ -27,6 +27,8 @@ const TOOLS = [
   { id: 'fiber',      icon: '🔬', label: '纸质分析' },
   { id: 'sidelight',  icon: '💡', label: '侧光照射' },
 ];
+
+const REQUIRED_TOOL_IDS = TOOLS.map((tool) => tool.id);
 
 // ── 工具反馈文案 ─────────────────────────────────────
 const TOOL_FEEDBACK = {
@@ -147,9 +149,9 @@ export default class PaintingViewer {
     this._feedbackEl = this._createElement('div', 'pv-feedback');
     main.appendChild(this._feedbackEl);
 
-    // 底部状态栏
+    // 线索状态栏：和图片同属于古画卡片，避免脱离画布
     this._statusEl = this._createElement('div', 'pv-status');
-    main.appendChild(this._statusEl);
+    card.appendChild(this._statusEl);
     this._updateStatus();
 
     // ── 内部容器：弹窗卡片 ──
@@ -239,16 +241,19 @@ export default class PaintingViewer {
     if (isFirstUse) {
       this._toolsUsed[toolId] = true;
 
-      // 使用放大镜后解锁探索
-      if (toolId === 'magnifier') {
-        this._explorable = true;
-        console.log('[PaintingViewer] 放大镜已使用，探索已解锁');
-        // 显示线索状态栏
-        if (this._statusEl) this._statusEl.style.display = 'block';
-      }
-
       // 回调
       this._opt.onToolUsed?.(toolId);
+    }
+
+    if (!this._explorable && this._hasUsedAllRequiredTools()) {
+      this._explorable = true;
+      console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
+      if (this._statusEl) this._statusEl.style.display = 'block';
+
+      const feedback = toolId === 'magnifier'
+        ? '三项基础检查完成。现在可以用放大镜在画面中寻找线索。'
+        : '三项基础检查完成。切回放大镜，在画面中寻找线索。';
+      this._showFeedback(feedback);
     }
 
     // 应用图像滤镜
@@ -394,10 +399,18 @@ export default class PaintingViewer {
       return;
     }
 
-    // 未解锁探索 → 显示提示
+    // 未完成基础检查 → 显示提示
     if (!this._explorable) {
-      console.log('[PaintingViewer] 点击被忽略：尚未使用放大镜');
-      this._showFeedback('请先在右侧工具栏使用放大镜 🔍');
+      console.log('[PaintingViewer] 点击被忽略：尚未完成三项基础检查');
+      const missing = this._getMissingToolLabels();
+      this._showFeedback(`请先完成三项基础检查：${missing.join('、')}`);
+      return;
+    }
+
+    // 探索阶段必须切回放大镜
+    if (this._currentTool !== 'magnifier') {
+      console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
+      this._showFeedback('三项基础检查已完成，请切回放大镜 🔍 在画面中寻找线索。');
       return;
     }
     // 汇聚阶段不再响应普通点击
@@ -602,7 +615,8 @@ export default class PaintingViewer {
       point.appendChild(label);
 
       // 交会点点击 → 触发最终回调
-      point.addEventListener('click', () => {
+      point.addEventListener('click', (event) => {
+        event.stopPropagation();
         point.classList.add('pv-explode');
         setTimeout(() => {
           this._opt.onConvergence?.();
@@ -627,5 +641,15 @@ export default class PaintingViewer {
     const el = document.createElement(tag);
     if (className) el.className = className;
     return el;
+  }
+
+  _hasUsedAllRequiredTools() {
+    return REQUIRED_TOOL_IDS.every((id) => this._toolsUsed[id]);
+  }
+
+  _getMissingToolLabels() {
+    return TOOLS
+      .filter((tool) => !this._toolsUsed[tool.id])
+      .map((tool) => tool.label);
   }
 }

@@ -19,6 +19,7 @@ export class NotebookFloating {
     this._toolSectionEl = null;
     this._toolGridEl = null;
     this._emptyGuideEl = null;
+    this._confirmAreaEl = null;
 
     // 回调
     this._onSubmitCb = null;
@@ -175,6 +176,9 @@ export class NotebookFloating {
     this._quickThoughtsEl = document.createElement('div');
     this._quickThoughtsEl.className = 'notebook-quick-thoughts';
 
+    this._confirmAreaEl = document.createElement('div');
+    this._confirmAreaEl.className = 'notebook-confirm-area hidden';
+
     const inputArea = document.createElement('div');
     inputArea.className = 'notebook-input-area';
     
@@ -197,6 +201,7 @@ export class NotebookFloating {
     inputArea.appendChild(this._sendBtn);
 
     pane.appendChild(this._historyEl);
+    pane.appendChild(this._confirmAreaEl);
     pane.appendChild(this._quickThoughtsEl);
     pane.appendChild(inputArea);
 
@@ -236,10 +241,13 @@ export class NotebookFloating {
     if (bool) {
       this._inputEl.disabled = true;
       this._sendBtn.disabled = true;
-      // add loading indicator if needed
+      this._sendBtn.textContent = '…';
+      this._container?.classList.add('is-loading');
     } else {
       this._inputEl.disabled = false;
       this._sendBtn.disabled = false;
+      this._sendBtn.innerHTML = '➤';
+      this._container?.classList.remove('is-loading');
       this._inputEl.focus();
     }
   }
@@ -249,6 +257,7 @@ export class NotebookFloating {
       this._historyEl.innerHTML = '';
       this._historyEl.appendChild(this._emptyGuideEl);
     }
+    this.hideConfirmButton();
   }
 
   showQuickThoughts(thoughts) {
@@ -351,10 +360,36 @@ export class NotebookFloating {
     this._onToolClickCb = callback;
   }
 
-  // === 其他接口 ===
-  showConfirmButton(cb) { /* 占位，如需 */ }
-  hideConfirmButton() { /* 占位，如需 */ }
-  showPassEffect(title) { /* 占位，如需 */ }
+  // === 研讨确认接口 ===
+  showConfirmButton(cb) {
+    if (!this._confirmAreaEl) return;
+    this._confirmAreaEl.innerHTML = '';
+    this._confirmAreaEl.classList.remove('hidden');
+
+    const btn = document.createElement('button');
+    btn.className = 'notebook-confirm-btn';
+    btn.innerHTML = '<span class="notebook-confirm-icon">✓</span><span>确认这个推断</span>';
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      btn.classList.add('confirmed');
+      cb?.();
+    });
+
+    this._confirmAreaEl.appendChild(btn);
+    this._scrollToBottom();
+  }
+
+  hideConfirmButton() {
+    if (!this._confirmAreaEl) return;
+    this._confirmAreaEl.classList.add('hidden');
+    this._confirmAreaEl.innerHTML = '';
+  }
+
+  showPassEffect(title) {
+    this.hideConfirmButton();
+    this.showSystemMessage(`研讨通过：「${title}」已写入修复记录。`);
+  }
+
   setOfflineMode(bool) { /* 占位，如需 */ }
 
   // === 事件处理器 ===

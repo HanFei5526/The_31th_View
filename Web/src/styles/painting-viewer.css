@@ -55,9 +55,9 @@
 .pv-card-container {
   display: flex;
   flex-direction: row;
-  width: 70vw;
-  height: 65vh;
-  margin-bottom: 8rem;
+  width: min(58vw, 980px);
+  height: min(54vh, 560px);
+  margin-bottom: 11rem;
   background: rgba(12, 9, 8, 0.92);
   border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: 4px;
@@ -73,7 +73,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 2.5rem 3rem;
   overflow: hidden;
   border-right: none;
 }
@@ -111,12 +111,15 @@
   inset: 0;
   pointer-events: none;
 }
+.pv-markers-layer {
+  pointer-events: auto;
+}
 .pv-feedback {
   position: fixed;
-  bottom: 10rem;
+  bottom: 12.25rem;
   left: 50%;
   transform: translateX(-50%) translateY(15px);
-  max-width: 60%;
+  max-width: min(52vw, 720px);
   background: rgba(26, 20, 16, 0.95);
   border: 1px solid rgba(160, 120, 90, 0.4);
   color: #e6dac3;
@@ -136,7 +139,7 @@
 }
 .pv-status {
   position: absolute;
-  bottom: 2rem;
+  bottom: 0.9rem;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(15, 12, 10, 0.85);
@@ -146,6 +149,7 @@
   border-radius: 4px;
   font-family: var(--font-serif);
   font-size: 0.9rem;
+  white-space: nowrap;
   pointer-events: none;
   z-index: 5;
   display: none;
@@ -239,13 +243,13 @@
 }
 .pv-convergence-point {
   position: absolute;
-  width: 70px;
-  height: 70px;
-  margin-left: -35px;
-  margin-top: -35px;
+  width: 96px;
+  height: 96px;
+  margin-left: -48px;
+  margin-top: -48px;
   cursor: pointer;
   pointer-events: auto;
-  z-index: 10;
+  z-index: 20;
 }
 .pv-convergence-pulse {
   position: absolute;

@@ -135,7 +135,7 @@
 .chat-bubble.npc {
   align-self: flex-start;
   background: rgba(45, 42, 38, 0.8);
-  color: var(--text-primary);
+  color: #efe7d8;
   border-left: 2px solid #d4a853;
 }
 
@@ -196,6 +196,50 @@
   filter: grayscale(1);
 }
 
+/* 研讨确认 */
+.notebook-confirm-area {
+  margin-bottom: 0.75rem;
+}
+
+.notebook-confirm-area.hidden {
+  display: none;
+}
+
+.notebook-confirm-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(112, 157, 102, 0.55);
+  border-radius: 4px;
+  background: rgba(112, 157, 102, 0.12);
+  color: #bfe0b8;
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.notebook-confirm-btn:hover:not(:disabled) {
+  background: rgba(112, 157, 102, 0.2);
+  border-color: rgba(112, 157, 102, 0.8);
+}
+
+.notebook-confirm-btn:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.notebook-confirm-btn.confirmed {
+  background: rgba(112, 157, 102, 0.24);
+}
+
+.notebook-confirm-icon {
+  font-size: 1rem;
+}
+
 /* 输入框区 */
 .notebook-input-area {
   display: flex;
@@ -241,6 +285,18 @@
 .notebook-send-btn:disabled {
   background: #554d3e;
   cursor: not-allowed;
+}
+
+.notebook-floating.is-loading .notebook-chat-history::after {
+  content: '（翻阅中……）';
+  align-self: flex-start;
+  max-width: 90%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: rgba(45, 42, 38, 0.6);
+  color: #cbbda5;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 /* === 记录 Tab 内部 === */

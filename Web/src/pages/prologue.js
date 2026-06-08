@@ -35,12 +35,12 @@ const PROLOGUE_SCRIPT = [
   { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
   { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
   { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
-  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。', portrait: '/images/zhou-portrait.png' },
-  { speaker: '周鹤年', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。', portrait: '/images/zhou-portrait.png' },
-  { speaker: '周鹤年', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。', portrait: '/images/zhou-portrait.png' },
-  { speaker: '周鹤年', text: '不是画面本身有问题。是有些东西被压在了下面。', portrait: '/images/zhou-portrait.png' },
-  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。', portrait: '/images/zhou-portrait.png' },
-  { speaker: '周鹤年', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。', portrait: '/images/zhou-portrait.png' }
+  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。' },
+  { speaker: '周鹤年', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
+  { speaker: '周鹤年', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
+  { speaker: '周鹤年', text: '不是画面本身有问题。是有些东西被压在了下面。' },
+  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
+  { speaker: '周鹤年', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。' }
 ];
 
 /** 三处线索的完整定义 */
@@ -144,28 +144,17 @@ export default class PrologueScene extends GameSceneBase {
     // 绑定 Notebook 提交事件
     this._notebook.onSubmit(async (text) => {
       if (this._activeGateId) {
-        // 综合门槛时面板应该隐藏了，但以防万一
-        this.engine.discussionManager.handlePlayerInput(text);
+        await this.engine.discussionManager.handleQuickThought(text);
       } else {
-        this._notebook.showPlayerMessage(text);
-        this._notebook.setLoading(true);
-        const reply = await this.engine.aiService.queryNotebook(text);
-        this._notebook.setLoading(false);
-        this._notebook.showNPCMessage(reply);
+        await this._askNotebook(text);
       }
     });
 
-    this._notebook.onQuickThought((text) => {
+    this._notebook.onQuickThought(async (text) => {
       if (this._activeGateId) {
-        this.engine.discussionManager.handleQuickThought(text);
+        await this.engine.discussionManager.handleQuickThought(text);
       } else {
-        // Quick thought 作为正常问题提交
-        this._notebook.showPlayerMessage(text);
-        this._notebook.setLoading(true);
-        this.engine.aiService.queryNotebook(text).then(reply => {
-          this._notebook.setLoading(false);
-          this._notebook.showNPCMessage(reply);
-        });
+        await this._askNotebook(text);
       }
     });
 
@@ -404,8 +393,10 @@ export default class PrologueScene extends GameSceneBase {
     }
     this._activeGateId = gateId;
 
-    this._notebook.hide();
-    this._hud.hide();
+    this._notebook.show();
+    this._notebook.expand();
+    this._notebook.switchTab('chat');
+    this._notebook.setPlaceholder('写下你对三处痕迹关系的判断……');
 
     this._synthesisGateOff = this.engine.on('gate-completed', (data) => {
       if (data.gateId !== gateId) return;
@@ -417,7 +408,6 @@ export default class PrologueScene extends GameSceneBase {
       this.engine.gameProgress.synthesisPassed = true;
       this.engine.saveProgress();
 
-      this.engine.gatePanel.unmount();
       this._notebook.show();
       this._notebook.expand();
       this._notebook.setPlaceholder('继续整理这三处痕迹……');
@@ -430,7 +420,10 @@ export default class PrologueScene extends GameSceneBase {
       this._paintingViewer?.triggerConvergence();
     });
 
-    this.engine.discussionManager.startSynthesisGate(gateId, this.engine.gatePanel);
+    this.engine.discussionManager.startSynthesisGate(gateId, this._createNotebookGateAdapter({
+      openingPrefix: '周老师批注',
+      systemPrefix: '研讨记录',
+    }));
   }
 
   /**
@@ -438,19 +431,54 @@ export default class PrologueScene extends GameSceneBase {
    * @returns {Object}
    * @private
    */
-  _createNotebookGateAdapter() {
+  _createNotebookGateAdapter(options = {}) {
+    const openingPrefix = options.openingPrefix || '周老师批注';
+    const systemPrefix = options.systemPrefix || '研讨';
+    const formatNotebookReply = (text) => {
+      if (!text) return text;
+      const zhouMatch = text.match(/^周鹤年：「([\s\S]*)」$/);
+      if (zhouMatch) return `${openingPrefix}：${zhouMatch[1]}`;
+      if (text.startsWith(`${openingPrefix}：`)) return text;
+      return `${openingPrefix}：${text}`;
+    };
+
     return {
       showOpening: (title, text) => {
-        this._notebook.showSystemMessage(`研讨：${title}`);
-        if (text) this._notebook.showNPCMessage(text);
+        this._notebook.showSystemMessage(`${systemPrefix}：${title}`);
+        if (text) this._notebook.showNPCMessage(formatNotebookReply(text));
       },
       showQuickThoughts: (thoughts) => this._notebook.showQuickThoughts(thoughts),
-      showNPCMessage: (text) => this._notebook.showNPCMessage(text),
+      showNPCMessage: (text) => this._notebook.showNPCMessage(formatNotebookReply(text)),
       showPlayerMessage: (text) => this._notebook.showPlayerMessage(text),
       showSystemMessage: (text) => this._notebook.showSystemMessage(text),
       setLoading: (value) => this._notebook.setLoading(value),
+      showConfirmButton: (cb) => this._notebook.showConfirmButton(cb),
+      hideConfirmButton: () => this._notebook.hideConfirmButton(),
+      showPassEffect: (title) => this._notebook.showPassEffect(title),
       setOfflineMode: () => {},
     };
+  }
+
+  /**
+   * 统一处理修复笔记本查询，确保快捷按钮和手动输入行为一致
+   * @param {string} text
+   * @private
+   */
+  async _askNotebook(text) {
+    if (!text?.trim()) return;
+
+    this._notebook.showPlayerMessage(text);
+    this._notebook.setLoading(true);
+
+    try {
+      const reply = await this.engine.aiService.queryNotebook(text);
+      this._notebook.showNPCMessage(reply);
+    } catch (err) {
+      console.error('[PrologueScene] 笔记本查询失败:', err);
+      this._notebook.showNPCMessage('（翻了翻，没有找到相关记录）');
+    } finally {
+      this._notebook.setLoading(false);
+    }
   }
 
   /**

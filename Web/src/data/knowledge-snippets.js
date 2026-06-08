@@ -21,6 +21,13 @@ export const KNOWLEDGE_SNIPPETS = [
 册页重装可能出于修复破损、统一尺幅、保护画心等目的。装裱、边框、题签和旁注都属于作品的物质信息，能帮助判断作品流转和整理过程。`,
   },
   {
+    id: 'prologue_notebook_scope',
+    chapter: 0,
+    unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
+    content: `【修复笔记本当前内容】
+当前笔记本已解锁的内容包括：《拙政园三十一景图》的公开信息、文徵明简介、册页装裱常识，以及后续由玩家亲自发现并记录的线索。它不是全知资料库；未发现的线索、后续章节内容和最终真相不会提前出现在笔记本里。`,
+  },
+  {
     id: 'clue_margin_label',
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_margin'),

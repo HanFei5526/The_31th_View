@@ -95,16 +95,21 @@
 
 /* 反馈提示条 */
 .narration-feedback {
-  position: fixed;
-  top: 40%;
+  position: absolute;
+  bottom: calc(100% + 1.35rem);
   left: 50%;
   transform: translateX(-50%) translateY(10px);
+  width: max-content;
+  max-width: min(52vw, 720px);
   background: rgba(0, 0, 0, 0.75);
   color: #f1f0ea;
   padding: 12px 32px;
   border-radius: 6px;
   font-family: var(--font-sans);
   font-size: 1.1rem;
+  line-height: 1.5;
+  text-align: center;
+  white-space: normal;
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s ease;

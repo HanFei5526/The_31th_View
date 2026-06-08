@@ -95,9 +95,9 @@ export class DiscussionGateManager {
   }
 
   /**
-   * 启动全屏综合研讨门槛
+   * 启动综合研讨门槛
    * @param {string} gateId 门槛ID
-   * @param {Object} container GatePanel 或同等 UI 回调接口
+   * @param {Object} container NotebookFloating / GatePanel 或同等 UI 回调接口
    * @param {Object} callbacks 生命周期回调
    */
   startSynthesisGate(gateId, container, callbacks = {}) {
