@@ -108,6 +108,13 @@ export class ChatPanel {
     // 世界切换时更新可见性
     this.engine.on('world-changed', () => this._updateVisibility());
 
+    // 监听打开预填消息事件
+    window.addEventListener('open-chat-panel', (e) => {
+      if (e.detail && e.detail.initialText) {
+        this.openWithMessage(e.detail.initialText);
+      }
+    });
+
     // 场景切换时关闭面板并清空历史
     this.engine.on('scene-enter', () => {
       this._close();
@@ -143,11 +150,23 @@ export class ChatPanel {
     setTimeout(() => this._inputEl.focus(), 300);
   }
 
+  /**
+   * 打开面板并预填消息
+   * @param {string} text
+   */
+  openWithMessage(text) {
+    this._open();
+    if (this._inputEl) {
+      this._inputEl.value = text;
+    }
+  }
+
   /** @private */
   _close() {
     this._isOpen = false;
     this._panelEl.classList.remove('open');
     this._toggleEl.classList.remove('active');
+    window.dispatchEvent(new CustomEvent('chat-panel-closed'));
   }
 
   /** @private */

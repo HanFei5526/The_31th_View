@@ -5,48 +5,65 @@
  * 玩家扮演研究生沈念，在导师周鹤年指导下接手第三十一景数字化修复任务。
  *
  * 完整流程：
- *   1. 章节标题淡入淡出「序章 · 残页」
- *   2. 场景描写旁白（沈念视角）
- *   3. 节拍1 · 周鹤年对话气泡（5段）
- *   4. 节拍2 · 扫描比对谜题（三工具渐进发现）
- *   5. 节拍3 · 跌入画中转场（墨迹扩散 + 过渡文字 + 回声）
- *   6. 序章完成 → 收集修复笔记本 → 解锁第一章 → 返回菜单
+ *   1. 场景描写旁白（沈念视角）
+ *   2. 导师出场旁白 → 周鹤年对话气泡（5段）
+ *   3. 弹出"查看古画"按钮
+ *   4. 点击后进入古画查看器（3/4 画面 + 右侧工具栏）
+ *   5. 使用工具 → 点击古画找线索 → 线索弹窗
+ *   6. 找齐3条线索 → 汇聚动画 → 跌入画中转场
+ *   7. 序章完成 → 收集修复笔记本 → 解锁第一章 → 返回菜单
  */
 
 import GameSceneBase from './game-scene.js';
-import ScannerUI from '../components/scanner-ui.js';
+import PaintingViewer from '../components/painting-viewer.js';
 import FallTransition from '../components/fall-transition.js';
+import { PrologueDock } from '../components/prologue-dock.js';
 
 const prologueBg = '/images/prologue-workshop.png';
 const paintingImg = '/images/scene-31-painting.png';
 
 /* ==================== 叙事文本 ==================== */
 
-/** 场景描写旁白（沈念视角） */
-const SCENE_NARRATIONS = [
-  '工作室在美术学院旧楼的三层，窗外是梧桐树。',
-  '面前的操作台上，一台高精度扫描仪正在低声嗡鸣。屏幕上，一页泛黄的册页被放大到纤维可辨的程度。',
-  '这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。',
+/**
+ * 序章脚本流：旁白 + 周鹤年开场白，全部通过左下角对话坞逐句播放。
+ * speaker 为 null 表示旁白，否则显示说话人名。
+ */
+const PROLOGUE_SCRIPT = [
+  { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
+  { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
+  { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
+  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。' },
+  { speaker: '周鹤年', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
+  { speaker: '周鹤年', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
+  { speaker: '周鹤年', text: '不是画面本身有问题。是有些东西被压在了下面。' },
+  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
+  { speaker: '周鹤年', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。' },
 ];
 
-/** 周鹤年对话序列（气泡框显示） */
-const ZHOU_DIALOGUE = [
-  '三十一景图你应该熟悉。本科课上讲过。',
-  '现存册页体系完整，学界一般认为内容已无重大缺页问题。公开数据库里，这一页也一直被视为正常的最后一景。',
-  '但这次高精度扫描发现了几个异常。不是它不像文徵明画的。恰恰相反，它太稳、太完整，像一页被处理得很干净的正式作品。',
-  '真正奇怪的是边缘、背纸和装裱层。那里有些东西被压住了。',
-  '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。',
-];
-
-/** 三工具发现反馈文本 */
-const TOOL_FEEDBACK = {
-  magnifier: '装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-  fiber: '背纸与其他三十页不完全一致，显示此页曾经重装；画心本身较稳定，并非整幅新画。',
-  sidelight: '装裱边下方隐约显出旧字残痕："……所见"；旁边有一条极淡的低位构图辅助线。',
+/** 三处线索的完整定义 */
+const CLUE_DATA = {
+  clue_margin: {
+    id: 'clue_margin',
+    title: '装裱接缝残角',
+    desc: '装裱边缘压住了一小片旧题签的残角。题签纸质与画心不同，边缘有被刀裁切过的痕迹——有人在重新装裱时，把原来的题签裁掉了大部分，只留下了被新边覆盖的这一角。',
+    askText: '我在装裱接缝处发现了一小片被裁掉的旧题签残角，这说明什么？',
+    recordText: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+  },
+  clue_text: {
+    id: 'clue_text',
+    title: '"……所见"残字',
+    desc: '侧光下，装裱边的下方隐约浮现两个残字："……所见"。笔迹纤细，不像是文徵明的书风。倒更像是某种旁注——有人曾在这里标注过什么，后来被装裱层压在了下面。',
+    askText: '装裱层下有两个残字"所见"，笔迹不像文徵明，这是谁写的？',
+    recordText: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+  },
+  clue_line: {
+    id: 'clue_line',
+    title: '低位构图辅助线',
+    desc: '一条极淡的墨线横贯画面下方，不是画面内容的一部分。这是一条构图辅助线——画家在正式落笔前用来确定视角高度的参考。它的位置异常地低，说明作画者的视线几乎与地面平齐。这不是站着画的。',
+    askText: '画面下方有一条低位构图辅助线，视线几乎与地面平齐，这意味着什么？',
+    recordText: '[线索] 低位构图辅助线 — 视线异常低，作画者非站立姿态',
+  },
 };
-
-/** 三工具全部使用后的提示 */
-const ALL_TOOLS_HINT = '三种检测都完成了。在侧光模式下，残字与辅助线的交会处似乎在微微发光……';
 
 /* ==================== 场景阶段 ==================== */
 
@@ -54,9 +71,11 @@ const PHASE = {
   TITLE: 0,
   NARRATION: 1,
   DIALOGUE: 2,
-  SCANNER: 3,
-  TRANSITION: 4,
-  COMPLETE: 5,
+  PROMPT: 3,       // 等待玩家点击"查看古画"
+  PAINTING: 4,     // 古画查看器界面
+  CONVERGENCE: 5,
+  TRANSITION: 6,
+  COMPLETE: 7,
 };
 
 /* ==================== 序章场景类 ==================== */
@@ -65,10 +84,11 @@ export default class PrologueScene extends GameSceneBase {
   constructor(engine) {
     super(engine);
     this._phase = PHASE.TITLE;
-    this._scannerUI = null;
+    this._paintingViewer = null;
     this._fallTransition = null;
-    this._dialogueBubbleEl = null;
-    this._autoFeedbackTimer = null;
+    this._dock = null;
+    this._activeGateId = null;
+    this._recordedClues = new Set(); // 防重复标记
   }
 
   /* ==================== 生命周期 ==================== */
@@ -82,250 +102,227 @@ export default class PrologueScene extends GameSceneBase {
     container.innerHTML = '';
     container.appendChild(root);
 
-    // 创建对话气泡容器
-    this._createDialogueBubble();
-
-    // 1. 章节阶段初始化（不再显示大字标题）
-    this._phase = PHASE.TITLE;
-
-    // 2. 场景描写旁白
-    this._phase = PHASE.NARRATION;
-    await this._showNarrationSequence(SCENE_NARRATIONS);
+    // 隐藏基类底部旁白面板 —— 序章全程改用左下角对话坞
     this._hideNarration();
+    if (this._narrationPanel) this._narrationPanel.style.display = 'none';
 
-    // 短暂停顿，营造导师站在身后的氛围
-    await this._delay(600);
-    await this._showNarration('导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。');
-    this._hideNarration();
+    // 创建并挂载左下角对话坞
+    this._dock = new PrologueDock(this.engine);
+    this._dock.mount(root);
 
-    await this._delay(400);
+    // 全局绑定对话处理：根据是否处于研讨门槛，路由玩家输入
+    this._dock.bindDiscussion(
+      async (text) => {
+        if (this._activeGateId) {
+          this.engine.discussionManager.handlePlayerInput(text);
+        } else {
+          // 通用闲聊模式
+          this._dock.showPlayerMessage(text);
+          this._dock.setLoading(true);
+          this._dock._setInputState(true); // 正在请求时禁用输入
+          const reply = await this.engine.aiService.chatWithZhou(text);
+          this._dock.setLoading(false);
+          this._dock.showNPCMessage(reply);
+          this._dock._setInputState(false); // 恢复输入
+        }
+      },
+      (text) => {
+        if (this._activeGateId) {
+          this.engine.discussionManager.handleQuickThought(text);
+        }
+      }
+    );
 
-    // 3. 周鹤年对话（气泡框）
+    // 1+2. 逐句播放脚本（旁白 + 周鹤年开场白）
     this._phase = PHASE.DIALOGUE;
-    await this._playZhouDialogue();
+    for (const line of PROLOGUE_SCRIPT) {
+      await this._dock.playLine(line.speaker, line.text);
+    }
 
-    // 4. 进入扫描比对阶段
-    this._phase = PHASE.SCANNER;
-    await this._showNarration('（使用下方工具检查这页画……）');
-    this._hideNarration();
-    await this._enterScannerPhase();
+    // 3. 弹出"查看古画"按钮
+    this._phase = PHASE.PROMPT;
+    this._showViewPaintingButton();
+    
+    // 脚本播放结束，正式开放输入框，允许玩家随时进行通用闲聊
+    if (this._dock) {
+      this._dock._setInputState(false);
+    }
   }
 
   exit() {
-    clearTimeout(this._autoFeedbackTimer);
-    // 清理扫描界面
-    if (this._scannerUI) {
-      this._scannerUI.destroy();
-      this._scannerUI = null;
+    if (this._paintingViewer) {
+      this._paintingViewer.destroy();
+      this._paintingViewer = null;
     }
-    // 清理转场
     if (this._fallTransition) {
       this._fallTransition.destroy();
       this._fallTransition = null;
     }
-    // 清理对话气泡
-    if (this._dialogueBubbleEl) {
-      this._dialogueBubbleEl.remove();
-      this._dialogueBubbleEl = null;
+    if (this._dock) {
+      this._dock.unmount();
+      this._dock = null;
     }
+    // 清理"查看古画"按钮
+    const promptBtn = document.getElementById('view-painting-prompt');
+    if (promptBtn) promptBtn.remove();
     super.exit();
   }
 
-  /* ==================== 对话气泡系统 ==================== */
+  /* ==================== "查看古画" 入口 ==================== */
 
   /**
-   * 创建人物对话气泡 DOM
+   * 在工作室场景中央显示"查看古画"按钮
    * @private
    */
-  _createDialogueBubble() {
-    const container = document.createElement('div');
-    container.className = 'dialogue-bubble-container';
-    container.id = 'dialogue-bubble-container';
-
-    container.innerHTML = `
-      <div class="dialogue-bubble" id="dialogue-bubble">
-        <div class="dialogue-bubble-speaker" id="dialogue-bubble-speaker"></div>
-        <div class="dialogue-bubble-text" id="dialogue-bubble-text"></div>
-        <div class="dialogue-bubble-indicator" id="dialogue-bubble-indicator">▼ 点击继续</div>
-      </div>
+  _showViewPaintingButton() {
+    const btn = document.createElement('button');
+    btn.className = 'view-painting-btn';
+    btn.id = 'view-painting-prompt';
+    btn.innerHTML = `
+      <span class="view-painting-icon">🖼️</span>
+      <span class="view-painting-label">查看古画</span>
     `;
-
-    this._root.appendChild(container);
-    this._dialogueBubbleEl = container;
-    this._bubbleSpeaker = container.querySelector('#dialogue-bubble-speaker');
-    this._bubbleText = container.querySelector('#dialogue-bubble-text');
-    this._bubbleIndicator = container.querySelector('#dialogue-bubble-indicator');
-  }
-
-  /**
-   * 在气泡框中显示一行角色对话（打字机效果），点击后 resolve
-   * @param {string} speaker — 说话人名字
-   * @param {string} text — 对话内容
-   * @returns {Promise<void>}
-   * @private
-   */
-  _showBubbleDialogue(speaker, text) {
-    return new Promise((resolve) => {
-      // 设置说话人
-      this._bubbleSpeaker.textContent = speaker;
-
-      // 隐藏指示器
-      this._bubbleIndicator.style.display = 'none';
-
-      // 显示气泡
-      this._dialogueBubbleEl.classList.add('visible');
-
-      // 打字机效果
-      this._bubbleText.textContent = '';
-      let i = 0;
-      const typeSpeed = 45;
-
-      const typeTimer = setInterval(() => {
-        if (i < text.length) {
-          this._bubbleText.textContent += text[i];
-          i++;
-        } else {
-          clearInterval(typeTimer);
-          this._bubbleIndicator.style.display = 'block';
-        }
-      }, typeSpeed);
-
-      // 点击处理
-      const bubble = this._dialogueBubbleEl.querySelector('#dialogue-bubble');
-      const clickHandler = () => {
-        if (i < text.length) {
-          // 跳过打字，直接显示完整文本
-          clearInterval(typeTimer);
-          this._bubbleText.textContent = text;
-          i = text.length;
-          this._bubbleIndicator.style.display = 'block';
-        } else {
-          // 推进到下一行
-          bubble.removeEventListener('click', clickHandler);
-          resolve();
-        }
-      };
-
-      bubble.addEventListener('click', clickHandler);
-
-      // 记录到叙事日志
-      this.engine.emit('narration-logged', {
-        text: `${speaker}：${text}`,
-        chapter: this.engine.currentChapter,
-        scene: 'prologue',
-      });
-    });
-  }
-
-  /**
-   * 隐藏对话气泡
-   * @private
-   */
-  _hideBubbleDialogue() {
-    if (this._dialogueBubbleEl) {
-      this._dialogueBubbleEl.classList.remove('visible');
-    }
-  }
-
-  /**
-   * 播放周鹤年对话序列
-   * @private
-   */
-  async _playZhouDialogue() {
-    for (const line of ZHOU_DIALOGUE) {
-      await this._showBubbleDialogue('周鹤年', line);
-    }
-    this._hideBubbleDialogue();
-
-    // 对话完成后短暂停顿
-    await this._delay(300);
-  }
-
-  /* ==================== 扫描比对阶段 ==================== */
-
-  /**
-   * 进入扫描比对谜题
-   * @private
-   */
-  async _enterScannerPhase() {
-    // 隐藏旁白面板
-    this._hideNarration();
-
-    // 短暂延迟后显示扫描界面
-    await this._delay(500);
-
-    this._scannerUI = new ScannerUI({
-      mainImage: paintingImg,
-      onToolUsed: (toolId, allUsed) => this._onToolUsed(toolId, allUsed),
-      onIntersectionClick: () => this._onIntersectionClick(),
-      onFeedback: (text) => this._showNarration(text),
-    });
-
-    // 挂载到场景根元素
-    this._scannerUI.mount(this._root);
-  }
-
-  /**
-   * 工具使用回调（非阻塞：旁白面板在扫描界面下层，不能用 click-to-advance）
-   * @param {string} toolId
-   * @param {boolean} allUsed — 是否三种工具都已使用
-   * @private
-   */
-  _onToolUsed(toolId, allUsed) {
-    // 显示该工具的发现反馈（自动消失，不阻塞）
-    const feedback = TOOL_FEEDBACK[toolId];
-    if (feedback) {
-      this._showAutoFeedback(feedback);
-    }
-
-    // 三工具全部使用后，给出提示并切换到侧光
-    if (allUsed) {
+    btn.addEventListener('click', () => {
+      btn.classList.add('clicked');
       setTimeout(() => {
-        this._showAutoFeedback(ALL_TOOLS_HINT, 3500);
-        // 提示消失后自动切换到侧光模式，显示交会热点
-        setTimeout(() => {
-          this._hideNarration();
-          this._scannerUI.activateSidelight();
-        }, 3800);
-      }, 3500);
+        btn.remove();
+        this._enterPaintingPhase();
+      }, 400);
+    });
+    this._root.appendChild(btn);
+
+    // 入场动画
+    requestAnimationFrame(() => btn.classList.add('visible'));
+  }
+
+  /* ==================== 古画查看阶段 ==================== */
+
+  /**
+   * 进入古画查看器
+   * @private
+   */
+  _enterPaintingPhase() {
+    this._phase = PHASE.PAINTING;
+
+    // 对话坞作为正式对话窗口保持完全可交互
+    if (this._dock) {
+      this._dock.setInteractive(true);
+      // 可选：添加一条提示，告知玩家可以一边看一边讨论
+      this._dock.showNPCMessage("你可以仔细观察这幅画，有任何发现随时告诉我。");
+    }
+
+    // 设置输入框状态为允许输入
+    if (this._dock) {
+      this._dock._setInputState(true);
+    }
+
+    this._paintingViewer = new PaintingViewer({
+      imageUrl: '/images/prologue/拙政园鸟瞰_首屏.png',
+      onToolUsed: (toolId) => {
+        // 工具使用的反馈通过 PaintingViewer 内部处理
+      },
+      onClueFound: (clueId) => {
+        this._startDiscussionGate(clueId);
+      },
+      onConvergence: () => {
+        this._onConvergenceClick();
+      },
+      onFeedback: (text) => {
+        // 可选：将反馈记录到叙事日志
+        this.engine.emit('narration-logged', {
+          text,
+          chapter: this.engine.currentChapter,
+          scene: 'prologue',
+        });
+      },
+    });
+
+    this._paintingViewer.mount(this._root);
+  }
+
+  /* ==================== 线索研讨（走对话坞） ==================== */
+
+  /**
+   * 发现线索后即时确认（玩家不需要推理，降低门槛）
+   * 研讨降级为辅助讨论：自动确认后，仍可和周鹤年交流加深理解
+   * @param {string} clueId
+   * @private
+   */
+  _startDiscussionGate(clueId) {
+    let gateId = '';
+    if (clueId === 'clue_margin') {
+      gateId = 'gate_prologue_margin';
+    } else if (clueId === 'clue_text') {
+      gateId = 'gate_prologue_text';
+    } else if (clueId === 'clue_line') {
+      gateId = 'gate_prologue_line';
+    } else {
+      return;
+    }
+
+    // 同一线索已在处理中，忽略重复触发
+    if (this._activeGateId === gateId) return;
+    if (this.engine.discussionManager.isGateCompleted(gateId)) return;
+    this._activeGateId = gateId;
+
+    // === 发现即确认：不等待玩家推理，直接标记线索 ===
+    // 研讨降级为辅助讨论，关键信息已在命中时反馈给玩家
+    this._markClueRecorded(clueId);
+
+    // 分发收集线索事件（供笔记本记录）
+    const clueData = CLUE_DATA[clueId];
+    if (clueData) {
+      window.dispatchEvent(new CustomEvent('clue-collected', {
+        detail: { text: clueData.recordText },
+      }));
+    }
+
+    // === 启动辅助讨论（可选，不阻塞进度）===
+    // 自动在对话坞展示线索说明，玩家可继续追问，但不影响通关
+    const onGateCompleted = (data) => {
+      if (data.gateId === gateId) {
+        off();
+        this._activeGateId = null;
+        // 讨论结束后恢复闲聊模式
+        if (this._dock) {
+          this._dock.setInteractive(true);
+          this._dock._setInputState(false);
+        }
+      }
+    };
+    const off = this.engine.on('gate-completed', onGateCompleted);
+
+    if (this._dock) {
+      this._dock.setInteractive(true);
+      this._dock._setInputState(false);
+    }
+
+    this.engine.discussionManager.startGate(gateId, this._dock);
+  }
+
+  /**
+   * 标记线索已记录（防重复）
+   * @param {string} clueId
+   * @private
+   */
+  _markClueRecorded(clueId) {
+    if (this._recordedClues.has(clueId)) return;
+    this._recordedClues.add(clueId);
+    if (this._paintingViewer) {
+      this._paintingViewer.markClueRecorded(clueId);
     }
   }
 
-  /**
-   * 在旁白面板显示反馈文字，自动消失（不需要玩家点击）
-   * @param {string} text
-   * @param {number} [duration=3000] — 显示时长（毫秒）
-   * @private
-   */
-  _showAutoFeedback(text, duration = 3000) {
-    // 提升旁白面板 z-index 到扫描界面之上
-    this._narrationPanel.style.zIndex = '20';
-    this._narrationPanel.classList.add('gs-narration--visible');
-    this._narrationIndicator.style.display = 'none';
-    this._narrationText.textContent = text;
-
-    this.engine.emit('narration-logged', {
-      text,
-      chapter: this.engine.currentChapter,
-      scene: 'prologue',
-    });
-
-    // 自动隐藏
-    clearTimeout(this._autoFeedbackTimer);
-    this._autoFeedbackTimer = setTimeout(() => {
-      this._narrationPanel.classList.remove('gs-narration--visible');
-    }, duration);
-  }
+  /* ==================== 汇聚 → 跌入转场 ==================== */
 
   /**
-   * 交会热点点击 → 触发跌入画中
+   * 交会点点击 → 跌入画中
    * @private
    */
-  async _onIntersectionClick() {
+  async _onConvergenceClick() {
     this._phase = PHASE.TRANSITION;
 
-    // 获取点击位置（墨迹扩散起点）
-    const origin = this._scannerUI.getIntersectionOrigin();
+    const origin = { x: window.innerWidth / 2, y: window.innerHeight * 0.6 };
 
     // 收集修复笔记本
     this.engine.collectItem({
@@ -335,8 +332,9 @@ export default class PrologueScene extends GameSceneBase {
       icon: '📓',
     });
 
-    // 隐藏扫描界面旁白
-    this._hideNarration();
+    // 记录状态变量
+    this.engine.gameProgress.hasNotebook = true;
+    this.engine.gameProgress.foundMarginTrace = true;
 
     // 播放跌入转场
     this._fallTransition = new FallTransition();
@@ -348,23 +346,21 @@ export default class PrologueScene extends GameSceneBase {
     this.engine.gameProgress.chapter1 = true;
     this.engine.saveProgress();
 
-    // 清理转场元素
+    // 清理转场
     this._fallTransition.destroy();
     this._fallTransition = null;
 
-    // 返回菜单（第一章解锁后可进入）
+    // 跌入画中：切换世界主题，进入第一章画中世界
+    this.engine.currentWorld = 'paint';
+    this.engine._applyWorldTheme();
+    this.engine.emit('world-changed', { world: 'paint' });
+
     this._root.classList.add('game-scene--exiting');
-    setTimeout(() => this.engine.switchScene('menu'), 600);
+    setTimeout(() => this.engine.switchScene('chapter1'), 600);
   }
 
   /* ==================== 工具方法 ==================== */
 
-  /**
-   * 延迟
-   * @param {number} ms
-   * @returns {Promise<void>}
-   * @private
-   */
   _delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }

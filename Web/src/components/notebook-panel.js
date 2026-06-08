@@ -184,26 +184,20 @@ export class NotebookPanel {
       );
     });
 
-    // 提示显示 → 触发批注
-    this.engine.on('hint-shown', (data) => {
-      this._tryGenerateAnnotation(
-        'hint-received',
-        `收到了一条提示（第${data.level}级）：${data.text}`,
-        `hint-${data.puzzleId}-${data.level}`
-      );
-    });
-
-    // 与周鹤年对话结束 → 触发批注
+    // 与周鹤年对话结束 → 只在包含推理进展时触发批注
     this.engine.on('zhou-chat-complete', (data) => {
-      // 只在有实质内容时触发（避免无意义对话也生成批注）
-      if (data.zhouReply && data.zhouReply.length > 10) {
-        const key = `zhou-${Date.now()}`;
-        this._tryGenerateAnnotation(
-          'zhou-dialogue',
-          `和周鹤年讨论后，他说：「${data.zhouReply}」这让我产生了一些新的想法。`,
-          key
-        );
-      }
+      // 过滤条件：有实质内容 + 包含推理关键词
+      if (!data.zhouReply || data.zhouReply.length < 15) return;
+      const reasoningKeywords = ['推断', '判断', '结论', '关键', '说明', '意味着', '证明', '指向', '因此', '所以', '线索'];
+      const hasReasoning = reasoningKeywords.some(kw => data.zhouReply.includes(kw));
+      if (!hasReasoning) return;
+
+      const key = `zhou-${Date.now()}`;
+      this._tryGenerateAnnotation(
+        'zhou-dialogue',
+        `和周鹤年讨论后的推理：${data.zhouReply.slice(0, 60)}${data.zhouReply.length > 60 ? '……' : ''}`,
+        key
+      );
     });
 
     // AI 批注生成完成 → 添加到列表
@@ -214,6 +208,13 @@ export class NotebookPanel {
     // 叙事旁白记录 → 添加到日志
     this.engine.on('narration-logged', (data) => {
       this._addNarrativeLog(data.text, data.chapter, data.scene);
+    });
+
+    // 线索收集 → 添加到批注
+    window.addEventListener('clue-collected', (e) => {
+      if (e.detail && e.detail.text) {
+        this._addAnnotation(e.detail.text, this.engine.currentChapter || 0, 'clue-collected');
+      }
     });
 
     // 标签切换

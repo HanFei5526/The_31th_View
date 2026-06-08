@@ -7,6 +7,9 @@
 // 设计系统样式
 import './styles/index.css'
 import './styles/transitions.css'
+import './styles/painting-viewer.css'
+import './styles/gate-panel.css'
+import './styles/prologue-dock.css'
 
 // 游戏引擎
 import gameEngine from './core/game-engine.js'
@@ -15,8 +18,8 @@ import gameEngine from './core/game-engine.js'
 import LandingScene from './pages/landing.js'
 import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
+import Chapter1PaintScene from './pages/chapter1-paint.js'
 import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
-import { ChatPanel } from './components/chat-panel.js'
 import { NotebookPanel } from './components/notebook-panel.js'
 
 // ==================== 初始化 ====================
@@ -30,24 +33,18 @@ if (!app) {
 // 初始化引擎
 gameEngine.init(app)
 
-// 初始化 AI 组件并挂载到引擎
-const chatPanel = new ChatPanel(gameEngine)
+// 初始化笔记本面板并挂载到引擎
+// 注：旧的"问周老师"浮动入口（ChatPanel）已移除 ——
+// 序章中与周鹤年的对话统一由左下角常驻对话坞（PrologueDock）承担。
 const notebookPanel = new NotebookPanel(gameEngine)
-chatPanel.init()
 notebookPanel.init()
-gameEngine.chatPanel = chatPanel
 gameEngine.notebookPanel = notebookPanel
 
 // 注册场景
 gameEngine.sceneManager.register('landing', LandingScene)
 gameEngine.sceneManager.register('menu', MenuScene)
 gameEngine.sceneManager.register('prologue', PrologueScene)
-gameEngine.sceneManager.register('chapter1', createChapterPlaceholderScene({
-  eyebrow: '第一章',
-  title: '东园',
-  subtitle: '兰雪堂至芙蓉榭',
-  description: '第一章的空间、线索与水面倒影谜题还在搭建中。当前入口先保留为章节占位，避免序章解锁后进入空场景。',
-}))
+gameEngine.sceneManager.register('chapter1', Chapter1PaintScene)
 gameEngine.sceneManager.register('chapter2', createChapterPlaceholderScene({
   eyebrow: '第二章',
   title: '中园',

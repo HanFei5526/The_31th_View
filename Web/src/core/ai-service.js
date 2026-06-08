@@ -16,18 +16,22 @@ import {
   buildNotebookQueryPrompt,
   buildAnnotationPrompt,
   buildReportPrompt,
+  buildGateZhouPrompt,
 } from './ai-prompts.js';
 
-const API_URL = 'https://api.deepseek.com/chat/completions';
-const MODEL = 'deepseek-v4-pro';
+/**
+ * API 配置。直接调用 DeepSeek 官方 API
+ */
+const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || '';
+const CHAT_ENDPOINT = 'https://api.deepseek.com/chat/completions';
 
 export class AIService {
   constructor(engine) {
     /** @type {import('./game-engine.js').GameEngine} */
     this.engine = engine;
 
-    /** DeepSeek API Key */
-    this._apiKey = '';
+    /** 后端是否可用（健康检查通过后置为 true） */
+    this._available = false;
 
     /** 周鹤年对话历史（每次场景切换时清空） */
     this._zhouHistory = [];
@@ -38,21 +42,23 @@ export class AIService {
      ========================== */
 
   /**
-   * 配置 API Key
-   * @param {string} key
+   * 探测配置状态。
+   * @returns {Promise<boolean>}
    */
-  configure(key) {
-    this._apiKey = key || '';
-    if (this._apiKey) {
-      console.log('[AIService] API Key 已配置');
+  async configure() {
+    if (DEEPSEEK_API_KEY) {
+      this._available = true;
+      console.log('[AIService] DeepSeek API Key 已配置，模型就绪');
     } else {
-      console.warn('[AIService] 未配置 API Key，AI 功能将不可用');
+      this._available = false;
+      console.warn('[AIService] 未在 .env 中找到 VITE_DEEPSEEK_API_KEY，将走离线降级模式');
     }
+    return this._available;
   }
 
-  /** @returns {boolean} API Key 是否已配置 */
+  /** @returns {boolean} 后端是否可用 */
   get isAvailable() {
-    return this._apiKey.length > 0;
+    return this._available;
   }
 
   /** 清空周鹤年对话历史（场景切换时调用） */
@@ -90,6 +96,33 @@ export class AIService {
     this._zhouHistory.push({ role: 'assistant', content: reply });
 
     return reply;
+  }
+
+  /* ==========================
+     方案 A+ · 研讨门槛对话
+     ========================== */
+
+  /**
+   * 研讨门槛中与周鹤年讨论
+   * @param {string} gateId - 门槛ID
+   * @param {string} userMessage - 玩家输入
+   * @param {Array} history - 对话历史 [{role, content}, ...]
+   * @param {string} systemHint - 系统提示（由前端关键词判定注入）
+   * @returns {Promise<string>} 周鹤年的回复
+   */
+  async discussWithZhou(gateId, userMessage, history = [], systemHint = '') {
+    const ctx = this.engine.getAIContext();
+    const systemPrompt = buildGateZhouPrompt(ctx, gateId, systemHint);
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...history,
+    ];
+
+    return this._callAPI(messages, {
+      temperature: 0.7,
+      max_tokens: 300,
+    });
   }
 
   /* ==========================
@@ -178,46 +211,38 @@ export class AIService {
      内部方法
      ========================== */
 
-  /**
-   * 调用 DeepSeek API
-   * @private
-   * @param {Array} messages - 消息数组
-   * @param {object} options - temperature, max_tokens
-   * @returns {Promise<string>} AI 回复文本
-   */
   async _callAPI(messages, options = {}) {
     if (!this.isAvailable) {
-      return '（AI 功能未启用，请在 .env 文件中配置 VITE_DEEPSEEK_API_KEY）';
+      return '（AI 功能未启用，请在 Web/.env 中配置 VITE_DEEPSEEK_API_KEY）';
     }
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(CHAT_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this._apiKey}`,
+          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
         },
         body: JSON.stringify({
-          model: MODEL,
+          model: 'deepseek-chat',
           messages,
           temperature: options.temperature ?? 0.7,
           max_tokens: options.max_tokens ?? 300,
-          stream: false,
         }),
       });
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error('[AIService] API 请求失败:', response.status, errText);
-        return '（笔记本页面有些模糊，暂时无法辨认……）';
+        console.error('[AIService] 请求失败:', response.status, errText);
+        return '（大模型有些困惑，暂时无法辨认……）';
       }
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content;
 
       if (!content) {
-        console.error('[AIService] API 返回格式异常:', data);
-        return '（墨迹尚未干透……）';
+        console.error('[AIService] 返回格式异常:', data);
+        return '（模型返回空文本……）';
       }
 
       return content.trim();

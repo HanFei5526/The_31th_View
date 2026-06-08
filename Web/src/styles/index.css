@@ -195,6 +195,18 @@ a {
   z-index: var(--z-scene);
 }
 
+/* 统一高级质感：全屏胶片/宣纸噪点遮罩（叠加在背景图之上） */
+.scene-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2; /* 确保在背景图之上，但在UI层之下 */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.08; /* 控制噪点强度 */
+  mix-blend-mode: multiply;
+}
+
 /* --- World Themes --- */
 
 /* 现实世界 */
@@ -243,8 +255,9 @@ a {
   margin: 0 auto;
   padding: 2rem;
   font-size: var(--font-size-lg);
-  line-height: 2;
-  letter-spacing: 0.05em;
+  line-height: 2.2;
+  letter-spacing: 0.08em;
+  font-weight: 300;
 }
 
 .paint-world .narrative-text {
@@ -542,7 +555,7 @@ a {
 /* --- Inventory Panel --- */
 .inventory-toggle {
   position: fixed;
-  bottom: 2rem;
+  top: 2rem;
   right: 2rem;
   width: 52px;
   height: 52px;
@@ -642,11 +655,11 @@ a {
 /* --- Hint Notebook --- */
 .hint-notebook {
   position: fixed;
-  top: 50%;
+  top: calc((100% - 240px) / 2); /* 居中于上方安全区 (避开底部的对话框) */
   left: 50%;
   transform: translate(-50%, -50%) scale(0.9);
   width: 600px;
-  max-height: 80vh;
+  max-height: calc(100vh - 300px); /* 最大高度避开对话框和上下边距 */
   border-radius: var(--radius-xl);
   padding: 2.5rem;
   z-index: var(--z-overlay);
@@ -1707,7 +1720,7 @@ a {
 
 .notebook-toggle {
   position: fixed;
-  bottom: 2rem;
+  bottom: 260px; /* Float above the 240px dialogue dock */
   right: 2rem;
   width: 56px;
   height: 56px;
@@ -1762,11 +1775,11 @@ a {
 
 .notebook-ai-panel {
   position: fixed;
-  top: 50%;
+  top: calc((100% - 240px) / 2); /* 避开底部对话框 */
   left: 50%;
   transform: translate(-50%, -50%) scale(0.9);
   width: 600px;
-  max-height: 80vh;
+  max-height: calc(100vh - 300px);
   border-radius: var(--radius-xl);
   z-index: calc(var(--z-overlay) + 1);
   opacity: 0;
