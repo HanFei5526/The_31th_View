@@ -60,7 +60,7 @@ export default class PaintingViewer {
     this._hintsLayer = null;   // 呼吸光斑层
     this._feedbackEl = null;   // 底部反馈条
     this._statusEl = null;     // 底部状态栏
-    this._toolBtns = {};       // { magnifier: btn, fiber: btn, sidelight: btn }
+    this._statusEl = null;     // 底部状态栏
     this._opt = {
       imageUrl: '',
       dockEl: null,         // 对话框DOM元素，将其嵌入到古画左侧下方
@@ -154,10 +154,6 @@ export default class PaintingViewer {
     const cardContainer = this._createElement('div', 'pv-card-container');
     cardContainer.appendChild(main);
 
-    // ── 右侧：工具侧边栏 ──
-    const sidebar = this._buildSidebar();
-    cardContainer.appendChild(sidebar);
-
     this._el.appendChild(cardContainer);
 
     // ── 挂载到父节点 ──
@@ -218,75 +214,21 @@ export default class PaintingViewer {
   }
 
   // ══════════════════════════════════════════════
-  //  内部 — 构建 DOM
+  //  公开 API — 工具控制
   // ══════════════════════════════════════════════
 
-  /** 构建工具侧边栏 */
-  _buildSidebar() {
-    const sidebar = this._createElement('div', 'pv-sidebar');
-
-    // 标题
-    const title = this._createElement('div', 'pv-sidebar-title');
-    title.textContent = '检测工具';
-    sidebar.appendChild(title);
-
-    // 工具列表
-    const list = this._createElement('div', 'pv-tool-list');
-
-    TOOLS.forEach(tool => {
-      const item = this._createElement('button', 'pv-tool-item');
-      item.innerHTML = `<span class="pv-tool-icon">${tool.icon}</span><span class="pv-tool-label">${tool.label}</span>`;
-      item.addEventListener('click', () => this._activateTool(tool.id));
-      list.appendChild(item);
-      this._toolBtns[tool.id] = item;
-    });
-
-    sidebar.appendChild(list);
-
-    // 底部提示文字
-    const tip = this._createElement('div', 'pv-sidebar-tip');
-    tip.textContent = '请依次使用工具检测画面';
-    sidebar.appendChild(tip);
-    this._sidebarTip = tip;
-
-    return sidebar;
-  }
-
-  // ══════════════════════════════════════════════
-  //  内部 — 工具交互
-  // ══════════════════════════════════════════════
-
-  /** 激活 / 切换工具 */
-  _activateTool(toolId) {
-    // 取消当前工具高亮
-    if (this._currentTool) {
-      this._toolBtns[this._currentTool]?.classList.remove('active');
-    }
-
-    // 如果再次点击同一工具 → 取消选中
-    if (this._currentTool === toolId) {
-      this._currentTool = null;
-      this._panX = 0;
-      this._panY = 0;
-      this._zoomLevel = 1.0;
-      this._applyImageEffect(null);
-      return;
-    }
-
-    // 激活新工具
+  /** 由外部调用：应用指定的工具滤镜 */
+  applyTool(toolId) {
     this._currentTool = toolId;
-    this._toolBtns[toolId]?.classList.add('active');
-
+    
     // 首次使用
     const isFirstUse = !this._toolsUsed[toolId];
     if (isFirstUse) {
       this._toolsUsed[toolId] = true;
-      this._toolBtns[toolId]?.classList.add('used');
 
       // 使用放大镜后解锁探索
       if (toolId === 'magnifier') {
         this._explorable = true;
-        this._sidebarTip.textContent = '✅ 已解锁画面点击探索';
         console.log('[PaintingViewer] 放大镜已使用，探索已解锁');
         // 显示线索状态栏
         if (this._statusEl) this._statusEl.style.display = 'block';
@@ -294,13 +236,19 @@ export default class PaintingViewer {
 
       // 回调
       this._opt.onToolUsed?.(toolId);
-
-      // 显示工具反馈文案
-      this._showFeedback(TOOL_FEEDBACK[toolId]);
     }
 
     // 应用图像滤镜
     this._applyImageEffect(toolId);
+  }
+
+  /** 由外部调用：清除当前工具滤镜 */
+  clearTool() {
+    this._currentTool = null;
+    this._panX = 0;
+    this._panY = 0;
+    this._zoomLevel = 1.0;
+    this._applyImageEffect(null);
   }
 
   /** 根据当前工具设置包装层的 transform / filter */
@@ -351,7 +299,8 @@ export default class PaintingViewer {
   _onMouseDown(e) {
     if (this._currentTool !== 'magnifier') return;
     if (!this._explorable) return;
-    
+    if (this._zoomLevel <= 1.0) return; // 未放大时禁止拖动
+
     e.preventDefault(); // 防止默认图片拖拽行为
     this._isDragging = true;
     this._dragStartX = e.clientX;
@@ -592,11 +541,7 @@ export default class PaintingViewer {
     this._hintsLayer.innerHTML = ''; // 清除所有光斑
 
     // ── 第一步：还原缩放 ──
-    this._applyImageEffect(null);
-    if (this._currentTool) {
-      this._toolBtns[this._currentTool]?.classList.remove('active');
-      this._currentTool = null;
-    }
+    this.clearTool();
 
     // ── 第二步：显示通关提示 → 汇聚动画 ──
     this._showFeedback('🎉 三处线索全部确认！点击画面中央的交会点，准备进入下一阶段。');
@@ -611,38 +556,31 @@ export default class PaintingViewer {
     }, 2200);
   }
 
-  /** 播放汇聚动画：三条金色连线 → 交会点脉冲 → 可点击 */
+  /** 播放汇聚动画：三个金色光点向中心汇聚 → 交会点脉冲 → 可点击 */
   _playConvergence() {
     if (this._convergenceShown) return;
     this._convergenceShown = true;
 
-    // 交会点坐标（三个线索的几何中心附近）
+    // 交会点坐标（三个线索的几何中心）
     const cx = 50, cy = 56;
 
-    // ── 逐条绘制连线 ──
+    // ── 三个光点向中心飞去 ──
     const clueEntries = Object.values(this._clues);
-    clueEntries.forEach((clue, idx) => {
-      setTimeout(() => {
-        const line = document.createElement('div');
-        line.className = 'pv-convergence-line';
-
-        // 计算长度和角度
-        const dx = cx - clue.x;
-        const dy = cy - clue.y;
-        const length = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-        line.style.left = `${clue.x}%`;
-        line.style.top = `${clue.y}%`;
-        line.style.width = `${length}%`;
-        line.style.transform = `rotate(${angle}deg)`;
-        line.style.transformOrigin = '0 50%';
-
-        this._markersLayer.appendChild(line);
-      }, idx * 350);
+    clueEntries.forEach((clue) => {
+      const dot = document.createElement('div');
+      dot.className = 'pv-convergence-dot';
+      dot.style.left = `${clue.x}%`;
+      dot.style.top = `${clue.y}%`;
+      // 触发 reflow 后设置终点，让 CSS transition 驱动动画
+      requestAnimationFrame(() => {
+        dot.style.left = `${cx}%`;
+        dot.style.top = `${cy}%`;
+        dot.style.opacity = '0';
+      });
+      this._markersLayer.appendChild(dot);
     });
 
-    // ── 交会点 + 脉冲 ──
+    // ── 交会点 + 脉冲（光点到达后出现）──
     setTimeout(() => {
       const point = document.createElement('div');
       point.className = 'pv-convergence-point';
@@ -667,7 +605,7 @@ export default class PaintingViewer {
       });
 
       this._markersLayer.appendChild(point);
-    }, clueEntries.length * 350 + 400);
+    }, 1500); // 等光点飞到中心后出现
   }
 
   // ══════════════════════════════════════════════

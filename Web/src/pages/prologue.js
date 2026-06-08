@@ -17,7 +17,10 @@
 import GameSceneBase from './game-scene.js';
 import PaintingViewer from '../components/painting-viewer.js';
 import FallTransition from '../components/fall-transition.js';
-import { PrologueDock } from '../components/prologue-dock.js';
+import { NarrationBar } from '../components/narration-bar.js';
+import { NotebookFloating } from '../components/notebook-floating.js';
+import { HudBar } from '../components/hud-bar.js';
+import { InventoryPopup } from '../components/inventory-popup.js';
 
 const prologueBg = '/images/prologue-workshop.png';
 const paintingImg = '/images/scene-31-painting.png';
@@ -32,12 +35,12 @@ const PROLOGUE_SCRIPT = [
   { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
   { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
   { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
-  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。' },
-  { speaker: '周鹤年', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
-  { speaker: '周鹤年', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
-  { speaker: '周鹤年', text: '不是画面本身有问题。是有些东西被压在了下面。' },
-  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
-  { speaker: '周鹤年', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。' },
+  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。', portrait: '/images/zhou-portrait.png' },
+  { speaker: '周鹤年', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。', portrait: '/images/zhou-portrait.png' },
+  { speaker: '周鹤年', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。', portrait: '/images/zhou-portrait.png' },
+  { speaker: '周鹤年', text: '不是画面本身有问题。是有些东西被压在了下面。', portrait: '/images/zhou-portrait.png' },
+  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。', portrait: '/images/zhou-portrait.png' },
+  { speaker: '周鹤年', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。', portrait: '/images/zhou-portrait.png' }
 ];
 
 /** 三处线索的完整定义 */
@@ -86,7 +89,10 @@ export default class PrologueScene extends GameSceneBase {
     this._phase = PHASE.TITLE;
     this._paintingViewer = null;
     this._fallTransition = null;
-    this._dock = null;
+    this._narrationBar = null;
+    this._notebook = null;
+    this._hud = null;
+    this._inventoryPopup = null;
     this._activeGateId = null;
     this._recordedClues = new Set(); // 防重复标记
   }
@@ -106,47 +112,84 @@ export default class PrologueScene extends GameSceneBase {
     this._hideNarration();
     if (this._narrationPanel) this._narrationPanel.style.display = 'none';
 
-    // 创建并挂载左下角对话坞
-    this._dock = new PrologueDock(this.engine);
-    this._dock.mount(root);
+    // 创建并挂载新组件
+    this._narrationBar = new NarrationBar(this.engine);
+    this._narrationBar.mount(root);
 
-    // 全局绑定对话处理：根据是否处于研讨门槛，路由玩家输入
-    this._dock.bindDiscussion(
-      async (text) => {
-        if (this._activeGateId) {
-          this.engine.discussionManager.handlePlayerInput(text);
-        } else {
-          // 通用闲聊模式
-          this._dock.showPlayerMessage(text);
-          this._dock.setLoading(true);
-          this._dock._setInputState(true); // 正在请求时禁用输入
-          const reply = await this.engine.aiService.chatWithZhou(text);
-          this._dock.setLoading(false);
-          this._dock.showNPCMessage(reply);
-          this._dock._setInputState(false); // 恢复输入
-        }
-      },
-      (text) => {
-        if (this._activeGateId) {
-          this.engine.discussionManager.handleQuickThought(text);
-        }
+    this._notebook = new NotebookFloating(this.engine);
+    this._notebook.mount(root);
+    this._notebook.hide();
+
+    this._hud = new HudBar(this.engine);
+    this._hud.mount(root);
+    this._hud.hide();
+
+    this._inventoryPopup = new InventoryPopup(this.engine);
+    this._inventoryPopup.mount(root);
+
+    // 绑定 HUD 事件
+    this._hud.onNotebookClick(() => {
+      if (this._notebook.isExpanded()) {
+        this._notebook.collapse();
+      } else {
+        this._notebook.expand();
       }
-    );
+    });
+    this._hud.onInventoryClick(() => {
+      this._inventoryPopup.open();
+    });
+
+    // 绑定 Notebook 提交事件
+    this._notebook.onSubmit(async (text) => {
+      if (this._activeGateId) {
+        // 综合门槛时面板应该隐藏了，但以防万一
+        this.engine.discussionManager.handlePlayerInput(text);
+      } else {
+        this._notebook.showPlayerMessage(text);
+        this._notebook.setLoading(true);
+        const reply = await this.engine.aiService.queryNotebook(text);
+        this._notebook.setLoading(false);
+        this._notebook.showNPCMessage(reply);
+      }
+    });
+
+    this._notebook.onQuickThought((text) => {
+      if (this._activeGateId) {
+        this.engine.discussionManager.handleQuickThought(text);
+      } else {
+        // Quick thought 作为正常问题提交
+        this._notebook.showPlayerMessage(text);
+        this._notebook.setLoading(true);
+        this.engine.aiService.queryNotebook(text).then(reply => {
+          this._notebook.setLoading(false);
+          this._notebook.showNPCMessage(reply);
+        });
+      }
+    });
 
     // 1+2. 逐句播放脚本（旁白 + 周鹤年开场白）
     this._phase = PHASE.DIALOGUE;
     for (const line of PROLOGUE_SCRIPT) {
-      await this._dock.playLine(line.speaker, line.text);
+      await this._narrationBar.playLine(line.speaker, line.text, { portrait: line.portrait });
     }
 
     // 3. 弹出"查看古画"按钮
     this._phase = PHASE.PROMPT;
+
+    // 对话结束后，玩家获得笔记本
+    this.engine.gameProgress.hasNotebook = true;
+    this._hud.show();
+    this._notebook.show();
+    // PROMPT阶段面板不锁定，可手动收缩
+    this._notebook.unlock();
+    this._notebook.setPlaceholder('翻阅笔记本……');
+    this._notebook.showQuickThoughts([
+      '拙政园三十一景是什么？',
+      '修复笔记本里有什么？',
+    ]);
+    this._narrationBar.showFeedback('获得物件：修复笔记本');
+
     this._showViewPaintingButton();
-    
-    // 脚本播放结束，正式开放输入框，允许玩家随时进行通用闲聊
-    if (this._dock) {
-      this._dock._setInputState(false);
-    }
   }
 
   exit() {
@@ -158,9 +201,21 @@ export default class PrologueScene extends GameSceneBase {
       this._fallTransition.destroy();
       this._fallTransition = null;
     }
-    if (this._dock) {
-      this._dock.unmount();
-      this._dock = null;
+    if (this._narrationBar) {
+      this._narrationBar.unmount();
+      this._narrationBar = null;
+    }
+    if (this._notebook) {
+      this._notebook.unmount();
+      this._notebook = null;
+    }
+    if (this._hud) {
+      this._hud.unmount();
+      this._hud = null;
+    }
+    if (this._inventoryPopup) {
+      this._inventoryPopup.unmount();
+      this._inventoryPopup = null;
     }
     // 清理"查看古画"按钮
     const promptBtn = document.getElementById('view-painting-prompt');
@@ -204,22 +259,30 @@ export default class PrologueScene extends GameSceneBase {
   _enterPaintingPhase() {
     this._phase = PHASE.PAINTING;
 
-    // 对话坞作为正式对话窗口保持完全可交互
-    if (this._dock) {
-      this._dock.setInteractive(true);
-      // 可选：添加一条提示，告知玩家可以一边看一边讨论
-      this._dock.showNPCMessage("你可以仔细观察这幅画，有任何发现随时告诉我。");
-    }
+    // 进入扫描/探索阶段，锁定展开
+    this._notebook.expand();
+    this._notebook.lock(); 
+    this._hud.setNotebookDisabled(true); // 📓按钮灰色禁用
 
-    // 设置输入框状态为允许输入
-    if (this._dock) {
-      this._dock._setInputState(true);
-    }
+    // 配置初始 Placeholder 和快捷问题
+    this._notebook.setPlaceholder('这个工具能看出什么？');
+    this._notebook.showQuickThoughts([
+      '放大镜能看到什么？',
+      '纸质分析有什么用？',
+      '侧光照射用来检查什么？'
+    ]);
 
     this._paintingViewer = new PaintingViewer({
       imageUrl: '/images/prologue/拙政园鸟瞰_首屏.png',
       onToolUsed: (toolId) => {
-        // 工具使用的反馈通过 PaintingViewer 内部处理
+        const feedbackMap = {
+          magnifier: '装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
+          fiber: '背纸与其他三十页不完全一致，显示此页曾经重装。',
+          sidelight: '装裱边下方隐约显出旧字残痕："……所见"；旁边有一条极淡的低位构图辅助线。'
+        };
+        if (feedbackMap[toolId]) {
+          this._narrationBar.showFeedback(feedbackMap[toolId]);
+        }
       },
       onClueFound: (clueId) => {
         this._startDiscussionGate(clueId);
@@ -228,16 +291,26 @@ export default class PrologueScene extends GameSceneBase {
         this._onConvergenceClick();
       },
       onFeedback: (text) => {
-        // 可选：将反馈记录到叙事日志
-        this.engine.emit('narration-logged', {
-          text,
-          chapter: this.engine.currentChapter,
-          scene: 'prologue',
-        });
+        // painting-viewer 自带 feedback 条，不重复在 narrationBar 显示
       },
     });
 
     this._paintingViewer.mount(this._root);
+
+    // 显示工具
+    const TOOLS = [
+      { id: 'magnifier', icon: '🔍', label: '放大镜' },
+      { id: 'fiber', icon: '🔬', label: '纸质分析' },
+      { id: 'sidelight', icon: '💡', label: '侧光照射' }
+    ];
+    this._notebook.showToolSection(TOOLS);
+    this._notebook.onToolClick((toolId) => {
+      if (toolId) {
+        this._paintingViewer.applyTool(toolId);
+      } else {
+        this._paintingViewer.clearTool();
+      }
+    });
   }
 
   /* ==================== 线索研讨（走对话坞） ==================== */
@@ -275,6 +348,15 @@ export default class PrologueScene extends GameSceneBase {
       window.dispatchEvent(new CustomEvent('clue-collected', {
         detail: { text: clueData.recordText },
       }));
+      // 更新快捷问题
+      this._notebook.setPlaceholder('这条线索意味着什么？');
+      this._notebook.showQuickThoughts([clueData.askText]);
+    }
+
+    // 如果三条线索都找齐了，在进入 Gate 之前或者之后，可以更新 Placeholder
+    if (this._recordedClues.size >= 3) {
+      this._notebook.setPlaceholder('三处痕迹之间有什么联系？');
+      this._notebook.showQuickThoughts(['这三条线索之间有什么共同点？', '是谁掩盖了这些痕迹？']);
     }
 
     // === 启动辅助讨论（可选，不阻塞进度）===
@@ -283,21 +365,12 @@ export default class PrologueScene extends GameSceneBase {
       if (data.gateId === gateId) {
         off();
         this._activeGateId = null;
-        // 讨论结束后恢复闲聊模式
-        if (this._dock) {
-          this._dock.setInteractive(true);
-          this._dock._setInputState(false);
-        }
       }
     };
     const off = this.engine.on('gate-completed', onGateCompleted);
 
-    if (this._dock) {
-      this._dock.setInteractive(true);
-      this._dock._setInputState(false);
-    }
-
-    this.engine.discussionManager.startGate(gateId, this._dock);
+    // 辅助讨论不隐藏笔记本（笔记本保持锁定展开）
+    this.engine.discussionManager.startGate(gateId, this._root);
   }
 
   /**
@@ -333,7 +406,6 @@ export default class PrologueScene extends GameSceneBase {
     });
 
     // 记录状态变量
-    this.engine.gameProgress.hasNotebook = true;
     this.engine.gameProgress.foundMarginTrace = true;
 
     // 播放跌入转场
