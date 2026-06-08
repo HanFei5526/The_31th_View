@@ -63,7 +63,6 @@ export default class PaintingViewer {
     this._hintsLayer = null;   // 呼吸光斑层
     this._feedbackEl = null;   // 底部反馈条
     this._statusEl = null;     // 底部状态栏
-    this._statusEl = null;     // 底部状态栏
     this._opt = {
       imageUrl: '',
       dockEl: null,         // 对话框DOM元素，将其嵌入到古画左侧下方

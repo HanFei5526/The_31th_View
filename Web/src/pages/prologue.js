@@ -408,14 +408,11 @@ export default class PrologueScene extends GameSceneBase {
       this.engine.gameProgress.synthesisPassed = true;
       this.engine.saveProgress();
 
-      this._notebook.show();
-      this._notebook.expand();
       this._notebook.setPlaceholder('继续整理这三处痕迹……');
       this._notebook.showQuickThoughts([
         '这意味着来源信息被遮蔽了吗？',
         '下一步应该看交会点'
       ]);
-      this._hud.show();
 
       this._paintingViewer?.triggerConvergence();
     });
