@@ -17,7 +17,7 @@
 
 ### 序章 · 探索寻线
 
-> 序章提示已改为错误次数触发（非定时），详见《玩法设计_2.md》阶段⑤-b。
+> 序章提示已改为错误次数触发（非定时），详见 `分章节实现文档/序章_残页_玩法设计.md` 阶段⑤-b。
 
 - 提示1（错误点击 ≥ 3次）：周鹤年口吻：「不要先看画面本身。先看它的身体——边缘、接缝、装裱层。」
 - 提示2（错误点击 ≥ 6次）：「表层画面很完整，真正不完整的是说明来源的那些部分。试试画面的角落和边缘。」
@@ -84,38 +84,45 @@
 
 ## 五、AI LLM 功能实现（已落地）
 
-> 以下内容对应 `Web/src/core/ai-service.js`、`Web/src/core/ai-prompts.js`、`Web/src/components/chat-panel.js`、`Web/src/components/notebook-panel.js` 的实际实现。
+> 以下内容对应 `Web/src/core/ai-service.js`、`Web/src/core/ai-prompts.js`、`Web/src/core/discussion-gate.js`、`Web/src/core/gate-config.js`、`Web/src/components/notebook-panel.js` 的实际实现。
 
 ### 5.1 技术选型
 
-- **LLM**：DeepSeek V4 Pro（`deepseek-v4-pro`）
+- **LLM**：DeepSeek（`deepseek-chat`）
 - **API 格式**：OpenAI 兼容（`https://api.deepseek.com/chat/completions`）
 - **认证**：`Authorization: Bearer <API_KEY>`
 - **API Key 存放**：`Web/.env` 文件中的 `VITE_DEEPSEEK_API_KEY`（Vite 环境变量），不得提交至代码仓库
 - **前端直连**：MVP / 路演阶段前端直调 API，如后续公开部署需改为后端代理
 - **无额外依赖**：使用浏览器原生 `fetch` 调用
 
-### 5.2 四种 AI 调用场景
+### 5.2 五种 AI 调用场景
 
 | 场景 | 接口 | 世界限制 | 对话模式 | temperature | max_tokens |
 |------|------|---------|---------|-------------|-----------|
 | 周鹤年对话 | `chatWithZhou` | 仅现实世界 | 多轮 | 0.7 | 300 |
-| 笔记本查阅 | `queryNotebook` | 仅画中世界 | 单轮 | 0.5 | 200 |
+| 研讨门槛对话 | `discussWithZhou` | 现实世界 | 多轮（含 systemHint） | 0.7 | 300 |
+| 笔记本查阅 | `queryNotebook` | 双世界 | 单轮 | 0.5 | 200 |
 | 沈念批注 | `generateAnnotation` | 双世界 | 单轮（自动） | 0.6 | 150 |
 | 修复报告 | `generateReport` | 终章 | 单轮（一次性） | 0.4 | 800 |
 
 ### 5.3 System Prompt 设计要点
 
-**周鹤年对话（现实世界）**：
+**周鹤年对话（脚本对话框 / 综合门槛）**：
 - 角色：60 岁古画修复教授，严谨寡言
 - 动态注入当前章节、已收集物件、进度标记
 - 关键约束：不预知画中世界内容；不直接给出谜题答案；不打破第四面墙；chapter >= 3 之前不透露"蘅"字秘密
 - 回答风格：1-3 句话，像真正的老学者
 
-**笔记本查阅（画中世界）**：
-- 角色：笔记本内容本身（不是任何人物）
-- 以"翻到某页""笔记本边注""参考文献摘录"等格式开头
-- 仅回答已记录的内容和通用修复知识
+**研讨门槛周鹤年（`buildGateZhouPrompt`）**：
+- 每个门槛有独立的引导目标（gateTarget）、允许认知（allowedInsight）、禁区（forbiddenInsight）
+- AI 不负责判定通过，只负责自然对话引导
+- 系统通过 `systemHint` 注入当前判定状态供 AI 参考
+
+**修复笔记本查阅（即将重构为主 AI 面板）**：
+- 身份：沈念的修复笔记本（非人格化）
+- 以"翻到某页""参考文献摘录""周老师的批注"等格式开头
+- 可通过"周老师的批注"间接引语做推理引导
+- 仅回答当前进度已解锁的知识范围（待接入轻量 RAG）
 
 **沈念批注（事件触发）**：
 - 角色：25 岁研究生沈念的第一人称
@@ -124,10 +131,29 @@
 
 **修复报告（终章一次性）**：
 - 根据 endingChoice（存档/守密/续笔）生成不同风格的最终文本
-- 引用全程收集的具体证据（侧光发现、异文比对、朱砂呼应等）
+- 引用全程收集的具体证据
 - 300-500 字，语言克制有分量
 
-### 5.4 事件总线联动
+### 5.4 研讨门槛系统
+
+**当前状态**：已降级为辅助讨论（发现线索即自动确认，AI 参与可选）。
+
+**即将改动**（见 `改动计划/序章综合研讨门槛_强制AI推理通过.md`）：
+- 三线索集齐后统一触发一次综合研讨门槛
+- 前端关键词累积匹配判定通过（不依赖 AI 判定）
+- 通过条件：`(systematic OR intentional_act) AND (conceal_origin OR erase_evidence)`，且轮数 >= 2
+- AI 负责自然对话引导，不负责判定
+- 离线降级：预写对话树 + 快捷按钮兜底
+
+**门槛配置结构**（`gate-config.js`）：
+- `concepts[]`：关键概念及对应关键词
+- `requiredConcepts` / `alsoRequires`：通过条件
+- `minRounds`：最少对话轮数
+- `opening` / `passResponse`：开场白和通过回复
+- `hintPool` / `affirmPool` / `correctionPool`：离线回复池
+- `quickThoughts[]`：快捷想法按钮文本
+
+### 5.5 事件总线联动
 
 AI 功能通过 GameEngine 的事件系统与游戏流程联动：
 
@@ -135,24 +161,38 @@ AI 功能通过 GameEngine 的事件系统与游戏流程联动：
 |---------|-------------|
 | `item-collected` | 自动生成沈念批注（笔记本面板） |
 | `hint-shown` | 自动生成沈念批注（笔记本面板） |
-| `zhou-chat-complete` | 对话结束后自动生成沈念批注 |
-| `world-changed` | 显示/隐藏周鹤年对话按钮 |
+| `gate-completed` | 门槛通过，清理状态，恢复闲聊模式 |
+| `world-changed` | 切换 AI 面板可用功能 |
 | `scene-enter` | 切场景时清空对话历史、更新面板可见性 |
+| `clue-collected` | 通知笔记本系统记录线索 |
+| `ai-annotation-generated` | 批注生成完成广播 |
 
-### 5.5 降级策略
+### 5.6 降级策略
 
 - 未配置 API Key 时：对话和查阅显示"（AI 功能未启用，请在 .env 文件中配置 VITE_DEEPSEEK_API_KEY）"
-- API 调用失败时：显示游戏化降级文案（如"笔记本页面有些模糊……""墨迹尚未干透……"）
+- API 调用失败时：显示游戏化降级文案（如"笔记本页面有些模糊……"）
+- 研讨门槛离线时：使用预写回复池（affirmPool/hintPool/correctionPool）轮询
 - 批注生成失败时：回退为预设固定文案
 - 不影响游戏主流程推进
 
-### 5.6 实现文件对应
+### 5.7 即将实施：轻量 RAG 知识约束
+
+详见 `改动计划/AI知识约束_轻量RAG方案.md`：
+- 按章节/进度维护知识文档，只注入当前允许的片段
+- AI 只能基于注入内容回答，超出范围回复"（翻了翻，没有找到相关记录）"
+- 知识累积式解锁（只增不减）
+- prompt 中明确指令防诱导突破
+
+### 5.8 实现文件对应
 
 | 文件 | 职责 |
 |------|------|
-| `Web/src/core/ai-service.js` | DeepSeek API 统一封装，4 个对外接口 |
-| `Web/src/core/ai-prompts.js` | 4 种 System Prompt 模板，动态注入游戏上下文 |
-| `Web/src/components/chat-panel.js` | 周鹤年对话浮层（右下角，仅现实世界） |
-| `Web/src/components/notebook-panel.js` | AI 笔记本面板（批注时间线 + 画中世界查阅） |
+| `Web/src/core/ai-service.js` | DeepSeek API 统一封装，5 个对外接口 |
+| `Web/src/core/ai-prompts.js` | 5 种 System Prompt 模板，动态注入游戏上下文 |
+| `Web/src/core/discussion-gate.js` | 研讨门槛管理器（启动/输入处理/通过判定/关闭） |
+| `Web/src/core/gate-config.js` | 门槛配置数据 + 关键词匹配函数 |
+| `Web/src/core/fallback-dialogues.js` | 离线对话降级文案 |
+| `Web/src/components/gate-panel.js` | 研讨全屏面板 UI（无关闭按钮） |
+| `Web/src/components/notebook-panel.js` | AI 笔记本面板（批注+查阅） |
 | `Web/.env` | API Key 存放（已加入 .gitignore） |
 

@@ -22,24 +22,39 @@
 
 ```text
 卅一景/
-├── story_02_卅一景_剧情大纲.md          # 故事设定、人物、主线、真相、结局
-├── 卅一景_chapter_design.md            # 章节细纲、叙事节拍、NPC 对话
-├── 卅一景_游戏开发文档.md              # 团队开发总览、MVP 范围、路演路线
-├── 剧情质疑与解释清单.md                # 常见质疑、世界观解释、证据链自洽
-├── TestPic/                            # 过程图片、生成图、临时参考图
+├── CLAUDE.md                           # 项目说明
+├── AGENTS.md                           # Agent 配置
+├── PRODUCT.md                          # 产品文档
+├── README.md                           # 项目 README（本文件）
+├── TestPic/                            # 过程图片 / 生成图 / 临时参考图
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
 │   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
-│   ├── menu-test.html                  # 菜单测试页
+│   ├── server/                         # Express 后端（AI 代理，可选）
 │   ├── public/                         # 正式静态资源
 │   │   └── images/                     # 正式使用的背景图 / 场景图
 │   └── src/                            # 前端源码
-├── 非剧情文档/
-│   ├── 谜题_场景_线索表设计.md          # 谜题机制、场景地图、线索表
-│   ├── 前端_交互_背包设计.md            # 界面风格、转场、交互层、物件匣 UI
-│   └── AI_提示词_后端数据设计.md        # AI 功能、提示词、状态变量、存档
+│       ├── main.js                     # 应用入口
+│       ├── core/                       # 引擎 / 场景 / 背包 / 提示 / 对话 / 存档 / AI
+│       ├── pages/                      # 页面场景
+│       ├── components/                 # 通用组件
+│       └── styles/                     # 样式文件
+├── 总分工文档/
+│   ├── story_02_卅一景_剧情大纲.md      # 故事设定（人物/梗概/主线/真相/结局）
+│   ├── 卅一景_chapter_design.md        # 章节细纲（叙事节拍/NPC 对话/张力设计）
+│   ├── 剧情质疑与解释清单.md            # 常见质疑 / 世界观 / 证据链解释
+│   ├── 谜题_场景_线索表设计.md          # 谜题机制/场景地图/物件线索表
+│   ├── 前端_交互_背包设计.md            # 界面风格/转场/交互层/物件匣 UI
+│   └── AI_提示词_后端数据设计.md        # AI 功能/提示词/状态变量/存档
+├── 分章节实现文档/
+│   ├── 序章_残页_玩法设计.md            # 序章玩法详案
+│   └── 序章_残页_场景制作.md            # 序章场景制作
+├── 改动计划/                           # 待实施的改动计划文档
+│   ├── UI重构_叙事层与AI对话层分离.md
+│   ├── 序章综合研讨门槛_强制AI推理通过.md
+│   └── AI知识约束_轻量RAG方案.md
 └── 备选故事/
     ├── story_01_石中记.md
     └── story_03_四时园.md
@@ -79,22 +94,21 @@ npm run preview
 
 当前前端已包含：
 
-- 注册场景：`landing`、`menu`、`prologue`
-- 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`
-- AI 组件：`chat-panel`（周鹤年对话，仅现实世界）、`notebook-panel`（AI 笔记本，批注 + 查阅）
-- 页面模块：着陆页、主菜单页、序章
+- 注册场景：`landing`、`menu`、`prologue`、`chapter1`（画中世界）、`chapter2`/`chapter3`/`finale`（占位）
+- 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`、`discussion-gate`、`gate-config`、`fallback-dialogues`
+- 已有组件：`painting-viewer`（古画查看器）、`gate-panel`（研讨门槛）、`prologue-dock`（待重构）、`notebook-panel`（AI笔记本）、`fall-transition`（跌入转场）、`scanner-ui`
 - 正式图片目录：`Web/public/images/`
 - 过程图片目录：`TestPic/`，不作为正式代码引用目录
 
 前端实现应优先遵循：
 
-- `非剧情文档/前端_交互_背包设计.md`
+- `总分工文档/前端_交互_背包设计.md`
 - `Web/implementation_plan.md`
 
 涉及叙事文案时，应同时回看：
 
-- `story_02_卅一景_剧情大纲.md`
-- `卅一景_chapter_design.md`
+- `总分工文档/story_02_卅一景_剧情大纲.md`
+- `总分工文档/卅一景_chapter_design.md`
 
 ## 章节结构
 
@@ -110,12 +124,14 @@ npm run preview
 
 | 文档 / 目录 | 负责方向 |
 | --- | --- |
-| `story_02_卅一景_剧情大纲.md` | 故事设定、人物、主线、真相、结局 |
-| `卅一景_chapter_design.md` | 章节细纲、叙事节拍、NPC 对话、张力设计 |
-| `剧情质疑与解释清单.md` | 历史虚构边界、机制解释、证据链自洽 |
-| `非剧情文档/谜题_场景_线索表设计.md` | 谜题设计、场景地图、物件线索表 |
-| `非剧情文档/前端_交互_背包设计.md` | 前端页面、交互方式、物件匣、AI 面板 UI |
-| `非剧情文档/AI_提示词_后端数据设计.md` | AI 功能、提示词、状态变量、存档 |
+| `总分工文档/story_02_卅一景_剧情大纲.md` | 故事设定、人物、主线、真相、结局 |
+| `总分工文档/卅一景_chapter_design.md` | 章节细纲、叙事节拍、NPC 对话、张力设计 |
+| `总分工文档/剧情质疑与解释清单.md` | 历史虚构边界、机制解释、证据链自洽 |
+| `总分工文档/谜题_场景_线索表设计.md` | 谜题设计、场景地图、物件线索表 |
+| `总分工文档/前端_交互_背包设计.md` | 前端页面、交互方式、物件匣、AI 面板 UI |
+| `总分工文档/AI_提示词_后端数据设计.md` | AI 功能、提示词、状态变量、存档 |
+| `分章节实现文档/` | 各章节玩法详案和场景制作 |
+| `改动计划/` | 待实施的改动方案（实施前审批用） |
 | `Web/` | 可运行前端原型、游戏引擎、AI 模块 |
 
 ## 协作约定
@@ -124,6 +140,9 @@ npm run preview
 - 所有叙事修改须确认是否触及三条剧情基准；触及则需要剧情统筹确认。
 - 谜题、前端、后端文档各自独立维护，叙事节拍中以锚点指向谜题文档。
 - 前端改动应保持与现有 Vite + 原生 JavaScript / CSS 结构一致。
+- AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框和综合门槛中。
 - 正式图片统一放入 `Web/public/images/` 并用 `/images/文件名` 引用；`TestPic/` 只保留过程图、草图和临时参考。
+- `.env` 文件中的 API Key 不得提交到代码仓库。
+- 所有改动在实施前须先在 `改动计划/` 目录下创建计划文档，审批通过后再动代码。
 - 未经明确要求，不引入额外框架、遥测、分析或网络请求。
 
