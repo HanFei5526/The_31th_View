@@ -94,6 +94,8 @@ export default class PrologueScene extends GameSceneBase {
     this._hud = null;
     this._inventoryPopup = null;
     this._activeGateId = null;
+    this._synthesisGateStarted = false;
+    this._synthesisGateOff = null;
     this._recordedClues = new Set(); // 防重复标记
   }
 
@@ -217,6 +219,11 @@ export default class PrologueScene extends GameSceneBase {
       this._inventoryPopup.unmount();
       this._inventoryPopup = null;
     }
+    if (this._synthesisGateOff) {
+      this._synthesisGateOff();
+      this._synthesisGateOff = null;
+    }
+    this.engine.gatePanel?.unmount();
     // 清理"查看古画"按钮
     const promptBtn = document.getElementById('view-painting-prompt');
     if (promptBtn) promptBtn.remove();
@@ -287,6 +294,9 @@ export default class PrologueScene extends GameSceneBase {
       onClueFound: (clueId) => {
         this._startDiscussionGate(clueId);
       },
+      onAllCluesRecorded: () => {
+        setTimeout(() => this._startSynthesisGate(), 0);
+      },
       onConvergence: () => {
         this._onConvergenceClick();
       },
@@ -353,10 +363,15 @@ export default class PrologueScene extends GameSceneBase {
       this._notebook.showQuickThoughts([clueData.askText]);
     }
 
-    // 如果三条线索都找齐了，在进入 Gate 之前或者之后，可以更新 Placeholder
+    // 如果三条线索都找齐了，进入综合门槛，不再启动单条辅助讨论
     if (this._recordedClues.size >= 3) {
       this._notebook.setPlaceholder('三处痕迹之间有什么联系？');
-      this._notebook.showQuickThoughts(['这三条线索之间有什么共同点？', '是谁掩盖了这些痕迹？']);
+      this._notebook.showQuickThoughts([
+        '这三条线索之间有什么共同点？',
+        '是谁掩盖了这些痕迹？'
+      ]);
+      this._startSynthesisGate();
+      return;
     }
 
     // === 启动辅助讨论（可选，不阻塞进度）===
@@ -370,7 +385,72 @@ export default class PrologueScene extends GameSceneBase {
     const off = this.engine.on('gate-completed', onGateCompleted);
 
     // 辅助讨论不隐藏笔记本（笔记本保持锁定展开）
-    this.engine.discussionManager.startGate(gateId, this._root);
+    this.engine.discussionManager.startGate(gateId, this._createNotebookGateAdapter());
+  }
+
+  /**
+   * 启动三线索综合研讨门槛
+   * @private
+   */
+  _startSynthesisGate() {
+    const gateId = 'gate_prologue_synthesis';
+    if (this._synthesisGateStarted) return;
+    if (this._recordedClues.size < 3) return;
+
+    this._synthesisGateStarted = true;
+
+    if (this._activeGateId && this._activeGateId !== gateId) {
+      this.engine.discussionManager.closeDiscussion(this._activeGateId);
+    }
+    this._activeGateId = gateId;
+
+    this._notebook.hide();
+    this._hud.hide();
+
+    this._synthesisGateOff = this.engine.on('gate-completed', (data) => {
+      if (data.gateId !== gateId) return;
+
+      this._synthesisGateOff?.();
+      this._synthesisGateOff = null;
+      this._activeGateId = null;
+
+      this.engine.gameProgress.synthesisPassed = true;
+      this.engine.saveProgress();
+
+      this.engine.gatePanel.unmount();
+      this._notebook.show();
+      this._notebook.expand();
+      this._notebook.setPlaceholder('继续整理这三处痕迹……');
+      this._notebook.showQuickThoughts([
+        '这意味着来源信息被遮蔽了吗？',
+        '下一步应该看交会点'
+      ]);
+      this._hud.show();
+
+      this._paintingViewer?.triggerConvergence();
+    });
+
+    this.engine.discussionManager.startSynthesisGate(gateId, this.engine.gatePanel);
+  }
+
+  /**
+   * 把 NotebookFloating 适配成研讨 UI 回调接口
+   * @returns {Object}
+   * @private
+   */
+  _createNotebookGateAdapter() {
+    return {
+      showOpening: (title, text) => {
+        this._notebook.showSystemMessage(`研讨：${title}`);
+        if (text) this._notebook.showNPCMessage(text);
+      },
+      showQuickThoughts: (thoughts) => this._notebook.showQuickThoughts(thoughts),
+      showNPCMessage: (text) => this._notebook.showNPCMessage(text),
+      showPlayerMessage: (text) => this._notebook.showPlayerMessage(text),
+      showSystemMessage: (text) => this._notebook.showSystemMessage(text),
+      setLoading: (value) => this._notebook.setLoading(value),
+      setOfflineMode: () => {},
+    };
   }
 
   /**
@@ -381,6 +461,7 @@ export default class PrologueScene extends GameSceneBase {
   _markClueRecorded(clueId) {
     if (this._recordedClues.has(clueId)) return;
     this._recordedClues.add(clueId);
+    this.engine.gameProgress.cluesFound = Array.from(this._recordedClues);
     if (this._paintingViewer) {
       this._paintingViewer.markClueRecorded(clueId);
     }

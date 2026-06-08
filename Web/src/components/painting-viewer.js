@@ -50,6 +50,7 @@ export default class PaintingViewer {
    * @param {string} options.imageUrl       — 古画图片 URL
    * @param {Function} options.onToolUsed   — 工具使用回调 (toolId) => {}
    * @param {Function} options.onClueFound  — 发现线索回调 (clueId) => {}
+   * @param {Function} options.onAllCluesRecorded — 三条线索全部记录回调 () => {}
    * @param {Function} options.onConvergence — 汇聚点点击回调 () => {}
    * @param {Function} options.onFeedback   — 反馈文字回调 (text) => {}
    */
@@ -66,6 +67,7 @@ export default class PaintingViewer {
       dockEl: null,         // 对话框DOM元素，将其嵌入到古画左侧下方
       onToolUsed: null,     // (toolId) => void
       onClueFound: null,    // (clueId) => void
+      onAllCluesRecorded: null, // () => void
       onConvergence: null,  // () => void
       onFeedback: null,     // (text) => void
       ...options
@@ -190,6 +192,17 @@ export default class PaintingViewer {
     if (!this._clues[clueId]?.recorded) {
       this._autoConfirmClue(clueId);
     }
+  }
+
+  /** 由外部调用：综合研讨通过后触发汇聚动画 */
+  triggerConvergence() {
+    if (!this._allRecorded || this._convergenceShown) return;
+
+    this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
+
+    setTimeout(() => {
+      this._playConvergence();
+    }, 1200);
   }
 
   /**
@@ -532,7 +545,7 @@ export default class PaintingViewer {
   //  内部 — 汇聚动画
   // ══════════════════════════════════════════════
 
-  /** 检查是否所有线索已记录，触发汇聚 */
+  /** 检查是否所有线索已记录，通知外部启动综合研讨 */
   _checkConvergence() {
     const recordedCount = Object.values(this._clues).filter(c => c.recorded).length;
     if (recordedCount < 3 || this._allRecorded) return;
@@ -543,17 +556,9 @@ export default class PaintingViewer {
     // ── 第一步：还原缩放 ──
     this.clearTool();
 
-    // ── 第二步：显示通关提示 → 汇聚动画 ──
-    this._showFeedback('🎉 三处线索全部确认！点击画面中央的交会点，准备进入下一阶段。');
-
-    setTimeout(() => {
-      this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
-
-      setTimeout(() => {
-        // 启动汇聚动画
-        this._playConvergence();
-      }, 1800);
-    }, 2200);
+    // ── 第二步：提示外部进入综合研讨，不自动播放汇聚动画 ──
+    this._showFeedback('三处线索全部确认。先把它们之间的关系说清楚。');
+    this._opt.onAllCluesRecorded?.();
   }
 
   /** 播放汇聚动画：三个金色光点向中心汇聚 → 交会点脉冲 → 可点击 */
