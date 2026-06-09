@@ -271,20 +271,34 @@ export default class PrologueScene extends GameSceneBase {
     this._paintingViewer = new PaintingViewer({
       imageUrl: '/images/prologue/拙政园鸟瞰_首屏.png',
       onToolUsed: (toolId) => {
-        const feedbackMap = {
-          magnifier: '装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-          fiber: '背纸与其他三十页不完全一致，显示此页曾经重装。',
-          sidelight: '装裱边下方隐约显出旧字残痕："……所见"；旁边有一条极淡的低位构图辅助线。'
+        // 将工具检测结果记入笔记本记录Tab
+        const recordMap = {
+          magnifier: '[检查] 放大镜 — 装裱接缝处有重叠痕迹，边框压住了旧题签的一角',
+          fiber: '[检查] 纸质分析 — 背纸与其他三十页不一致，此页曾重装；画心本身较稳定',
+          sidelight: '[检查] 侧光照射 — 装裱边下隐现旧字残痕"……所见"及一条低位辅助线',
         };
-        if (feedbackMap[toolId]) {
-          this._narrationBar.showFeedback(feedbackMap[toolId]);
+        if (recordMap[toolId]) {
+          this._notebook.addClueRecord(recordMap[toolId]);
         }
+        // 派发事件供外部使用
+        window.dispatchEvent(new CustomEvent('tool-used', { detail: { toolId } }));
       },
       onClueFound: (clueId) => {
         this._startDiscussionGate(clueId);
       },
       onAllCluesRecorded: () => {
-        setTimeout(() => this._startSynthesisGate(), 0);
+        // 不再自动启动研讨，由玩家点击"进入综合研讨"按钮触发
+        // 此处仅作为备用（如果玩家未通过 _startDiscussionGate 路径进入）
+        if (!this._synthesisGateStarted) {
+          this._notebook.showQuickThoughts([
+            '进入综合研讨：分析三处痕迹的关系',
+          ]);
+          this._notebook.onQuickThought((text) => {
+            if (text.includes('综合研讨')) {
+              this._startSynthesisGate();
+            }
+          });
+        }
       },
       onConvergence: () => {
         this._onConvergenceClick();
@@ -352,14 +366,29 @@ export default class PrologueScene extends GameSceneBase {
       this._notebook.showQuickThoughts([clueData.askText]);
     }
 
-    // 如果三条线索都找齐了，进入综合门槛，不再启动单条辅助讨论
+    // 如果三条线索都找齐了，仍然启动辅助讨论，但额外显示进入研讨的选项
     if (this._recordedClues.size >= 3) {
-      this._notebook.setPlaceholder('三处痕迹之间有什么联系？');
-      this._notebook.showQuickThoughts([
-        '这三条线索之间有什么共同点？',
-        '是谁掩盖了这些痕迹？'
-      ]);
-      this._startSynthesisGate();
+      // 启动第三条线索的辅助讨论
+      const onGateCompleted = (data) => {
+        if (data.gateId === gateId) {
+          off();
+          this._activeGateId = null;
+        }
+      };
+      const off = this.engine.on('gate-completed', onGateCompleted);
+      this.engine.discussionManager.startGate(gateId, this._createNotebookGateAdapter());
+
+      // 延迟显示"进入综合研讨"按钮，给玩家时间看批注
+      setTimeout(() => {
+        this._notebook.showQuickThoughts([
+          '进入综合研讨：分析三处痕迹的关系',
+        ]);
+        this._notebook.onQuickThought((text) => {
+          if (text.includes('综合研讨')) {
+            this._startSynthesisGate();
+          }
+        });
+      }, 3000);
       return;
     }
 
@@ -393,10 +422,23 @@ export default class PrologueScene extends GameSceneBase {
     }
     this._activeGateId = gateId;
 
+    // 隐藏工具区，进入研讨态
+    this._notebook.hideToolSection();
+    this._notebook.hideQuickThoughts();
+    this._notebook.onQuickThought(null); // 清掉旧回调
     this._notebook.show();
     this._notebook.expand();
+    this._notebook.lock();
+    this._notebook.setSynthesisMode(true);
     this._notebook.switchTab('chat');
-    this._notebook.setPlaceholder('写下你对三处痕迹关系的判断……');
+
+    // 清理之前的单条讨论消息，干净开始研讨
+    this._notebook.clearChat();
+
+    this._notebook.setPlaceholder('这三处痕迹之间有什么联系？写下你的判断……');
+
+    // 持久提示：告知玩家当前处于研讨阶段
+    this._paintingViewer?.showPersistentFeedback('综合研讨 — 在笔记本中分析三处痕迹之间的关系');
 
     this._synthesisGateOff = this.engine.on('gate-completed', (data) => {
       if (data.gateId !== gateId) return;
@@ -408,12 +450,19 @@ export default class PrologueScene extends GameSceneBase {
       this.engine.gameProgress.synthesisPassed = true;
       this.engine.saveProgress();
 
+      // 将研讨结论摘要记入笔记本记录Tab，供后续章节查阅
+      this._notebook.addClueRecord('[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息');
+
+      this._notebook.setSynthesisMode(false);
+      this._notebook.unlock();
       this._notebook.setPlaceholder('继续整理这三处痕迹……');
       this._notebook.showQuickThoughts([
         '这意味着来源信息被遮蔽了吗？',
         '下一步应该看交会点'
       ]);
 
+      // 隐藏研讨持久提示
+      this._paintingViewer?.hideFeedback();
       this._paintingViewer?.triggerConvergence();
     });
 

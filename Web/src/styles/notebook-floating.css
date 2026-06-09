@@ -24,6 +24,19 @@
   display: none !important;
 }
 
+/* 综合研讨态 */
+.notebook-floating.synthesis-mode {
+  border-left: 2px solid rgba(212, 168, 83, 0.6);
+}
+
+.notebook-floating.synthesis-mode .notebook-header {
+  border-bottom-color: rgba(212, 168, 83, 0.4);
+}
+
+.notebook-floating.synthesis-mode .notebook-close-btn {
+  display: none;
+}
+
 /* Tab 头部 */
 .notebook-header {
   display: flex;
@@ -384,6 +397,12 @@
   right: 4px;
   color: #d4a853;
   font-size: 0.7rem;
+}
+
+.tool-btn.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .tool-icon {

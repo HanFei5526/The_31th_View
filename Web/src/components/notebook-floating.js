@@ -130,6 +130,18 @@ export class NotebookFloating {
     this._locked = false;
   }
 
+  setSynthesisMode(active) {
+    if (!this._container) return;
+    if (active) {
+      this._container.classList.add('synthesis-mode');
+      // 改Tab标签名
+      if (this._tabs['chat']) this._tabs['chat'].textContent = '综合研讨';
+    } else {
+      this._container.classList.remove('synthesis-mode');
+      if (this._tabs['chat']) this._tabs['chat'].textContent = '对话';
+    }
+  }
+
   isExpanded() {
     return this._expanded;
   }
@@ -218,6 +230,11 @@ export class NotebookFloating {
 
   showSystemMessage(text) {
     this._appendMessage(text, 'system');
+  }
+
+  clearChat() {
+    if (!this._historyEl) return;
+    this._historyEl.innerHTML = '';
   }
 
   _appendMessage(text, type) {
@@ -329,13 +346,15 @@ export class NotebookFloating {
   showToolSection(tools) {
     if (!this._toolSectionEl) return;
     this._toolGridEl.innerHTML = '';
+    this._toolsLocked = false;
     tools.forEach(tool => {
       const btn = document.createElement('button');
       btn.className = 'tool-btn';
       btn.dataset.id = tool.id;
       btn.innerHTML = `<span class="tool-icon">${tool.icon}</span><span class="tool-label">${tool.label}</span>`;
       btn.addEventListener('click', () => {
-        // Toggle active
+        if (this._toolsLocked) return;
+        // 切换：当前激活的取消，点击新的激活
         const isActive = btn.classList.contains('active');
         Array.from(this._toolGridEl.children).forEach(c => c.classList.remove('active'));
         if (!isActive) btn.classList.add('active');
@@ -412,6 +431,17 @@ export class NotebookFloating {
   }
 
   _onAllToolsUsed() {
-    this.hideToolSection();
+    // 三项检查完成：锁定工具区，放大镜保持激活，其余灰掉
+    this._toolsLocked = true;
+    if (this._toolGridEl) {
+      Array.from(this._toolGridEl.children).forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.id === 'magnifier') {
+          btn.classList.add('active');
+        } else {
+          btn.classList.add('locked');
+        }
+      });
+    }
   }
 }

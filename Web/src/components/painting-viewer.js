@@ -32,9 +32,9 @@ const REQUIRED_TOOL_IDS = TOOLS.map((tool) => tool.id);
 
 // ── 工具反馈文案 ─────────────────────────────────────
 const TOOL_FEEDBACK = {
-  magnifier: '装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-  fiber:     '背纸与其他三十页不完全一致，显示此页曾经重装；画心本身较稳定，并非整幅新画。',
-  sidelight: '装裱边下方隐约显出旧字残痕："……所见"；旁边有一条极淡的低位构图辅助线。',
+  magnifier: '放大镜已就位。装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
+  fiber:     '纸质分析完成。背纸与其他三十页不完全一致，此页曾经重装；画心本身较稳定。',
+  sidelight: '侧光照射完成。装裱边下方隐约显出旧字残痕和一条极淡的低位辅助线。',
 };
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
@@ -234,11 +234,16 @@ export default class PaintingViewer {
   /** 由外部调用：应用指定的工具滤镜 */
   applyTool(toolId) {
     this._currentTool = toolId;
-    
+
     // 首次使用
     const isFirstUse = !this._toolsUsed[toolId];
     if (isFirstUse) {
       this._toolsUsed[toolId] = true;
+
+      // 显示工具检测反馈
+      if (TOOL_FEEDBACK[toolId]) {
+        this._showFeedback(TOOL_FEEDBACK[toolId]);
+      }
 
       // 回调
       this._opt.onToolUsed?.(toolId);
@@ -249,10 +254,17 @@ export default class PaintingViewer {
       console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
       if (this._statusEl) this._statusEl.style.display = 'block';
 
-      const feedback = toolId === 'magnifier'
-        ? '三项基础检查完成。现在可以用放大镜在画面中寻找线索。'
-        : '三项基础检查完成。切回放大镜，在画面中寻找线索。';
-      this._showFeedback(feedback);
+      // 自动切换到放大镜
+      this._currentTool = 'magnifier';
+      this._applyImageEffect('magnifier');
+
+      // 派发事件通知外部锁定工具区
+      window.dispatchEvent(new CustomEvent('all-tools-used'));
+
+      // 延迟显示，避免和工具反馈重叠
+      setTimeout(() => {
+        this._showFeedback('三项检查完成，已切换到放大镜。在画面中点击寻找异常。');
+      }, 3000);
     }
 
     // 应用图像滤镜
@@ -278,10 +290,8 @@ export default class PaintingViewer {
       transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoomLevel})`;
       filter = 'contrast(1.1) brightness(1.05)';
     } else if (toolId === 'fiber') {
-      transform = 'scale(1)';
       filter = 'contrast(1.3) saturate(0.3) brightness(1.1)';
     } else if (toolId === 'sidelight') {
-      transform = 'scale(1.05)';
       filter = 'contrast(1.15) brightness(0.95)';
     }
 
@@ -386,6 +396,21 @@ export default class PaintingViewer {
     }, 4500);
   }
 
+  /** 显示持久反馈（不自动消失） */
+  showPersistentFeedback(text) {
+    if (!this._feedbackEl) return;
+    if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
+    this._feedbackEl.textContent = text;
+    this._feedbackEl.classList.add('visible');
+  }
+
+  /** 隐藏反馈条 */
+  hideFeedback() {
+    if (!this._feedbackEl) return;
+    if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
+    this._feedbackEl.classList.remove('visible');
+  }
+
   // ══════════════════════════════════════════════
   //  内部 — 点击探索
   // ══════════════════════════════════════════════
@@ -398,22 +423,23 @@ export default class PaintingViewer {
       return;
     }
 
+    // 汇聚/研讨阶段不再响应点击
+    if (this._allRecorded) return;
+
     // 未完成基础检查 → 显示提示
     if (!this._explorable) {
       console.log('[PaintingViewer] 点击被忽略：尚未完成三项基础检查');
       const missing = this._getMissingToolLabels();
-      this._showFeedback(`请先完成三项基础检查：${missing.join('、')}`);
+      this._showFeedback(`请先使用右侧工具完成检查：${missing.join('、')}`);
       return;
     }
 
     // 探索阶段必须切回放大镜
     if (this._currentTool !== 'magnifier') {
       console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
-      this._showFeedback('三项基础检查已完成，请切回放大镜 🔍 在画面中寻找线索。');
+      this._showFeedback('点击右侧放大镜 🔍，然后在画面中寻找线索。');
       return;
     }
-    // 汇聚阶段不再响应普通点击
-    if (this._allRecorded) return;
 
     // 计算点击在包装层上的百分比坐标（自动适配 scale 缩放）
     const rect = this._wrapperEl.getBoundingClientRect();
@@ -441,9 +467,9 @@ export default class PaintingViewer {
       // 清除该线索的呼吸光斑（如果有）
       this._removeHintSpot(hitId);
 
-      // 明确反馈：告诉玩家发现了什么，下一步做什么
+      // 明确反馈
       const clueTitle = this._clues[hitId].title;
-      this._showFeedback(`📌 发现线索「${clueTitle}」，在对话坞中与周老师讨论以确认`);
+      this._showFeedback(`📌 发现线索「${clueTitle}」，已记入笔记本`);
 
       // 回调
       this._opt.onClueFound?.(hitId);
@@ -452,7 +478,7 @@ export default class PaintingViewer {
       this._showRipple(px, py, 'grey');
       this._wrongClicks++;
       console.log(`[PaintingViewer] 未命中 (${px.toFixed(1)}%, ${py.toFixed(1)}%), 连续错误: ${this._wrongClicks}`);
-      this._showFeedback('这个地方是正常的~~~');
+      this._showFeedback('这里没有异常，试试别的位置。');
       this._checkHintTrigger();
     }
   }
@@ -495,28 +521,43 @@ export default class PaintingViewer {
   //  内部 — 渐进提示
   // ══════════════════════════════════════════════
 
-  /** 错误次数达到阈值时触发提示 */
+  /** 错误次数达到阈值时触发提示（渐进披露，每3次错误多给一条） */
   _checkHintTrigger() {
-    if (this._wrongClicks >= 3) {
-      console.log('[PaintingViewer] 连续错误≥3，触发位置提示光斑');
-      this._showFeedback('💡 注意观察装裱边缘和画面下方……');
-      this._showVisualHints();
-    }
+    // 获取未找到的线索列表
+    const unfound = Object.entries(this._clues).filter(([, c]) => !c.found);
+    if (unfound.length === 0) return;
+
+    // 每累计3次错误，多显示一条光斑
+    const hintCount = Math.floor(this._wrongClicks / 3);
+    if (hintCount <= 0) return;
+
+    console.log(`[PaintingViewer] 连续错误≥${this._wrongClicks}，显示${Math.min(hintCount, unfound.length)}条位置提示`);
+
+    // 根据即将显示的线索给出针对性方位提示
+    const toShow = unfound.slice(0, hintCount);
+    const lastRevealed = toShow[toShow.length - 1];
+    const hintTextMap = {
+      clue_margin: '💡 注意观察画面右上方的装裱边缘……',
+      clue_text: '💡 试试画面左下方，装裱层底下似乎有字迹……',
+      clue_line: '💡 画面下方中部有一条不属于画面内容的痕迹……',
+    };
+    const fallback = '💡 画面边缘和下方可能还藏着什么……';
+    this._showFeedback(hintTextMap[lastRevealed[0]] || fallback);
+    this._showVisualHintsProgressive(hintCount);
   }
 
-  /** 在未找到的线索区域显示呼吸光斑 */
-  _showVisualHints() {
-    // 清空旧光斑
+  /** 渐进显示呼吸光斑：最多显示 count 条 */
+  _showVisualHintsProgressive(count) {
     this._hintsLayer.innerHTML = '';
-    for (const [id, clue] of Object.entries(this._clues)) {
-      if (!clue.found) {
-        const spot = document.createElement('div');
-        spot.className = 'pv-hint-spot';
-        spot.dataset.clue = id;
-        spot.style.left = `${clue.x}%`;
-        spot.style.top = `${clue.y}%`;
-        this._hintsLayer.appendChild(spot);
-      }
+    const unfound = Object.entries(this._clues).filter(([, c]) => !c.found);
+    const toShow = unfound.slice(0, count);
+    for (const [id, clue] of toShow) {
+      const spot = document.createElement('div');
+      spot.className = 'pv-hint-spot';
+      spot.dataset.clue = id;
+      spot.style.left = `${clue.x}%`;
+      spot.style.top = `${clue.y}%`;
+      this._hintsLayer.appendChild(spot);
     }
   }
 
@@ -563,14 +604,15 @@ export default class PaintingViewer {
     if (recordedCount < 3 || this._allRecorded) return;
 
     this._allRecorded = true;
-    this._hintsLayer.innerHTML = ''; // 清除所有光斑
+    this._hintsLayer.innerHTML = '';
 
-    // ── 第一步：还原缩放 ──
+    // 还原缩放
     this.clearTool();
 
-    // ── 第二步：提示外部进入综合研讨，不自动播放汇聚动画 ──
-    this._showFeedback('三处线索全部确认。先把它们之间的关系说清楚。');
-    this._opt.onAllCluesRecorded?.();
+    // 等第三条线索的"已确认"提示消失后再回调外部
+    setTimeout(() => {
+      this._opt.onAllCluesRecorded?.();
+    }, 4000);
   }
 
   /** 播放汇聚动画：三个金色光点向中心汇聚 → 交会点脉冲 → 可点击 */
