@@ -8,40 +8,54 @@
 
 ### 已实现页面 / 场景
 
+当前注册场景见 `Web/src/main.js`：
+
 - `landing`：着陆页，包含全景背景、项目简介、园林空间 / 古画秘史 / 人物图鉴轮播弹窗。
 - `menu`：主菜单，包含章节列表、存档入口、新游戏、继续游戏、清除存档。
-- `prologue`：序章基础探索，包含画卷残片、放大镜、修复笔记热点；完成后返回菜单并解锁第一章。
-
-当前实际注册场景见 `Web/src/main.js`：
-
-- `landing`
-- `menu`
-- `prologue`
-
-第一章、第二章、第三章、终章仍是待实现目标，菜单中已有入口配置，但尚未注册对应场景类。
+- `prologue`：序章完整流程（脚本对话→工具扫描→自由探索→线索发现→辅助讨论→汇聚转场→进入画中）。
+- `chapter1`：第一章画中世界场景（`chapter1-paint.js`）。
+- `chapter2` / `chapter3` / `finale`：占位场景（`chapter-placeholder.js`），显示章节未开放信息。
 
 ### 已实现核心模块
 
-- `Web/src/core/game-engine.js`：全局状态、事件总线、场景切换、世界主题、AI 上下文。
-- `Web/src/core/scene-manager.js`：场景注册与生命周期切换。
-- `Web/src/core/inventory.js`：物件匣数据管理。
-- `Web/src/core/hint-system.js`：基于计时的渐进提示。
-- `Web/src/core/dialogue.js`：对话序列播放。
-- `Web/src/core/save-system.js`：`localStorage` 存档，键名为 `sanyijing-save`。
-- `Web/src/core/ai-service.js`：DeepSeek API 调用封装。
-- `Web/src/core/ai-prompts.js`：AI System Prompt 模板。
+| 文件 | 职责 |
+|------|------|
+| `core/game-engine.js` | 全局状态、事件总线、场景切换、世界主题、AI 上下文 |
+| `core/scene-manager.js` | 场景注册与生命周期切换 |
+| `core/inventory.js` | 物件匣数据管理 |
+| `core/hint-system.js` | 基于计时/次数的渐进提示 |
+| `core/dialogue.js` | 对话序列播放 |
+| `core/save-system.js` | `localStorage` 存档，键名为 `sanyijing-save` |
+| `core/ai-service.js` | DeepSeek API 调用封装（5 个对外接口） |
+| `core/ai-prompts.js` | AI System Prompt 模板（5 种角色） |
+| `core/discussion-gate.js` | 研讨门槛管理器（辅助讨论模式） |
+| `core/gate-config.js` | 门槛配置（概念/关键词/通过条件/回复池） |
+| `core/fallback-dialogues.js` | 离线对话降级文案 |
 
 ### 已实现组件
 
-- `Web/src/components/chat-panel.js`：周鹤年 AI 对话面板，仅现实世界显示。
-- `Web/src/components/notebook-panel.js`：AI 笔记本面板，支持批注与画中世界查阅。
-- `Web/src/components/transition.js`：转场动画组件。
+| 文件 | 职责 |
+|------|------|
+| `components/painting-viewer.js` | 古画查看器（缩放/拖拽/工具滤镜/线索判定/汇聚动画） |
+| `components/gate-panel.js` | 研讨门槛全屏面板（无关闭按钮，必须通过） |
+| `components/prologue-dock.js` | 序章对话坞（脚本播放+研讨模式，待重构） |
+| `components/scanner-ui.js` | 扫描工具 UI（待迁移至右侧面板） |
+| `components/fall-transition.js` | 跌入画中转场动画 |
+| `components/notebook-panel.js` | AI 笔记本面板（批注时间线+画中世界查阅） |
+| `components/chat-panel.js` | 周鹤年对话浮层（旧，待重构） |
+| `components/clue-explorer.js` | 线索探索器（旧，已由 painting-viewer 替代） |
+| `components/clue-popup.js` | 线索弹窗（旧，已由 painting-viewer 替代） |
+| `components/transition.js` | 通用转场动画 |
 
 ### 已实现样式
 
-- `Web/src/styles/index.css`：全局样式、双世界主题变量、AI 面板样式。
-- `Web/src/styles/transitions.css`：转场动画样式。
-- 各页面当前有部分页面级样式注入，后续可按稳定程度再拆分。
+| 文件 | 内容 |
+|------|------|
+| `styles/index.css` | 全局样式、双世界主题变量 |
+| `styles/transitions.css` | 转场动画样式 |
+| `styles/painting-viewer.css` | 古画查看器样式 |
+| `styles/gate-panel.css` | 研讨门槛面板样式 |
+| `styles/prologue-dock.css` | 序章对话坞样式 |
 
 ---
 
@@ -59,41 +73,34 @@ Web/public/images/
 const bgImage = '/images/landing-panorama.png'
 ```
 
-当前正式图片：
-
-- `Web/public/images/landing-panorama.png`：着陆页全景背景。
-- `Web/public/images/menu-gate.png`：主菜单背景。
-- `Web/public/images/prologue-bg.png`：序章修复室背景。
-- `Web/public/images/menu-test-bg.png`：菜单测试页背景。
-
-`TestPic/` 仅作为过程图片、生成图和临时参考图目录，不再作为正式代码引用目录。
+`TestPic/` 仅作为过程图片、生成图和临时参考图目录，不作为正式代码引用目录。
 
 ---
 
 ## 三、AI 功能状态
 
-AI 功能已经落地，不再只是后续增强项。
-
 ### DeepSeek 接入
 
-- 模型：`deepseek-v4-pro`
+- 模型：`deepseek-chat`
 - 接口：`https://api.deepseek.com/chat/completions`
 - API Key：通过 `Web/.env` 中的 `VITE_DEEPSEEK_API_KEY` 配置
+- 前端直连：MVP / 路演阶段前端直调 API
 
 ### 已实现能力
 
-- `chatWithZhou`：周鹤年现实世界多轮对话。
-- `queryNotebook`：画中世界笔记本查阅。
-- `generateAnnotation`：根据事件生成沈念批注。
-- `generateReport`：终章报告 / 结局文本生成接口。
+| 接口 | 用途 | 对话模式 |
+|------|------|---------|
+| `chatWithZhou` | 周鹤年现实世界多轮对话 | 多轮 |
+| `discussWithZhou` | 研讨门槛中周鹤年引导对话 | 多轮（含 systemHint） |
+| `queryNotebook` | 笔记本查阅（画中世界） | 单轮 |
+| `generateAnnotation` | 事件驱动生成沈念批注 | 单轮 |
+| `generateReport` | 终章结局文本生成 | 单轮 |
 
-### 约束
+### 降级策略
 
-- 未配置 API Key 时，AI 功能显示明确降级文案。
-- 周鹤年对话仅限现实世界。
-- 画中世界通过笔记本查阅，不以周鹤年身份回答。
-- AI 不负责决定谜题答案、控制结局或新增历史事实。
-- 固定规则提示仍作为基础兜底，确保关闭 AI 后主线仍可通关。
+- 未配置 API Key 时：显示明确降级文案
+- API 调用失败时：显示叙事化降级文案
+- 研讨门槛离线时：使用预写回复池（affirmPool/hintPool/correctionPool）轮询
 
 ---
 
@@ -102,62 +109,82 @@ AI 功能已经落地，不再只是后续增强项。
 ```text
 Web/
 ├── package.json
-├── package-lock.json
 ├── vite.config.js
 ├── index.html
-├── menu-test.html
+├── .env                          ← API Key（不提交）
+├── server/                       ← Express 后端（可选代理）
 ├── public/
-│   ├── favicon.svg
-│   ├── icons.svg
 │   └── images/
-│       ├── landing-panorama.png
-│       ├── menu-gate.png
-│       ├── menu-test-bg.png
-│       └── prologue-bg.png
 └── src/
     ├── main.js
-    ├── style.css
     ├── core/
-    │   ├── ai-prompts.js
-    │   ├── ai-service.js
-    │   ├── dialogue.js
     │   ├── game-engine.js
-    │   ├── hint-system.js
+    │   ├── scene-manager.js
     │   ├── inventory.js
+    │   ├── hint-system.js
+    │   ├── dialogue.js
     │   ├── save-system.js
-    │   └── scene-manager.js
+    │   ├── ai-service.js
+    │   ├── ai-prompts.js
+    │   ├── discussion-gate.js
+    │   ├── gate-config.js
+    │   └── fallback-dialogues.js
     ├── components/
-    │   ├── chat-panel.js
+    │   ├── painting-viewer.js
+    │   ├── gate-panel.js
+    │   ├── prologue-dock.js
+    │   ├── scanner-ui.js
+    │   ├── fall-transition.js
     │   ├── notebook-panel.js
+    │   ├── chat-panel.js
+    │   ├── clue-explorer.js      ← deprecated
+    │   ├── clue-popup.js         ← deprecated
     │   └── transition.js
     ├── pages/
     │   ├── game-scene.js
     │   ├── landing.js
     │   ├── menu.js
-    │   └── prologue.js
+    │   ├── prologue.js
+    │   ├── chapter1-paint.js
+    │   └── chapter-placeholder.js
     └── styles/
         ├── index.css
-        └── transitions.css
+        ├── transitions.css
+        ├── painting-viewer.css
+        ├── gate-panel.css
+        └── prologue-dock.css
 ```
 
 ---
 
-## 五、MVP 后续实现顺序
+## 五、待实施改动
 
-1. 第一章 · 东园：实现兰雪堂 / 芙蓉榭节点与水面倒影翻转谜题，获得断簪。
-2. 第二章 · 中园：实现远香堂诗词比对谜题，获得残砚与旧批注残片。
-3. 第三章 · 西园：实现残砚显线、断簪揭灰、墙面草图显现，获得王蘅的信与草图拓片。
-4. 终章 · 第三十一景：实现四问复原与三结局入口。
-5. 串联章节循环：序章入画、章末回现实、继续修复进入下一章。
-6. 完整走查：存档、提示、物件匣、AI 面板、关闭 AI 后的兜底流程。
+详见 `改动计划/` 目录下三份文档：
+
+1. **UI 重构**：叙事对话框（底部古色风格+立绘）与修复笔记本悬浮面板（右侧240px可收缩）分离，HUD按钮栏
+2. **综合门槛**：三线索集齐后全屏强制研讨，前端关键词匹配通过
+3. **知识约束**：轻量 RAG，按进度解锁知识片段注入 AI prompt
 
 ---
 
-## 六、验证方式
+## 六、MVP 后续实现顺序
+
+1. UI 重构（NarrationBar + NotebookFloating + HudBar 替代 PrologueDock）
+2. 综合研讨门槛（强制 AI 推理通过）
+3. 知识约束系统（轻量 RAG）
+4. 第一章 · 东园：兰雪堂 / 芙蓉榭节点与水面倒影翻转谜题
+5. 第二章 · 中园：远香堂诗词比对谜题
+6. 第三章 · 西园：残砚显线、断簪揭灰、墙面草图显现
+7. 终章 · 第三十一景：四问复原与三结局
+8. 完整走查：存档、提示、物件匣、AI 面板、关闭 AI 后的兜底流程
+
+---
+
+## 七、验证方式
 
 开发启动：
 
-```powershell
+```bash
 cd Web
 npm install
 npm run dev
@@ -165,15 +192,15 @@ npm run dev
 
 构建检查：
 
-```powershell
+```bash
 cd Web
 npm run build
 ```
 
 每次前端改动后至少验证：
 
-- 页面能启动。
-- `npm run build` 通过。
-- 相关图片从 `Web/public/images/` 加载。
-- 新增场景已在 `Web/src/main.js` 注册。
-- 关闭或缺少 API Key 时，AI 面板有可理解的降级反馈。
+- 页面能启动
+- `npm run build` 通过
+- 相关图片从 `Web/public/images/` 加载
+- 新增场景已在 `Web/src/main.js` 注册
+- 关闭或缺少 API Key 时，AI 面板有可理解的降级反馈

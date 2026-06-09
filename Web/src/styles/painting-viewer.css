@@ -43,42 +43,39 @@
    ========================================================================== */
 .painting-viewer {
   position: fixed;
-  inset: 0 0 240px 0; /* 留出底部 240px 给 dialogue box */
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50; /* 低于 prologue-dock 的 60，保证对话框可点击 */
-  background: rgba(14, 11, 8, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  z-index: 50;
+  background: transparent;
   animation: fadeIn 0.4s ease;
 }
 
 .pv-card-container {
   display: flex;
   flex-direction: row;
-  width: 100vw;
-  max-width: none;
-  height: 100%;
-  /* 高级质感：深邃的悬浮画框 */
-  background: rgba(12, 9, 8, 0.95);
-  border: none;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 0;
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+  width: min(58vw, 980px);
+  height: min(54vh, 560px);
+  margin-bottom: 11rem;
+  background: rgba(12, 9, 8, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
   overflow: hidden;
 }
 
 .pv-main {
-  flex: 3;
+  flex: 1;
+  width: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 2.5rem 3rem;
   overflow: hidden;
-  border-right: 1px solid rgba(212, 175, 55, 0.15);
+  border-right: none;
 }
 .pv-painting-card {
   position: relative;
@@ -114,12 +111,15 @@
   inset: 0;
   pointer-events: none;
 }
+.pv-markers-layer {
+  pointer-events: auto;
+}
 .pv-feedback {
-  position: absolute;
-  bottom: 5rem;
+  position: fixed;
+  bottom: 12.25rem;
   left: 50%;
   transform: translateX(-50%) translateY(15px);
-  max-width: 70%;
+  max-width: min(52vw, 720px);
   background: rgba(26, 20, 16, 0.95);
   border: 1px solid rgba(160, 120, 90, 0.4);
   color: #e6dac3;
@@ -131,7 +131,7 @@
   opacity: 0;
   transition: all 0.4s ease;
   pointer-events: none;
-  z-index: 5;
+  z-index: 105;
 }
 .pv-feedback.visible {
   opacity: 1;
@@ -139,7 +139,7 @@
 }
 .pv-status {
   position: absolute;
-  bottom: 2rem;
+  bottom: 0.9rem;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(15, 12, 10, 0.85);
@@ -149,6 +149,7 @@
   border-radius: 4px;
   font-family: var(--font-serif);
   font-size: 0.9rem;
+  white-space: nowrap;
   pointer-events: none;
   z-index: 5;
   display: none;
@@ -158,100 +159,7 @@
   margin: 0 0.3rem;
 }
 
-/* ── 右侧侧边栏 ── */
-.pv-sidebar {
-  flex: 1;
-  background: rgba(8, 6, 4, 0.95);
-  display: flex;
-  flex-direction: column;
-  padding: 3rem 2.5rem;
-}
-
-.pv-sidebar-title {
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: rgba(212, 175, 55, 0.8);
-  margin-bottom: 2.5rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  padding-bottom: 1rem;
-}
-
-.pv-tool-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  flex: 1;
-}
-
-.pv-tool-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  background: transparent;
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 2px;
-  color: #eae3d8;
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.pv-tool-item::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
-  transition: left 0.5s;
-}
-
-.pv-tool-item:hover {
-  border-color: rgba(212, 175, 55, 0.5);
-  color: #fff;
-  transform: translateX(4px);
-}
-
-.pv-tool-item:hover::before {
-  left: 100%;
-}
-
-.pv-tool-item.active {
-  background: rgba(212, 175, 55, 0.05);
-  border-color: rgba(212, 175, 55, 0.8);
-  color: #d4af37;
-  box-shadow: inset 4px 0 0 rgba(212, 175, 55, 0.8);
-}
-.pv-tool-item.used::after {
-  content: '✓';
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #5a8a6e;
-  color: white;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.pv-sidebar-tip {
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(212,175,55,0.15);
-  font-family: var(--font-serif);
-  font-size: 0.85rem;
-  color: #7a6b5a;
-  text-align: center;
-  line-height: 1.6;
-}
+/* Sidebar CSS removed */
 .pv-ripple {
   position: absolute;
   width: 20px;
@@ -271,18 +179,19 @@
 }
 .pv-hint-spot {
   position: absolute;
-  width: 70px;
-  height: 70px;
-  margin-left: -35px;
-  margin-top: -35px;
+  width: 90px;
+  height: 90px;
+  margin-left: -45px;
+  margin-top: -45px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  animation: pvHintPulse 2s infinite ease-in-out;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0.15) 40%, transparent 70%);
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  animation: pvHintPulse 1.8s infinite ease-in-out;
   pointer-events: none;
 }
 @keyframes pvHintPulse {
-  0%, 100% { transform: scale(0.85); opacity: 0.15; }
-  50% { transform: scale(1.15); opacity: 0.40; }
+  0%, 100% { transform: scale(0.8); opacity: 0.4; border-color: rgba(212, 175, 55, 0.4); }
+  50% { transform: scale(1.2); opacity: 0.9; border-color: rgba(212, 175, 55, 0.8); }
 }
 .pv-marker {
   position: absolute;
@@ -319,38 +228,41 @@
   pointer-events: none;
 }
 .pv-marker:hover .pv-marker-label { opacity: 1; }
-.pv-convergence-line {
+.pv-convergence-dot {
   position: absolute;
-  height: 1px;
-  background: rgba(212, 175, 55, 0.6);
-  animation: pvLineDraw 0.8s ease-out forwards;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 80, 1) 0%, rgba(212, 175, 55, 0.6) 60%, transparent 100%);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+  opacity: 1;
+  transition: left 1.4s ease-in-out, top 1.4s ease-in-out, opacity 1.4s ease-in-out;
   pointer-events: none;
-}
-@keyframes pvLineDraw {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0 0 0); }
 }
 .pv-convergence-point {
   position: absolute;
-  width: 60px;
-  height: 60px;
-  margin-left: -30px;
-  margin-top: -30px;
+  width: 96px;
+  height: 96px;
+  margin-left: -48px;
+  margin-top: -48px;
   cursor: pointer;
   pointer-events: auto;
-  z-index: 10;
+  z-index: 20;
 }
 .pv-convergence-pulse {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.8) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(255, 220, 80, 1) 0%, rgba(212, 175, 55, 0.6) 40%, transparent 70%);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4);
   animation: pvPointPulse 1.5s infinite;
 }
 @keyframes pvPointPulse {
-  0%   { transform: scale(0.5); opacity: 1; }
-  70%  { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(0.5); opacity: 1; }
+  0%   { transform: scale(0.6); opacity: 1; }
+  70%  { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(0.6); opacity: 1; }
 }
 .pv-convergence-label {
   position: absolute;
@@ -449,4 +361,30 @@
 .clue-popup-plaque.hiding {
   transform: scale(0.9) translateY(20px);
   opacity: 0;
+}
+
+/* 进入综合研讨按钮 */
+.synthesis-entry-btn {
+  position: fixed;
+  bottom: 12.25rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(26, 20, 16, 0.95);
+  border: 1px solid rgba(212, 168, 83, 0.6);
+  color: #d4a853;
+  padding: 0.8rem 2rem;
+  border-radius: 4px;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 105;
+}
+
+.synthesis-entry-btn.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  cursor: pointer;
 }

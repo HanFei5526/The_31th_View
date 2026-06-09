@@ -136,7 +136,7 @@ export class AIService {
    */
   async queryNotebook(question) {
     const ctx = this.engine.getAIContext();
-    const systemPrompt = buildNotebookQueryPrompt(ctx);
+    const systemPrompt = buildNotebookQueryPrompt(ctx, this.engine.gameProgress);
 
     const messages = [
       { role: 'system', content: systemPrompt },

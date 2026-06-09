@@ -27,6 +27,11 @@ const ECHO_TEXT = '「记住，表面完整，不等于没有缺失。」';
 export default class FallTransition {
   constructor() {
     this._elements = [];
+    this._timers = [];
+    this._isPlaying = false;
+    this._skipped = false;
+    this._phaseResolve = null;
+    this._boundOnKeyDown = this._onKeyDown.bind(this);
   }
 
   /**
@@ -35,20 +40,29 @@ export default class FallTransition {
    * @returns {Promise<void>} resolves when transition is complete
    */
   async play(origin) {
+    this._isPlaying = true;
+    this._skipped = false;
+    document.addEventListener('keydown', this._boundOnKeyDown);
+
     // Phase 1: Cold blue desaturation
     await this._phaseDesat();
+    if (this._skipped) return this._finishPlay();
 
     // Phase 2: Ink spread from origin
     await this._phaseInkSpread(origin);
+    if (this._skipped) return this._finishPlay();
 
     // Phase 3: Transition text
     await this._phaseText();
+    if (this._skipped) return this._finishPlay();
 
     // Phase 4: Zhou Henian echo
     await this._phaseEcho();
+    if (this._skipped) return this._finishPlay();
 
     // Phase 5: Hold on ink, ready for scene switch
     await this._phaseFinal();
+    this._finishPlay();
   }
 
   /**
@@ -57,6 +71,7 @@ export default class FallTransition {
    */
   _phaseDesat() {
     return new Promise(resolve => {
+      this._phaseResolve = resolve;
       const el = document.createElement('div');
       el.className = 'fall-transition-desat';
       document.body.appendChild(el);
@@ -64,7 +79,7 @@ export default class FallTransition {
 
       requestAnimationFrame(() => {
         el.classList.add('active');
-        setTimeout(resolve, 1500);
+        this._setTimer(resolve, 1500);
       });
     });
   }
@@ -75,6 +90,7 @@ export default class FallTransition {
    */
   _phaseInkSpread(origin) {
     return new Promise(resolve => {
+      this._phaseResolve = resolve;
       const container = document.createElement('div');
       container.className = 'fall-transition-ink';
       document.body.appendChild(container);
@@ -93,7 +109,7 @@ export default class FallTransition {
 
       requestAnimationFrame(() => {
         drop.classList.add('spreading');
-        setTimeout(resolve, 2000);
+        this._setTimer(resolve, 2000);
       });
     });
   }
@@ -104,6 +120,7 @@ export default class FallTransition {
    */
   _phaseText() {
     return new Promise(resolve => {
+      this._phaseResolve = resolve;
       const layer = document.createElement('div');
       layer.className = 'fall-transition-text-layer';
       document.body.appendChild(layer);
@@ -120,17 +137,17 @@ export default class FallTransition {
 
       // Stagger reveal
       lineEls.forEach((el, i) => {
-        setTimeout(() => el.classList.add('visible'), 600 + i * 1500);
+        this._setTimer(() => el.classList.add('visible'), 600 + i * 1500);
       });
 
       // Wait for all lines to be shown, then hold briefly
       const totalTime = 600 + TRANSITION_LINES.length * 1500 + 1500;
-      setTimeout(() => {
+      this._setTimer(() => {
         // Fade out text
         lineEls.forEach((el, i) => {
-          setTimeout(() => el.classList.add('fading'), i * 200);
+          this._setTimer(() => el.classList.add('fading'), i * 200);
         });
-        setTimeout(resolve, 800);
+        this._setTimer(resolve, 800);
       }, totalTime);
     });
   }
@@ -141,6 +158,7 @@ export default class FallTransition {
    */
   _phaseEcho() {
     return new Promise(resolve => {
+      this._phaseResolve = resolve;
       // Reuse text layer or find it
       let layer = document.querySelector('.fall-transition-text-layer');
       if (!layer) {
@@ -158,12 +176,12 @@ export default class FallTransition {
       echo.textContent = ECHO_TEXT;
       layer.appendChild(echo);
 
-      setTimeout(() => echo.classList.add('visible'), 200);
+      this._setTimer(() => echo.classList.add('visible'), 200);
 
       // Hold, then fade
-      setTimeout(() => {
+      this._setTimer(() => {
         echo.classList.add('fading');
-        setTimeout(resolve, 2500);
+        this._setTimer(resolve, 2500);
       }, 2500);
     });
   }
@@ -174,14 +192,62 @@ export default class FallTransition {
    */
   _phaseFinal() {
     return new Promise(resolve => {
-      setTimeout(resolve, 500);
+      this._phaseResolve = resolve;
+      this._setTimer(resolve, 500);
     });
+  }
+
+  _setTimer(callback, delay) {
+    const timer = setTimeout(() => {
+      this._timers = this._timers.filter(id => id !== timer);
+      callback();
+    }, delay);
+    this._timers.push(timer);
+    return timer;
+  }
+
+  _clearTimers() {
+    this._timers.forEach((timer) => clearTimeout(timer));
+    this._timers = [];
+  }
+
+  _finishPlay() {
+    this._isPlaying = false;
+    this._phaseResolve = null;
+    document.removeEventListener('keydown', this._boundOnKeyDown);
+  }
+
+  _onKeyDown(e) {
+    if (!this._isPlaying || !this._isFastForwardKey(e) || this._isTextInputActive()) return;
+    e.preventDefault();
+    this._skipped = true;
+    this._clearTimers();
+    const resolve = this._phaseResolve;
+    this._phaseResolve = null;
+    this.destroy();
+    resolve?.();
+  }
+
+  _isFastForwardKey(e) {
+    return e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ';
+  }
+
+  _isTextInputActive() {
+    const el = document.activeElement;
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
   }
 
   /**
    * Clean up all transition elements
    */
   destroy() {
+    this._clearTimers();
+    document.removeEventListener('keydown', this._boundOnKeyDown);
+    this._isPlaying = false;
+    this._phaseResolve = null;
+
     this._elements.forEach(el => {
       if (el && el.parentNode) {
         el.remove();

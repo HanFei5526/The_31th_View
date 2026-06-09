@@ -350,6 +350,10 @@
   pointer-events: auto;
 }
 
+.gate-panel-wrapper.hidden .gate-pass-overlay {
+  pointer-events: none;
+}
+
 .gate-pass-content {
   text-align: center;
   transform: scale(0.6);

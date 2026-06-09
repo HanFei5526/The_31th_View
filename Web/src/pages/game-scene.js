@@ -30,6 +30,7 @@ export default class GameSceneBase {
     this._narrationIndicator = null;
     this._hotspotLayer = null;
     this._typewriterTimer = null;
+    this._typewriterText = '';
     this._isTyping = false;
   }
 
@@ -155,10 +156,10 @@ export default class GameSceneBase {
       return;
     }
 
-    // 空格/回车：继续旁白或跳过打字机
-    if (e.key === ' ' || e.key === 'Enter') {
+    // 空格/Z/回车：继续旁白或跳过打字机
+    if (e.key === ' ' || e.key === 'Enter' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
       // 如果输入框有焦点，不处理
-      if (document.activeElement?.tagName === 'INPUT') return;
+      if (this._isTextInputActive()) return;
 
       // 如果有热点可见，回车触发当前聚焦的热点
       if (e.key === 'Enter' && document.activeElement?.classList?.contains('gs-hotspot')) {
@@ -326,6 +327,7 @@ export default class GameSceneBase {
   _startTypewriter(text) {
     this._clearTypewriter();
     this._isTyping = true;
+    this._typewriterText = text;
     this._narrationText.textContent = '';
     let i = 0;
 
@@ -341,6 +343,7 @@ export default class GameSceneBase {
 
   _completeTypewriter() {
     this._clearTypewriter();
+    this._narrationText.textContent = this._typewriterText;
     this._isTyping = false;
     this._narrationIndicator.style.display = 'block';
   }
@@ -350,6 +353,13 @@ export default class GameSceneBase {
       clearInterval(this._typewriterTimer);
       this._typewriterTimer = null;
     }
+  }
+
+  _isTextInputActive() {
+    const el = document.activeElement;
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
   }
 
   /* ==================== 样式注入 ==================== */

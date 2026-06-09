@@ -169,6 +169,69 @@ export const GATE_CONFIG = {
       '辅助线意味着画家是蹲着或坐着画的',
     ],
   },
+
+  // 综合门槛：三处痕迹之间的关系
+  gate_prologue_synthesis: {
+    title: '三处痕迹的联系',
+    speaker: '周鹤年',
+    world: 'real',
+    concepts: [
+      {
+        id: 'systematic',
+        keywords: ['系统', '有组织', '有计划', '统一', '一起', '全部', '所有', '连在一起', '共同', '整体', '都是', '三处', '三个', '一套', '配合', '协调', '不是偶然'],
+        description: '三处痕迹呈现系统性关联',
+      },
+      {
+        id: 'conceal_origin',
+        keywords: ['遮蔽来源', '隐藏出处', '掩盖来源', '来源', '出处', '来历', '身份', '谁画', '作者', '归属', '从哪来', '来路', '出自', '信息', '记录'],
+        description: '被遮蔽的是来源信息',
+      },
+      {
+        id: 'intentional_act',
+        keywords: ['有人', '刻意', '故意', '蓄意', '不是巧合', '人为', '计划', '目的', '想要', '不想让', '不让'],
+        description: '这是有人刻意为之',
+      },
+      {
+        id: 'erase_evidence',
+        keywords: ['抹去', '消除', '销毁', '清除', '擦掉', '去掉', '不让人看', '不让人知道', '遮蔽', '隐藏', '掩盖', '毁掉', '删掉', '证据', '痕迹'],
+        description: '证据或痕迹被抹除',
+      },
+    ],
+    requiredConcepts: {
+      anyOfGroups: [
+        ['systematic', 'intentional_act'],
+        ['conceal_origin', 'erase_evidence'],
+      ],
+    },
+    minRounds: 2,
+    opening: '三处痕迹你都看到了。装裱接缝的旧题签、被压住的"所见"残字、低位构图辅助线。它们之间有什么联系？',
+    passResponse: '对。不是时间磨损，不是偶然遗漏。是有人系统性地抹去了这幅画的来源信息。',
+    hintPool: [
+      '周鹤年：「先别把三处痕迹分开看。旧题签、残字、辅助线，都指向同一个问题：有人不想让后来者知道什么？」',
+      '周鹤年：「如果只是保存不善，痕迹会散乱；但这三处都和说明来源有关。你再把它们连起来。」',
+      '周鹤年：「题签、边注、辅助线不是画面装饰。它们原本都在告诉我们，这个视角从哪里来。」',
+    ],
+    affirmPool: [
+      '周鹤年：「方向对。继续把‘谁不想让人看见’和‘不想让人看见什么’说清楚。」',
+      '周鹤年：「嗯，你已经把它们连起来了，再往来源信息上想一步。」',
+      '周鹤年：「对，不像自然损坏。还要说明它被处理掉的对象是什么。」',
+    ],
+    correctionPool: [
+      '周鹤年：「不是画心失踪，也不是新画替换。画还在，消失的是解释这幅画来源的东西。」',
+      '周鹤年：「不要急着找一个具体姓名。现在证据只能说明：有人处理过来源痕迹。」',
+      '周鹤年：「如果三处痕迹都被动过，问题就不只是单个破损，而是一组被整理过的证据。」',
+    ],
+    quickThoughts: [
+      '这些痕迹是被故意去除的吗？',
+      '有人在系统性地隐藏什么',
+      '来源信息被刻意遮蔽了',
+    ],
+    fallbackQuickThoughts: [
+      '有人故意把这幅画的来源信息遮蔽了',
+      '三处痕迹不是偶然，是系统性处理',
+      '旧题签、残字和辅助线都在指向被抹去的来源证据',
+    ],
+  },
 };
 
 /**
@@ -229,6 +292,31 @@ export function analyzePlayerInput(gateId, playerInput) {
     matched,
     matchedConcepts,
     allConcepts: allConceptIds,
+  };
+}
+
+/**
+ * 分析综合门槛输入，支持跨多轮累积概念命中
+ * @param {string} playerInput - 玩家原始输入
+ * @param {Iterable<string>} accumulated - 已命中的概念集合
+ * @returns {Object} { matchedConcepts: string[], accumulatedConcepts: string[] }
+ */
+export function analyzePlayerInputAccumulated(playerInput, accumulated = []) {
+  const config = GATE_CONFIG.gate_prologue_synthesis;
+  const input = playerInput.toLowerCase().trim();
+  const accumulatedSet = new Set(accumulated);
+  const matchedConcepts = [];
+
+  for (const concept of config.concepts) {
+    if (_matchConcept(input, concept)) {
+      matchedConcepts.push(concept.id);
+      accumulatedSet.add(concept.id);
+    }
+  }
+
+  return {
+    matchedConcepts,
+    accumulatedConcepts: Array.from(accumulatedSet),
   };
 }
 

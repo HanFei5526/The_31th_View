@@ -60,6 +60,9 @@ export default class MenuScene {
   constructor(gameEngine) {
     this.engine = gameEngine;
     this._styleEl = null;
+    this._transitionTimers = [];
+    this._transitionKeyHandler = null;
+    this._transitionOverlay = null;
   }
 
   /* ==================== 生命周期 ==================== */
@@ -72,6 +75,7 @@ export default class MenuScene {
 
   exit() {
     if (this._styleEl) this._styleEl.remove();
+    this._clearIntroTransition();
   }
 
   /* ==================== DOM 构建 ==================== */
@@ -270,8 +274,10 @@ export default class MenuScene {
   /* ==================== 辅助方法 ==================== */
 
   _transitionToSceneWithOverlay(root, scene) {
+    this._clearIntroTransition();
     const overlay = document.createElement('div');
     overlay.className = 'intro-transition-overlay';
+    this._transitionOverlay = overlay;
     
     if (scene === 'prologue') {
       overlay.classList.add('intro-transition-overlay--prologue');
@@ -287,8 +293,38 @@ export default class MenuScene {
     document.body.appendChild(overlay);
 
     const textContainer = overlay.querySelector(scene === 'prologue' ? '#intro-prologue-text' : '.intro-transition-text');
+    let finished = false;
 
-    setTimeout(() => {
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      this._clearTransitionTimers();
+      document.removeEventListener('keydown', this._transitionKeyHandler);
+      this._transitionKeyHandler = null;
+
+      textContainer.querySelectorAll('span').forEach((p) => {
+        p.style.opacity = '1';
+        p.style.transform = 'translateY(0)';
+      });
+
+      this.engine.switchScene(scene, true);
+      overlay.classList.remove('active');
+      overlay.classList.add('fade-out');
+
+      this._transitionTimers.push(setTimeout(() => {
+        overlay.remove();
+        if (this._transitionOverlay === overlay) this._transitionOverlay = null;
+      }, 3000));
+    };
+
+    this._transitionKeyHandler = (e) => {
+      if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+      e.preventDefault();
+      finish();
+    };
+    document.addEventListener('keydown', this._transitionKeyHandler);
+
+    this._transitionTimers.push(setTimeout(() => {
       overlay.classList.add('active');
       if (scene === 'prologue') {
         const title = overlay.querySelector('.intro-prologue-title');
@@ -297,7 +333,7 @@ export default class MenuScene {
           title.style.transform = 'translateY(0)';
         }
       }
-    }, 50);
+    }, 50));
 
     root.classList.add('menu-scene--exiting-slow');
 
@@ -323,7 +359,7 @@ export default class MenuScene {
 
     textContainer.innerHTML = '';
 
-    setTimeout(() => {
+    this._transitionTimers.push(setTimeout(() => {
       lines.forEach((line, index) => {
         const p = document.createElement('span');
         p.textContent = line;
@@ -333,25 +369,45 @@ export default class MenuScene {
         p.style.display = 'block';
         textContainer.appendChild(p);
 
-        setTimeout(() => {
+        this._transitionTimers.push(setTimeout(() => {
           p.style.opacity = '1';
           p.style.transform = 'translateY(0)';
-        }, index * 1200);
+        }, index * 1200));
       });
 
       const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
 
-      setTimeout(() => {
-        this.engine.switchScene(scene, true);
-        overlay.classList.remove('active');
-        overlay.classList.add('fade-out');
+      this._transitionTimers.push(setTimeout(finish, totalDuration));
 
-        setTimeout(() => {
-          overlay.remove();
-        }, 3000);
-      }, totalDuration);
+    }, 1500));
+  }
 
-    }, 1500);
+  _clearIntroTransition() {
+    this._clearTransitionTimers();
+    if (this._transitionKeyHandler) {
+      document.removeEventListener('keydown', this._transitionKeyHandler);
+      this._transitionKeyHandler = null;
+    }
+    if (this._transitionOverlay) {
+      this._transitionOverlay.remove();
+      this._transitionOverlay = null;
+    }
+  }
+
+  _clearTransitionTimers() {
+    this._transitionTimers.forEach((timer) => clearTimeout(timer));
+    this._transitionTimers = [];
+  }
+
+  _isFastForwardKey(e) {
+    return e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ';
+  }
+
+  _isTextInputActive() {
+    const el = document.activeElement;
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
   }
 
   _hasSaveData() {

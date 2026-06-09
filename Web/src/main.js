@@ -9,7 +9,10 @@ import './styles/index.css'
 import './styles/transitions.css'
 import './styles/painting-viewer.css'
 import './styles/gate-panel.css'
-import './styles/prologue-dock.css'
+import './styles/narration-bar.css'
+import './styles/notebook-floating.css'
+import './styles/hud-bar.css'
+import './styles/inventory-popup.css'
 
 // 游戏引擎
 import gameEngine from './core/game-engine.js'
@@ -20,7 +23,6 @@ import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
 import Chapter1PaintScene from './pages/chapter1-paint.js'
 import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
-import { NotebookPanel } from './components/notebook-panel.js'
 
 // ==================== 初始化 ====================
 
@@ -33,12 +35,7 @@ if (!app) {
 // 初始化引擎
 gameEngine.init(app)
 
-// 初始化笔记本面板并挂载到引擎
-// 注：旧的"问周老师"浮动入口（ChatPanel）已移除 ——
-// 序章中与周鹤年的对话统一由左下角常驻对话坞（PrologueDock）承担。
-const notebookPanel = new NotebookPanel(gameEngine)
-notebookPanel.init()
-gameEngine.notebookPanel = notebookPanel
+// 初始化笔记本面板的代码已移除，NotebookFloating 现在由各场景（如 prologue.js）自行挂载和管理。
 
 // 注册场景
 gameEngine.sceneManager.register('landing', LandingScene)

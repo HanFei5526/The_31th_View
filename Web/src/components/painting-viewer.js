@@ -8,7 +8,7 @@
  *
  * 交互流程：
  * 1. 挂载后显示全屏界面，三种工具（放大镜 / 纸质分析 / 侧光照射）
- * 2. 使用放大镜后解锁画面点击探索
+ * 2. 完成三项基础检查后，使用放大镜解锁画面点击探索
  * 3. 点击命中线索区 → 金色涟漪 + 回调；未命中 → 灰色涟漪
  * 4. 连续错误 ≥ 3 → 呼吸光斑提示
  * 5. 三条线索全部记录后 → 汇聚动画 → 回调
@@ -28,11 +28,13 @@ const TOOLS = [
   { id: 'sidelight',  icon: '💡', label: '侧光照射' },
 ];
 
+const REQUIRED_TOOL_IDS = TOOLS.map((tool) => tool.id);
+
 // ── 工具反馈文案 ─────────────────────────────────────
 const TOOL_FEEDBACK = {
-  magnifier: '装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-  fiber:     '背纸与其他三十页不完全一致，显示此页曾经重装；画心本身较稳定，并非整幅新画。',
-  sidelight: '装裱边下方隐约显出旧字残痕："……所见"；旁边有一条极淡的低位构图辅助线。',
+  magnifier: '放大镜已就位。装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
+  fiber:     '纸质分析完成。背纸与其他三十页不完全一致，此页曾经重装；画心本身较稳定。',
+  sidelight: '侧光照射完成。装裱边下方隐约显出旧字残痕和一条极淡的低位辅助线。',
 };
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
@@ -50,6 +52,7 @@ export default class PaintingViewer {
    * @param {string} options.imageUrl       — 古画图片 URL
    * @param {Function} options.onToolUsed   — 工具使用回调 (toolId) => {}
    * @param {Function} options.onClueFound  — 发现线索回调 (clueId) => {}
+   * @param {Function} options.onAllCluesRecorded — 三条线索全部记录回调 () => {}
    * @param {Function} options.onConvergence — 汇聚点点击回调 () => {}
    * @param {Function} options.onFeedback   — 反馈文字回调 (text) => {}
    */
@@ -60,12 +63,12 @@ export default class PaintingViewer {
     this._hintsLayer = null;   // 呼吸光斑层
     this._feedbackEl = null;   // 底部反馈条
     this._statusEl = null;     // 底部状态栏
-    this._toolBtns = {};       // { magnifier: btn, fiber: btn, sidelight: btn }
     this._opt = {
       imageUrl: '',
       dockEl: null,         // 对话框DOM元素，将其嵌入到古画左侧下方
       onToolUsed: null,     // (toolId) => void
       onClueFound: null,    // (clueId) => void
+      onAllCluesRecorded: null, // () => void
       onConvergence: null,  // () => void
       onFeedback: null,     // (text) => void
       ...options
@@ -145,18 +148,14 @@ export default class PaintingViewer {
     this._feedbackEl = this._createElement('div', 'pv-feedback');
     main.appendChild(this._feedbackEl);
 
-    // 底部状态栏
+    // 线索状态栏：和图片同属于古画卡片，避免脱离画布
     this._statusEl = this._createElement('div', 'pv-status');
-    main.appendChild(this._statusEl);
+    card.appendChild(this._statusEl);
     this._updateStatus();
 
     // ── 内部容器：弹窗卡片 ──
     const cardContainer = this._createElement('div', 'pv-card-container');
     cardContainer.appendChild(main);
-
-    // ── 右侧：工具侧边栏 ──
-    const sidebar = this._buildSidebar();
-    cardContainer.appendChild(sidebar);
 
     this._el.appendChild(cardContainer);
 
@@ -196,6 +195,17 @@ export default class PaintingViewer {
     }
   }
 
+  /** 由外部调用：综合研讨通过后触发汇聚动画 */
+  triggerConvergence() {
+    if (!this._allRecorded || this._convergenceShown) return;
+
+    this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
+
+    setTimeout(() => {
+      this._playConvergence();
+    }, 1200);
+  }
+
   /**
    * 发现线索后自动确认（即时反馈，无需研讨）
    * @param {string} clueId
@@ -218,89 +228,56 @@ export default class PaintingViewer {
   }
 
   // ══════════════════════════════════════════════
-  //  内部 — 构建 DOM
+  //  公开 API — 工具控制
   // ══════════════════════════════════════════════
 
-  /** 构建工具侧边栏 */
-  _buildSidebar() {
-    const sidebar = this._createElement('div', 'pv-sidebar');
-
-    // 标题
-    const title = this._createElement('div', 'pv-sidebar-title');
-    title.textContent = '检测工具';
-    sidebar.appendChild(title);
-
-    // 工具列表
-    const list = this._createElement('div', 'pv-tool-list');
-
-    TOOLS.forEach(tool => {
-      const item = this._createElement('button', 'pv-tool-item');
-      item.innerHTML = `<span class="pv-tool-icon">${tool.icon}</span><span class="pv-tool-label">${tool.label}</span>`;
-      item.addEventListener('click', () => this._activateTool(tool.id));
-      list.appendChild(item);
-      this._toolBtns[tool.id] = item;
-    });
-
-    sidebar.appendChild(list);
-
-    // 底部提示文字
-    const tip = this._createElement('div', 'pv-sidebar-tip');
-    tip.textContent = '请依次使用工具检测画面';
-    sidebar.appendChild(tip);
-    this._sidebarTip = tip;
-
-    return sidebar;
-  }
-
-  // ══════════════════════════════════════════════
-  //  内部 — 工具交互
-  // ══════════════════════════════════════════════
-
-  /** 激活 / 切换工具 */
-  _activateTool(toolId) {
-    // 取消当前工具高亮
-    if (this._currentTool) {
-      this._toolBtns[this._currentTool]?.classList.remove('active');
-    }
-
-    // 如果再次点击同一工具 → 取消选中
-    if (this._currentTool === toolId) {
-      this._currentTool = null;
-      this._panX = 0;
-      this._panY = 0;
-      this._zoomLevel = 1.0;
-      this._applyImageEffect(null);
-      return;
-    }
-
-    // 激活新工具
+  /** 由外部调用：应用指定的工具滤镜 */
+  applyTool(toolId) {
     this._currentTool = toolId;
-    this._toolBtns[toolId]?.classList.add('active');
 
     // 首次使用
     const isFirstUse = !this._toolsUsed[toolId];
     if (isFirstUse) {
       this._toolsUsed[toolId] = true;
-      this._toolBtns[toolId]?.classList.add('used');
 
-      // 使用放大镜后解锁探索
-      if (toolId === 'magnifier') {
-        this._explorable = true;
-        this._sidebarTip.textContent = '✅ 已解锁画面点击探索';
-        console.log('[PaintingViewer] 放大镜已使用，探索已解锁');
-        // 显示线索状态栏
-        if (this._statusEl) this._statusEl.style.display = 'block';
+      // 显示工具检测反馈
+      if (TOOL_FEEDBACK[toolId]) {
+        this._showFeedback(TOOL_FEEDBACK[toolId]);
       }
 
       // 回调
       this._opt.onToolUsed?.(toolId);
+    }
 
-      // 显示工具反馈文案
-      this._showFeedback(TOOL_FEEDBACK[toolId]);
+    if (!this._explorable && this._hasUsedAllRequiredTools()) {
+      this._explorable = true;
+      console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
+      if (this._statusEl) this._statusEl.style.display = 'block';
+
+      // 自动切换到放大镜
+      this._currentTool = 'magnifier';
+      this._applyImageEffect('magnifier');
+
+      // 派发事件通知外部锁定工具区
+      window.dispatchEvent(new CustomEvent('all-tools-used'));
+
+      // 延迟显示，避免和工具反馈重叠
+      setTimeout(() => {
+        this._showFeedback('三项检查完成，已切换到放大镜。在画面中点击寻找异常。');
+      }, 3000);
     }
 
     // 应用图像滤镜
     this._applyImageEffect(toolId);
+  }
+
+  /** 由外部调用：清除当前工具滤镜 */
+  clearTool() {
+    this._currentTool = null;
+    this._panX = 0;
+    this._panY = 0;
+    this._zoomLevel = 1.0;
+    this._applyImageEffect(null);
   }
 
   /** 根据当前工具设置包装层的 transform / filter */
@@ -313,10 +290,8 @@ export default class PaintingViewer {
       transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoomLevel})`;
       filter = 'contrast(1.1) brightness(1.05)';
     } else if (toolId === 'fiber') {
-      transform = 'scale(1)';
       filter = 'contrast(1.3) saturate(0.3) brightness(1.1)';
     } else if (toolId === 'sidelight') {
-      transform = 'scale(1.05)';
       filter = 'contrast(1.15) brightness(0.95)';
     }
 
@@ -351,7 +326,8 @@ export default class PaintingViewer {
   _onMouseDown(e) {
     if (this._currentTool !== 'magnifier') return;
     if (!this._explorable) return;
-    
+    if (this._zoomLevel <= 1.0) return; // 未放大时禁止拖动
+
     e.preventDefault(); // 防止默认图片拖拽行为
     this._isDragging = true;
     this._dragStartX = e.clientX;
@@ -420,6 +396,21 @@ export default class PaintingViewer {
     }, 4500);
   }
 
+  /** 显示持久反馈（不自动消失） */
+  showPersistentFeedback(text) {
+    if (!this._feedbackEl) return;
+    if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
+    this._feedbackEl.textContent = text;
+    this._feedbackEl.classList.add('visible');
+  }
+
+  /** 隐藏反馈条 */
+  hideFeedback() {
+    if (!this._feedbackEl) return;
+    if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
+    this._feedbackEl.classList.remove('visible');
+  }
+
   // ══════════════════════════════════════════════
   //  内部 — 点击探索
   // ══════════════════════════════════════════════
@@ -432,14 +423,23 @@ export default class PaintingViewer {
       return;
     }
 
-    // 未解锁探索 → 显示提示
+    // 汇聚/研讨阶段不再响应点击
+    if (this._allRecorded) return;
+
+    // 未完成基础检查 → 显示提示
     if (!this._explorable) {
-      console.log('[PaintingViewer] 点击被忽略：尚未使用放大镜');
-      this._showFeedback('请先在右侧工具栏使用放大镜 🔍');
+      console.log('[PaintingViewer] 点击被忽略：尚未完成三项基础检查');
+      const missing = this._getMissingToolLabels();
+      this._showFeedback(`请先使用右侧工具完成检查：${missing.join('、')}`);
       return;
     }
-    // 汇聚阶段不再响应普通点击
-    if (this._allRecorded) return;
+
+    // 探索阶段必须切回放大镜
+    if (this._currentTool !== 'magnifier') {
+      console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
+      this._showFeedback('点击右侧放大镜 🔍，然后在画面中寻找线索。');
+      return;
+    }
 
     // 计算点击在包装层上的百分比坐标（自动适配 scale 缩放）
     const rect = this._wrapperEl.getBoundingClientRect();
@@ -467,9 +467,9 @@ export default class PaintingViewer {
       // 清除该线索的呼吸光斑（如果有）
       this._removeHintSpot(hitId);
 
-      // 明确反馈：告诉玩家发现了什么，下一步做什么
+      // 明确反馈
       const clueTitle = this._clues[hitId].title;
-      this._showFeedback(`📌 发现线索「${clueTitle}」，在对话坞中与周老师讨论以确认`);
+      this._showFeedback(`📌 发现线索「${clueTitle}」，已记入笔记本`);
 
       // 回调
       this._opt.onClueFound?.(hitId);
@@ -478,7 +478,7 @@ export default class PaintingViewer {
       this._showRipple(px, py, 'grey');
       this._wrongClicks++;
       console.log(`[PaintingViewer] 未命中 (${px.toFixed(1)}%, ${py.toFixed(1)}%), 连续错误: ${this._wrongClicks}`);
-      this._showFeedback('这个地方是正常的~~~');
+      this._showFeedback('这里没有异常，试试别的位置。');
       this._checkHintTrigger();
     }
   }
@@ -521,28 +521,43 @@ export default class PaintingViewer {
   //  内部 — 渐进提示
   // ══════════════════════════════════════════════
 
-  /** 错误次数达到阈值时触发提示 */
+  /** 错误次数达到阈值时触发提示（渐进披露，每3次错误多给一条） */
   _checkHintTrigger() {
-    if (this._wrongClicks >= 3) {
-      console.log('[PaintingViewer] 连续错误≥3，触发位置提示光斑');
-      this._showFeedback('💡 注意观察装裱边缘和画面下方……');
-      this._showVisualHints();
-    }
+    // 获取未找到的线索列表
+    const unfound = Object.entries(this._clues).filter(([, c]) => !c.found);
+    if (unfound.length === 0) return;
+
+    // 每累计3次错误，多显示一条光斑
+    const hintCount = Math.floor(this._wrongClicks / 3);
+    if (hintCount <= 0) return;
+
+    console.log(`[PaintingViewer] 连续错误≥${this._wrongClicks}，显示${Math.min(hintCount, unfound.length)}条位置提示`);
+
+    // 根据即将显示的线索给出针对性方位提示
+    const toShow = unfound.slice(0, hintCount);
+    const lastRevealed = toShow[toShow.length - 1];
+    const hintTextMap = {
+      clue_margin: '💡 注意观察画面右上方的装裱边缘……',
+      clue_text: '💡 试试画面左下方，装裱层底下似乎有字迹……',
+      clue_line: '💡 画面下方中部有一条不属于画面内容的痕迹……',
+    };
+    const fallback = '💡 画面边缘和下方可能还藏着什么……';
+    this._showFeedback(hintTextMap[lastRevealed[0]] || fallback);
+    this._showVisualHintsProgressive(hintCount);
   }
 
-  /** 在未找到的线索区域显示呼吸光斑 */
-  _showVisualHints() {
-    // 清空旧光斑
+  /** 渐进显示呼吸光斑：最多显示 count 条 */
+  _showVisualHintsProgressive(count) {
     this._hintsLayer.innerHTML = '';
-    for (const [id, clue] of Object.entries(this._clues)) {
-      if (!clue.found) {
-        const spot = document.createElement('div');
-        spot.className = 'pv-hint-spot';
-        spot.dataset.clue = id;
-        spot.style.left = `${clue.x}%`;
-        spot.style.top = `${clue.y}%`;
-        this._hintsLayer.appendChild(spot);
-      }
+    const unfound = Object.entries(this._clues).filter(([, c]) => !c.found);
+    const toShow = unfound.slice(0, count);
+    for (const [id, clue] of toShow) {
+      const spot = document.createElement('div');
+      spot.className = 'pv-hint-spot';
+      spot.dataset.clue = id;
+      spot.style.left = `${clue.x}%`;
+      spot.style.top = `${clue.y}%`;
+      this._hintsLayer.appendChild(spot);
     }
   }
 
@@ -583,66 +598,48 @@ export default class PaintingViewer {
   //  内部 — 汇聚动画
   // ══════════════════════════════════════════════
 
-  /** 检查是否所有线索已记录，触发汇聚 */
+  /** 检查是否所有线索已记录，通知外部启动综合研讨 */
   _checkConvergence() {
     const recordedCount = Object.values(this._clues).filter(c => c.recorded).length;
     if (recordedCount < 3 || this._allRecorded) return;
 
     this._allRecorded = true;
-    this._hintsLayer.innerHTML = ''; // 清除所有光斑
+    this._hintsLayer.innerHTML = '';
 
-    // ── 第一步：还原缩放 ──
-    this._applyImageEffect(null);
-    if (this._currentTool) {
-      this._toolBtns[this._currentTool]?.classList.remove('active');
-      this._currentTool = null;
-    }
+    // 还原缩放
+    this.clearTool();
 
-    // ── 第二步：显示通关提示 → 汇聚动画 ──
-    this._showFeedback('🎉 三处线索全部确认！点击画面中央的交会点，准备进入下一阶段。');
-
+    // 等线索确认提示完全消失后（4.5s）再回调外部
     setTimeout(() => {
-      this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
-
-      setTimeout(() => {
-        // 启动汇聚动画
-        this._playConvergence();
-      }, 1800);
-    }, 2200);
+      this._opt.onAllCluesRecorded?.();
+    }, 5500);
   }
 
-  /** 播放汇聚动画：三条金色连线 → 交会点脉冲 → 可点击 */
+  /** 播放汇聚动画：三个金色光点向中心汇聚 → 交会点脉冲 → 可点击 */
   _playConvergence() {
     if (this._convergenceShown) return;
     this._convergenceShown = true;
 
-    // 交会点坐标（三个线索的几何中心附近）
+    // 交会点坐标（三个线索的几何中心）
     const cx = 50, cy = 56;
 
-    // ── 逐条绘制连线 ──
+    // ── 三个光点向中心飞去 ──
     const clueEntries = Object.values(this._clues);
-    clueEntries.forEach((clue, idx) => {
-      setTimeout(() => {
-        const line = document.createElement('div');
-        line.className = 'pv-convergence-line';
-
-        // 计算长度和角度
-        const dx = cx - clue.x;
-        const dy = cy - clue.y;
-        const length = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-        line.style.left = `${clue.x}%`;
-        line.style.top = `${clue.y}%`;
-        line.style.width = `${length}%`;
-        line.style.transform = `rotate(${angle}deg)`;
-        line.style.transformOrigin = '0 50%';
-
-        this._markersLayer.appendChild(line);
-      }, idx * 350);
+    clueEntries.forEach((clue) => {
+      const dot = document.createElement('div');
+      dot.className = 'pv-convergence-dot';
+      dot.style.left = `${clue.x}%`;
+      dot.style.top = `${clue.y}%`;
+      // 触发 reflow 后设置终点，让 CSS transition 驱动动画
+      requestAnimationFrame(() => {
+        dot.style.left = `${cx}%`;
+        dot.style.top = `${cy}%`;
+        dot.style.opacity = '0';
+      });
+      this._markersLayer.appendChild(dot);
     });
 
-    // ── 交会点 + 脉冲 ──
+    // ── 交会点 + 脉冲（光点到达后出现）──
     setTimeout(() => {
       const point = document.createElement('div');
       point.className = 'pv-convergence-point';
@@ -659,7 +656,8 @@ export default class PaintingViewer {
       point.appendChild(label);
 
       // 交会点点击 → 触发最终回调
-      point.addEventListener('click', () => {
+      point.addEventListener('click', (event) => {
+        event.stopPropagation();
         point.classList.add('pv-explode');
         setTimeout(() => {
           this._opt.onConvergence?.();
@@ -667,7 +665,7 @@ export default class PaintingViewer {
       });
 
       this._markersLayer.appendChild(point);
-    }, clueEntries.length * 350 + 400);
+    }, 1500); // 等光点飞到中心后出现
   }
 
   // ══════════════════════════════════════════════
@@ -684,5 +682,15 @@ export default class PaintingViewer {
     const el = document.createElement(tag);
     if (className) el.className = className;
     return el;
+  }
+
+  _hasUsedAllRequiredTools() {
+    return REQUIRED_TOOL_IDS.every((id) => this._toolsUsed[id]);
+  }
+
+  _getMissingToolLabels() {
+    return TOOLS
+      .filter((tool) => !this._toolsUsed[tool.id])
+      .map((tool) => tool.label);
   }
 }

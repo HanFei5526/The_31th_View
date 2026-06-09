@@ -113,6 +113,7 @@ export class GatePanel {
     this._onQuickThought = onQuickThought;
 
     this._messagesEl.innerHTML = '';
+    this._clearPassEffect();
     this._wrapperEl.classList.remove('hidden');
     this._confirmAreaEl.classList.add('hidden');
     this._confirmAreaEl.innerHTML = '';
@@ -129,6 +130,7 @@ export class GatePanel {
   unmount() {
     this._wrapperEl.classList.add('hidden');
     this._messagesEl.innerHTML = '';
+    this._clearPassEffect();
     this._confirmAreaEl.innerHTML = '';
     this._confirmAreaEl.classList.add('hidden');
     this._quickThoughtsEl.innerHTML = '';
@@ -270,6 +272,7 @@ export class GatePanel {
   // ==== 通过动效 ====
 
   showPassEffect(gateTitle) {
+    this._clearPassEffect();
     const overlay = document.createElement('div');
     overlay.className = 'gate-pass-overlay';
     overlay.innerHTML = `
@@ -284,6 +287,12 @@ export class GatePanel {
     // 动画：墨迹扩散效果
     requestAnimationFrame(() => {
       overlay.classList.add('active');
+    });
+  }
+
+  _clearPassEffect() {
+    this._wrapperEl.querySelectorAll('.gate-pass-overlay').forEach((overlay) => {
+      overlay.remove();
     });
   }
 
