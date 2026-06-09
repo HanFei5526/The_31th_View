@@ -37,7 +37,8 @@
 │   │   └── images/                     # 正式使用的背景图 / 场景图
 │   └── src/                            # 前端源码
 │       ├── main.js                     # 应用入口
-│       ├── core/                       # 引擎 / 场景 / 背包 / 提示 / 对话 / 存档 / AI
+│       ├── core/                       # 引擎 / 场景 / 背包 / 提示 / 对话 / 存档 / AI / 知识库
+│       ├── data/                       # 数据文件（知识片段等）
 │       ├── pages/                      # 页面场景
 │       ├── components/                 # 通用组件
 │       └── styles/                     # 样式文件
@@ -51,10 +52,13 @@
 ├── 分章节实现文档/
 │   ├── 序章_残页_玩法设计.md            # 序章玩法详案
 │   └── 序章_残页_场景制作.md            # 序章场景制作
-├── 改动计划/                           # 待实施的改动计划文档
-│   ├── UI重构_叙事层与AI对话层分离.md
-│   ├── 序章综合研讨门槛_强制AI推理通过.md
-│   └── AI知识约束_轻量RAG方案.md
+├── 当前改动计划/                        # 改动计划文档
+│   ├── AI面板宽度与自动滚动调整.md
+│   ├── 测试快进按键设计.md
+│   └── 已通过/                         # 已实施完成的计划
+│       ├── UI重构_叙事层与AI对话层分离.md
+│       ├── 序章综合研讨门槛_强制AI推理通过.md
+│       └── AI知识约束_轻量RAG方案.md
 └── 备选故事/
     ├── story_01_石中记.md
     └── story_03_四时园.md
@@ -95,8 +99,8 @@ npm run preview
 当前前端已包含：
 
 - 注册场景：`landing`、`menu`、`prologue`、`chapter1`（画中世界）、`chapter2`/`chapter3`/`finale`（占位）
-- 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`、`discussion-gate`、`gate-config`、`fallback-dialogues`
-- 已有组件：`painting-viewer`（古画查看器）、`gate-panel`（研讨门槛）、`prologue-dock`（待重构）、`notebook-panel`（AI笔记本）、`fall-transition`（跌入转场）、`scanner-ui`
+- 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`、`discussion-gate`、`gate-config`、`knowledge-base`、`fallback-dialogues`
+- 已有组件：`painting-viewer`（古画查看器）、`narration-bar`（叙事对话框）、`notebook-floating`（悬浮笔记本面板）、`hud-bar`（HUD按钮）、`inventory-popup`（物件匣）、`fall-transition`（跌入转场）
 - 正式图片目录：`Web/public/images/`
 - 过程图片目录：`TestPic/`，不作为正式代码引用目录
 
@@ -131,7 +135,7 @@ npm run preview
 | `总分工文档/前端_交互_背包设计.md` | 前端页面、交互方式、物件匣、AI 面板 UI |
 | `总分工文档/AI_提示词_后端数据设计.md` | AI 功能、提示词、状态变量、存档 |
 | `分章节实现文档/` | 各章节玩法详案和场景制作 |
-| `改动计划/` | 待实施的改动方案（实施前审批用） |
+| `当前改动计划/` | 待实施/已通过的改动方案（实施前审批用） |
 | `Web/` | 可运行前端原型、游戏引擎、AI 模块 |
 
 ## 协作约定
@@ -140,9 +144,9 @@ npm run preview
 - 所有叙事修改须确认是否触及三条剧情基准；触及则需要剧情统筹确认。
 - 谜题、前端、后端文档各自独立维护，叙事节拍中以锚点指向谜题文档。
 - 前端改动应保持与现有 Vite + 原生 JavaScript / CSS 结构一致。
-- AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框和综合门槛中。
+- AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框中；综合研讨中AI以"预置批注浮现"形式介入。
 - 正式图片统一放入 `Web/public/images/` 并用 `/images/文件名` 引用；`TestPic/` 只保留过程图、草图和临时参考。
 - `.env` 文件中的 API Key 不得提交到代码仓库。
-- 所有改动在实施前须先在 `改动计划/` 目录下创建计划文档，审批通过后再动代码。
+- 所有改动在实施前须先在 `当前改动计划/` 目录下创建计划文档，审批通过后再动代码。
 - 未经明确要求，不引入额外框架、遥测、分析或网络请求。
 

@@ -2,7 +2,7 @@
  * 《卅一景》AI Prompt 模板
  *
  * 集中管理所有 System Prompt，接收游戏状态动态拼接。
- * 四种角色：周鹤年对话、笔记本查阅、沈念批注、修复报告。
+ * 五种角色：周鹤年对话、研讨门槛批注、笔记本查阅、沈念批注、修复报告。
  */
 
 import { formatAvailableKnowledge } from './knowledge-base.js';
