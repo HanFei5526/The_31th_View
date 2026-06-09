@@ -19,8 +19,8 @@
 
 ```
 卅一景/
-├── CLAUDE.md                           # 项目说明
-├── AGENTS.md                           # Agent 配置（本文件）
+├── CLAUDE.md                           # 项目说明（本文件）
+├── AGENTS.md                           # Agent 配置
 ├── PRODUCT.md                          # 产品文档
 ├── README.md                           # 项目 README
 ├── TestPic/                            # 过程图片 / 生成图 / 临时参考图
@@ -64,11 +64,13 @@
 │       │   ├── notebook-floating.js     # 悬浮笔记本面板（对话/记录/工具/研讨态）
 │       │   ├── hud-bar.js              # 右下角HUD按钮栏（📓📦）
 │       │   ├── inventory-popup.js       # 物件匣弹出浮层
-│       │   ├── gate-panel.js            # 研讨全屏面板（已废弃）
-│       │   ├── scanner-ui.js            # 扫描工具 UI（已废弃）
-│       │   ├── prologue-dock.js         # 序章对话坞（已废弃）
-│       │   ├── chat-panel.js            # 周鹤年对话面板（已废弃）
-│       │   └── notebook-panel.js        # 旧AI笔记本（已废弃）
+│       │   ├── gate-panel.js            # 研讨全屏面板（已废弃，由notebook-floating研讨态替代）
+│       │   ├── scanner-ui.js            # 扫描工具 UI（已废弃，工具迁入notebook-floating）
+│       │   ├── clue-explorer.js         # 线索探索器（已废弃，由 painting-viewer 替代）
+│       │   ├── clue-popup.js            # 线索弹窗（已废弃，由 painting-viewer 替代）
+│       │   ├── prologue-dock.js         # 序章对话坞（已废弃，由 narration-bar 替代）
+│       │   ├── chat-panel.js            # 周鹤年对话面板（已废弃，由 notebook-floating 替代）
+│       │   └── notebook-panel.js        # 旧AI笔记本（已废弃，由 notebook-floating 替代）
 │       └── styles/                     # 样式文件
 │           ├── index.css                # 全局样式与双世界主题变量
 │           ├── transitions.css          # 转场动画样式
@@ -76,6 +78,7 @@
 │           ├── narration-bar.css        # 叙事对话框样式
 │           ├── notebook-floating.css    # 悬浮笔记本面板样式
 │           ├── hud-bar.css             # HUD按钮栏样式
+│           ├── inventory-popup.css      # 物件匣弹出浮层样式
 │           ├── gate-panel.css           # 研讨全屏面板样式（已废弃）
 │           └── prologue-dock.css        # 序章对话坞样式（已废弃）
 ├── 总分工文档/
@@ -87,17 +90,14 @@
 │   └── AI_提示词_后端数据设计.md        # AI 功能/提示词/状态变量/存档
 ├── 分章节实现文档/
 │   ├── 序章_残页_玩法设计.md            # 序章玩法详案
-│   └── 序章_残页_场景制作.md            # 序章场景制作
+│   ├── 序章_残页_场景制作.md            # 序章场景制作
+│   ├── 第一章_东园_玩法设计.md          # 第一章玩法详案
+│   └── 第一章_东园_场景制作.md          # 第一章场景制作
 ├── 当前改动计划/                        # 改动计划文档
-│   ├── AI面板宽度与自动滚动调整.md
-│   ├── 测试快进按键设计.md
 │   └── 已通过/                         # 已实施完成的计划
 │       ├── UI重构_叙事层与AI对话层分离.md
 │       ├── 序章综合研讨门槛_强制AI推理通过.md
 │       └── AI知识约束_轻量RAG方案.md
-└── 备选故事/
-    ├── story_01_石中记.md
-    └── story_03_四时园.md
 ```
 
 ## 文档分工
@@ -124,6 +124,12 @@
 - `TestPic/` 只作为过程图片、生成图和临时参考图目录，不作为正式代码引用目录。
 - 如需启动前端，先进入 `Web/`，安装依赖后运行 `npm run dev`。
 
+## 已完成改动（见 `当前改动计划/已通过/`）
+
+1. **UI重构**（已完成）：叙事对话框 NarrationBar（底部55%宽居中，古色风格，立绘在对话框左侧）+ 悬浮笔记本面板 NotebookFloating（右侧360px可收缩，含对话/记录Tab+工具区+研讨态）+ HUD按钮栏 HudBar（📓📦），替代旧 PrologueDock。游戏画面100%全屏。
+2. **综合门槛**（已完成）：三线索集齐后玩家主动点击按钮触发，在笔记本面板内进行综合研讨（Tab改名"综合研讨"），前端关键词累积匹配通过后结论摘要记入笔记本。
+3. **知识约束**（已完成）：轻量RAG（`knowledge-snippets.js` + `knowledge-base.js`），按进度解锁知识片段注入prompt，AI只能基于已注入内容回答。
+
 ## 章节结构
 
 序章 · 残页 → 第一章 · 东园 → 第二章 · 中园 → 第三章 · 西园 → 终章 · 第三十一景（三结局）
@@ -136,7 +142,7 @@
 - 前端实现应优先遵循 `总分工文档/前端_交互_背包设计.md` 与 `Web/implementation_plan.md`
 - 修改前端时避免破坏已拍板剧情基准，涉及叙事文案的改动需回看 `总分工文档/story_02_卅一景_剧情大纲.md` 与 `总分工文档/卅一景_chapter_design.md`
 - AI Prompt 修改须回看 `总分工文档/AI_提示词_后端数据设计.md`，确保与提示系统约束一致
-- AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框中；综合研讨中AI以"预置批注浮现"形式介入
+- AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框中；综合研讨中AI以"预置批注浮现"形式介入（非实时对话）
 - 正式图片统一放入 `Web/public/images/`；过程图、临时图保留在 `TestPic/`
 - `.env` 文件中的 API Key 不得提交到代码仓库
 - 所有改动在实施前须先在 `当前改动计划/` 目录下创建计划文档，审批通过后再动代码
