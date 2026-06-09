@@ -5,7 +5,8 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 280px;
+  width: 360px;
+  max-width: calc(100vw - 24px);
   background: rgba(28, 26, 24, 0.95);
   border-left: 1px solid rgba(212, 168, 83, 0.2);
   z-index: 200;
@@ -118,6 +119,7 @@
 /* 聊天记录列表 */
 .notebook-chat-history {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -182,21 +184,21 @@
 .notebook-quick-thoughts {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
 }
 
 .quick-thought-btn {
   background: rgba(212, 168, 83, 0.05);
   border: 1px solid rgba(212, 168, 83, 0.3);
   color: #d4a853;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 4px;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .quick-thought-btn:hover:not(:disabled) {
@@ -257,8 +259,9 @@
 .notebook-input-area {
   display: flex;
   gap: 0.5rem;
+  align-items: stretch;
   border-top: 1px solid rgba(212, 168, 83, 0.1);
-  padding-top: 0.5rem;
+  padding-top: 0.65rem;
 }
 
 .notebook-input {
@@ -266,11 +269,13 @@
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(212, 168, 83, 0.2);
   color: #e8dcc4;
-  padding: 8px;
+  padding: 10px 12px;
   border-radius: 4px;
   font-size: 0.95rem;
+  line-height: 1.5;
   resize: none;
-  height: 40px;
+  height: 58px;
+  min-height: 58px;
 }
 
 .notebook-input:focus {
@@ -283,7 +288,8 @@
   color: #1c1917;
   border: none;
   border-radius: 4px;
-  width: 40px;
+  width: 44px;
+  min-height: 58px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -375,19 +381,11 @@
   border-radius: 6px;
   cursor: pointer;
   color: #8c8375;
-  transition: all 0.2s;
 }
 
 .tool-btn:hover {
   background: rgba(212, 168, 83, 0.1);
   border-color: rgba(212, 168, 83, 0.3);
-  color: #d4a853;
-}
-
-.tool-btn.active {
-  background: rgba(212, 168, 83, 0.2);
-  border-color: #d4a853;
-  color: #d4a853;
 }
 
 .tool-btn.used::after {
@@ -411,4 +409,14 @@
 
 .tool-label {
   font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .notebook-floating {
+    width: min(360px, 82vw);
+  }
+
+  .notebook-pane {
+    padding: 0.85rem;
+  }
 }

@@ -362,3 +362,29 @@
   transform: scale(0.9) translateY(20px);
   opacity: 0;
 }
+
+/* 进入综合研讨按钮 */
+.synthesis-entry-btn {
+  position: fixed;
+  bottom: 12.25rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(26, 20, 16, 0.95);
+  border: 1px solid rgba(212, 168, 83, 0.6);
+  color: #d4a853;
+  padding: 0.8rem 2rem;
+  border-radius: 4px;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 105;
+}
+
+.synthesis-entry-btn.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  cursor: pointer;
+}

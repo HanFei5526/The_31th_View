@@ -96,6 +96,7 @@ export default class PrologueScene extends GameSceneBase {
     this._activeGateId = null;
     this._synthesisGateStarted = false;
     this._synthesisGateOff = null;
+    this._synthesisBtnShown = false;
     this._recordedClues = new Set(); // 防重复标记
   }
 
@@ -144,8 +145,11 @@ export default class PrologueScene extends GameSceneBase {
     // 绑定 Notebook 提交事件
     this._notebook.onSubmit(async (text) => {
       if (this._activeGateId) {
+        // 研讨模式：discussion-gate 内部会显示玩家消息
         await this.engine.discussionManager.handleQuickThought(text);
       } else {
+        // 普通查阅：手动显示玩家消息
+        this._notebook.showPlayerMessage(text);
         await this._askNotebook(text);
       }
     });
@@ -287,17 +291,9 @@ export default class PrologueScene extends GameSceneBase {
         this._startDiscussionGate(clueId);
       },
       onAllCluesRecorded: () => {
-        // 不再自动启动研讨，由玩家点击"进入综合研讨"按钮触发
-        // 此处仅作为备用（如果玩家未通过 _startDiscussionGate 路径进入）
-        if (!this._synthesisGateStarted) {
-          this._notebook.showQuickThoughts([
-            '进入综合研讨：分析三处痕迹的关系',
-          ]);
-          this._notebook.onQuickThought((text) => {
-            if (text.includes('综合研讨')) {
-              this._startSynthesisGate();
-            }
-          });
+        // 备用：如果未通过 _startDiscussionGate 路径触发
+        if (!this._synthesisGateStarted && !this._synthesisBtnShown) {
+          this._showSynthesisEntryButton();
         }
       },
       onConvergence: () => {
@@ -366,7 +362,7 @@ export default class PrologueScene extends GameSceneBase {
       this._notebook.showQuickThoughts([clueData.askText]);
     }
 
-    // 如果三条线索都找齐了，仍然启动辅助讨论，但额外显示进入研讨的选项
+    // 如果三条线索都找齐了，仍然启动辅助讨论，但在画面下方显示进入研讨按钮
     if (this._recordedClues.size >= 3) {
       // 启动第三条线索的辅助讨论
       const onGateCompleted = (data) => {
@@ -378,17 +374,10 @@ export default class PrologueScene extends GameSceneBase {
       const off = this.engine.on('gate-completed', onGateCompleted);
       this.engine.discussionManager.startGate(gateId, this._createNotebookGateAdapter());
 
-      // 延迟显示"进入综合研讨"按钮，给玩家时间看批注
+      // 延迟在画面下方显示"进入综合研讨"按钮（等线索提示完全消失后）
       setTimeout(() => {
-        this._notebook.showQuickThoughts([
-          '进入综合研讨：分析三处痕迹的关系',
-        ]);
-        this._notebook.onQuickThought((text) => {
-          if (text.includes('综合研讨')) {
-            this._startSynthesisGate();
-          }
-        });
-      }, 3000);
+        this._showSynthesisEntryButton();
+      }, 8000);
       return;
     }
 
@@ -404,6 +393,25 @@ export default class PrologueScene extends GameSceneBase {
 
     // 辅助讨论不隐藏笔记本（笔记本保持锁定展开）
     this.engine.discussionManager.startGate(gateId, this._createNotebookGateAdapter());
+  }
+
+  /**
+   * 在画面下方显示"进入综合研讨"按钮
+   * @private
+   */
+  _showSynthesisEntryButton() {
+    if (this._synthesisBtnShown) return;
+    this._synthesisBtnShown = true;
+
+    const btn = document.createElement('button');
+    btn.className = 'synthesis-entry-btn';
+    btn.textContent = '进入综合研讨：分析三处痕迹的关系';
+    btn.addEventListener('click', () => {
+      btn.remove();
+      this._startSynthesisGate();
+    });
+    this._root.appendChild(btn);
+    requestAnimationFrame(() => btn.classList.add('visible'));
   }
 
   /**
@@ -425,7 +433,6 @@ export default class PrologueScene extends GameSceneBase {
     // 隐藏工具区，进入研讨态
     this._notebook.hideToolSection();
     this._notebook.hideQuickThoughts();
-    this._notebook.onQuickThought(null); // 清掉旧回调
     this._notebook.show();
     this._notebook.expand();
     this._notebook.lock();

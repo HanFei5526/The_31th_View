@@ -17,6 +17,7 @@ export class NarrationBar {
     this._feedbackTimer = null;
 
     this._boundOnClick = this._onClick.bind(this);
+    this._boundOnKeyDown = this._onKeyDown.bind(this);
   }
 
   mount(root) {
@@ -35,6 +36,7 @@ export class NarrationBar {
     this._barEl = document.createElement('div');
     this._barEl.className = 'narration-bar';
     this._barEl.addEventListener('click', this._boundOnClick);
+    document.addEventListener('keydown', this._boundOnKeyDown);
 
     this._speakerEl = document.createElement('div');
     this._speakerEl.className = 'narration-speaker';
@@ -58,6 +60,7 @@ export class NarrationBar {
     if (this._typingTimer) clearTimeout(this._typingTimer);
     if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
     if (this._barEl) this._barEl.removeEventListener('click', this._boundOnClick);
+    document.removeEventListener('keydown', this._boundOnKeyDown);
     if (this._portraitContainer) this._portraitContainer.remove();
     if (this._container) this._container.remove();
     this._container = null;
@@ -138,5 +141,23 @@ export class NarrationBar {
         resolve();
       }
     }
+  }
+
+  _onKeyDown(e) {
+    if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+    if (!this._resolvePlay && !this._isTyping) return;
+    e.preventDefault();
+    this._onClick();
+  }
+
+  _isFastForwardKey(e) {
+    return e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ';
+  }
+
+  _isTextInputActive() {
+    const el = document.activeElement;
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
   }
 }

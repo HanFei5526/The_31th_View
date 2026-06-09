@@ -188,6 +188,9 @@ export class DiscussionGateManager {
     const config = getGateConfig(gateId);
     if (!config) return;
 
+    // 显示玩家消息
+    this.uiCallback.showPlayerMessage(text);
+
     if (!this.dialogueHistory.has(gateId)) {
       this.dialogueHistory.set(gateId, []);
     }

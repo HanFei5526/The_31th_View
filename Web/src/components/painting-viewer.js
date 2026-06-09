@@ -609,10 +609,10 @@ export default class PaintingViewer {
     // 还原缩放
     this.clearTool();
 
-    // 等第三条线索的"已确认"提示消失后再回调外部
+    // 等线索确认提示完全消失后（4.5s）再回调外部
     setTimeout(() => {
       this._opt.onAllCluesRecorded?.();
-    }, 4000);
+    }, 5500);
   }
 
   /** 播放汇聚动画：三个金色光点向中心汇聚 → 交会点脉冲 → 可点击 */

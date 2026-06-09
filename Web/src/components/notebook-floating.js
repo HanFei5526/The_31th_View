@@ -1,6 +1,7 @@
 export class NotebookFloating {
   constructor(engine) {
     this.engine = engine;
+    this._rootEl = null;
     this._container = null;
     this._tabs = {};
     this._panes = {};
@@ -20,6 +21,7 @@ export class NotebookFloating {
     this._toolGridEl = null;
     this._emptyGuideEl = null;
     this._confirmAreaEl = null;
+    this._scrollFrame = null;
 
     // 回调
     this._onSubmitCb = null;
@@ -34,6 +36,7 @@ export class NotebookFloating {
   }
 
   mount(root) {
+    this._rootEl = root;
     this._container = document.createElement('div');
     this._container.className = 'notebook-floating';
 
@@ -93,8 +96,14 @@ export class NotebookFloating {
     window.removeEventListener('tool-used', this._boundOnToolUsed);
     window.removeEventListener('all-tools-used', this._boundOnAllToolsUsed);
     
+    this._rootEl?.classList.remove('notebook-panel-expanded');
+    if (this._scrollFrame) {
+      cancelAnimationFrame(this._scrollFrame);
+      this._scrollFrame = null;
+    }
     if (this._container) this._container.remove();
     this._container = null;
+    this._rootEl = null;
   }
 
   // === 阶段控制 ===
@@ -103,6 +112,8 @@ export class NotebookFloating {
     if (this._container) {
       this._container.classList.add('expanded');
       this._expanded = true;
+      this._syncLayoutExpanded();
+      this._scrollToBottom();
     }
   }
 
@@ -111,15 +122,23 @@ export class NotebookFloating {
     if (this._container) {
       this._container.classList.remove('expanded');
       this._expanded = false;
+      this._syncLayoutExpanded();
     }
   }
 
   hide() {
-    if (this._container) this._container.classList.add('hidden');
+    if (this._container) {
+      this._container.classList.add('hidden');
+      this._syncLayoutExpanded();
+    }
   }
 
   show() {
-    if (this._container) this._container.classList.remove('hidden');
+    if (this._container) {
+      this._container.classList.remove('hidden');
+      this._syncLayoutExpanded();
+      if (this._expanded) this._scrollToBottom();
+    }
   }
 
   lock() {
@@ -249,9 +268,16 @@ export class NotebookFloating {
   }
 
   _scrollToBottom() {
-    if (this._historyEl) {
+    if (!this._historyEl) return;
+    if (this._scrollFrame) cancelAnimationFrame(this._scrollFrame);
+
+    this._scrollFrame = requestAnimationFrame(() => {
       this._historyEl.scrollTop = this._historyEl.scrollHeight;
-    }
+      this._scrollFrame = requestAnimationFrame(() => {
+        this._historyEl.scrollTop = this._historyEl.scrollHeight;
+        this._scrollFrame = null;
+      });
+    });
   }
 
   setLoading(bool) {
@@ -260,12 +286,14 @@ export class NotebookFloating {
       this._sendBtn.disabled = true;
       this._sendBtn.textContent = '…';
       this._container?.classList.add('is-loading');
+      this._scrollToBottom();
     } else {
       this._inputEl.disabled = false;
       this._sendBtn.disabled = false;
       this._sendBtn.innerHTML = '➤';
       this._container?.classList.remove('is-loading');
       this._inputEl.focus();
+      this._scrollToBottom();
     }
   }
 
@@ -315,6 +343,11 @@ export class NotebookFloating {
     if (this._onSubmitCb) this._onSubmitCb(text);
   }
 
+  _syncLayoutExpanded() {
+    const visibleExpanded = this._expanded && !this._container?.classList.contains('hidden');
+    this._rootEl?.classList.toggle('notebook-panel-expanded', visibleExpanded);
+  }
+
   // === Records Pane ===
 
   _createRecordsPane() {
@@ -354,11 +387,9 @@ export class NotebookFloating {
       btn.innerHTML = `<span class="tool-icon">${tool.icon}</span><span class="tool-label">${tool.label}</span>`;
       btn.addEventListener('click', () => {
         if (this._toolsLocked) return;
-        // 切换：当前激活的取消，点击新的激活
-        const isActive = btn.classList.contains('active');
-        Array.from(this._toolGridEl.children).forEach(c => c.classList.remove('active'));
-        if (!isActive) btn.classList.add('active');
-        if (this._onToolClickCb) this._onToolClickCb(isActive ? null : tool.id);
+        if (btn.classList.contains('used')) return;
+        btn.classList.add('used');
+        if (this._onToolClickCb) this._onToolClickCb(tool.id);
       });
       this._toolGridEl.appendChild(btn);
     });
@@ -431,16 +462,11 @@ export class NotebookFloating {
   }
 
   _onAllToolsUsed() {
-    // 三项检查完成：锁定工具区，放大镜保持激活，其余灰掉
+    // 三项检查完成：锁定工具区，所有按钮不可再点击
     this._toolsLocked = true;
     if (this._toolGridEl) {
       Array.from(this._toolGridEl.children).forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.id === 'magnifier') {
-          btn.classList.add('active');
-        } else {
-          btn.classList.add('locked');
-        }
+        btn.classList.add('locked');
       });
     }
   }
