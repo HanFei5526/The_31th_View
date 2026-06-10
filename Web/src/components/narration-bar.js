@@ -15,6 +15,8 @@ export class NarrationBar {
     this._typingTimer = null;
     this._fullText = '';
     this._feedbackTimer = null;
+    this._optionsEl = null;
+    this._resolveOptions = null;
 
     this._boundOnClick = this._onClick.bind(this);
     this._boundOnKeyDown = this._onKeyDown.bind(this);
@@ -62,8 +64,10 @@ export class NarrationBar {
     if (this._barEl) this._barEl.removeEventListener('click', this._boundOnClick);
     document.removeEventListener('keydown', this._boundOnKeyDown);
     if (this._portraitContainer) this._portraitContainer.remove();
+    if (this._optionsEl) this._optionsEl.remove();
     if (this._container) this._container.remove();
     this._container = null;
+    this._optionsEl = null;
   }
 
   playLine(speaker, text, options = {}) {
@@ -95,10 +99,59 @@ export class NarrationBar {
   setPortrait(src) {
     if (src) {
       this._portraitImg.src = src;
-      this._portraitContainer.classList.add('visible');
+      this._portraitImg.onerror = () => {
+        // 立绘加载失败时静默隐藏
+        this._portraitContainer.classList.remove('visible');
+      };
+      this._portraitImg.onload = () => {
+        this._portraitContainer.classList.add('visible');
+      };
     } else {
       this._portraitContainer.classList.remove('visible');
     }
+  }
+
+  showOptions(options) {
+    return new Promise((resolve) => {
+      this._resolveOptions = resolve;
+
+      if (this._optionsEl) {
+        this._optionsEl.remove();
+      }
+
+      this._optionsEl = document.createElement('div');
+      this._optionsEl.className = 'narration-options';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'narration-option-btn';
+        btn.textContent = opt.label;
+        btn.onclick = (e) => {
+          e.stopPropagation(); // 防止触发底下的点击事件
+          this._handleOptionClick(opt.value);
+        };
+        this._optionsEl.appendChild(btn);
+      });
+
+      this._container.appendChild(this._optionsEl);
+      
+      // 如果正在打字，直接显示全本
+      if (this._isTyping) {
+        if (this._typingTimer) clearTimeout(this._typingTimer);
+        this._textEl.textContent = this._fullText;
+        this._isTyping = false;
+      }
+    });
+  }
+
+  _handleOptionClick(value) {
+    if (this._optionsEl) {
+      this._optionsEl.remove();
+      this._optionsEl = null;
+    }
+    const resolve = this._resolveOptions;
+    this._resolveOptions = null;
+    if (resolve) resolve(value);
   }
 
   showFeedback(text) {
@@ -118,6 +171,14 @@ export class NarrationBar {
     this._textEl.textContent = '';
     this._speakerEl.style.display = 'none';
     this.setPortrait(null);
+    if (this._optionsEl) {
+      this._optionsEl.remove();
+      this._optionsEl = null;
+    }
+    if (this._resolveOptions) {
+      this._resolveOptions(null);
+      this._resolveOptions = null;
+    }
   }
 
   _typeChar(index) {
@@ -130,6 +191,9 @@ export class NarrationBar {
   }
 
   _onClick() {
+    // 如果有选项正在显示，禁止点击通过
+    if (this._resolveOptions) return;
+
     if (this._isTyping) {
       if (this._typingTimer) clearTimeout(this._typingTimer);
       this._textEl.textContent = this._fullText;
