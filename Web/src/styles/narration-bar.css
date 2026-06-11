@@ -121,3 +121,115 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* =========================================================
+   画中世界主题 (Paint World Theme) - 浅色、宣纸、水墨 (参考图)
+   ========================================================= */
+
+.paint-world .narration-container {
+  width: 55%;
+  bottom: 2vh;
+}
+
+.paint-world .narration-bar {
+  background: rgba(230, 222, 205, 0.65); /* 降低不透明度，颜色更偏向古画宣纸的温润底色 */
+  backdrop-filter: blur(3px) sepia(10%); /* 毛玻璃效果+轻微复古滤镜，让底层古画自然化开，既融合又能看清文字 */
+  -webkit-backdrop-filter: blur(3px) sepia(10%);
+  border: 1px solid rgba(180, 155, 115, 0.25); /* 边框更柔和更通透 */
+  border-top: 1px solid rgba(180, 155, 115, 0.35); 
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.15); /* 减弱高光 */
+  padding: 2rem 4rem;
+}
+
+.paint-world .narration-bar::before {
+  /* 右下角古典花枝装饰示意 */
+  content: "❀";
+  position: absolute;
+  bottom: -6px;
+  right: 18px;
+  font-size: 2.5rem;
+  color: rgba(160, 140, 100, 0.25); /* 颜色更深沉，融入背景 */
+  pointer-events: none;
+}
+
+.paint-world .narration-bar.state-narration {
+  background: rgba(225, 215, 195, 0.78);
+  border: 1px dashed rgba(180, 155, 115, 0.35);
+  border-radius: 12px;
+}
+
+.paint-world .narration-speaker {
+  background: linear-gradient(135deg, rgba(225, 215, 195, 0.95), rgba(210, 200, 180, 0.95)); /* 药丸渐变底色，增加一点通透感 */
+  color: #3b3024;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px; /* 药丸形状 */
+  padding: 4px 18px 4px 14px;
+  font-size: 1.05rem;
+  font-weight: bold;
+  top: -18px;
+  left: 3rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 1px;
+}
+
+.paint-world .narration-speaker::before {
+  content: "✿";
+  color: #a89468;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.paint-world .narration-text {
+  color: #2b231d;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+  text-shadow: none;
+}
+
+.paint-world .narration-bar.state-narration .narration-text {
+  color: #5c4f42;
+}
+
+.paint-world .narration-feedback {
+  background: rgba(248, 244, 235, 0.95);
+  color: #2b231d;
+  border: 1px solid rgba(196, 176, 135, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 继续指示器 ▼ */
+.narration-continue {
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  font-size: 0.9rem;
+  color: rgba(212, 168, 83, 0.7);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.narration-continue.visible {
+  opacity: 1;
+  animation: continueBlink 1.2s infinite ease-in-out;
+}
+
+@keyframes continueBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.paint-world .narration-continue {
+  color: rgba(90, 70, 45, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .narration-continue.visible {
+    animation: none;
+    opacity: 0.7;
+  }
+}

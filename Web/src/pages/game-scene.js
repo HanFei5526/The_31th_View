@@ -73,9 +73,6 @@ export default class GameSceneBase {
       <!-- 顶部工具栏 -->
       <div class="gs-toolbar">
         <button class="gs-btn-back" id="gs-btn-back" aria-label="返回菜单">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
           <span>返回</span>
         </button>
         <div class="gs-toolbar-right">
@@ -440,40 +437,28 @@ export default class GameSceneBase {
     }
 
     .gs-btn-back {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      min-height: 44px;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0.6rem 2.2rem;
       font-family: var(--font-serif);
-      font-size: 0.9rem;
-      letter-spacing: 0.05em;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.25em; 
       cursor: pointer;
-      transition: all 0.3s ease;
-      border: none;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.2s ease-out;
+      border-radius: 0;
+      color: #e0c296; 
+      background: #713824;
+      border: 2px solid #4a2417;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
     }
 
-    .game-scene--dark .gs-btn-back {
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.8);
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-    .game-scene--dark .gs-btn-back:hover {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
-
-    .game-scene--light .gs-btn-back {
-      background: rgba(0,0,0,0.05);
-      color: rgba(30,25,20,0.7);
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-    .game-scene--light .gs-btn-back:hover {
-      background: rgba(0,0,0,0.1);
-      color: rgba(30,25,20,1);
+    .gs-btn-back:hover {
+      transform: translate(2px, 2px);
+      background: #5c2d1b;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
     }
 
     .gs-btn-inventory {

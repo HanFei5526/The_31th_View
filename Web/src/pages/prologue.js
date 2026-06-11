@@ -35,12 +35,12 @@ const PROLOGUE_SCRIPT = [
   { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
   { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
   { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
-  { speaker: '周鹤年', text: '三十一景图你应该熟悉。本科课上讲过。' },
-  { speaker: '周鹤年', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
-  { speaker: '周鹤年', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
-  { speaker: '周鹤年', text: '不是画面本身有问题。是有些东西被压在了下面。' },
-  { speaker: '周鹤年', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
-  { speaker: '周鹤年', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。' }
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '三十一景图你应该熟悉。本科课上讲过。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '不是画面本身有问题。是有些东西被压在了下面。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。' }
 ];
 
 /** 三处线索的完整定义 */
@@ -111,6 +111,10 @@ export default class PrologueScene extends GameSceneBase {
     container.innerHTML = '';
     container.appendChild(root);
 
+    // 确保无论何时进入工作室，都是“现实世界”主题
+    this.engine.currentWorld = 'real';
+    this.engine._applyWorldTheme();
+
     // 隐藏基类底部旁白面板 —— 序章全程改用左下角对话坞
     this._hideNarration();
     if (this._narrationPanel) this._narrationPanel.style.display = 'none';
@@ -121,11 +125,11 @@ export default class PrologueScene extends GameSceneBase {
 
     this._notebook = new NotebookFloating(this.engine);
     this._notebook.mount(root);
-    this._notebook.hide();
+    this._notebook.show();
 
     this._hud = new HudBar(this.engine);
     this._hud.mount(root);
-    this._hud.hide();
+    this._hud.show();
 
     this._inventoryPopup = new InventoryPopup(this.engine);
     this._inventoryPopup.mount(root);
@@ -148,8 +152,7 @@ export default class PrologueScene extends GameSceneBase {
         // 研讨模式：discussion-gate 内部会显示玩家消息
         await this.engine.discussionManager.handleQuickThought(text);
       } else {
-        // 普通查阅：手动显示玩家消息
-        this._notebook.showPlayerMessage(text);
+        // 普通查阅：_askNotebook 内部会显示玩家消息
         await this._askNotebook(text);
       }
     });
@@ -162,29 +165,34 @@ export default class PrologueScene extends GameSceneBase {
       }
     });
 
-    // 1+2. 逐句播放脚本（旁白 + 周鹤年开场白）
-    this._phase = PHASE.DIALOGUE;
-    for (const line of PROLOGUE_SCRIPT) {
-      await this._narrationBar.playLine(line.speaker, line.text, { portrait: line.portrait });
+    if (!this.engine.gameProgress.prologue) {
+      // 1+2. 逐句播放脚本（旁白 + 周鹤年开场白）
+      this._phase = PHASE.DIALOGUE;
+      for (const line of PROLOGUE_SCRIPT) {
+        await this._narrationBar.playLine(line.speaker, line.text, { portrait: line.portrait });
+      }
+
+      // 3. 弹出"查看古画"按钮
+      this._phase = PHASE.PROMPT;
+
+      // 对话结束后，玩家获得笔记本权限
+      this.engine.gameProgress.hasNotebook = true;
+      
+      // PROMPT阶段面板不锁定，可手动收缩
+      this._notebook.unlock();
+      this._notebook.setPlaceholder('翻阅笔记本……');
+      this._notebook.showQuickThoughts([
+        '拙政园三十一景是什么？',
+        '修复笔记本里有什么？',
+      ]);
+      this._narrationBar.showFeedback('获得物件：修复笔记本');
+
+      this._showViewPaintingButton();
+    } else {
+      // 如果已经完成序章，进入自由探索
+      this._notebook.unlock();
+      this._narrationBar.showFloating('工作室：你可以在这里整理线索，或者进入画中。');
     }
-
-    // 3. 弹出"查看古画"按钮
-    this._phase = PHASE.PROMPT;
-
-    // 对话结束后，玩家获得笔记本
-    this.engine.gameProgress.hasNotebook = true;
-    this._hud.show();
-    this._notebook.show();
-    // PROMPT阶段面板不锁定，可手动收缩
-    this._notebook.unlock();
-    this._notebook.setPlaceholder('翻阅笔记本……');
-    this._notebook.showQuickThoughts([
-      '拙政园三十一景是什么？',
-      '修复笔记本里有什么？',
-    ]);
-    this._narrationBar.showFeedback('获得物件：修复笔记本');
-
-    this._showViewPaintingButton();
   }
 
   exit() {
@@ -258,6 +266,9 @@ export default class PrologueScene extends GameSceneBase {
    */
   _enterPaintingPhase() {
     this._phase = PHASE.PAINTING;
+
+    // 隐藏立绘与旁白条
+    this._narrationBar.dismiss();
 
     // 进入扫描/探索阶段，锁定展开
     this._notebook.expand();
@@ -580,17 +591,40 @@ export default class PrologueScene extends GameSceneBase {
     this.engine.gameProgress.chapter1 = true;
     this.engine.saveProgress();
 
-    // 清理转场
-    this._fallTransition.destroy();
-    this._fallTransition = null;
-
     // 跌入画中：切换世界主题，进入第一章画中世界
     this.engine.currentWorld = 'paint';
     this.engine._applyWorldTheme();
     this.engine.emit('world-changed', { world: 'paint' });
 
     this._root.classList.add('game-scene--exiting');
-    setTimeout(() => this.engine.switchScene('chapter1'), 600);
+    
+    // 脱离 _fallTransition 防止在 exit() 中被立刻销毁
+    const transition = this._fallTransition;
+    this._fallTransition = null;
+
+    // 创建一个纯色遮罩，用来在旧转场销毁和新场景加载之间平滑过渡
+    const solidOverlay = document.createElement('div');
+    solidOverlay.style.position = 'fixed';
+    solidOverlay.style.inset = '0';
+    solidOverlay.style.backgroundColor = '#2c1810'; // 与跌入画中的墨迹颜色一致
+    solidOverlay.style.zIndex = '9999';
+    document.body.appendChild(solidOverlay);
+
+    // 等待一帧让遮罩生效
+    await new Promise(r => requestAnimationFrame(r));
+
+    // 现在安全地销毁原有的跌入转场元素
+    if (transition) transition.destroy();
+
+    // 切换到第一章，跳过 SceneManager 的默认转场
+    this.engine.switchScene('chapter1', true);
+
+    // 稍微等待新场景(Chapter1)的 DOM 加载和图片渲染，然后平滑淡出遮罩
+    setTimeout(() => {
+      solidOverlay.style.transition = 'opacity 2s ease-in-out';
+      solidOverlay.style.opacity = '0';
+      setTimeout(() => solidOverlay.remove(), 2000);
+    }, 800);
   }
 
   /* ==================== 工具方法 ==================== */

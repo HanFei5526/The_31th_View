@@ -1,61 +1,118 @@
+import GameSceneBase from './game-scene.js';
 import { NarrationBar } from '../components/narration-bar.js';
 import { NotebookFloating } from '../components/notebook-floating.js';
+import { HudBar } from '../components/hud-bar.js';
+import { InventoryPopup } from '../components/inventory-popup.js';
 
-export default class Chapter1WorkshopScene {
+const prologueBg = '/images/prologue-workshop.png';
+
+export default class Chapter1WorkshopScene extends GameSceneBase {
   constructor(engine) {
-    this.engine = engine;
+    super(engine);
     this.name = 'chapter1-workshop';
     
-    this.narrationBar = new NarrationBar(engine);
-    this.notebook = new NotebookFloating(engine);
-    
-    this._container = null;
-    this._sceneRoot = null;
-    
-    // 现实工作台背景
-    this._bgImage = '/images/chapter1-bg-placeholder.png'; // 后续可换为工作台占位图
+    this.narrationBar = null;
+    this.notebook = null;
+    this.hudBar = null;
+    this.inventoryPopup = null;
   }
 
-  enter(container) {
-    this._container = container;
-    
-    // 更新世界状态
+  async enter(container) {
+    const root = this._buildSceneShell({
+      bgImage: prologueBg,
+      theme: 'light',
+    });
+
+    container.innerHTML = '';
+    container.appendChild(root);
+
+    // 确保是现实世界主题
     this.engine.currentWorld = 'real';
     this.engine._applyWorldTheme();
     
-    // UI 层
-    this._uiLayer = document.createElement('div');
-    this._uiLayer.className = 'scene-ui-layer';
-    this._uiLayer.style.position = 'absolute';
-    this._uiLayer.style.inset = '0';
-    this._uiLayer.style.pointerEvents = 'none';
-    
+    // 强制清除可能的残留样式
+    if (document.body) document.body.classList.remove('paint-world');
+    if (container) {
+      container.classList.remove('paint-world');
+      container.classList.add('real-world');
+    }
+
+    // 隐藏基类底部旁白面板
+    this._hideNarration();
+    if (this._narrationPanel) this._narrationPanel.style.display = 'none';
+
     // 挂载组件
-    this.narrationBar.mount(this._uiLayer);
-    this.notebook.mount(this._uiLayer);
-    
+    this.narrationBar = new NarrationBar(this.engine);
+    this.narrationBar.mount(root);
+
+    this.notebook = new NotebookFloating(this.engine);
+    this.notebook.mount(root);
+
+    this.hudBar = new HudBar(this.engine);
+    this.hudBar.mount(root);
+    this.hudBar.show();
+
+    this.inventoryPopup = new InventoryPopup(this.engine);
+    this.inventoryPopup.mount(root);
+
     if (this.narrationBar._container) this.narrationBar._container.style.pointerEvents = 'auto';
     if (this.notebook._container) this.notebook._container.style.pointerEvents = 'auto';
 
-    // 场景根节点
-    this._sceneRoot = document.createElement('div');
-    this._sceneRoot.className = 'ch1-scene full-viewport';
-    this._sceneRoot.style.backgroundImage = `url('${this._bgImage}')`;
-    this._sceneRoot.style.backgroundSize = 'cover';
-    this._sceneRoot.style.backgroundPosition = 'center';
-    
-    this._container.appendChild(this._sceneRoot);
-    this._container.appendChild(this._uiLayer);
-    
+    this.hudBar.onNotebookClick(() => {
+      if (this.notebook.isExpanded()) {
+        this.notebook.collapse();
+      } else {
+        this.notebook.expand();
+      }
+    });
+    this.hudBar.onInventoryClick(() => {
+      this.inventoryPopup.open();
+    });
+
+    // 绑定 Notebook 提交事件
+    this.notebook.onSubmit(async (text) => {
+      if (this._activeGateId) {
+        await this.engine.discussionManager.handleQuickThought(text);
+      } else {
+        await this._askNotebook(text);
+      }
+    });
+
+    this.notebook.onQuickThought(async (text) => {
+      if (this._activeGateId) {
+        await this.engine.discussionManager.handleQuickThought(text);
+      } else {
+        await this._askNotebook(text);
+      }
+    });
+
     this._startDialogue();
   }
 
+  async _askNotebook(text) {
+    if (!text?.trim()) return;
+
+    this.notebook.showPlayerMessage(text);
+    this.notebook.setLoading(true);
+
+    try {
+      const reply = await this.engine.aiService.queryNotebook(text);
+      this.notebook.showNPCMessage(reply);
+    } catch (err) {
+      console.error('[Chapter1Workshop] 笔记本查询失败:', err);
+      this.notebook.showNPCMessage('（翻了翻，没有找到相关记录）');
+    } finally {
+      this.notebook.setLoading(false);
+    }
+  }
+
   exit() {
-    this.narrationBar.unmount();
-    this.notebook.unmount();
-    if (this._sceneRoot) this._sceneRoot.remove();
-    if (this._uiLayer) this._uiLayer.remove();
+    if (this.narrationBar) this.narrationBar.unmount();
+    if (this.notebook) this.notebook.unmount();
+    if (this.hudBar) this.hudBar.unmount();
+    if (this.inventoryPopup) this.inventoryPopup.unmount();
     if (this._endCard) this._endCard.remove();
+    super.exit();
   }
 
   async _startDialogue() {
@@ -82,14 +139,20 @@ export default class Chapter1WorkshopScene {
     await this.narrationBar.playLine(null, '他把笔记本推回你面前，手指点了点扉页上自己写的那行字。');
     await this.narrationBar.playLine('周鹤年', '你继续查的时候，多留意参考文献。题跋、匾额、边注——这些地方最容易留下不够正式、却最诚实的东西。', { portrait: '/images/zhou_henian.png' });
 
+    if (choice === 'A') {
+      this.notebook.addClueRecord('[沈念的判断] 这页画底下藏着另一套说明——画面结构可能有隐藏的辅助标注层。');
+    } else {
+      this.notebook.addClueRecord('[沈念的判断] 画里有人留下了东西——不是画家本人的正式创作，而是某个人的私人痕迹。');
+    }
     this.notebook.addClueRecord('[周老师的建议] 关注题跋、匾额与边注——这些地方最容易留下不够正式、却最诚实的东西。');
-    this.narrationBar.showFeedback('📝 笔记本记录更新：周老师建议——关注题跋、匾额与边注');
+    this.narrationBar.showFeedback('笔记本记录更新：周老师建议——关注题跋、匾额与边注');
 
     await this.narrationBar.playLine(null, '窗外的梧桐树在晚风里轻轻摇动。你合上笔记本，但脑海中仍然浮着那个字。');
     await this.narrationBar.playLine('沈念', '蘅。是谁？', { portrait: '/images/shennian.png' });
     this.narrationBar.dismiss();
 
-    this._showChapterEnd();
+    // 画面短暂停留 2s 后显示章节结束卡
+    setTimeout(() => this._showChapterEnd(), 2000);
   }
 
   _showChapterEnd() {
@@ -110,7 +173,7 @@ export default class Chapter1WorkshopScene {
       <button class="choice-btn" style="max-width: 200px; text-align: center;">返回菜单</button>
     `;
     
-    this._container.appendChild(this._endCard);
+    this._root.appendChild(this._endCard);
     
     const btn = this._endCard.querySelector('button');
     btn.addEventListener('click', () => {

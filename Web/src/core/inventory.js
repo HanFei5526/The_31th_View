@@ -20,7 +20,7 @@ export const ITEM_TEMPLATES = {
     id: 'hairpin',
     name: '断簪',
     description: '在拙政园遗址中发现的一根断簪，簪头雕刻着细密的梅花纹样。明代工艺，可能属于一位女性。',
-    icon: '📌',
+    icon: '',
   },
   inkstone: {
     id: 'inkstone',
