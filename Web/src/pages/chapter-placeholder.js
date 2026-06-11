@@ -141,21 +141,28 @@ export function createChapterPlaceholderScene(config = {}) {
 
         .chapter-placeholder__back {
           margin-top: 2rem;
-          min-height: 44px;
-          padding: 0.75rem 1.4rem;
-          border-radius: var(--radius-md);
-          background: var(--paint-accent);
-          color: #fff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 48px;
+          padding: 0.6rem 2.2rem;
           font-family: var(--font-serif);
-          font-size: var(--font-size-base);
-          letter-spacing: 0.06em;
-          transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+          font-size: 1.05rem;
+          font-weight: 700;
+          letter-spacing: 0.25em; 
+          cursor: pointer;
+          transition: all 0.2s ease-out;
+          border-radius: 0;
+          color: #e0c296; 
+          background: #713824;
+          border: 2px solid #4a2417;
+          box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
         }
 
         .chapter-placeholder__back:hover {
-          background: var(--paint-ink);
-          transform: translateY(-1px);
-          box-shadow: 0 8px 24px rgba(61, 43, 31, 0.16);
+          transform: translate(2px, 2px);
+          background: #5c2d1b;
+          box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
         }
 
         .chapter-placeholder__back:focus-visible {

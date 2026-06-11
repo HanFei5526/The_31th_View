@@ -1,4 +1,4 @@
-const bgImage = '/images/landing-panorama.png';
+const bgImage = '/images/landing_bg.png';
 
 /**
  * 《卅一景》 — 着陆页 / Landing Page
@@ -69,6 +69,9 @@ export default class LandingScene {
       this._carousel.remove();
       this._carousel = null;
     }
+    if (this._fullscreenHandler) {
+      document.removeEventListener('fullscreenchange', this._fullscreenHandler);
+    }
   }
 
   /* ==================== DOM 构建 ==================== */
@@ -77,14 +80,21 @@ export default class LandingScene {
     const root = document.createElement('div');
     root.className = 'landing-scene';
     root.innerHTML = `
+      <!-- 注入 SVG 毛边滤镜，用于实现版画印记的边缘残破感 -->
+      <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+          <filter id="rough-edge">
+            <feTurbulence type="fractalNoise" baseFrequency="0.25" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
       <!-- 全景背景 -->
       <div class="landing-bg-panorama">
         <div class="panorama-img"></div>
         <div class="panorama-vignette"></div>
       </div>
-
-      <!-- 左侧渐变过渡遮罩 -->
-      <div class="landing-gradient-mask"></div>
 
       <!-- 内容层 -->
       <div class="landing-content">
@@ -109,8 +119,8 @@ export default class LandingScene {
             </div>
 
             <h1 class="landing-title">
-              <span class="title-line">入画·拙政园：</span>
-              <span class="title-line">穿越五百年，<em class="title-verm">成为画中人</em></span>
+              <span class="title-line">寻找拙政园</span>
+              <span class="title-line">复原五百年前的<em class="title-verm">隐秘回眸</em></span>
             </h1>
 
             <p class="landing-desc">
@@ -135,31 +145,48 @@ export default class LandingScene {
             <span>人物图鉴</span>
           </button>
         </div>
+
+        <!-- 全屏按钮 -->
+        <button class="landing-fullscreen-btn" id="landing-fullscreen" title="网页全屏">⤢</button>
       </div>
     `;
 
     // 绑定"开始游戏"按钮
     root.querySelector('#btn-enter').addEventListener('click', () => {
       const overlay = document.createElement('div');
-      overlay.className = 'intro-transition-overlay';
-      overlay.innerHTML = '<div class="intro-transition-text"></div>';
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
+      
+      const titleStr = '寻找拙政园';
+      const lines = [
+        "你是一位古画修复师的学生。",
+        "在修复文徵明《拙政园三十一景图》的过程中，",
+        "你发现最后一页的画心异常完整，",
+        "被遮蔽的却是边缘的来源痕迹。",
+        "从修复工作室到明代园林，从断簪到残砚，",
+        "一步步复原她留下的低位视角。"
+      ];
+
+      overlay.innerHTML = `
+        <div class="prologue-transition-layout">
+          <div class="intro-prologue-title">${titleStr}</div>
+          <div class="intro-prologue-text" id="intro-prologue-text"></div>
+        </div>
+      `;
       document.body.appendChild(overlay);
       
-      const textContainer = overlay.querySelector('.intro-transition-text');
+      const textContainer = overlay.querySelector('#intro-prologue-text');
 
       setTimeout(() => {
         overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
       }, 50);
       
       root.classList.add('landing-scene--exiting-slow'); 
 
-      const lines = [
-        "你是一位古画修复师的学生。",
-        "在修复文徵明《拙政园三十一景图》的过程中，你发现最后一页并没有失踪。",
-        "画心完整地保留着一个低位视角，来源说明却被装裱边缘压住。",
-        "从修复工作室到明代园林，从断簪到残砚，一步步确认王蘅留下的所见。"
-      ];
-      
       textContainer.innerHTML = '';
       
       // Delay before starting fade in (wait for overlay to appear)
@@ -202,6 +229,32 @@ export default class LandingScene {
         this._openCarousel(key);
       });
     });
+
+    // 绑定全屏按钮
+    const fsBtn = root.querySelector('#landing-fullscreen');
+    if (fsBtn) {
+      if (document.fullscreenElement) {
+        fsBtn.textContent = '⤡';
+        fsBtn.title = '退出全屏';
+      }
+      fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      });
+      this._fullscreenHandler = () => {
+        if (document.fullscreenElement) {
+          fsBtn.textContent = '⤡';
+          fsBtn.title = '退出全屏';
+        } else {
+          fsBtn.textContent = '⤢';
+          fsBtn.title = '网页全屏';
+        }
+      };
+      document.addEventListener('fullscreenchange', this._fullscreenHandler);
+    }
 
     return root;
   }
@@ -407,27 +460,6 @@ export default class LandingScene {
     }
 
     /* ===========================
-       Gradient Mask — 左侧文字区过渡
-       =========================== */
-    .landing-gradient-mask {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 60%;
-      height: 100%;
-      z-index: 1;
-      background: linear-gradient(
-        90deg,
-        rgba(240, 232, 216, 0.92) 0%,
-        rgba(240, 232, 216, 0.82) 35%,
-        rgba(240, 232, 216, 0.55) 60%,
-        rgba(240, 232, 216, 0.15) 85%,
-        transparent 100%
-      );
-      pointer-events: none;
-    }
-
-    /* ===========================
        Content Layer
        =========================== */
     .landing-content {
@@ -550,26 +582,28 @@ export default class LandingScene {
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      text-wrap: balance;
+      font-kerning: normal;
     }
 
     .title-line {
       display: block;
-      color: #2c2416;
-      line-height: 1.2;
+      color: #6e4125; /* 赭红赭黄，低明度 */
+      line-height: 1.15;
       animation: titleFadeIn 1.2s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
     .title-line:first-child {
       font-size: clamp(3.2rem, 5vw, 4.8rem);
       font-weight: 700; /* Bold */
-      letter-spacing: 0.12em;
+      letter-spacing: 0.05em;
     }
 
     .title-line:last-child {
       font-size: clamp(1.8rem, 2.8vw, 2.5rem);
       font-weight: 600; /* Bold */
-      color: #4a3e31;
-      letter-spacing: 0.1em;
+      color: #6e4125; /* 赭红赭黄，低明度 */
+      letter-spacing: 0.02em;
     }
 
     @keyframes titleFadeIn {
@@ -579,7 +613,7 @@ export default class LandingScene {
 
     .title-verm {
       font-style: normal;
-      color: #2c2416; /* Removed red */
+      color: #6e4125; /* 赭红赭黄，低明度 */
       position: relative;
       font-weight: 500;
       display: inline-block;
@@ -592,7 +626,7 @@ export default class LandingScene {
       left: 0;
       right: 0;
       height: 1px;
-      background: #2c2416;
+      background: #6e4125; /* 赭红赭黄，低明度 */
       opacity: 0.5;
     }
 
@@ -601,10 +635,12 @@ export default class LandingScene {
        =========================== */
     .landing-desc {
       font-family: var(--font-serif);
-      font-size: clamp(0.95rem, 1.1vw, 1.1rem);
-      color: #5a4b3c;
-      line-height: 2.2;
-      max-width: 48ch;
+      font-size: 1.125rem;
+      color: #111111;
+      line-height: 1.8;
+      max-width: 52ch;
+      text-wrap: pretty;
+      font-kerning: normal;
       margin-top: 6vh; /* Moved up significantly */
       animation: descFadeIn 1.2s 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
@@ -641,42 +677,45 @@ export default class LandingScene {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      padding: 0.7rem 1.6rem;
-      border-radius: 100px;
+      min-height: 48px;
+      padding: 0.6rem 2.2rem;
       font-family: var(--font-serif);
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.25em; 
       cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      border: none;
-      position: relative;
-      overflow: hidden;
+      transition: all 0.2s ease-out;
+      /* 回归干净锐利的方正边角，无任何残边和扭曲 */
+      border-radius: 0;
     }
 
+    /* 雕版主按钮 */
     .btn--primary {
-      background: linear-gradient(135deg, #4a6d7c 0%, #3a5d6c 100%);
-      color: #f5f0e8;
-      box-shadow: 0 4px 16px rgba(74, 109, 124, 0.25);
+      color: #e0c296; 
+      background: #713824;
+      border: 2px solid #4a2417;
+      /* 保留木块的物理厚度感阴影，但去除所有杂乱噪点 */
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
     }
 
     .btn--primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(74, 109, 124, 0.35);
+      transform: translate(2px, 2px);
+      background: #5c2d1b;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
     }
 
+    /* 雕版次按钮 */
     .btn--outline {
-      background: rgba(245, 240, 232, 0.5);
-      color: #5a4d3a;
-      border: 1.5px solid rgba(139, 119, 79, 0.25);
-      backdrop-filter: blur(4px);
+      color: #713824;
+      background: #d8be96;
+      border: 2px solid #713824;
+      box-shadow: 4px 4px 0px rgba(113, 56, 36, 0.35); 
     }
 
     .btn--outline:hover {
-      border-color: rgba(200, 64, 50, 0.4);
-      color: #c84032;
-      background: rgba(200, 64, 50, 0.04);
-      transform: translateY(-1px);
+      transform: translate(2px, 2px);
+      background: #c8ab7d;
+      box-shadow: 2px 2px 0px rgba(113, 56, 36, 0.35);
     }
 
     /* ===========================
@@ -873,6 +912,34 @@ export default class LandingScene {
       font-size: 0.8rem;
       color: #9a8b7a;
       letter-spacing: 0.1em;
+    }
+
+    .landing-fullscreen-btn {
+      position: absolute;
+      bottom: 2rem;
+      right: 2rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(28, 25, 23, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    
+    .landing-fullscreen-btn:hover {
+      background: rgba(28, 25, 23, 0.8);
+      color: #fff;
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.5);
     }
 
     /* ===========================

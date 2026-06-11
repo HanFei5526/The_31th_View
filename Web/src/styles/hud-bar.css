@@ -17,27 +17,35 @@
 }
 
 .hud-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(28, 25, 23, 0.9);
-  border: 1px solid rgba(212, 168, 83, 0.3);
-  color: #d4a853;
-  font-size: 1.5rem;
+  min-width: 48px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 1.2rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.25em; 
   cursor: pointer;
   pointer-events: auto; /* 恢复点击 */
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease-out;
+  border-radius: 0;
+  color: #e0c296; 
+  background: #713824;
+  border: 2px solid #4a2417;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
   position: relative;
 }
 
+.hud-btn-label {
+  white-space: nowrap;
+}
+
 .hud-btn:hover:not(.disabled) {
-  background: rgba(212, 168, 83, 0.1);
-  border-color: rgba(212, 168, 83, 0.6);
-  transform: translateY(-2px);
+  transform: translate(2px, 2px);
+  background: #5c2d1b;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
 }
 
 .hud-btn.disabled {
@@ -53,11 +61,12 @@
   top: -30px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
+  background: rgba(44, 36, 22, 0.9);
+  color: #e0c296;
   font-size: 0.8rem;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 0;
+  border: 1px solid #713824;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -71,12 +80,146 @@
 
 /* 呼吸灯高亮 */
 @keyframes hud-breathe {
-  0% { box-shadow: 0 0 0 0 rgba(212, 168, 83, 0.6); }
-  70% { box-shadow: 0 0 0 10px rgba(212, 168, 83, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(212, 168, 83, 0); }
+  0% { box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85), 0 0 0 0 rgba(224, 194, 150, 0.6); }
+  70% { box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85), 0 0 0 10px rgba(224, 194, 150, 0); }
+  100% { box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85), 0 0 0 0 rgba(224, 194, 150, 0); }
 }
 
 .hud-btn.highlight {
   animation: hud-breathe 2s infinite;
-  border-color: #d4a853;
+  border-color: #e0c296;
+}
+
+/* 全局返回按钮 (左上角) - 采用菜单页木刻印刷风格 */
+.hud-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  z-index: 150;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.6rem 2.2rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.25em; 
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease-out;
+  border-radius: 0;
+  color: #e0c296; 
+  background: #713824;
+  border: 2px solid #4a2417;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
+  opacity: 0;
+}
+
+.hud-back-btn.visible {
+  opacity: 1;
+}
+
+.hud-back-btn:hover {
+  transform: translate(2px, 2px);
+  background: #5c2d1b;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
+}
+
+/* 退出确认卡片 */
+.hud-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(28, 25, 23, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hud-confirm-overlay.visible {
+  opacity: 1;
+}
+
+.hud-confirm-card {
+  background: #fdfaf2;
+  border: 2px solid rgba(139, 119, 79, 0.3);
+  border-radius: 12px;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-family: var(--font-serif);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(139, 69, 19, 0.01) 2px,
+    rgba(139, 69, 19, 0.01) 4px
+  );
+}
+
+.hud-confirm-overlay.visible .hud-confirm-card {
+  transform: translateY(0) scale(1);
+}
+
+.hud-confirm-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c2416;
+  margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.hud-confirm-desc {
+  font-size: 1.05rem;
+  color: #5a4b3c;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+
+.hud-confirm-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.hud-confirm-btn {
+  min-width: 120px;
+  height: 44px;
+  border-radius: 6px;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-confirm-cancel {
+  background: transparent;
+  border: 1px solid rgba(44, 36, 22, 0.2);
+  color: #5a4b3c;
+}
+
+.hud-confirm-cancel:hover {
+  background: rgba(44, 36, 22, 0.05);
+  color: #2c2416;
+}
+
+.hud-confirm-ok {
+  background: #713824;
+  border: 1px solid #4a2417;
+  color: #e0c296;
+  box-shadow: 2px 2px 0px rgba(44, 36, 22, 0.3);
+}
+
+.hud-confirm-ok:hover {
+  background: #5c2d1b;
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px rgba(44, 36, 22, 0.3);
 }

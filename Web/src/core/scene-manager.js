@@ -152,6 +152,40 @@ export class SceneManager {
   }
 
   /**
+   * 褪色转场 — 画中世界退场专用
+   * @param {string} targetScene — 目标场景名
+   * @returns {Promise<void>}
+   */
+  async switchWithFadeToSepia(targetScene) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'fade-to-sepia-overlay';
+      document.body.appendChild(overlay);
+
+      // Trigger reflow
+      void overlay.offsetWidth;
+
+      overlay.classList.add('active');
+
+      // 褪色滤镜 1s + 背景变实 1.2s = 2.2s
+      setTimeout(() => {
+        this._doSwitch(targetScene);
+        
+        // 停留 0.5s 后淡出
+        setTimeout(() => {
+          overlay.style.transition = 'opacity 1s ease';
+          overlay.style.opacity = '0';
+          
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 1000);
+        }, 500);
+      }, 2200);
+    });
+  }
+
+  /**
    * 内部：执行场景切换（无转场动画）
    * @param {string} name
    */

@@ -15,6 +15,8 @@ export class NarrationBar {
     this._typingTimer = null;
     this._fullText = '';
     this._feedbackTimer = null;
+    this._optionsEl = null;
+    this._resolveOptions = null;
 
     this._boundOnClick = this._onClick.bind(this);
     this._boundOnKeyDown = this._onKeyDown.bind(this);
@@ -46,6 +48,12 @@ export class NarrationBar {
     this._textEl.className = 'narration-text';
     this._barEl.appendChild(this._textEl);
 
+    this._continueEl = document.createElement('span');
+    this._continueEl.className = 'narration-continue';
+    this._continueEl.setAttribute('aria-hidden', 'true');
+    this._continueEl.textContent = '▼';
+    this._barEl.appendChild(this._continueEl);
+
     this._container.appendChild(this._barEl);
 
     // 短反馈条
@@ -59,11 +67,14 @@ export class NarrationBar {
   unmount() {
     if (this._typingTimer) clearTimeout(this._typingTimer);
     if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
+    if (this._floatingTimer) clearTimeout(this._floatingTimer);
     if (this._barEl) this._barEl.removeEventListener('click', this._boundOnClick);
     document.removeEventListener('keydown', this._boundOnKeyDown);
     if (this._portraitContainer) this._portraitContainer.remove();
+    if (this._optionsEl) this._optionsEl.remove();
     if (this._container) this._container.remove();
     this._container = null;
+    this._optionsEl = null;
   }
 
   playLine(speaker, text, options = {}) {
@@ -95,10 +106,61 @@ export class NarrationBar {
   setPortrait(src) {
     if (src) {
       this._portraitImg.src = src;
-      this._portraitContainer.classList.add('visible');
+      this._portraitImg.onerror = () => {
+        // 立绘加载失败时静默隐藏
+        this._portraitContainer.classList.remove('visible');
+      };
+      this._portraitImg.onload = () => {
+        this._portraitContainer.classList.add('visible');
+      };
     } else {
       this._portraitContainer.classList.remove('visible');
     }
+  }
+
+  showOptions(options) {
+    return new Promise((resolve) => {
+      this._resolveOptions = resolve;
+
+      if (this._optionsEl) {
+        this._optionsEl.remove();
+      }
+
+      this._optionsEl = document.createElement('div');
+      this._optionsEl.className = 'narration-options';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'narration-option-btn';
+        btn.textContent = opt.label;
+        btn.onclick = (e) => {
+          e.stopPropagation(); // 防止触发底下的点击事件
+          this._handleOptionClick(opt.value);
+        };
+        this._optionsEl.appendChild(btn);
+      });
+
+      // 将选项插入到对话框上方
+      this._container.insertBefore(this._optionsEl, this._barEl);
+      this._hideContinue();
+
+      // 如果正在打字，直接显示全本
+      if (this._isTyping) {
+        if (this._typingTimer) clearTimeout(this._typingTimer);
+        this._textEl.textContent = this._fullText;
+        this._isTyping = false;
+      }
+    });
+  }
+
+  _handleOptionClick(value) {
+    if (this._optionsEl) {
+      this._optionsEl.remove();
+      this._optionsEl = null;
+    }
+    const resolve = this._resolveOptions;
+    this._resolveOptions = null;
+    if (resolve) resolve(value);
   }
 
   showFeedback(text) {
@@ -109,15 +171,43 @@ export class NarrationBar {
     if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
     this._feedbackTimer = setTimeout(() => {
       this._feedbackEl.classList.remove('visible');
-    }, 3000);
+    }, 4000);
+  }
+
+  showFloating(text) {
+    if (!this._barEl) return;
+    if (this._floatingTimer) clearTimeout(this._floatingTimer);
+    if (this._typingTimer) clearTimeout(this._typingTimer);
+    this._isTyping = false;
+    this._hideContinue();
+
+    this._barEl.className = 'narration-bar state-narration';
+    this._speakerEl.style.display = 'none';
+    this._textEl.textContent = text;
+
+    this._floatingTimer = setTimeout(() => {
+      this._textEl.textContent = '';
+      this._floatingTimer = null;
+    }, 4000);
   }
 
   dismiss() {
     if (this._typingTimer) clearTimeout(this._typingTimer);
+    if (this._floatingTimer) clearTimeout(this._floatingTimer);
+    this._floatingTimer = null;
     this._isTyping = false;
+    this._hideContinue();
     this._textEl.textContent = '';
     this._speakerEl.style.display = 'none';
     this.setPortrait(null);
+    if (this._optionsEl) {
+      this._optionsEl.remove();
+      this._optionsEl = null;
+    }
+    if (this._resolveOptions) {
+      this._resolveOptions(null);
+      this._resolveOptions = null;
+    }
   }
 
   _typeChar(index) {
@@ -126,16 +216,22 @@ export class NarrationBar {
       this._typingTimer = setTimeout(() => this._typeChar(index + 1), this._typeSpeed);
     } else {
       this._isTyping = false;
+      this._showContinue();
     }
   }
 
   _onClick() {
+    // 如果有选项正在显示，禁止点击通过
+    if (this._resolveOptions) return;
+
     if (this._isTyping) {
       if (this._typingTimer) clearTimeout(this._typingTimer);
       this._textEl.textContent = this._fullText;
       this._isTyping = false;
+      this._showContinue();
     } else {
       if (this._resolvePlay) {
+        this._hideContinue();
         const resolve = this._resolvePlay;
         this._resolvePlay = null;
         resolve();
@@ -159,5 +255,13 @@ export class NarrationBar {
     if (!el) return false;
     const tag = el.tagName;
     return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  }
+
+  _showContinue() {
+    if (this._continueEl) this._continueEl.classList.add('visible');
+  }
+
+  _hideContinue() {
+    if (this._continueEl) this._continueEl.classList.remove('visible');
   }
 }

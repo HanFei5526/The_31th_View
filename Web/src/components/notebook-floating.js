@@ -27,6 +27,7 @@ export class NotebookFloating {
     this._onSubmitCb = null;
     this._onQuickThoughtCb = null;
     this._onToolClickCb = null;
+    this._onCollapseCb = null;
     
     // 事件绑定
     this._boundOnClueCollected = this._onClueCollected.bind(this);
@@ -123,6 +124,7 @@ export class NotebookFloating {
       this._container.classList.remove('expanded');
       this._expanded = false;
       this._syncLayoutExpanded();
+      if (this._onCollapseCb) this._onCollapseCb();
     }
   }
 
@@ -157,6 +159,17 @@ export class NotebookFloating {
       if (this._tabs['chat']) this._tabs['chat'].textContent = '综合研讨';
     } else {
       this._container.classList.remove('synthesis-mode');
+      if (this._tabs['chat']) this._tabs['chat'].textContent = '对话';
+    }
+  }
+
+  setLightweightMode(active) {
+    if (!this._container) return;
+    if (active) {
+      this._container.classList.add('lightweight-mode');
+      if (this._tabs['chat']) this._tabs['chat'].textContent = '梳理';
+    } else {
+      this._container.classList.remove('lightweight-mode');
       if (this._tabs['chat']) this._tabs['chat'].textContent = '对话';
     }
   }
@@ -213,9 +226,16 @@ export class NotebookFloating {
     const inputArea = document.createElement('div');
     inputArea.className = 'notebook-input-area';
     
+    const inputId = 'nb-input-' + Math.random().toString(36).slice(2, 8);
+    const inputLabel = document.createElement('label');
+    inputLabel.className = 'notebook-input-label';
+    inputLabel.htmlFor = inputId;
+    inputLabel.textContent = '翻阅笔记本';
+
     this._inputEl = document.createElement('textarea');
+    this._inputEl.id = inputId;
     this._inputEl.className = 'notebook-input';
-    this._inputEl.placeholder = '翻阅笔记本……';
+    this._inputEl.placeholder = '在此输入你的想法……';
     this._inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -226,8 +246,10 @@ export class NotebookFloating {
     this._sendBtn = document.createElement('button');
     this._sendBtn.className = 'notebook-send-btn';
     this._sendBtn.innerHTML = '➤';
+    this._sendBtn.setAttribute('aria-label', '发送');
     this._sendBtn.addEventListener('click', () => this._submitInput());
 
+    inputArea.appendChild(inputLabel);
     inputArea.appendChild(this._inputEl);
     inputArea.appendChild(this._sendBtn);
 
@@ -336,6 +358,10 @@ export class NotebookFloating {
     this._onQuickThoughtCb = callback;
   }
 
+  onCollapse(callback) {
+    this._onCollapseCb = callback;
+  }
+
   _submitInput() {
     const text = this._inputEl.value.trim();
     if (!text) return;
@@ -382,9 +408,9 @@ export class NotebookFloating {
     this._toolsLocked = false;
     tools.forEach(tool => {
       const btn = document.createElement('button');
-      btn.className = 'tool-btn';
+      btn.className = 'notebook-tool-btn';
       btn.dataset.id = tool.id;
-      btn.innerHTML = `<span class="tool-icon">${tool.icon}</span><span class="tool-label">${tool.label}</span>`;
+      btn.innerHTML = `<span class="notebook-tool-icon">${tool.icon}</span><span class="notebook-tool-label">${tool.label}</span>`;
       btn.addEventListener('click', () => {
         if (this._toolsLocked) return;
         if (btn.classList.contains('used')) return;
@@ -418,10 +444,30 @@ export class NotebookFloating {
 
     const btn = document.createElement('button');
     btn.className = 'notebook-confirm-btn';
-    btn.innerHTML = '<span class="notebook-confirm-icon">✓</span><span>确认这个推断</span>';
+    btn.innerHTML = '<span>确认这个推断</span>';
     btn.addEventListener('click', () => {
       btn.disabled = true;
       btn.classList.add('confirmed');
+      cb?.();
+    });
+
+    this._confirmAreaEl.appendChild(btn);
+    this._scrollToBottom();
+  }
+
+  showSkipButton(cb) {
+    if (!this._confirmAreaEl) return;
+    this._confirmAreaEl.innerHTML = '';
+    this._confirmAreaEl.classList.remove('hidden');
+
+    const btn = document.createElement('button');
+    btn.className = 'notebook-confirm-btn';
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--paint-text)';
+    btn.style.borderColor = 'var(--paint-border)';
+    btn.innerHTML = '<span>跳过梳理 ⏭</span>';
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
       cb?.();
     });
 

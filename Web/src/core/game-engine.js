@@ -298,26 +298,30 @@ export class GameEngine {
       el.style.filter = 'blur(8px)';
       el.style.background = 'radial-gradient(ellipse at center, #c8b898 0%, #e8e0d0 100%)';
 
-      // 柔缓淡入（带模糊→清晰）
+      // 柔缓淡入遮罩
       requestAnimationFrame(() => {
-        el.style.transition = 'opacity 0.7s ease, filter 0.9s ease';
+        el.style.transition = 'opacity 0.6s ease, filter 0.8s ease';
         el.style.opacity = '1';
         el.style.filter = 'blur(0)';
       });
 
-      // 保持，然后淡出
+      // 当遮罩完全不透明时，解析 Promise 让底层引擎切换场景 DOM
       setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.filter = 'blur(12px)';
+        resolve();
+
+        // 稍微停留缓冲，然后开始淡出遮罩，露出新场景
         setTimeout(() => {
-          el.style.display = 'none';
-          el.classList.remove('active');
-          el.style.transition = '';
-          el.style.filter = '';
-          el.style.background = '';
-          resolve();
-        }, 700);
-      }, 500);
+          el.style.opacity = '0';
+          el.style.filter = 'blur(12px)';
+          setTimeout(() => {
+            el.style.display = 'none';
+            el.classList.remove('active');
+            el.style.transition = '';
+            el.style.filter = '';
+            el.style.background = '';
+          }, 800); // 等待淡出结束
+        }, 100);
+      }, 600);
     });
   }
 

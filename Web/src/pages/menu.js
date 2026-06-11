@@ -1,4 +1,4 @@
-const bgImage = '/images/menu-bg.png';
+const bgImage = '/images/menu-bg-5.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu
@@ -29,14 +29,16 @@ const CHAPTERS = [
     subtitle: '东园 · 兰雪堂至芙蓉榭',
     tagline: '水面倒影里，第一次看见她留下的痕迹',
     unlockKey: 'chapter1',
+    alwaysUnlocked: true,
   },
   {
     id: 'chapter2',
     scene: 'chapter2',
     name: '第二章',
     subtitle: '中园 · 远香堂至小飞虹',
-    tagline: '题诗异文之间，浮现“画非一人”的疑问',
+    tagline: '题诗异文之间，浮现”画非一人”的疑问',
     unlockKey: 'chapter2',
+    alwaysUnlocked: false,
   },
   {
     id: 'chapter3',
@@ -45,6 +47,7 @@ const CHAPTERS = [
     subtitle: '西园 · 卅六鸳鸯馆至留听阁',
     tagline: '墙上草图指向一个低而偏的观看位置',
     unlockKey: 'chapter3',
+    alwaysUnlocked: false,
   },
   {
     id: 'finale',
@@ -53,6 +56,7 @@ const CHAPTERS = [
     subtitle: '第三十一景',
     tagline: '不为她正名，只让她的所见重新被看见',
     unlockKey: 'finale',
+    alwaysUnlocked: false,
   },
 ];
 
@@ -108,9 +112,6 @@ export default class MenuScene {
 
       <!-- 返回按钮 -->
       <button class="menu-back" id="btn-back">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
         <span>返回</span>
       </button>
 
@@ -128,7 +129,7 @@ export default class MenuScene {
           <!-- 章节列表 -->
           <nav class="chapter-list" aria-label="章节列表">
             ${CHAPTERS.map((ch, i) => {
-              const unlocked = ch.alwaysUnlocked || progress[ch.unlockKey];
+              const unlocked = this._isChapterUnlocked(ch);
               const completed = progress[ch.unlockKey + '_completed'];
               return `
               <div class="chapter-item ${unlocked ? 'chapter-item--unlocked' : 'chapter-item--locked'}"
@@ -279,20 +280,56 @@ export default class MenuScene {
     overlay.className = 'intro-transition-overlay';
     this._transitionOverlay = overlay;
     
+    overlay.classList.add('intro-transition-overlay--prologue');
+    
+    let titleStr = '';
+    let lines = [];
     if (scene === 'prologue') {
-      overlay.classList.add('intro-transition-overlay--prologue');
-      overlay.innerHTML = `
-        <div class="prologue-transition-layout">
-          <div class="intro-prologue-title">序章 · 残页</div>
-          <div class="intro-prologue-text" id="intro-prologue-text"></div>
-        </div>
-      `;
+      titleStr = '序章 · 残页';
+      lines = [
+        "美术学院旧楼三层，古画修复工作室。",
+        "操作台上，高精度扫描仪低声嗡鸣。",
+        "一页泛黄的册页被放大到纤维可辨的程度。",
+        "五百年前的秘密，正等待着你的凝视。"
+      ];
+    } else if (scene === 'chapter1') {
+      titleStr = '第一章 · 东园';
+      lines = [
+        "兰雪堂至芙蓉榭",
+        "水面倒影里，第一次看见她留下的痕迹。"
+      ];
+    } else if (scene === 'chapter2') {
+      titleStr = '第二章 · 中园';
+      lines = [
+        "远香堂至小飞虹",
+        "题诗异文之间，浮现“画非一人”的疑问。"
+      ];
+    } else if (scene === 'chapter3') {
+      titleStr = '第三章 · 西园';
+      lines = [
+        "卅六鸳鸯馆至留听阁",
+        "墙上草图指向一个低而偏的观看位置。"
+      ];
+    } else if (scene === 'finale') {
+      titleStr = '终章 · 卅一景';
+      lines = [
+        "不为她正名，",
+        "只让她的所见重新被看见。"
+      ];
     } else {
-      overlay.innerHTML = '<div class="intro-transition-text"></div>';
+      titleStr = '加载中';
+      lines = ["..."];
     }
+
+    overlay.innerHTML = `
+      <div class="prologue-transition-layout">
+        <div class="intro-prologue-title">${titleStr}</div>
+        <div class="intro-prologue-text" id="intro-prologue-text"></div>
+      </div>
+    `;
     document.body.appendChild(overlay);
 
-    const textContainer = overlay.querySelector(scene === 'prologue' ? '#intro-prologue-text' : '.intro-transition-text');
+    const textContainer = overlay.querySelector('#intro-prologue-text');
     let finished = false;
 
     const finish = () => {
@@ -307,14 +344,18 @@ export default class MenuScene {
         p.style.transform = 'translateY(0)';
       });
 
+      // 脱离 _transitionOverlay 防止被 exit() 立刻清理
+      if (this._transitionOverlay === overlay) {
+        this._transitionOverlay = null;
+      }
+
       this.engine.switchScene(scene, true);
       overlay.classList.remove('active');
       overlay.classList.add('fade-out');
 
-      this._transitionTimers.push(setTimeout(() => {
+      setTimeout(() => {
         overlay.remove();
-        if (this._transitionOverlay === overlay) this._transitionOverlay = null;
-      }, 3000));
+      }, 3000);
     };
 
     this._transitionKeyHandler = (e) => {
@@ -326,36 +367,14 @@ export default class MenuScene {
 
     this._transitionTimers.push(setTimeout(() => {
       overlay.classList.add('active');
-      if (scene === 'prologue') {
-        const title = overlay.querySelector('.intro-prologue-title');
-        if (title) {
-          title.style.opacity = '1';
-          title.style.transform = 'translateY(0)';
-        }
+      const title = overlay.querySelector('.intro-prologue-title');
+      if (title) {
+        title.style.opacity = '1';
+        title.style.transform = 'translateY(0)';
       }
     }, 50));
 
     root.classList.add('menu-scene--exiting-slow');
-
-    let lines = [];
-    if (scene === 'prologue') {
-      lines = [
-        "美术学院旧楼三层，古画修复工作室。",
-        "操作台上，高精度扫描仪低声嗡鸣。",
-        "一页泛黄的册页被放大到纤维可辨的程度。",
-        "五百年前的秘密，正等待着你的凝视。"
-      ];
-    } else if (scene === 'chapter1') {
-      lines = ["第一章 · 东园", "兰雪堂至芙蓉榭"];
-    } else if (scene === 'chapter2') {
-      lines = ["第二章 · 中园", "远香堂至小飞虹"];
-    } else if (scene === 'chapter3') {
-      lines = ["第三章 · 西园", "卅六鸳鸯馆至留听阁"];
-    } else if (scene === 'finale') {
-      lines = ["终章", "第三十一景"];
-    } else {
-      lines = ["加载中..."];
-    }
 
     textContainer.innerHTML = '';
 
@@ -426,6 +445,16 @@ export default class MenuScene {
     return { prologue: true };
   }
 
+  _isChapterUnlocked(ch) {
+    if (ch.alwaysUnlocked) return true;
+    const progress = this._getProgress();
+    // 各章节的解锁条件：前一章完成
+    if (ch.id === 'chapter2') return !!progress.chapter1Complete;
+    if (ch.id === 'chapter3') return !!progress.chapter2Complete;
+    if (ch.id === 'finale') return !!progress.chapter3Complete;
+    return !!progress[ch.unlockKey];
+  }
+
   /* ==================== 样式注入 ==================== */
 
   _injectStyles() {
@@ -476,7 +505,7 @@ export default class MenuScene {
       inset: 0;
       background-image: url("${bgImage}");
       background-size: cover;
-      background-position: center bottom;
+      background-position: center;
       pointer-events: none;
       z-index: 0;
     }
@@ -536,30 +565,28 @@ export default class MenuScene {
       top: 1.5rem;
       left: 2rem;
       z-index: 20;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      min-height: 44px;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 100px;
-      color: #5a4d3a;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0.6rem 2.2rem;
       font-family: var(--font-serif);
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.25em; 
       cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease-out;
+      border-radius: 0;
+      color: #e0c296; 
+      background: #713824;
+      border: 2px solid #4a2417;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
     }
 
     .menu-back:hover {
-      color: #2c2416;
-      background: rgba(255, 255, 255, 0.9);
-      border-color: #fff;
-      transform: translateX(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translate(2px, 2px);
+      background: #5c2d1b;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
     }
 
     /* ===========================
@@ -568,7 +595,7 @@ export default class MenuScene {
     .menu-panel {
       position: relative;
       z-index: 10;
-      width: 400px;
+      width: 500px;
       max-width: calc(100vw - 4rem);
       max-height: calc(100vh - 6rem);
       display: flex;
@@ -585,13 +612,19 @@ export default class MenuScene {
       position: absolute;
       inset: 0;
       z-index: -1;
-      background-color: #d1bfae; /* Base kraft paper color */
+      background-color: #d4bc9d; /* 温暖复古的牛皮纸/宣纸底色 */
       background-image: 
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 60%, rgba(101, 77, 49, 0.2) 150%),
-        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+        /* 细微的交叉纤维纹理，模拟纸张物理颗粒感 */
+        repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.04) 1px, rgba(100, 70, 40, 0.04) 2px),
+        repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.04) 1px, rgba(100, 70, 40, 0.04) 2px),
+        /* 四周泛黄氧化晕染 */
+        radial-gradient(circle at 50% 50%, transparent 40%, rgba(101, 60, 20, 0.25) 120%),
+        /* 局部陈旧水渍斑块 */
+        radial-gradient(circle at 15% 85%, rgba(120, 80, 40, 0.15) 0%, transparent 30%),
+        radial-gradient(circle at 85% 15%, rgba(120, 80, 40, 0.12) 0%, transparent 25%);
+      /* 不使用容易引发渲染 Bug 的 blend-mode 和 SVG base64 */
       filter: url(#paper-tear);
-      /* Add some internal borders or shadows just in case the filter doesn't load */
-      box-shadow: inset 0 0 20px rgba(101, 77, 49, 0.1);
+      box-shadow: inset 0 0 50px rgba(90, 50, 20, 0.15); /* 内阴影加深边缘厚重感 */
     }
 
     @keyframes panelSlideUp {
@@ -909,42 +942,45 @@ export default class MenuScene {
       align-items: center;
       justify-content: center;
       min-width: 180px;
-      min-height: 44px;
-      padding: 0.8rem 2rem;
+      min-height: 48px;
+      padding: 0.6rem 2.2rem;
       font-family: var(--font-serif);
-      font-size: 1.1rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.25em; 
       cursor: pointer;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
+      transition: all 0.2s ease-out;
+      border-radius: 0;
     }
 
     .action-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.5;
       cursor: not-allowed;
+      filter: grayscale(1);
     }
 
     .action-btn--primary {
-      background: #3a5d6c;
-      color: #f5f0e8;
-      box-shadow: 0 4px 12px rgba(58, 93, 108, 0.25);
+      color: #e0c296; 
+      background: #713824;
+      border: 2px solid #4a2417;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
     }
     .action-btn--primary:hover:not(:disabled) {
-      background: #2d4a56;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(58, 93, 108, 0.35);
+      transform: translate(2px, 2px);
+      background: #5c2d1b;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
     }
 
     .action-btn--secondary {
-      background: #f0ebe3;
-      color: rgba(54, 41, 25, 0.82);
-      border: 1px solid rgba(139, 119, 79, 0.25);
+      color: #713824;
+      background: #d8be96;
+      border: 2px solid #713824;
+      box-shadow: 4px 4px 0px rgba(113, 56, 36, 0.35); 
     }
     .action-btn--secondary:hover:not(:disabled) {
-      background: #e8e0d0;
-      border-color: rgba(139, 119, 79, 0.4);
+      transform: translate(2px, 2px);
+      background: #c8ab7d;
+      box-shadow: 2px 2px 0px rgba(113, 56, 36, 0.35);
     }
 
     .action-btn--ghost {

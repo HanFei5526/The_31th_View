@@ -22,6 +22,7 @@ import LandingScene from './pages/landing.js'
 import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
 import Chapter1PaintScene from './pages/chapter1-paint.js'
+import Chapter1WorkshopScene from './pages/chapter1-workshop.js'
 import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
 
 // ==================== 初始化 ====================
@@ -42,6 +43,7 @@ gameEngine.sceneManager.register('landing', LandingScene)
 gameEngine.sceneManager.register('menu', MenuScene)
 gameEngine.sceneManager.register('prologue', PrologueScene)
 gameEngine.sceneManager.register('chapter1', Chapter1PaintScene)
+gameEngine.sceneManager.register('chapter1-workshop', Chapter1WorkshopScene)
 gameEngine.sceneManager.register('chapter2', createChapterPlaceholderScene({
   eyebrow: '第二章',
   title: '中园',
@@ -61,7 +63,7 @@ gameEngine.sceneManager.register('finale', createChapterPlaceholderScene({
   description: '终章尚未开放。三结局与修复报告生成逻辑会在核心章节完成后接入。',
 }))
 
-// 启动：进入着陆页
+// 启动：直接进入着陆页
 gameEngine.switchScene('landing')
 
 console.log('[Main] 《卅一景》已启动 — v2 with prologue')
