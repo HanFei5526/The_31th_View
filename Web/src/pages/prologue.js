@@ -182,8 +182,8 @@ export default class PrologueScene extends GameSceneBase {
       // 2. 全部对话和旁白结束后（阶段③→④过渡），玩家获得修复笔记本
       this._grantNotebookAccess();
 
-      // 在对话框内播放获得提示
-      await this._narrationBar.playLine('系统提示', '已获得【修复笔记本】与【物件匣】。你可在屏幕右下角点击打开它们查看详细记录或进行讨论。\n准备就绪后，点击屏幕中央的【查看古画】即可开始数字化扫描检查。');
+      // 在对话框内播放获得提示（不使用 await，使其与按钮同时出现）
+      this._narrationBar.playLine('系统提示', '已获得【修复笔记本】与【物件匣】。你可在屏幕右下角点击打开它们查看详细记录或进行讨论。\n准备就绪后，点击屏幕中央的【查看古画】即可开始数字化扫描检查。');
 
       // 3. 弹出"查看古画"按钮
       this._phase = PHASE.PROMPT;
@@ -335,7 +335,6 @@ export default class PrologueScene extends GameSceneBase {
     btn.className = 'view-painting-btn';
     btn.id = 'view-painting-prompt';
     btn.innerHTML = `
-      <span class="view-painting-icon">🖼️</span>
       <span class="view-painting-label">查看古画</span>
     `;
     btn.addEventListener('click', () => {

@@ -9,13 +9,14 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.2rem 2.5rem;
+  padding: 0.8rem 2.2rem;
+  min-height: 48px;
   background: #713824;
   border: 2px solid #4a2417;
   border-radius: 0;
   color: #e0c296;
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.25em;
   cursor: pointer;
