@@ -174,67 +174,6 @@
   to { transform: translateX(100%); }
 }
 
-/* --- Chapter title card shown during scroll transition --- */
-.transition-chapter-card {
-  position: fixed;
-  inset: 0;
-  z-index: calc(var(--z-transition) + 1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  opacity: 0;
-  background: var(--paint-bg-deep);
-}
-
-.transition-chapter-card.visible {
-  opacity: 1;
-  animation: chapterCardReveal 3s ease forwards;
-}
-
-@keyframes chapterCardReveal {
-  0% { opacity: 0; }
-  15% { opacity: 1; }
-  75% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-.transition-chapter-card .chapter-number {
-  font-family: var(--font-handwrite);
-  font-size: var(--font-size-xl);
-  color: var(--paint-text-dim);
-  letter-spacing: 0.3em;
-  margin-bottom: 1rem;
-}
-
-.transition-chapter-card .chapter-name {
-  font-family: var(--font-handwrite);
-  font-size: var(--font-size-4xl);
-  color: var(--paint-ink);
-  letter-spacing: 0.2em;
-  position: relative;
-}
-
-.transition-chapter-card .chapter-name::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 2px;
-  background: var(--paint-vermillion);
-}
-
-.transition-chapter-card .chapter-subtitle {
-  font-family: var(--font-handwrite);
-  font-size: var(--font-size-lg);
-  color: var(--paint-text-dim);
-  margin-top: 1.5rem;
-  letter-spacing: 0.15em;
-}
-
 /* --- 简单淡入淡出 (通用) --- */
 .transition-fade {
   position: fixed;

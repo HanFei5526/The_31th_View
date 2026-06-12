@@ -30,9 +30,9 @@ export default class Chapter1PaintScene {
     this.state = SCENE_STATES.LANXUE;
 
     // 三张独立背景图
-    this._bgLanxue = '/images/chapter1-lanxuetang.png';
-    this._bgZhuiyun = '/images/chapter1-zhuiyunfeng.png';
-    this._bgFurong = '/images/chapter1-furongxie.png';
+    this._bgLanxue = '/images/chapter1-lanxue.png';
+    this._bgZhuiyun = '/images/chapter1-zhuiyun.png';
+    this._bgFurong = '/images/chapter1-furong.png';
 
     // 存档状态
     this.engine.gameProgress.plaqueNoted = this.engine.gameProgress.plaqueNoted || false;
@@ -263,11 +263,9 @@ export default class Chapter1PaintScene {
       this.narrationBar.dismiss();
       this._isNarrating = false;
 
-      // 石缝探索完成后显示前进箭头
-      if (this._zhuiyunArrow) this._zhuiyunArrow.style.display = '';
     }, '石缝');
 
-    // 前进箭头 — 2-8（石缝点击后才出现）
+    // 前进箭头 — 2-8（石缝为可选互动，不阻塞主线）
     this._zhuiyunArrow = this._createNavArrow(75, 65, 10, async () => {
       if (this._isNarrating) return;
       this._isNarrating = true;
@@ -276,15 +274,9 @@ export default class Chapter1PaintScene {
       this._isNarrating = false;
       this._switchToFurong();
     }, '前往芙蓉榭');
-    this._zhuiyunArrow.style.display = 'none';
 
     this._zhuiyunEl.appendChild(crackSpot);
     this._zhuiyunEl.appendChild(this._zhuiyunArrow);
-
-    // 存档恢复：若石缝已探索过，直接显示前进箭头
-    if (this.engine.gameProgress.zhuiyunExplored) {
-      this._zhuiyunArrow.style.display = '';
-    }
 
     this._sceneRoot.appendChild(this._zhuiyunEl);
   }
@@ -307,7 +299,6 @@ export default class Chapter1PaintScene {
     this._waterline = document.createElement('div');
     this._waterline.className = 'furong-waterline';
     this._waterline.style.top = '55%';
-    this._waterline.style.display = 'none';
     this._waterline.tabIndex = 0;
     this._waterline.setAttribute('role', 'button');
     this._waterline.setAttribute('aria-label', '水面分界线');
@@ -318,11 +309,6 @@ export default class Chapter1PaintScene {
       if (!this._hairpinIdentified) {
         this._createRipple(50, 55, this._furongWrap);
         this.narrationBar.showFloating('水面微微晃动，什么也没发生。');
-        // 水面线点击完毕，解锁倒影断簪
-        if (this._furongStep === 1) {
-          this._furongStep = 2;
-          if (this._hairpinReflection) this._hairpinReflection.style.display = '';
-        }
         return;
       }
 
@@ -356,7 +342,7 @@ export default class Chapter1PaintScene {
           if (this._hairpinReflection) this._hairpinReflection.style.display = 'none';
           if (this._hairpinReal) this._hairpinReal.style.display = 'block';
 
-          this.narrationBar.showFloating('点击断簪将它取下');
+          this.narrationBar.showFloating('断簪停在近前，金光轻轻一闪。');
           this._resetIdleTimer('flipper');
         }, 2400);
       } else {
@@ -401,20 +387,14 @@ export default class Chapter1PaintScene {
       let msg = '你摸了摸栏杆。什么都没有。';
       if (!this._isFlipped) msg += '但水面的倒影里，那件东西还在。';
       this.narrationBar.showFloating(msg);
-      // 栏杆点击完毕，解锁水面线
-      if (this._furongStep === 0) {
-        this._furongStep = 1;
-        if (this._waterline) this._waterline.style.display = '';
-      }
     }, '栏杆');
     this._furongWrap.appendChild(realRailing);
 
-    // 倒影中断簪（翻转前可见）— 3-7~3-9，栏杆+水面线点击后才显示
+    // 倒影中断簪（翻转前可见）— 3-7~3-9
     this._hairpinReflection = document.createElement('div');
     this._hairpinReflection.className = 'furong-hairpin';
     this._hairpinReflection.style.left = '45%';
     this._hairpinReflection.style.top = '72%';
-    this._hairpinReflection.style.display = 'none';
     this._hairpinReflection.tabIndex = 0;
     this._hairpinReflection.setAttribute('role', 'button');
     this._hairpinReflection.setAttribute('aria-label', '水面倒影中的物件');
@@ -433,7 +413,7 @@ export default class Chapter1PaintScene {
         this.narrationBar.dismiss();
         this._isNarrating = false;
         this._hairpinIdentified = true;
-        this.narrationBar.showFloating('试试点击水面分界线');
+        this.narrationBar.showFloating('水面那条明暗交界线微微亮了一下。');
         this._resetIdleTimer('identified');
         return;
       }
@@ -586,8 +566,8 @@ export default class Chapter1PaintScene {
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
-    // 旁白结束后提示玩家进入探索
-    this.narrationBar.showFloating('进入探索模式，请点击场景要素获取信息');
+    // 旁白结束后，以场景反馈引导玩家观察
+    this.narrationBar.showFloating('脚下石径、竹影和廊柱边，都像在等你靠近。');
   }
 
   async _switchToZhuiyun() {
@@ -609,7 +589,7 @@ export default class Chapter1PaintScene {
     this._isNarrating = false;
 
     // 提示玩家可探索或直接前进
-    this.narrationBar.showFloating('进入探索模式，请点击场景要素获取信息');
+    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。');
   }
 
   async _switchToFurong() {
@@ -633,8 +613,8 @@ export default class Chapter1PaintScene {
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
-    // 旁白已经暗示了倒影中有东西，给出明确操作提示
-    this.narrationBar.showFloating('进入探索模式，请点击场景要素获取信息');
+    // 旁白已经暗示了倒影中有东西，给出场景内提示
+    this.narrationBar.showFloating('水面与栏杆之间，有一点微弱金光没有随倒影散去。');
     this._resetIdleTimer('initial');
   }
 
@@ -706,14 +686,14 @@ export default class Chapter1PaintScene {
     this._clearIdleTimer();
     this._idleTimer = setTimeout(() => {
       if (phase === 'initial') {
-        this.narrationBar.showFloating('水面倒影里挂着一件东西，点击它看看。');
+        this.narrationBar.showFloating('水面倒影里好像有什么。');
       } else if (phase === 'identified') {
-        this.narrationBar.showFloating('直接够不到倒影里的东西……点击水面线，试着换个角度。');
+        this.narrationBar.showFloating('直接够不到。也许换个角度看这片水面。');
         this._idleTimer = setTimeout(() => {
           this.narrationBar.showFloating('倒影和真实之间……那条线。');
         }, 20000);
       } else if (phase === 'flipper') {
-        this.narrationBar.showFloating('断簪就在眼前，点击它拾取。');
+        this.narrationBar.showFloating('它在等你伸手。');
       }
     }, phase === 'initial' ? 30000 : (phase === 'identified' ? 25000 : 10000));
   }

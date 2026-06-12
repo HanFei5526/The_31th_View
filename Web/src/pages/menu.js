@@ -130,7 +130,7 @@ export default class MenuScene {
           <nav class="chapter-list" aria-label="章节列表">
             ${CHAPTERS.map((ch, i) => {
               const unlocked = this._isChapterUnlocked(ch);
-              const completed = progress[ch.unlockKey + '_completed'];
+              const completed = progress[ch.unlockKey + '_completed'] || progress[ch.unlockKey + 'Complete'];
               return `
               <div class="chapter-item ${unlocked ? 'chapter-item--unlocked' : 'chapter-item--locked'}"
                    data-scene="${ch.scene}"
@@ -332,7 +332,7 @@ export default class MenuScene {
     const textContainer = overlay.querySelector('#intro-prologue-text');
     let finished = false;
 
-    const finish = () => {
+    const finish = (fast = false) => {
       if (finished) return;
       finished = true;
       this._clearTransitionTimers();
@@ -350,18 +350,24 @@ export default class MenuScene {
       }
 
       this.engine.switchScene(scene, true);
-      overlay.classList.remove('active');
-      overlay.classList.add('fade-out');
 
-      setTimeout(() => {
-        overlay.remove();
-      }, 3000);
+      if (fast) {
+        // Z键快进：缩短淡出，快速移除
+        overlay.style.transition = 'opacity 0.4s ease';
+        overlay.classList.remove('active');
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.remove(), 450);
+      } else {
+        overlay.classList.remove('active');
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.remove(), 3000);
+      }
     };
 
     this._transitionKeyHandler = (e) => {
       if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
       e.preventDefault();
-      finish();
+      finish(true);
     };
     document.addEventListener('keydown', this._transitionKeyHandler);
 

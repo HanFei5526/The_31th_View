@@ -7,7 +7,6 @@
  *   - 顶部工具栏（返回按钮 + 物品栏入口）
  *   - 底部旁白面板（打字机效果）
  *   - 可交互热点系统
- *   - 章节标题淡入淡出
  *
  * 子类只需 override enter() 并调用基类方法来组装场景。
  *
@@ -52,8 +51,6 @@ export default class GameSceneBase {
    * @param {object} config
    * @param {string} config.bgImage — 背景图路径（import 后的 URL）
    * @param {string} config.theme — 'dark' | 'light'
-   * @param {string} [config.chapterTitle] — 章节名
-   * @param {string} [config.chapterSubtitle] — 章节副标题
    * @returns {HTMLElement} root
    */
   _buildSceneShell(config) {
@@ -87,13 +84,6 @@ export default class GameSceneBase {
 
       <!-- 热点图层 -->
       <div class="gs-hotspot-layer" id="gs-hotspot-layer" role="region" aria-label="可交互区域"></div>
-
-      <!-- 章节标题 (初始隐藏) -->
-      <div class="gs-chapter-title" id="gs-chapter-title" aria-live="polite" aria-atomic="true">
-        <div class="gs-chapter-name">${config.chapterTitle || ''}</div>
-        <div class="gs-chapter-divider"></div>
-        <div class="gs-chapter-subtitle">${config.chapterSubtitle || ''}</div>
-      </div>
 
       <!-- 底部旁白面板 -->
       <div class="gs-narration" id="gs-narration" role="region" aria-label="叙事旁白" tabindex="0">
@@ -132,21 +122,8 @@ export default class GameSceneBase {
    * @private
    */
   _handleKeyDown(e) {
-    // Esc：关闭打开的面板（如果聊天或笔记本打开）
+    // Esc：返回菜单
     if (e.key === 'Escape') {
-      const chatOpen = document.querySelector('.chat-panel.open');
-      const notebookOpen = document.querySelector('.notebook-ai-panel.open');
-      if (chatOpen) {
-        e.preventDefault();
-        document.querySelector('#chat-close-btn')?.click();
-        return;
-      }
-      if (notebookOpen) {
-        e.preventDefault();
-        document.querySelector('#notebook-close-btn')?.click();
-        return;
-      }
-      // 没有面板打开时，Esc 返回菜单
       e.preventDefault();
       this._root.classList.add('game-scene--exiting');
       setTimeout(() => this.engine.switchScene('menu'), 600);
@@ -181,28 +158,6 @@ export default class GameSceneBase {
         }
       }
     }
-  }
-
-  /* ==================== 章节标题动画 ==================== */
-
-  /**
-   * 显示章节标题（淡入 → 停留 → 淡出）
-   * @param {number} [duration=3000] 总显示时长
-   * @returns {Promise<void>}
-   */
-  _showChapterTitle(duration = 3000) {
-    return new Promise((resolve) => {
-      const el = this._root.querySelector('#gs-chapter-title');
-      el.classList.add('gs-chapter-title--visible');
-      setTimeout(() => {
-        el.classList.remove('gs-chapter-title--visible');
-        el.classList.add('gs-chapter-title--exit');
-        setTimeout(() => {
-          el.classList.remove('gs-chapter-title--exit');
-          resolve();
-        }, 800);
-      }, duration);
-    });
   }
 
   /* ==================== 旁白系统 ==================== */
@@ -496,74 +451,6 @@ export default class GameSceneBase {
     }
 
     /* ===========================
-       Chapter Title
-       =========================== */
-    .gs-chapter-title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 15;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.8s ease;
-    }
-
-    .gs-chapter-title--visible {
-      opacity: 1;
-    }
-
-    .gs-chapter-title--exit {
-      opacity: 0;
-      transition: opacity 0.8s ease;
-    }
-
-    .gs-chapter-name {
-      font-family: var(--font-serif);
-      font-weight: 300;
-      letter-spacing: 0.2em;
-    }
-
-    .game-scene--dark .gs-chapter-name {
-      font-size: 3.5rem;
-      color: rgba(255,255,255,0.95);
-      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    .game-scene--light .gs-chapter-name {
-      font-size: 3.5rem;
-      color: rgba(30,25,20,0.9);
-      text-shadow: 0 2px 10px rgba(255,255,255,0.6);
-    }
-
-    .gs-chapter-divider {
-      width: 60px;
-      height: 1px;
-      margin: 1rem auto;
-    }
-
-    .game-scene--dark .gs-chapter-divider {
-      background: rgba(255,255,255,0.4);
-    }
-    .game-scene--light .gs-chapter-divider {
-      background: rgba(30,25,20,0.3);
-    }
-
-    .gs-chapter-subtitle {
-      font-family: var(--font-handwrite);
-      letter-spacing: 0.1em;
-    }
-
-    .game-scene--dark .gs-chapter-subtitle {
-      font-size: 1.2rem;
-      color: rgba(255,255,255,0.6);
-    }
-    .game-scene--light .gs-chapter-subtitle {
-      font-size: 1.2rem;
-      color: rgba(30,25,20,0.5);
-    }
-
-    /* ===========================
        Narration Panel
        =========================== */
     .gs-narration {
@@ -729,7 +616,6 @@ export default class GameSceneBase {
        =========================== */
     @media (prefers-reduced-motion: reduce) {
       .gs-bg { animation: none; }
-      .gs-chapter-title { transition: none; }
       .gs-narration { transition: none; }
       .gs-hotspot-glow { animation: none; }
       .gs-narration-indicator { animation: none; }
@@ -745,12 +631,6 @@ export default class GameSceneBase {
       }
       .gs-narration-inner {
         padding: 1.5rem 1.5rem;
-      }
-      .gs-chapter-name {
-        font-size: 2.5rem !important;
-      }
-      .gs-chapter-subtitle {
-        font-size: 1rem !important;
       }
     }
     `;

@@ -45,15 +45,15 @@ export const KNOWLEDGE_SNIPPETS = [
     id: 'clue_line_draft',
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_line'),
-    content: `【构图辅助线用途】
-构图辅助线用于确定画面比例、位置和视角高度。低位辅助线意味着作画或观察时的视线位置偏低，和常规站立游观视点不同。`,
+    content: `【底层细线异常】
+画面下方的细线比裂纹规整，又不像装裱产生的痕迹。它更像是某种被保留下来的定位痕迹，但仅凭这一处还不能判断它的具体用途。`,
   },
   {
     id: 'synthesis_remounting_purpose',
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.synthesisPassed),
     content: `【二次装裱的目的】
-二次装裱既可能为了保护画心，也可能在统一册页体例时改变边缘信息的可见性。若题签、旁注和辅助线同时被压住或忽略，重点不在画面是否缺失，而在来源说明被整理掉。`,
+二次装裱既可能为了保护画心，也可能在统一册页体例时改变边缘信息的可见性。若题签、旁注和底层细线同时被压住或忽略，重点不在画面是否缺失，而在来源说明被整理掉。`,
   },
   {
     id: 'synthesis_conceal_methods',
@@ -73,7 +73,7 @@ export const KNOWLEDGE_SNIPPETS = [
     id: 'ch1_low_viewpoint',
     chapter: 1,
     unlockCondition: ({ chapter }) => chapter >= 1,
-    content: `【低位视角】
-第一章的场景探索中，发现青石板等低视角的互动点，与序章中发现的低位构图辅助线相互呼应，进一步印证了第三十一景的画面原本是以一个极低的、甚至是贴近地面的视点进行观察的。`,
+    content: `【低处观察】
+第一章的场景探索会反复出现“站着看不到、低下来才看得到”的瞬间。它暂时不是结论，而是一种观察方法：有些痕迹需要换到更低、更偏、更不正式的位置才会显现。`,
   },
 ];
