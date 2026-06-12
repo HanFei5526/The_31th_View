@@ -174,22 +174,15 @@ export default class PrologueScene extends GameSceneBase {
 
       this._phase = PHASE.DIALOGUE;
 
-      // 1. 先播放第一句旁白
-      const firstLine = PROLOGUE_SCRIPT[0];
-      if (firstLine) {
-        await this._narrationBar.playLine(firstLine.speaker, firstLine.text, { portrait: firstLine.portrait });
-      }
-
-      // 2. 第一句旁白结束后，玩家获得修复笔记本
-      this._grantNotebookAccess();
-
-      // 3. 播放剩余的序章脚本
-      for (let i = 1; i < PROLOGUE_SCRIPT.length; i++) {
-        const line = PROLOGUE_SCRIPT[i];
+      // 1. 播放全部序章旁白与周鹤年对话
+      for (const line of PROLOGUE_SCRIPT) {
         await this._narrationBar.playLine(line.speaker, line.text, { portrait: line.portrait });
       }
 
-      // 4. 弹出"查看古画"按钮
+      // 2. 全部对话和旁白结束后（阶段③→④过渡），玩家获得修复笔记本
+      this._grantNotebookAccess();
+
+      // 3. 弹出"查看古画"按钮
       this._phase = PHASE.PROMPT;
       this._showViewPaintingButton();
     } else {
