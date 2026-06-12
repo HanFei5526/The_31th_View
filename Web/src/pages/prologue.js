@@ -318,8 +318,9 @@ export default class PrologueScene extends GameSceneBase {
     this._notebook.unlock();
     this._notebook.setPlaceholder('在此输入你想询问或记录的内容……');
     this._notebook.showQuickThoughts([
-      '拙政园三十一景是什么？',
       '修复笔记本里有什么？',
+      '拙政园三十一景是什么？',
+      '文徵明与这套册页有什么关联？',
     ]);
     this.engine.saveProgress();
   }
