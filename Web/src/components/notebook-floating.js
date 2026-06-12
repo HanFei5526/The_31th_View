@@ -405,7 +405,36 @@ export class NotebookFloating {
       const btn = document.createElement('button');
       btn.className = 'notebook-tool-btn';
       btn.dataset.id = tool.id;
-      btn.innerHTML = `<span class="notebook-tool-icon">${tool.icon}</span><span class="notebook-tool-label">${tool.label}</span>`;
+      
+      // 根据 tool.id 渲染简约金色矢量细线条 SVG 图标，取代原具象 emoji
+      let iconHtml = tool.icon;
+      if (tool.id === 'magnifier') {
+        iconHtml = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10" cy="10" r="5" />
+            <line x1="21" y1="21" x2="14" y2="14" />
+            <line x1="8" y1="8" x2="11" y2="8" opacity="0.5" stroke-width="1.2" />
+          </svg>
+        `;
+      } else if (tool.id === 'fiber') {
+        iconHtml = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 18V4a1 1 0 0 1 1-1h10l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
+            <path d="M8 8h8M8 12h8M10 6v10M14 6v10" stroke-width="1.2" opacity="0.5" />
+          </svg>
+        `;
+      } else if (tool.id === 'sidelight') {
+        iconHtml = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13 L7 9 L5 7 L1 11 Z" />
+            <line x1="8" y1="8" x2="20" y2="8" stroke-dasharray="2 2" />
+            <line x1="7" y1="11" x2="18" y2="14" stroke-dasharray="2 2" opacity="0.8" />
+            <line x1="9" y1="5" x2="16" y2="3" stroke-dasharray="2 2" opacity="0.8" />
+          </svg>
+        `;
+      }
+      
+      btn.innerHTML = `<span class="notebook-tool-icon">${iconHtml}</span><span class="notebook-tool-label">${tool.label}</span>`;
       btn.addEventListener('click', () => {
         if (this._toolsLocked) return;
         if (btn.classList.contains('used')) return;

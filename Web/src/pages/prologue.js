@@ -360,13 +360,13 @@ export default class PrologueScene extends GameSceneBase {
   _enterPaintingPhase() {
     this._phase = PHASE.PAINTING;
 
-    // 隐藏立绘与旁白条
-    this._narrationBar.dismiss();
-
     // 进入扫描/探索阶段，锁定展开
     this._notebook.expand();
     this._notebook.lock(); 
     this._hud.setNotebookDisabled(true); // 📓按钮灰色禁用
+
+    // 保持对话框样式，播放顺畅的引导提示（提示玩家将三个工具全部使用一遍）
+    this._narrationBar.playLine('系统提示', '已进入古画数字化检测阶段。你可点击右下角【工具箱】选择工具对古画进行检测，并可在【修复笔记本】中与 AI 讨论这些工具的作用。请确保将三个工具全部使用一遍，之后即可在画面中寻找异常线索。');
 
     // 配置初始 Placeholder 和快捷问题
     this._notebook.setPlaceholder('在此输入针对检测工具的疑问……');
@@ -404,7 +404,7 @@ export default class PrologueScene extends GameSceneBase {
         this._onConvergenceClick();
       },
       onFeedback: (text) => {
-        // painting-viewer 自带 feedback 条，不重复在 narrationBar 显示
+        this._narrationBar.playLine('系统提示', text);
       },
     });
 

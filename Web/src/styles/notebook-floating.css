@@ -361,7 +361,7 @@
 
 .notebook-tool-section {
   border-top: 1px solid rgba(212, 168, 83, 0.2);
-  padding: 1.2rem 1rem;
+  padding: 0.8rem 0.8rem;
   background: #1c1917; /* 恢复原版深色底，以便无背景金边更显眼 */
   box-shadow: inset 0 10px 20px -10px rgba(0,0,0,0.8);
   flex-shrink: 0;
@@ -381,7 +381,7 @@
 .notebook-tool-title {
   color: #d4af37;
   font-size: 0.9rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
   text-align: center;
   font-family: var(--font-serif);
   letter-spacing: 4px;
@@ -390,7 +390,7 @@
 .notebook-tool-grid {
   display: flex;
   justify-content: space-between;
-  gap: 0.8rem;
+  gap: 0.5rem;
 }
 
 .notebook-tool-btn {
@@ -399,15 +399,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: transparent !important; /* 无背景，强制覆盖可能存在的全局设定 */
-  border: 2px double #d4af37 !important; /* 黄色金边图案 */
-  padding: 12px 4px;
+  border: 1px solid rgba(212, 175, 55, 0.6) !important; /* 精致细单线金框 */
+  padding: 6px 4px;
   border-radius: 4px;
   cursor: pointer;
   color: #d4af37 !important; /* 配合金边的金色文字 */
   font-family: var(--font-serif);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.15), inset 0 0 8px rgba(212, 175, 55, 0.15) !important; /* 微微金光 */
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.1), inset 0 0 6px rgba(212, 175, 55, 0.1) !important; /* 微微金光 */
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -423,9 +423,9 @@
   content: '✓';
   position: absolute;
   top: 4px;
-  right: 8px;
+  right: 6px;
   color: #d4af37; 
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
 }
@@ -440,7 +440,11 @@
 }
 
 .notebook-tool-icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   /* 用滤镜将图标颜色强行往古铜/金黄色调和，带金光阴影 */
   filter: sepia(0.8) hue-rotate(5deg) saturate(1.5) drop-shadow(0 0 3px rgba(212, 175, 55, 0.6));
 }

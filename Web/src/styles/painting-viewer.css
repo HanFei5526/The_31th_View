@@ -56,13 +56,13 @@
 .pv-card-container {
   display: flex;
   flex-direction: row;
-  width: min(58vw, 980px);
-  height: min(54vh, 560px);
-  margin-bottom: 11rem;
-  background: rgba(12, 9, 8, 0.92);
+  width: min(72vw, 1020px);
+  height: min(48vh, 480px);
+  margin-bottom: 11.5rem;
+  background: rgba(12, 9, 8, 0.95);
   border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: 4px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.7);
   overflow: hidden;
 }
 
@@ -74,7 +74,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 3rem;
+  padding: 0.5rem;
   overflow: hidden;
   border-right: none;
 }
@@ -116,27 +116,7 @@
   pointer-events: auto;
 }
 .pv-feedback {
-  position: fixed;
-  bottom: 12.25rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(15px);
-  max-width: min(52vw, 720px);
-  background: rgba(26, 20, 16, 0.95);
-  border: 1px solid rgba(160, 120, 90, 0.4);
-  color: #e6dac3;
-  padding: 0.8rem 1.8rem;
-  border-radius: 2px;
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  text-align: center;
-  opacity: 0;
-  transition: all 0.4s ease;
-  pointer-events: none;
-  z-index: 105;
-}
-.pv-feedback.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  display: none !important;
 }
 .pv-status {
   position: absolute;
