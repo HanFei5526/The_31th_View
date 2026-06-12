@@ -316,7 +316,7 @@ export default class PrologueScene extends GameSceneBase {
     this._hud.show();
     this._hud.setNotebookDisabled(false);
     this._notebook.unlock();
-    this._notebook.setPlaceholder('翻阅笔记本……');
+    this._notebook.setPlaceholder('在此输入你想询问或记录的内容……');
     this._notebook.showQuickThoughts([
       '拙政园三十一景是什么？',
       '修复笔记本里有什么？',
@@ -368,7 +368,7 @@ export default class PrologueScene extends GameSceneBase {
     this._hud.setNotebookDisabled(true); // 📓按钮灰色禁用
 
     // 配置初始 Placeholder 和快捷问题
-    this._notebook.setPlaceholder('这个工具能看出什么？');
+    this._notebook.setPlaceholder('在此输入针对检测工具的疑问……');
     this._notebook.showQuickThoughts([
       '放大镜能看到什么？',
       '纸质分析有什么用？',
@@ -461,7 +461,7 @@ export default class PrologueScene extends GameSceneBase {
         detail: { text: clueData.recordText },
       }));
       // 更新快捷问题
-      this._notebook.setPlaceholder('这条线索意味着什么？');
+      this._notebook.setPlaceholder('在此输入针对该线索的判断或讨论……');
       this._notebook.showQuickThoughts([clueData.askText]);
     }
 
@@ -545,7 +545,7 @@ export default class PrologueScene extends GameSceneBase {
     // 清理之前的单条讨论消息，干净开始研讨
     this._notebook.clearChat();
 
-    this._notebook.setPlaceholder('这三处痕迹之间有什么联系？写下你的判断……');
+    this._notebook.setPlaceholder('在此输入你对这三处痕迹之间关系的判断……');
 
     // 持久提示：告知玩家当前处于研讨阶段
     this._paintingViewer?.showPersistentFeedback('综合研讨 — 在笔记本中分析三处痕迹之间的关系');
@@ -565,7 +565,7 @@ export default class PrologueScene extends GameSceneBase {
 
       this._notebook.setSynthesisMode(false);
       this._notebook.unlock();
-      this._notebook.setPlaceholder('继续整理这三处痕迹……');
+      this._notebook.setPlaceholder('在此输入针对线索整理的疑问或判断……');
       this._notebook.showQuickThoughts([
         '这意味着来源信息被遮蔽了吗？',
         '下一步应该看交会点'

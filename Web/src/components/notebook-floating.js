@@ -227,15 +227,11 @@ export class NotebookFloating {
     inputArea.className = 'notebook-input-area';
     
     const inputId = 'nb-input-' + Math.random().toString(36).slice(2, 8);
-    const inputLabel = document.createElement('label');
-    inputLabel.className = 'notebook-input-label';
-    inputLabel.htmlFor = inputId;
-    inputLabel.textContent = '翻阅笔记本';
 
     this._inputEl = document.createElement('textarea');
     this._inputEl.id = inputId;
     this._inputEl.className = 'notebook-input';
-    this._inputEl.placeholder = '在此输入你的想法……';
+    this._inputEl.placeholder = '在此输入你想询问或记录的内容……';
     this._inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -249,7 +245,6 @@ export class NotebookFloating {
     this._sendBtn.setAttribute('aria-label', '发送');
     this._sendBtn.addEventListener('click', () => this._submitInput());
 
-    inputArea.appendChild(inputLabel);
     inputArea.appendChild(this._inputEl);
     inputArea.appendChild(this._sendBtn);
 

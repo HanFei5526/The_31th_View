@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   height: 50px;
-  border-bottom: 1px solid rgba(212, 168, 83, 0.2);
+  border-bottom: 1px solid rgba(212, 168, 83, 0.12); /* 改弱底边线颜色，避免clash */
 }
 
 .notebook-tab {
@@ -68,7 +68,18 @@
 
 .notebook-tab.active {
   color: #d4a853;
-  border-bottom: 2px solid #d4a853;
+  position: relative;
+}
+
+.notebook-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px; /* 横线长度缩短为40px，不与边缘边框打架 */
+  height: 2px;
+  background-color: #d4a853;
 }
 
 .notebook-close-btn {
@@ -263,29 +274,24 @@
 .notebook-input-area {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  border-top: 1px solid rgba(212, 168, 83, 0.1);
+  border-top: 1px solid rgba(212, 168, 83, 0.12); /* 稍微改弱横线 */
   padding-top: 0.65rem;
-}
-
-.notebook-input-label {
-  font-size: 0.82rem;
-  color: #8c8375;
-  padding-left: 2px;
+  position: relative; /* 用于发送按钮的绝对定位 */
 }
 
 .notebook-input {
   flex: 1;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(212, 168, 83, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 168, 83, 0.25);
   color: #e8dcc4;
-  padding: 10px 12px;
+  padding: 10px 34px 10px 12px; /* 右侧留出 34px 空间放置发送小三角，防止遮挡文字 */
   border-radius: 4px;
   font-size: 0.95rem;
   line-height: 1.5;
   resize: none;
-  height: 58px;
-  min-height: 58px;
+  height: 80px; /* 扩大输入框高度 */
+  min-height: 80px;
+  box-sizing: border-box;
 }
 
 .notebook-input:focus {
@@ -294,25 +300,32 @@
 }
 
 .notebook-send-btn {
-  background: #d4a853;
-  color: #1c1917;
+  position: absolute;
+  right: 10px;
+  bottom: 10px; /* 定位于输入框右下角 */
+  background: transparent; /* 无背景 */
+  color: #d4a853; /* 黄色小三角 */
   border: none;
-  border-radius: 4px;
-  width: 44px;
-  min-height: 58px;
+  width: 24px;
+  height: 24px;
+  min-height: auto;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s;
+  transition: color 0.2s, opacity 0.2s;
+  font-size: 1.15rem;
+  padding: 0;
+  z-index: 5;
 }
 
 .notebook-send-btn:hover {
-  opacity: 0.9;
+  color: #f3c775;
 }
 
 .notebook-send-btn:disabled {
-  background: #554d3e;
+  color: #554d3e;
+  background: transparent;
   cursor: not-allowed;
 }
 
