@@ -269,7 +269,7 @@ export default class PaintingViewer {
 
       // 延迟显示，避免和工具反馈重叠
       setTimeout(() => {
-        this._showFeedback('三项检查完成，已切换到放大镜。在画面中点击寻找异常。');
+        this._showFeedback('三项基础扫描已完成。请在古画上点击寻找并收集隐藏线索（收集进度可查看画幅下方的 0/3 指示灯）。集齐全部线索后，即可开启综合研讨，推理出最终结论。');
       }, 3000);
     }
 

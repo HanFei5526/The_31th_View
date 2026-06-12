@@ -14,6 +14,7 @@ export class NarrationBar {
     this._resolvePlay = null;
     this._typingTimer = null;
     this._fullText = '';
+    this._textChars = [];
     this._feedbackTimer = null;
     this._optionsEl = null;
     this._resolveOptions = null;
@@ -79,9 +80,21 @@ export class NarrationBar {
   }
 
   playLine(speaker, text, options = {}) {
+    if (this._typingTimer) clearTimeout(this._typingTimer);
+    if (this._floatingTimer) clearTimeout(this._floatingTimer);
+    this._typingTimer = null;
+    this._floatingTimer = null;
+
+    if (this._resolvePlay) {
+      const oldResolve = this._resolvePlay;
+      this._resolvePlay = null;
+      oldResolve();
+    }
+
     return new Promise((resolve) => {
       this._resolvePlay = resolve;
       this._fullText = text;
+      this._textChars = Array.from(text);
       this._isTyping = true;
       this._textEl.textContent = '';
 
@@ -226,8 +239,8 @@ export class NarrationBar {
   }
 
   _typeChar(index) {
-    if (index < this._fullText.length) {
-      this._textEl.textContent += this._fullText.charAt(index);
+    if (index < this._textChars.length) {
+      this._textEl.textContent += this._textChars[index];
       this._typingTimer = setTimeout(() => this._typeChar(index + 1), this._typeSpeed);
     } else {
       this._isTyping = false;
