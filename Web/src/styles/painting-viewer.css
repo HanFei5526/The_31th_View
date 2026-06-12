@@ -57,7 +57,7 @@
   display: flex;
   flex-direction: row;
   /* 由 JS 动态设置宽高，不在此硬编码 */
-  margin-bottom: 11.5rem;
+  margin-bottom: 11rem;
   background: rgba(12, 9, 8, 0.95);
   border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: 4px;
