@@ -410,32 +410,31 @@ export class NotebookFloating {
       let iconHtml = tool.icon;
       if (tool.id === 'magnifier') {
         iconHtml = `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="10" cy="10" r="5.5" />
             <line x1="21" y1="21" x2="14.2" y2="14.2" />
-            <line x1="7" y1="7" x2="10" y2="7" opacity="0.5" stroke-width="1.0" />
+            <line x1="8" y1="7" x2="11" y2="7" opacity="0.4" stroke-width="0.8" />
           </svg>
         `;
       } else if (tool.id === 'fiber') {
         iconHtml = `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
             <rect x="4" y="3" width="16" height="18" rx="1" />
-            <line x1="7" y1="7" x2="17" y2="7" stroke-width="1.0" opacity="0.8" />
-            <line x1="7" y1="11" x2="17" y2="11" stroke-width="1.0" opacity="0.8" />
-            <line x1="7" y1="15" x2="14" y2="15" stroke-width="1.0" opacity="0.8" />
-            <path d="M11 3 L11 21" stroke-width="0.8" opacity="0.3" stroke-dasharray="2 2" />
+            <line x1="7" y1="7" x2="17" y2="7" opacity="0.7" />
+            <line x1="7" y1="11" x2="17" y2="11" opacity="0.7" />
+            <line x1="7" y1="15" x2="14" y2="15" opacity="0.7" />
+            <line x1="11" y1="3" x2="11" y2="21" opacity="0.2" stroke-dasharray="2 2" />
           </svg>
         `;
       } else if (tool.id === 'sidelight') {
         iconHtml = `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="19" x2="11" y2="13" />
-            <line x1="7" y1="21" x2="13" y2="15" />
-            <path d="M5 19 C4 20, 6 22, 7 21" />
-            <path d="M11 13 L14 16 L16 14 L13 11 Z" />
-            <line x1="16" y1="14" x2="22" y2="17" stroke-dasharray="2 1.5" />
-            <line x1="15" y1="12" x2="22" y2="12" stroke-dasharray="2 1.5" />
-            <line x1="13" y1="10" x2="18" y2="6" stroke-dasharray="2 1.5" />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="18" x2="12" y2="12" />
+            <line x1="8" y1="20" x2="14" y2="14" />
+            <path d="M6 18 C5.2 18.8, 7.2 20.8, 8 20" />
+            <path d="M12 12 L15 15 L17 13 L14 10 Z" />
+            <line x1="15" y1="15" x2="17" y2="13" />
+            <circle cx="10" cy="15" r="0.6" fill="currentColor" />
           </svg>
         `;
       }

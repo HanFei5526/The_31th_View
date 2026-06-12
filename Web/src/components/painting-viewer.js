@@ -693,8 +693,8 @@ export default class PaintingViewer {
     if (!imgW || !imgH) return;
 
     // 理想最大显示高度与宽度，预留底部对话框空间
-    const maxH = Math.min(window.innerHeight * 0.58, 540); 
-    const maxW = window.innerWidth * 0.72;
+    const maxH = Math.min(window.innerHeight * 0.70, 680); 
+    const maxW = window.innerWidth * 0.82;
 
     // 计算缩放比例
     let targetH = maxH;
