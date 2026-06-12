@@ -429,9 +429,9 @@ export class NotebookFloating {
       } else if (tool.id === 'sidelight') {
         iconHtml = `
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M 4 16 L 7 19 L 14 12 L 11 9 Z" />
-            <path d="M 11 9 L 14 12 L 19 9 L 14 4 Z" />
-            <circle cx="10" cy="13" r="0.6" fill="currentColor" />
+            <path d="M 3 18 L 6 21 L 14 13 L 11 10 Z" />
+            <path d="M 11 10 L 14 13 L 22 9 L 15 2 Z" />
+            <circle cx="9" cy="15" r="0.6" fill="currentColor" />
           </svg>
         `;
       }
