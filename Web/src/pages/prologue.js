@@ -183,7 +183,7 @@ export default class PrologueScene extends GameSceneBase {
       this._grantNotebookAccess();
 
       // 在对话框内播放获得提示
-      await this._narrationBar.playLine('系统提示', '已获得【修复笔记本】与【物件匣】。你可在屏幕右下角点击打开它们查看详细记录。\n接下来，请点击屏幕中央的【查看古画】按钮，开始进行数字化扫描检查。');
+      await this._narrationBar.playLine('系统提示', '已获得【修复笔记本】与【物件匣】。你可在屏幕右下角点击打开它们查看详细记录或进行讨论。\n准备就绪后，点击屏幕中央的【查看古画】即可开始数字化扫描检查。');
 
       // 3. 弹出"查看古画"按钮
       this._phase = PHASE.PROMPT;
