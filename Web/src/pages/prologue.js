@@ -222,6 +222,10 @@ export default class PrologueScene extends GameSceneBase {
       this._inventoryPopup.unmount();
       this._inventoryPopup = null;
     }
+    if (this._synthesisBtn) {
+      this._synthesisBtn.remove();
+      this._synthesisBtn = null;
+    }
     if (this._synthesisGateOff) {
       this._synthesisGateOff();
       this._synthesisGateOff = null;
@@ -500,22 +504,31 @@ export default class PrologueScene extends GameSceneBase {
   }
 
   /**
-   * 在画面下方显示"进入综合研讨"按钮
+   * 在对话框中提示进入综合研讨
    * @private
    */
-  _showSynthesisEntryButton() {
+  async _showSynthesisEntryButton() {
     if (this._synthesisBtnShown) return;
     this._synthesisBtnShown = true;
 
-    const btn = document.createElement('button');
-    btn.className = 'synthesis-entry-btn';
-    btn.textContent = '进入综合研讨：分析三处痕迹的关系';
-    btn.addEventListener('click', () => {
-      btn.remove();
+    // 创建“开启推理研讨”按钮并挂载
+    this._synthesisBtn = document.createElement('button');
+    this._synthesisBtn.className = 'hud-btn prologue-synthesis-btn';
+    this._synthesisBtn.innerHTML = '<span class="hud-btn-label">开启推理研讨</span>';
+    this._synthesisBtn.addEventListener('click', () => {
+      if (this._synthesisBtn) {
+        this._synthesisBtn.remove();
+        this._synthesisBtn = null;
+      }
       this._startSynthesisGate();
     });
-    this._root.appendChild(btn);
-    requestAnimationFrame(() => btn.classList.add('visible'));
+    this._root.appendChild(this._synthesisBtn);
+
+    // 清空任何正在显示的短反馈
+    this._narrationBar.dismiss();
+
+    // 播放较平滑的引导文本
+    await this._narrationBar.playLine(null, '三处异常痕迹都找齐了。可以先在右侧笔记本“记录”里查看线索，或在“对话”里和 AI 讨论。准备好后，点击上方的“开启推理研讨”开始推导真相。');
   }
 
   /**
@@ -549,7 +562,7 @@ export default class PrologueScene extends GameSceneBase {
     this._notebook.setPlaceholder('在此输入你对这三处痕迹之间关系的判断……');
 
     // 持久提示：告知玩家当前处于研讨阶段
-    this._paintingViewer?.showPersistentFeedback('综合研讨 — 在笔记本中分析三处痕迹之间的关系');
+    this._paintingViewer?.showPersistentFeedback('开始综合研讨：去右侧笔记本里分析这三处痕迹的联系吧');
 
     this._synthesisGateOff = this.engine.on('gate-completed', (data) => {
       if (data.gateId !== gateId) return;

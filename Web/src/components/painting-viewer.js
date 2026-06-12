@@ -31,9 +31,9 @@ const REQUIRED_TOOL_IDS = TOOLS.map((tool) => tool.id);
 
 // ── 工具反馈文案 ─────────────────────────────────────
 const TOOL_FEEDBACK = {
-  magnifier: '放大镜已就位。装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-  fiber:     '纸质分析完成。背纸与其他三十页不完全一致，此页曾经重装；画心本身较稳定。',
-  sidelight: '侧光照射完成。装裱边下方隐约显出旧字残痕和一条极淡的细线。',
+  magnifier: '放大镜已就位。装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。（检测结果已同步至右侧笔记本【记录】页签，可以前往查看或在【对话】页签发起研讨）',
+  fiber:     '纸质分析完成。背纸与其他三十页不完全一致，此页曾经重装；画心本身较稳定。（检测结果已同步至右侧笔记本【记录】页签，可以前往查看或在【对话】页签发起研讨）',
+  sidelight: '侧光照射完成。装裱边下方隐约显出旧字残痕和一条极淡的细线。（检测结果已同步至右侧笔记本【记录】页签，可以前往查看或在【对话】页签发起研讨）',
 };
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
@@ -227,7 +227,7 @@ export default class PaintingViewer {
     this._updateStatus();
 
     // 即时反馈
-    this._showFeedback(`✅ 「${clue.title}」已确认并记入笔记本`);
+    this._showFeedback(`发现了「${clue.title}」的相关线索。内容已经整理到了右侧笔记本的“记录”页，如果有疑问，随时可以到“对话”页发起讨论。`);
 
     // 判断是否触发汇聚
     this._checkConvergence();
@@ -270,7 +270,7 @@ export default class PaintingViewer {
       // 延迟显示，避免和工具反馈重叠
       setTimeout(() => {
         this._showFeedback('三项基础扫描已完成。请在古画上点击寻找并收集隐藏线索（收集进度可查看画幅下方的 0/3 指示灯）。集齐全部线索后，即可开启综合研讨，推理出最终结论。');
-      }, 3000);
+      }, 6000);
     }
 
     // 应用图像滤镜
@@ -436,14 +436,14 @@ export default class PaintingViewer {
     if (!this._explorable) {
       console.log('[PaintingViewer] 点击被忽略：尚未完成三项基础检查');
       const missing = this._getMissingToolLabels();
-      this._showFeedback(`请先使用右侧工具完成检查：${missing.join('、')}`);
+      this._showFeedback(`请先启用右侧的检测工具，完成以下检查：${missing.join('、')}`);
       return;
     }
 
     // 探索阶段必须切回放大镜
     if (this._currentTool !== 'magnifier') {
       console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
-      this._showFeedback('点击右侧放大镜 🔍，然后在画面中寻找线索。');
+      this._showFeedback('线索探索需要使用放大镜，请先在右侧工具箱中启用放大镜。');
       return;
     }
 
@@ -475,7 +475,7 @@ export default class PaintingViewer {
 
       // 明确反馈
       const clueTitle = this._clues[hitId].title;
-      this._showFeedback(`📌 发现线索「${clueTitle}」，已记入笔记本`);
+      this._showFeedback(`找到了线索「${clueTitle}」，已记录下来`);
 
       // 回调
       this._opt.onClueFound?.(hitId);
@@ -484,7 +484,7 @@ export default class PaintingViewer {
       this._showRipple(px, py, 'grey');
       this._wrongClicks++;
       console.log(`[PaintingViewer] 未命中 (${px.toFixed(1)}%, ${py.toFixed(1)}%), 连续错误: ${this._wrongClicks}`);
-      this._showFeedback('这里没有异常，试试别的位置。');
+      this._showFeedback('这地方看起来挺正常的，再去别的位置找找看。');
       this._checkHintTrigger();
     }
   }
@@ -543,11 +543,11 @@ export default class PaintingViewer {
     const toShow = unfound.slice(0, hintCount);
     const lastRevealed = toShow[toShow.length - 1];
     const hintTextMap = {
-      clue_margin: '💡 注意观察画面右上方的装裱边缘……',
-      clue_text: '💡 试试画面左下方，装裱层底下似乎有字迹……',
-      clue_line: '💡 画面下方中部有一条不属于画面内容的痕迹……',
+      clue_margin: '留意画面右上方的金色光圈，那里的装裱材质纹理似乎有被故意掩盖的痕迹。',
+      clue_text: '留意画面左下角的金色光圈，装裱层底下好像藏着一些没被抹干净的旧字迹。',
+      clue_line: '留意画面下方中央区域的金色光圈，那里似乎有一道极细的线条，看起来不像是画作原有的。',
     };
-    const fallback = '💡 画面边缘和下方可能还藏着什么……';
+    const fallback = '除了画中的景物，这页古画的边缘和装裱处好像还藏着别的信息，再仔细找找看吧。';
     this._showFeedback(hintTextMap[lastRevealed[0]] || fallback);
     this._showVisualHintsProgressive(hintCount);
   }
@@ -591,9 +591,11 @@ export default class PaintingViewer {
     }
 
     if (recorded === 3) {
+      this._el?.classList.add('pv-synthesis-ready');
       this._statusEl.innerHTML =
         `✅ 三处线索全部确认 <span class="pv-circles">${circles}</span>`;
     } else {
+      this._el?.classList.remove('pv-synthesis-ready');
       this._statusEl.innerHTML =
         `线索 <span class="pv-circles">${circles}</span>` +
         ` <span class="pv-status-detail">${found}/3 已发现${recorded > 0 ? ` · ${recorded}/3 已确认` : ''}</span>`;

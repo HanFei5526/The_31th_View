@@ -223,3 +223,12 @@
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0px rgba(44, 36, 22, 0.3);
 }
+
+.prologue-synthesis-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 10.25rem;
+  z-index: 120;
+  animation: fadeIn 0.4s ease forwards;
+}

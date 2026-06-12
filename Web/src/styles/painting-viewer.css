@@ -63,6 +63,11 @@
   border-radius: 4px;
   box-shadow: 0 10px 45px rgba(0, 0, 0, 0.7);
   overflow: hidden;
+  transition: margin-bottom 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.painting-viewer.pv-synthesis-ready .pv-card-container {
+  margin-bottom: 13.5rem;
 }
 
 .pv-main {
