@@ -124,6 +124,13 @@ export default class PaintingViewer {
     this._imgEl.src = this._opt.imageUrl;
     this._imgEl.alt = '第三十一景';
     this._imgEl.draggable = false;
+    
+    // 监听加载事件以进行尺寸自适应
+    this._imgEl.addEventListener('load', () => this._resizeContainerToFitImage());
+    if (this._imgEl.complete) {
+      requestAnimationFrame(() => this._resizeContainerToFitImage());
+    }
+    
     this._wrapperEl.appendChild(this._imgEl);
 
     // 标记层（涟漪 / 线索标记 / 汇聚连线）
@@ -671,9 +678,48 @@ export default class PaintingViewer {
   //  内部 — 工具方法
   // ══════════════════════════════════════════════
 
-  /** resize 处理（预留） */
   _onResize() {
-    // 当前不需要额外处理；预留以便未来加入自适应逻辑
+    this._resizeContainerToFitImage();
+  }
+
+  /**
+   * 动态计算并适配古画与外卡片容器的尺寸，使其黑边几乎为零（画布仅比图片大 16px 边距）
+   * @private
+   */
+  _resizeContainerToFitImage() {
+    if (!this._imgEl || !this._el) return;
+    const imgW = this._imgEl.naturalWidth;
+    const imgH = this._imgEl.naturalHeight;
+    if (!imgW || !imgH) return;
+
+    // 理想最大显示高度与宽度，预留底部对话框空间
+    const maxH = Math.min(window.innerHeight * 0.46, 420); 
+    const maxW = window.innerWidth * 0.65;
+
+    // 计算缩放比例
+    let targetH = maxH;
+    let targetW = targetH * (imgW / imgH);
+
+    if (targetW > maxW) {
+      targetW = maxW;
+      targetH = targetW * (imgH / imgW);
+    }
+
+    // 容器比图片只大一点点（四周加 padding: 0.5rem = 8px，一共 16px）
+    const borderPadding = 16;
+    const containerW = targetW + borderPadding;
+    const containerH = targetH + borderPadding;
+
+    const container = this._el.querySelector('.pv-card-container');
+    if (container) {
+      container.style.width = `${containerW}px`;
+      container.style.height = `${containerH}px`;
+    }
+
+    if (this._cardEl) {
+      this._cardEl.style.width = `${targetW}px`;
+      this._cardEl.style.height = `${targetH}px`;
+    }
   }
 
   /** 创建带 className 的元素 */
