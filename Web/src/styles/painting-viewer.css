@@ -10,18 +10,18 @@
   align-items: center;
   gap: 1rem;
   padding: 1.2rem 2.5rem;
-  background: #2b2018;
-  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
-  border: 2px solid #5c432b;
-  border-radius: 2px;
-  color: #d9c8aa;
+  background: #713824;
+  border: 2px solid #4a2417;
+  border-radius: 0;
+  color: #e0c296;
   font-family: var(--font-serif);
   font-size: 1.3rem;
-  letter-spacing: 0.15em;
+  font-weight: 700;
+  letter-spacing: 0.25em;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: inset 0 0 0 1px #1a120e, inset 0 0 15px rgba(0,0,0,0.4), 0 12px 35px rgba(0,0,0,0.4);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease-out, box-shadow 0.2s ease-out;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85);
   z-index: 15;
 }
 .view-painting-btn.visible {
@@ -29,9 +29,9 @@
   transform: translate(-50%, -50%) scale(1);
 }
 .view-painting-btn:hover {
-  background: #3b2b20;
-  border-color: #785a3a;
+  background: #5c2d1b;
   transform: translate(-50%, -50%) scale(1.03);
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
 }
 .view-painting-btn.clicked {
   opacity: 0;

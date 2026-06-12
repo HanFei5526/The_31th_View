@@ -182,6 +182,9 @@ export default class PrologueScene extends GameSceneBase {
       // 2. 全部对话和旁白结束后（阶段③→④过渡），玩家获得修复笔记本
       this._grantNotebookAccess();
 
+      // 在对话框内播放获得提示
+      await this._narrationBar.playLine('系统提示', '已获得【修复笔记本】与【物件匣】。你可在屏幕右下角点击打开它们查看详细记录。\n接下来，请点击屏幕中央的【查看古画】按钮，开始进行数字化扫描检查。');
+
       // 3. 弹出"查看古画"按钮
       this._phase = PHASE.PROMPT;
       this._showViewPaintingButton();
@@ -318,9 +321,6 @@ export default class PrologueScene extends GameSceneBase {
       '拙政园三十一景是什么？',
       '修复笔记本里有什么？',
     ]);
-    if (!alreadyHadNotebook) {
-      this._narrationBar.showFeedback('获得物件：修复笔记本');
-    }
     this.engine.saveProgress();
   }
 
