@@ -176,21 +176,69 @@ export default class LandingScene {
       
       const textContainer = overlay.querySelector('#intro-prologue-text');
 
-      setTimeout(() => {
+      let finished = false;
+      const timers = [];
+
+      const finish = (fast = false) => {
+        if (finished) return;
+        finished = true;
+
+        // 清理所有定时器
+        timers.forEach(clearTimeout);
+        document.removeEventListener('keydown', onKey);
+
+        textContainer.querySelectorAll('span').forEach((p) => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        });
+
+        this.engine.switchScene('menu', true); // Skip default transition
+
+        if (fast) {
+          overlay.style.transition = 'opacity 0.4s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 450);
+        } else {
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 3000);
+        }
+      };
+
+      const onKey = (e) => {
+        if (e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
+          const activeEl = document.activeElement;
+          const isInput = activeEl && (
+            activeEl.tagName === 'INPUT' || 
+            activeEl.tagName === 'TEXTAREA' || 
+            activeEl.tagName === 'SELECT' || 
+            activeEl.isContentEditable
+          );
+          if (!isInput) {
+            e.preventDefault();
+            finish(true);
+          }
+        }
+      };
+
+      document.addEventListener('keydown', onKey);
+
+      timers.push(setTimeout(() => {
         overlay.classList.add('active');
         const title = overlay.querySelector('.intro-prologue-title');
         if (title) {
           title.style.opacity = '1';
           title.style.transform = 'translateY(0)';
         }
-      }, 50);
+      }, 50));
       
       root.classList.add('landing-scene--exiting-slow'); 
 
       textContainer.innerHTML = '';
       
       // Delay before starting fade in (wait for overlay to appear)
-      setTimeout(() => {
+      timers.push(setTimeout(() => {
         lines.forEach((line, index) => {
           const p = document.createElement('span');
           p.textContent = line;
@@ -200,26 +248,20 @@ export default class LandingScene {
           p.style.display = 'block';
           textContainer.appendChild(p);
           
-          setTimeout(() => {
+          timers.push(setTimeout(() => {
             p.style.opacity = '1';
             p.style.transform = 'translateY(0)';
-          }, index * 1200); // 1.2 seconds between lines
+          }, index * 1200)); // 1.2 seconds between lines
         });
         
         // Wait for all lines to appear + 2 seconds hold time
         const totalDuration = (lines.length - 1) * 1200 + 1200 + 2000;
         
-        setTimeout(() => {
-          this.engine.switchScene('menu', true); // Skip default transition
-          overlay.classList.remove('active');
-          overlay.classList.add('fade-out');
-          
-          setTimeout(() => {
-            overlay.remove();
-          }, 3000); // Wait 3s for the slower fade out
-        }, totalDuration);
+        timers.push(setTimeout(() => {
+          finish(false);
+        }, totalDuration));
         
-      }, 1500);
+      }, 1500));
     });
 
     // 绑定轮播面板按钮
