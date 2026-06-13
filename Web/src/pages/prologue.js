@@ -559,6 +559,9 @@ export default class PrologueScene extends GameSceneBase {
     // 清理之前的单条讨论消息，干净开始研讨
     this._notebook.clearChat();
 
+    // 播放新的综合研讨系统提示
+    this._narrationBar.playLine('系统提示', '已开启综合研讨推理。请在右侧笔记本的【综合研讨】页（可通过输入或点击快捷问题）与 AI 对话研讨，分析这三处痕迹的联系以推导结论；在【记录】页可随时查阅此前收集的所有线索。得出最终结论后即可继续剧情。');
+
     this._notebook.setPlaceholder('在此输入你对这三处痕迹之间关系的判断……');
 
     // 持久提示：告知玩家当前处于研讨阶段
