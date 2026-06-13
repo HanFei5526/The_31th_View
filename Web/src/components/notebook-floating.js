@@ -509,7 +509,7 @@ export class NotebookFloating {
 
   showPassEffect(title) {
     this.hideConfirmButton();
-    this.showSystemMessage(`研讨通过：「${title}」已写入修复记录。`);
+    this.showSystemMessage(`得出结论：「${title}」已写入修复记录。`);
   }
 
   setOfflineMode(bool) { /* 占位，如需 */ }

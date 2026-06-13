@@ -205,7 +205,7 @@ export default class PaintingViewer {
   triggerConvergence() {
     if (!this._allRecorded || this._convergenceShown) return;
 
-    this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
+    this._showFeedback('已成功推理得出结论。你可以在右侧笔记本的【对话】中与 AI 继续探讨，或在【记录】中查阅已写入的结论摘要。如不需进一步讨论，点击古画中央的闪烁光点，即可继续剧情。');
 
     setTimeout(() => {
       this._playConvergence();

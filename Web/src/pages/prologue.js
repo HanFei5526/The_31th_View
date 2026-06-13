@@ -583,10 +583,7 @@ export default class PrologueScene extends GameSceneBase {
       this._notebook.setSynthesisMode(false);
       this._notebook.unlock();
       this._notebook.setPlaceholder('在此输入针对线索整理的疑问或判断……');
-      this._notebook.showQuickThoughts([
-        '这意味着来源信息被遮蔽了吗？',
-        '下一步应该看交会点'
-      ]);
+      this._notebook.hideQuickThoughts();
 
       // 隐藏研讨持久提示
       this._paintingViewer?.hideFeedback();
