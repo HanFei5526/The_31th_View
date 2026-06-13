@@ -232,3 +232,7 @@
   z-index: 120;
   animation: fadeIn 0.4s ease forwards;
 }
+
+.prologue-synthesis-btn:hover:not(.disabled) {
+  transform: translateX(-50%);
+}

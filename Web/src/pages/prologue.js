@@ -528,7 +528,7 @@ export default class PrologueScene extends GameSceneBase {
     this._narrationBar.dismiss();
 
     // 播放较平滑的引导文本
-    await this._narrationBar.playLine(null, '三处异常痕迹都找齐了。可以先在右侧笔记本“记录”里查看线索，或在“对话”里和 AI 讨论。准备好后，点击上方的“开启推理研讨”开始推导真相。');
+    await this._narrationBar.playLine('系统提示', '三处异常痕迹都找齐了。可以先在右侧笔记本“记录”里查看线索，或在“对话”里和 AI 讨论。准备好后，点击上方的“开启推理研讨”开始推导真相。');
   }
 
   /**
@@ -603,7 +603,7 @@ export default class PrologueScene extends GameSceneBase {
    */
   _createNotebookGateAdapter(options = {}) {
     const openingPrefix = options.openingPrefix || '周老师批注';
-    const systemPrefix = options.systemPrefix || '研讨';
+    const systemPrefix = options.systemPrefix || '线索';
     const formatNotebookReply = (text) => {
       if (!text) return text;
       const zhouMatch = text.match(/^周鹤年：「([\s\S]*)」$/);

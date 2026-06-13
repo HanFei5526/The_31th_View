@@ -593,7 +593,7 @@ export default class PaintingViewer {
     if (recorded === 3) {
       this._el?.classList.add('pv-synthesis-ready');
       this._statusEl.innerHTML =
-        `✅ 三处线索全部确认 <span class="pv-circles">${circles}</span>`;
+        `三处线索已全部确认 <span class="pv-circles">${circles}</span>`;
     } else {
       this._el?.classList.remove('pv-synthesis-ready');
       this._statusEl.innerHTML =
