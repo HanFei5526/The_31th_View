@@ -47,7 +47,7 @@
   inset: 0;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
   z-index: 50;
   background: transparent;
   animation: fadeIn 0.4s ease;
@@ -223,10 +223,10 @@
 }
 .pv-convergence-point {
   position: absolute;
-  width: 96px;
-  height: 96px;
-  margin-left: -48px;
-  margin-top: -48px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  margin-top: -17px;
   cursor: pointer;
   pointer-events: auto;
   z-index: 20;
@@ -235,31 +235,20 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 220, 80, 1) 0%, rgba(212, 175, 55, 0.6) 40%, transparent 70%);
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4);
-  animation: pvPointPulse 1.5s infinite;
+  background: radial-gradient(circle, rgba(245, 213, 72, 0.92) 0%, rgba(224, 181, 44, 0.5) 48%, rgba(224, 181, 44, 0.08) 100%);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  animation: pvPointGlow 1.6s ease-in-out infinite;
 }
-@keyframes pvPointPulse {
-  0%   { transform: scale(0.6); opacity: 1; }
-  70%  { transform: scale(1.1); opacity: 0.7; }
-  100% { transform: scale(0.6); opacity: 1; }
+@keyframes pvPointGlow {
+  0%, 100% { opacity: 0.78; filter: brightness(0.95); }
+  50% { opacity: 1; filter: brightness(1.18); }
 }
-.pv-convergence-label {
-  position: absolute;
-  bottom: -24px;
-  width: 80px;
-  left: -10px;
-  text-align: center;
-  color: #d4af37;
-  font-family: var(--font-serif);
-  font-size: 0.8rem;
-  opacity: 0;
-  animation: pvTextFade 0.8s forwards 1.2s;
-}
-@keyframes pvTextFade { to { opacity: 0.8; } }
 .pv-explode .pv-convergence-pulse {
-  animation: pvRippleExpand 0.4s ease-out forwards;
-  background: radial-gradient(circle, rgba(255,255,255,1) 0%, transparent 60%);
+  animation: pvPointFade 0.35s ease-out forwards;
+  background: radial-gradient(circle, rgba(245, 213, 72, 0.9) 0%, rgba(224, 181, 44, 0.2) 100%);
+}
+@keyframes pvPointFade {
+  to { opacity: 0; transform: scale(0.9); }
 }
 
 /* 进入综合研讨按钮 */

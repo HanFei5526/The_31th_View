@@ -276,135 +276,109 @@ export default class MenuScene {
 
   _transitionToSceneWithOverlay(root, scene) {
     this._clearIntroTransition();
-    const overlay = document.createElement('div');
-    overlay.className = 'intro-transition-overlay';
-    this._transitionOverlay = overlay;
     
-    overlay.classList.add('intro-transition-overlay--prologue');
-    
-    let titleStr = '';
-    let lines = [];
+    // 仅序章（prologue）保留原有的黄色开场引言过场
     if (scene === 'prologue') {
-      titleStr = '序章 · 残页';
-      lines = [
+      const overlay = document.createElement('div');
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
+      this._transitionOverlay = overlay;
+      
+      const titleStr = '序章 · 残页';
+      const lines = [
         "美术学院旧楼三层，古画修复工作室。",
         "操作台上，高精度扫描仪低声嗡鸣。",
         "一页泛黄的册页被放大到纤维可辨的程度。",
         "五百年前的秘密，正等待着你的凝视。"
       ];
-    } else if (scene === 'chapter1') {
-      titleStr = '第一章 · 东园';
-      lines = [
-        "兰雪堂至芙蓉榭",
-        "水面倒影里，第一次看见她留下的痕迹。"
-      ];
-    } else if (scene === 'chapter2') {
-      titleStr = '第二章 · 中园';
-      lines = [
-        "远香堂至小飞虹",
-        "题诗异文之间，浮现“画非一人”的疑问。"
-      ];
-    } else if (scene === 'chapter3') {
-      titleStr = '第三章 · 西园';
-      lines = [
-        "卅六鸳鸯馆至留听阁",
-        "墙上草图指向一个低而偏的观看位置。"
-      ];
-    } else if (scene === 'finale') {
-      titleStr = '终章 · 卅一景';
-      lines = [
-        "不为她正名，",
-        "只让她的所见重新被看见。"
-      ];
-    } else {
-      titleStr = '加载中';
-      lines = ["..."];
-    }
 
-    overlay.innerHTML = `
-      <div class="prologue-transition-layout">
-        <div class="intro-prologue-title">${titleStr}</div>
-        <div class="intro-prologue-text" id="intro-prologue-text"></div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
+      overlay.innerHTML = `
+        <div class="prologue-transition-layout">
+          <div class="intro-prologue-title">${titleStr}</div>
+          <div class="intro-prologue-text" id="intro-prologue-text"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
 
-    const textContainer = overlay.querySelector('#intro-prologue-text');
-    let finished = false;
+      const textContainer = overlay.querySelector('#intro-prologue-text');
+      let finished = false;
 
-    const finish = (fast = false) => {
-      if (finished) return;
-      finished = true;
-      this._clearTransitionTimers();
-      document.removeEventListener('keydown', this._transitionKeyHandler);
-      this._transitionKeyHandler = null;
+      const finish = (fast = false) => {
+        if (finished) return;
+        finished = true;
+        this._clearTransitionTimers();
+        document.removeEventListener('keydown', this._transitionKeyHandler);
+        this._transitionKeyHandler = null;
 
-      textContainer.querySelectorAll('span').forEach((p) => {
-        p.style.opacity = '1';
-        p.style.transform = 'translateY(0)';
-      });
-
-      // 脱离 _transitionOverlay 防止被 exit() 立刻清理
-      if (this._transitionOverlay === overlay) {
-        this._transitionOverlay = null;
-      }
-
-      this.engine.switchScene(scene, true);
-
-      if (fast) {
-        // Z键快进：缩短淡出，快速移除
-        overlay.style.transition = 'opacity 0.4s ease';
-        overlay.classList.remove('active');
-        overlay.classList.add('fade-out');
-        setTimeout(() => overlay.remove(), 450);
-      } else {
-        overlay.classList.remove('active');
-        overlay.classList.add('fade-out');
-        setTimeout(() => overlay.remove(), 3000);
-      }
-    };
-
-    this._transitionKeyHandler = (e) => {
-      if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
-      e.preventDefault();
-      finish(true);
-    };
-    document.addEventListener('keydown', this._transitionKeyHandler);
-
-    this._transitionTimers.push(setTimeout(() => {
-      overlay.classList.add('active');
-      const title = overlay.querySelector('.intro-prologue-title');
-      if (title) {
-        title.style.opacity = '1';
-        title.style.transform = 'translateY(0)';
-      }
-    }, 50));
-
-    root.classList.add('menu-scene--exiting-slow');
-
-    textContainer.innerHTML = '';
-
-    this._transitionTimers.push(setTimeout(() => {
-      lines.forEach((line, index) => {
-        const p = document.createElement('span');
-        p.textContent = line;
-        p.style.opacity = '0';
-        p.style.transform = scene === 'prologue' ? 'translateY(15px)' : 'translateY(10px)';
-        p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
-        p.style.display = 'block';
-        textContainer.appendChild(p);
-
-        this._transitionTimers.push(setTimeout(() => {
+        textContainer.querySelectorAll('span').forEach((p) => {
           p.style.opacity = '1';
           p.style.transform = 'translateY(0)';
-        }, index * 1200));
-      });
+        });
 
-      const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        if (this._transitionOverlay === overlay) {
+          this._transitionOverlay = null;
+        }
 
-      this._transitionTimers.push(setTimeout(finish, totalDuration));
+        this.engine.switchScene(scene, true);
 
-    }, 1500));
+        if (fast) {
+          overlay.style.transition = 'opacity 0.4s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 450);
+        } else {
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 3000);
+        }
+      };
+
+      this._transitionKeyHandler = (e) => {
+        if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+        e.preventDefault();
+        finish(true);
+      };
+      document.addEventListener('keydown', this._transitionKeyHandler);
+
+      this._transitionTimers.push(setTimeout(() => {
+        overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }, 50));
+
+      root.classList.add('menu-scene--exiting-slow');
+
+      textContainer.innerHTML = '';
+
+      this._transitionTimers.push(setTimeout(() => {
+        lines.forEach((line, index) => {
+          const p = document.createElement('span');
+          p.textContent = line;
+          p.style.opacity = '0';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          p.style.display = 'block';
+          textContainer.appendChild(p);
+
+          this._transitionTimers.push(setTimeout(() => {
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, index * 1200));
+        });
+
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        this._transitionTimers.push(setTimeout(finish, totalDuration));
+
+      }, 1500));
+    } else {
+      // 其它后续章节（第一章等）直接淡出菜单并柔和淡入目标场景
+      root.classList.add('menu-scene--exiting');
+      setTimeout(() => {
+        this.engine.switchScene(scene, false);
+      }, 1000);
+    }
   }
 
   _clearIntroTransition() {

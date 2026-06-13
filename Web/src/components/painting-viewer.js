@@ -658,11 +658,6 @@ export default class PaintingViewer {
       pulse.className = 'pv-convergence-pulse';
       point.appendChild(pulse);
 
-      const label = document.createElement('div');
-      label.className = 'pv-convergence-label';
-      label.textContent = '点击查看';
-      point.appendChild(label);
-
       // 交会点点击 → 触发最终回调
       point.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -694,21 +689,22 @@ export default class PaintingViewer {
     const imgH = this._imgEl.naturalHeight;
     if (!imgW || !imgH) return;
 
-    // 理想最大显示高度与宽度，预留底部对话框空间
-    const maxH = Math.min(window.innerHeight * 0.70, 680); 
-    const maxW = window.innerWidth * 0.82;
+    // 理想尺寸：外框宽度贴近底部叙事对话框宽度，并预留右侧笔记本空间
+    const borderPadding = 16;
+    const maxH = Math.min(window.innerHeight * 0.70, 780);
+    const preferredContainerW = window.innerWidth * 0.55;
+    const maxContainerW = window.innerWidth * 0.76;
 
     // 计算缩放比例
-    let targetH = maxH;
-    let targetW = targetH * (imgW / imgH);
+    let targetW = Math.min(preferredContainerW, maxContainerW) - borderPadding;
+    let targetH = targetW * (imgH / imgW);
 
-    if (targetW > maxW) {
-      targetW = maxW;
-      targetH = targetW * (imgH / imgW);
+    if (targetH > maxH) {
+      targetH = maxH;
+      targetW = targetH * (imgW / imgH);
     }
 
     // 容器比图片只大一点点（四周加 padding: 0.5rem = 8px，一共 16px）
-    const borderPadding = 16;
     const containerW = targetW + borderPadding;
     const containerH = targetH + borderPadding;
 
@@ -716,6 +712,15 @@ export default class PaintingViewer {
     if (container) {
       container.style.width = `${containerW}px`;
       container.style.height = `${containerH}px`;
+
+      const edgeGap = 24;
+      const notebookEl = document.querySelector('.notebook-floating.expanded:not(.hidden)');
+      const notebookRect = notebookEl?.getBoundingClientRect();
+      const availableRight = notebookRect ? notebookRect.left - edgeGap : window.innerWidth - edgeGap;
+      const centeredLeft = (window.innerWidth - containerW) / 2;
+      const maxSafeLeft = availableRight - containerW;
+      const targetLeft = Math.max(edgeGap, Math.min(centeredLeft, maxSafeLeft));
+      container.style.marginLeft = `${targetLeft}px`;
     }
 
     if (this._cardEl) {

@@ -37,6 +37,7 @@ export class NotebookFloating {
   }
 
   mount(root) {
+    this._ensureNotebookState();
     this._rootEl = root;
     this._container = document.createElement('div');
     this._container.className = 'notebook-floating';
@@ -83,6 +84,8 @@ export class NotebookFloating {
     this._container.appendChild(this._toolSectionEl);
 
     root.appendChild(this._container);
+    this._renderRecords();
+    this._renderCurrentChapterChat();
 
     // 绑定事件总线
     window.addEventListener('clue-collected', this._boundOnClueCollected);
@@ -270,10 +273,13 @@ export class NotebookFloating {
 
   clearChat() {
     if (!this._historyEl) return;
+    this._ensureNotebookState();
+    this.engine.notebookChatsByChapter[this._getChapterKey()] = [];
     this._historyEl.innerHTML = '';
+    this._historyEl.appendChild(this._emptyGuideEl);
   }
 
-  _appendMessage(text, type) {
+  _appendMessage(text, type, persist = true) {
     if (this._emptyGuideEl && this._emptyGuideEl.parentNode) {
       this._emptyGuideEl.remove();
     }
@@ -281,6 +287,14 @@ export class NotebookFloating {
     bubble.className = `chat-bubble ${type}`;
     bubble.textContent = text;
     this._historyEl.appendChild(bubble);
+    if (persist) {
+      this._ensureNotebookState();
+      const chapterKey = this._getChapterKey();
+      if (!this.engine.notebookChatsByChapter[chapterKey]) {
+        this.engine.notebookChatsByChapter[chapterKey] = [];
+      }
+      this.engine.notebookChatsByChapter[chapterKey].push({ text, type });
+    }
     this._scrollToBottom();
   }
 
@@ -381,18 +395,68 @@ export class NotebookFloating {
   }
 
   addClueRecord(clueText) {
-    const card = document.createElement('div');
-    card.className = 'clue-card';
-    card.textContent = clueText;
-    this._recordsListEl.appendChild(card);
+    this._ensureNotebookState();
+    if (this._hasRecord('clue', clueText)) return;
+    this.engine.notebookRecords.push({ type: 'clue', text: clueText });
+    this._appendRecordCard({ type: 'clue', text: clueText });
   }
 
   addAnnotation(text) {
+    this._ensureNotebookState();
+    if (this._hasRecord('annotation', text)) return;
+    this.engine.notebookRecords.push({ type: 'annotation', text });
+    this._appendRecordCard({ type: 'annotation', text });
+  }
+
+  _appendRecordCard(record) {
+    if (!this._recordsListEl) return;
     const card = document.createElement('div');
-    card.className = 'clue-card annotation';
-    card.style.borderColor = '#8c8375';
-    card.innerHTML = `<em>沈念批注：</em><br>${text}`;
+    if (record.type === 'annotation') {
+      card.className = 'clue-card annotation';
+      card.style.borderColor = '#8c8375';
+      const label = document.createElement('em');
+      label.textContent = '沈念批注：';
+      card.appendChild(label);
+      card.appendChild(document.createElement('br'));
+      card.appendChild(document.createTextNode(record.text));
+    } else {
+      card.className = 'clue-card';
+      card.textContent = record.text;
+    }
     this._recordsListEl.appendChild(card);
+  }
+
+  _renderRecords() {
+    if (!this._recordsListEl) return;
+    this._ensureNotebookState();
+    this._recordsListEl.innerHTML = '';
+    this.engine.notebookRecords.forEach(record => this._appendRecordCard(record));
+  }
+
+  _renderCurrentChapterChat() {
+    if (!this._historyEl) return;
+    this._ensureNotebookState();
+    const messages = this.engine.notebookChatsByChapter[this._getChapterKey()] || [];
+    this._historyEl.innerHTML = '';
+    if (!messages.length) {
+      this._historyEl.appendChild(this._emptyGuideEl);
+      return;
+    }
+    messages.forEach(message => this._appendMessage(message.text, message.type, false));
+  }
+
+  _ensureNotebookState() {
+    if (!this.engine.notebookRecords) this.engine.notebookRecords = [];
+    if (!this.engine.notebookChatsByChapter) this.engine.notebookChatsByChapter = {};
+  }
+
+  _hasRecord(type, text) {
+    return this.engine.notebookRecords.some(record => record.type === type && record.text === text);
+  }
+
+  _getChapterKey() {
+    const chapter = Number.isFinite(this.engine.currentChapter) ? this.engine.currentChapter : 0;
+    return `chapter-${chapter}`;
   }
 
   // === Tools ===

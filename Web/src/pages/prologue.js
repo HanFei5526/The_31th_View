@@ -93,6 +93,7 @@ export default class PrologueScene extends GameSceneBase {
     this._phase = PHASE.NARRATION;
     this._paintingViewer = null;
     this._fallTransition = null;
+    this._introTransition = null;
     this._narrationBar = null;
     this._notebook = null;
     this._hud = null;
@@ -205,6 +206,10 @@ export default class PrologueScene extends GameSceneBase {
     if (this._fallTransition) {
       this._fallTransition.destroy();
       this._fallTransition = null;
+    }
+    if (this._introTransition) {
+      this._introTransition.destroy();
+      this._introTransition = null;
     }
     if (this._narrationBar) {
       this._narrationBar.unmount();
@@ -723,15 +728,15 @@ export default class PrologueScene extends GameSceneBase {
     // 现在安全地销毁原有的跌入转场元素
     if (transition) transition.destroy();
 
-    // 切换到第一章，跳过 SceneManager 的默认转场
-    this.engine.switchScene('chapter1', true);
+    // 直接切换到第一章，不再播放多余的黄色入场过场
+    await this.engine.switchScene('chapter1', true);
 
-    // 稍微等待新场景(Chapter1)的 DOM 加载和图片渲染，然后平滑淡出遮罩
+    // 平滑淡出纯色遮罩，露出第一章画中世界
+    solidOverlay.style.transition = 'opacity 1.0s ease-in-out';
+    solidOverlay.style.opacity = '0';
     setTimeout(() => {
-      solidOverlay.style.transition = 'opacity 2s ease-in-out';
-      solidOverlay.style.opacity = '0';
-      setTimeout(() => solidOverlay.remove(), 2000);
-    }, 800);
+      if (solidOverlay.parentNode) solidOverlay.remove();
+    }, 1000);
   }
 
   /* ==================== 工具方法 ==================== */

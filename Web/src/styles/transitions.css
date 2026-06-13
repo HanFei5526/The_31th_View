@@ -473,6 +473,22 @@
   transition: opacity 1.5s ease, transform 1.5s ease;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .intro-transition-overlay {
+    transition-duration: 0.3s;
+  }
+
+  .intro-transition-overlay--prologue::before {
+    transition-duration: 0.3s;
+    transform: none !important;
+  }
+
+  .intro-prologue-title,
+  .intro-prologue-text span {
+    transition-duration: 0.3s !important;
+  }
+}
+
 /* ============================================
    序章 · 跌入画中 转场
    ============================================ */

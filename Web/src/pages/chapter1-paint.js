@@ -30,9 +30,9 @@ export default class Chapter1PaintScene {
     this.state = SCENE_STATES.LANXUE;
 
     // 三张独立背景图
-    this._bgLanxue = '/images/chapter1-lanxue.png';
-    this._bgZhuiyun = '/images/chapter1-zhuiyun.png';
-    this._bgFurong = '/images/chapter1-furong.png';
+    this._bgLanxue = '/images/chapter1-lanxuetang.png';
+    this._bgZhuiyun = '/images/chapter1-zhuiyunfeng.png';
+    this._bgFurong = '/images/chapter1-furongxie.png';
 
     // 存档状态
     this.engine.gameProgress.plaqueNoted = this.engine.gameProgress.plaqueNoted || false;
@@ -48,12 +48,15 @@ export default class Chapter1PaintScene {
     this._container = null;
     this._sceneRoot = null;
     this._uiLayer = null;
+    this._exited = false;
   }
 
   /* ==================== 生命周期 ==================== */
 
   enter(container) {
+    this._exited = false;
     this._container = container;
+    this.engine.currentChapter = 1;
     this.engine.currentWorld = 'paint';
     this._container.classList.remove('real-world');
     this._container.classList.add('paint-world');
@@ -82,7 +85,6 @@ export default class Chapter1PaintScene {
     this.hudBar.onInventoryClick(() => {
       this.inventoryPopup.open();
     });
-    this.hudBar.show();
 
     // 绑定 Notebook 提交事件
     this.notebook.onSubmit(async (text) => {
@@ -139,6 +141,7 @@ export default class Chapter1PaintScene {
   }
 
   exit() {
+    this._exited = true;
     this._clearIdleTimer();
     if (this._flipTimeout) {
       clearTimeout(this._flipTimeout);
@@ -551,6 +554,8 @@ export default class Chapter1PaintScene {
   async _startSequence() {
     this.engine.currentChapter = 1;
     this.engine.currentWorld = 'paint';
+    await this._waitForSceneReady();
+    if (this._exited) return;
 
     // 激活兰雪堂
     this._lanxueEl.classList.add('active');
@@ -564,10 +569,61 @@ export default class Chapter1PaintScene {
     await this.narrationBar.playLine('沈念', '等等……这个地方我见过。是拙政园东部的兰雪堂。但不对，它不是我在照片里看到的样子。它更旧，更轻——像是一笔还没有干透的线。');
     await this.narrationBar.playLine('沈念', '不会吧。我在画里？');
     this.narrationBar.dismiss();
-    this._isNarrating = false;
 
-    // 旁白结束后，以场景反馈引导玩家观察
-    this.narrationBar.showFloating('脚下石径、竹影和廊柱边，都像在等你靠近。');
+    // 旁白结束后开放 HUD，并引导玩家使用笔记本与场景探索。
+    this.hudBar.show();
+    await this.narrationBar.playLine('系统提示', '你可以先打开右下角的【修复笔记本】，在【记录】里查看此前发现的线索；也可以在【对话】里写下疑问，看看周老师的批注能不能帮你理清眼前的情况。');
+    await this.narrationBar.playLine('系统提示', '如果暂时不想停下来整理，也可以直接在兰雪堂周围点击探索。脚下石径、竹影和廊柱边都像在等你靠近，后续的环境细节和剧情会从这些观察里慢慢展开。');
+    this.narrationBar.dismiss();
+    this._isNarrating = false;
+  }
+
+  async _waitForSceneReady() {
+    await this._waitForImage(this._bgLanxue);
+    await this._nextFrame();
+    await this._nextFrame();
+    await this._waitForIntroOverlayGone();
+    await this._delay(250);
+  }
+
+  _waitForImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
+      if (img.complete) resolve();
+    });
+  }
+
+  _waitForIntroOverlayGone() {
+    return new Promise((resolve) => {
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const check = () => {
+        if (settled) return;
+        if (this._exited || !document.querySelector('.intro-transition-overlay')) {
+          done();
+          return;
+        }
+        requestAnimationFrame(check);
+      };
+      const timer = setTimeout(done, 4500);
+      requestAnimationFrame(check);
+    });
+  }
+
+  _nextFrame() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  }
+
+  _delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async _switchToZhuiyun() {

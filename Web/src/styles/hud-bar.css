@@ -13,7 +13,12 @@
 }
 
 .hud-container.visible {
-  opacity: 1;
+  opacity: 1 !important;
+}
+
+.hud-container:not(.visible) .hud-btn,
+.hud-back-btn:not(.visible) {
+  pointer-events: none;
 }
 
 .hud-btn {
@@ -117,7 +122,7 @@
 }
 
 .hud-back-btn.visible {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 .hud-back-btn:hover {
@@ -228,7 +233,7 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 10.6rem;
+  bottom: clamp(9.25rem, 22vh, 15.5rem);
   z-index: 120;
   min-height: 42px;
   height: 42px;
