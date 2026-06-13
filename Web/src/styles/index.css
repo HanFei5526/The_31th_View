@@ -753,8 +753,11 @@ a {
   .dialogue-bubble-container { transition: none; }
   .dialogue-bubble-indicator { animation: none; }
   /* Chapter 1 */
-  .ch1-hotspot::after { animation: none; opacity: 0.6; }
-  .ch1-nav-arrow { animation: none; }
+  .ch1-hotspot::before,
+  .ch1-hotspot::after { animation: none; opacity: 0.9; }
+  .ch1-nav-arrow,
+  .ch1-nav-arrow::before,
+  .ch1-nav-arrow::after { animation: none; }
   .furong-waterline { animation: none; opacity: 0.5; }
   .hairpin-gleam.visible { animation: none; opacity: 0.5; }
   .ch1-ripple { animation: none; opacity: 0; }
@@ -1160,32 +1163,50 @@ a {
   cursor: pointer;
   border-radius: 50%;
   transform: translate(-50%, -50%);
+  z-index: 6;
+}
+
+.ch1-hotspot::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 200, 82, 0.72) 0%, rgba(212, 175, 55, 0.34) 30%, rgba(212, 175, 55, 0.12) 52%, transparent 76%);
+  filter: blur(1px);
+  pointer-events: none;
+  animation: hotspotHalo 2s infinite ease-out;
 }
 
 .ch1-hotspot::after {
   content: '';
   position: absolute;
-  inset: 50%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
+  background: radial-gradient(circle, rgba(255, 223, 112, 0.92) 0%, rgba(229, 183, 52, 0.62) 42%, transparent 72%);
+  filter: blur(0.3px);
   pointer-events: none;
-  animation: hotspotPulse 2s infinite ease-in-out;
+  animation: hotspotPulse 2.4s infinite ease-in-out;
+}
+
+.ch1-hotspot:hover::before {
+  opacity: 0.95;
 }
 
 .ch1-hotspot:hover::after {
-  opacity: 1;
-  animation: none;
+  opacity: 0.9;
 }
 
 .ch1-hotspot:active::after {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1.6);
+  opacity: 0.95;
+  transform: scale(1.1);
   transition: transform 0.1s ease;
 }
 
@@ -1196,8 +1217,14 @@ a {
 }
 
 @keyframes hotspotPulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-  50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.8; }
+  0%, 100% { opacity: 0.64; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes hotspotHalo {
+  0% { transform: scale(0.65); opacity: 0.62; }
+  70% { transform: scale(1.28); opacity: 0.16; }
+  100% { transform: scale(1.42); opacity: 0; }
 }
 
 /* 前进箭头 */
@@ -1205,35 +1232,67 @@ a {
   position: absolute;
   cursor: pointer;
   transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 2rem;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-  animation: floatArrow 2s infinite ease-in-out;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+  border-radius: 50%;
   z-index: 10;
 }
 
+.ch1-nav-arrow::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 108, 0.76) 0%, rgba(224, 178, 48, 0.36) 32%, rgba(212, 175, 55, 0.14) 56%, transparent 78%);
+  filter: blur(1px);
+  pointer-events: none;
+  animation: navHotspotHalo 2s infinite ease-out;
+}
+
+.ch1-nav-arrow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 231, 132, 0.96) 0%, rgba(236, 190, 52, 0.7) 42%, transparent 74%);
+  filter: blur(0.3px);
+  pointer-events: none;
+  animation: navHotspotPulse 2.4s infinite ease-in-out;
+}
+
 .nav-arrow-icon {
-  display: block;
-  width: 14px;
-  height: 14px;
-  border-right: 3px solid currentColor;
-  border-bottom: 3px solid currentColor;
-  transform: rotate(-45deg);
-  margin-top: 4px;
+  display: none;
 }
 
-.ch1-nav-arrow:hover {
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+.ch1-nav-arrow:hover::before {
+  opacity: 0.96;
 }
 
-@keyframes floatArrow {
-  0%, 100% { transform: translate(-50%, -50%); }
-  50% { transform: translate(-50%, calc(-50% - 10px)); }
+.ch1-nav-arrow:hover::after {
+  opacity: 1;
+}
+
+.ch1-nav-arrow:focus-visible {
+  outline: 2px solid rgba(212, 168, 83, 0.85);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+@keyframes navHotspotPulse {
+  0%, 100% { opacity: 0.68; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes navHotspotHalo {
+  0% { transform: scale(0.65); opacity: 0.66; }
+  70% { transform: scale(1.3); opacity: 0.18; }
+  100% { transform: scale(1.45); opacity: 0; }
 }
 
 /* 涟漪动画 */

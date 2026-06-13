@@ -73,6 +73,7 @@ export default class MenuScene {
 
   enter(container) {
     this._injectStyles();
+    this._hydrateRuntimeFromSaveIfEmpty();
     container.innerHTML = '';
     container.appendChild(this._buildDOM());
   }
@@ -239,6 +240,8 @@ export default class MenuScene {
     }
     this.engine.gameProgress = {};
     this.engine.inventory.items = [];
+    this.engine.notebookRecords = [];
+    this.engine.notebookChatsByChapter = {};
     this.engine.currentChapter = 0;
     this.engine.currentWorld = 'real';
     this._transitionToSceneWithOverlay(root, 'prologue');
@@ -247,15 +250,24 @@ export default class MenuScene {
   _continueGame(root) {
     const save = this.engine.saveSystem?.load?.();
     if (save) {
-      this.engine.currentChapter = save.chapter ?? 0;
-      this.engine.currentWorld = save.world ?? 'real';
-      this.engine.gameProgress = save.progress ?? {};
-      if (save.inventory) {
-        this.engine.inventory.restore(save.inventory);
-      }
+      this.engine.restoreFromSave?.(save);
     }
     const lastScene = save?.scene || 'prologue';
     this._transitionToSceneWithOverlay(root, lastScene);
+  }
+
+  _hydrateRuntimeFromSaveIfEmpty() {
+    const hasRuntimeState =
+      Object.keys(this.engine.gameProgress || {}).length > 0 ||
+      this.engine.inventory?.getItems?.().length > 0 ||
+      (this.engine.notebookRecords || []).length > 0 ||
+      Object.keys(this.engine.notebookChatsByChapter || {}).length > 0;
+
+    if (hasRuntimeState) return;
+    const save = this.engine.saveSystem?.load?.();
+    if (save) {
+      this.engine.restoreFromSave?.(save);
+    }
   }
 
   /* ==================== 辅助方法 ==================== */

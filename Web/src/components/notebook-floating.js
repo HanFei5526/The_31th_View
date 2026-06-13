@@ -1,3 +1,61 @@
+const NOTEBOOK_RECORD_SEEDS = [
+  {
+    type: 'clue',
+    text: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+    when: (progress) => progress.cluesFound?.includes('clue_margin'),
+  },
+  {
+    type: 'clue',
+    text: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+    when: (progress) => progress.cluesFound?.includes('clue_text'),
+  },
+  {
+    type: 'clue',
+    text: '[线索] 底层细线 — 画面下方有一条不属于画面内容的极淡细线',
+    when: (progress) => progress.cluesFound?.includes('clue_line'),
+  },
+  {
+    type: 'clue',
+    text: '[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息',
+    when: (progress) => Boolean(progress.synthesisPassed),
+  },
+  {
+    type: 'clue',
+    text: '[线索] 匾额多余笔画 — 兰雪堂匾额"兰"字草字头下多了一道极细横笔，笔力稳定，墨色一致，非败笔',
+    when: (progress) => Boolean(progress.plaqueNoted),
+  },
+  {
+    type: 'clue',
+    text: '有些景，只从低处出现。',
+    when: (progress) => Boolean(progress.zhuiyunExplored),
+  },
+  {
+    type: 'clue',
+    text: '[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字',
+    when: (progress) => Boolean(progress.hasHairpin),
+  },
+  {
+    type: 'clue',
+    text: '[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明',
+    when: (progress) => Boolean(progress.hasHairpin),
+  },
+  {
+    type: 'clue',
+    text: '[沈念的判断] 这页画底下藏着另一套说明——画面结构可能有隐藏的辅助标注层。',
+    when: (progress) => progress.chapter1Choice === 'A',
+  },
+  {
+    type: 'clue',
+    text: '[沈念的判断] 画里有人留下了东西——不是画家本人的正式创作，而是某个人的私人痕迹。',
+    when: (progress) => progress.chapter1Choice === 'B',
+  },
+  {
+    type: 'clue',
+    text: '[周老师的建议] 关注题跋、匾额与边注——这些地方最容易留下不够正式、却最诚实的东西。',
+    when: (progress) => Boolean(progress.chapter1Complete || progress.chapter1_completed),
+  },
+];
+
 export class NotebookFloating {
   constructor(engine) {
     this.engine = engine;
@@ -186,6 +244,9 @@ export class NotebookFloating {
   switchTab(tabId) {
     if (this._currentTab === tabId) return;
     this._currentTab = tabId;
+    if (tabId === 'records') {
+      this._renderRecords();
+    }
     
     Object.keys(this._tabs).forEach(id => {
       if (id === tabId) {
@@ -294,6 +355,7 @@ export class NotebookFloating {
         this.engine.notebookChatsByChapter[chapterKey] = [];
       }
       this.engine.notebookChatsByChapter[chapterKey].push({ text, type });
+      this._persistNotebookState();
     }
     this._scrollToBottom();
   }
@@ -396,16 +458,26 @@ export class NotebookFloating {
 
   addClueRecord(clueText) {
     this._ensureNotebookState();
-    if (this._hasRecord('clue', clueText)) return;
-    this.engine.notebookRecords.push({ type: 'clue', text: clueText });
+    if (this._hasRecord('clue', clueText)) {
+      this._renderRecords();
+      this._persistNotebookState();
+      return;
+    }
+    this._rememberRecord({ type: 'clue', text: clueText });
     this._appendRecordCard({ type: 'clue', text: clueText });
+    this._persistNotebookState();
   }
 
   addAnnotation(text) {
     this._ensureNotebookState();
-    if (this._hasRecord('annotation', text)) return;
-    this.engine.notebookRecords.push({ type: 'annotation', text });
+    if (this._hasRecord('annotation', text)) {
+      this._renderRecords();
+      this._persistNotebookState();
+      return;
+    }
+    this._rememberRecord({ type: 'annotation', text });
     this._appendRecordCard({ type: 'annotation', text });
+    this._persistNotebookState();
   }
 
   _appendRecordCard(record) {
@@ -448,10 +520,29 @@ export class NotebookFloating {
   _ensureNotebookState() {
     if (!this.engine.notebookRecords) this.engine.notebookRecords = [];
     if (!this.engine.notebookChatsByChapter) this.engine.notebookChatsByChapter = {};
+    this._seedRecordsFromProgress();
   }
 
   _hasRecord(type, text) {
     return this.engine.notebookRecords.some(record => record.type === type && record.text === text);
+  }
+
+  _rememberRecord(record) {
+    if (this._hasRecord(record.type, record.text)) return;
+    this.engine.notebookRecords.push(record);
+  }
+
+  _seedRecordsFromProgress() {
+    const progress = this.engine.gameProgress || {};
+    NOTEBOOK_RECORD_SEEDS.forEach((seed) => {
+      if (seed.when(progress)) {
+        this._rememberRecord({ type: seed.type, text: seed.text });
+      }
+    });
+  }
+
+  _persistNotebookState() {
+    this.engine.saveSystem?.autoSave?.();
   }
 
   _getChapterKey() {

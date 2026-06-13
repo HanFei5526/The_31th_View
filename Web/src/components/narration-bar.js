@@ -16,6 +16,7 @@ export class NarrationBar {
     this._fullText = '';
     this._textChars = [];
     this._feedbackTimer = null;
+    this._isFloating = false;
     this._optionsEl = null;
     this._resolveOptions = null;
 
@@ -84,6 +85,7 @@ export class NarrationBar {
     if (this._floatingTimer) clearTimeout(this._floatingTimer);
     this._typingTimer = null;
     this._floatingTimer = null;
+    this._isFloating = false;
 
     if (this._resolvePlay) {
       const oldResolve = this._resolvePlay;
@@ -197,7 +199,8 @@ export class NarrationBar {
     if (this._floatingTimer) clearTimeout(this._floatingTimer);
     if (this._typingTimer) clearTimeout(this._typingTimer);
     this._isTyping = false;
-    this._hideContinue();
+    this._isFloating = true;
+    this._showContinue();
 
     if (this._container) {
       this._container.classList.add('visible'); // 浮现时显示对话框
@@ -210,6 +213,8 @@ export class NarrationBar {
     this._floatingTimer = setTimeout(() => {
       this._textEl.textContent = '';
       this._floatingTimer = null;
+      this._isFloating = false;
+      this._hideContinue();
       if (this._container) {
         this._container.classList.remove('visible'); // 自动淡出隐藏
       }
@@ -221,6 +226,7 @@ export class NarrationBar {
     if (this._floatingTimer) clearTimeout(this._floatingTimer);
     this._floatingTimer = null;
     this._isTyping = false;
+    this._isFloating = false;
     this._hideContinue();
     this._textEl.textContent = '';
     this._speakerEl.style.display = 'none';
@@ -252,6 +258,11 @@ export class NarrationBar {
     // 如果有选项正在显示，禁止点击通过
     if (this._resolveOptions) return;
 
+    if (this._isFloating) {
+      this.dismiss();
+      return;
+    }
+
     if (this._isTyping) {
       if (this._typingTimer) clearTimeout(this._typingTimer);
       this._textEl.textContent = this._fullText;
@@ -269,7 +280,7 @@ export class NarrationBar {
 
   _onKeyDown(e) {
     if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
-    if (!this._resolvePlay && !this._isTyping) return;
+    if (!this._resolvePlay && !this._isTyping && !this._isFloating) return;
     e.preventDefault();
     this._onClick();
   }

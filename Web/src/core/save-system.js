@@ -74,6 +74,8 @@ export class SaveSystem {
       world: this.engine.currentWorld,
       inventory: this.engine.inventory.getItems(),
       progress: { ...this.engine.gameProgress },
+      notebookRecords: this.engine.notebookRecords || [],
+      notebookChatsByChapter: this.engine.notebookChatsByChapter || {},
     };
     this.save(state);
   }

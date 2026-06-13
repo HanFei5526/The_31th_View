@@ -17,13 +17,48 @@
  */
 
 import { SceneManager } from './scene-manager.js';
-import { Inventory } from './inventory.js';
+import { Inventory, ITEM_TEMPLATES } from './inventory.js';
 import { HintSystem } from './hint-system.js';
 import { DiscussionGateManager } from './discussion-gate.js';
 import { GatePanel } from '../components/gate-panel.js';
 import { DialogueSystem } from './dialogue.js';
 import { SaveSystem } from './save-system.js';
 import { AIService } from './ai-service.js';
+
+const PROLOGUE_NOTEBOOK_ITEM = {
+  id: 'notebook',
+  name: '修复笔记本',
+  description: '导师给你的笔记本，封面写着"修复记录——三十一景图"。扉页夹着一张便签，是周老师的字："修复古画的第一课，不是把缺的补上，是理解它为什么缺。"',
+  icon: '📓',
+};
+
+const PROLOGUE_CLUE_IDS = ['clue_margin', 'clue_text', 'clue_line'];
+
+const DEPRECATED_NOTEBOOK_RECORDS = [
+  {
+    type: 'annotation',
+    text: '获得了物件 [修复笔记本]',
+  },
+];
+
+const PROLOGUE_CARRYOVER_RECORDS = [
+  {
+    type: 'clue',
+    text: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+  },
+  {
+    type: 'clue',
+    text: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+  },
+  {
+    type: 'clue',
+    text: '[线索] 底层细线 — 画面下方有一条不属于画面内容的极淡细线',
+  },
+  {
+    type: 'clue',
+    text: '[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息',
+  },
+];
 
 export class GameEngine {
   constructor() {
@@ -37,6 +72,10 @@ export class GameEngine {
     this.currentWorld = 'real';
     /** 通用进度标记，场景可自由读写 */
     this.gameProgress = {};
+    /** 修复笔记本记录：跨章节累积 */
+    this.notebookRecords = [];
+    /** 修复笔记本对话：按章节隔离 */
+    this.notebookChatsByChapter = {};
 
     /* ---- 事件系统 ---- */
 
@@ -104,14 +143,7 @@ export class GameEngine {
     const save = this.saveSystem.load();
 
     if (save) {
-      // 恢复存档状态
-      this.currentChapter = save.chapter ?? 0;
-      this.currentScene = save.scene ?? null;
-      this.currentWorld = save.world ?? 'real';
-      this.gameProgress = save.progress ?? {};
-      if (save.inventory) {
-        this.inventory.restore(save.inventory);
-      }
+      this.restoreFromSave(save);
       console.log(`[GameEngine] 从存档恢复: 章节${this.currentChapter}, 场景${this.currentScene}`);
       // 切换到存档场景
       if (this.currentScene) {
@@ -121,6 +153,140 @@ export class GameEngine {
       console.log('[GameEngine] 无存档，从头开始');
       this.emit('game-start');
     }
+  }
+
+  /**
+   * 从存档快照恢复完整运行时状态。
+   * @param {object} save
+   */
+  restoreFromSave(save = {}) {
+    this.currentChapter = save.chapter ?? 0;
+    this.currentScene = save.scene ?? null;
+    this.currentWorld = save.world ?? 'real';
+    this.gameProgress = save.progress ?? {};
+    this.notebookRecords = Array.isArray(save.notebookRecords) ? save.notebookRecords : [];
+    this.notebookChatsByChapter = save.notebookChatsByChapter ?? {};
+
+    if (save.inventory) {
+      this.inventory.restore(save.inventory);
+    } else {
+      this.inventory.restore([]);
+    }
+
+    this._restoreDerivedInventoryFromProgress();
+    this.ensureCarryoverForChapter(this.currentChapter, { persist: false });
+  }
+
+  /**
+   * 兼容旧存档：有些进度只保存了标记，没有保存物件对象。
+   * @private
+   */
+  _restoreDerivedInventoryFromProgress() {
+    const progress = this.gameProgress || {};
+    if (progress.hasNotebook && !this.inventory.hasItem('notebook')) {
+      this.inventory.addItem(PROLOGUE_NOTEBOOK_ITEM, { silent: true });
+    }
+    if (progress.hasHairpin && !this.inventory.hasItem('hairpin')) {
+      this.inventory.addItem(ITEM_TEMPLATES.hairpin, { silent: true });
+    }
+  }
+
+  /**
+   * 后续章节进入时，补齐前序章节已经应当拥有的基础内容。
+   * 记录页跨章累积；对话记录仍由 NotebookFloating 按章节隔离。
+   * @param {number} chapter
+   * @param {{persist?: boolean}} options
+   * @returns {boolean} 是否发生补齐
+   */
+  ensureCarryoverForChapter(chapter, options = {}) {
+    const shouldPersist = options.persist !== false;
+    if (chapter < 1) return false;
+
+    let changed = false;
+    const progress = this.gameProgress || {};
+    this.gameProgress = progress;
+
+    if (!progress.hasNotebook) {
+      progress.hasNotebook = true;
+      changed = true;
+    }
+
+    if (!Array.isArray(progress.cluesFound)) {
+      progress.cluesFound = [];
+      changed = true;
+    }
+    PROLOGUE_CLUE_IDS.forEach((clueId) => {
+      if (!progress.cluesFound.includes(clueId)) {
+        progress.cluesFound.push(clueId);
+        changed = true;
+      }
+    });
+
+    if (!progress.synthesisPassed) {
+      progress.synthesisPassed = true;
+      changed = true;
+    }
+
+    if (!progress.prologueComplete) {
+      progress.prologueComplete = true;
+      changed = true;
+    }
+    if (!progress.prologue_completed) {
+      progress.prologue_completed = true;
+      changed = true;
+    }
+
+    if (!this.inventory.hasItem('notebook')) {
+      this.inventory.addItem(PROLOGUE_NOTEBOOK_ITEM, { silent: true });
+      changed = true;
+    }
+
+    if (this._removeNotebookRecords(DEPRECATED_NOTEBOOK_RECORDS)) {
+      changed = true;
+    }
+
+    if (this._prioritizeNotebookRecords(PROLOGUE_CARRYOVER_RECORDS)) {
+      changed = true;
+    }
+
+    if (changed && shouldPersist) {
+      this.saveSystem?.autoSave?.();
+    }
+    return changed;
+  }
+
+  _removeNotebookRecords(records) {
+    if (!Array.isArray(this.notebookRecords)) this.notebookRecords = [];
+
+    const shouldRemove = (existing) => records.some((record) => (
+      existing.type === record.type && existing.text === record.text
+    ));
+    const nextRecords = this.notebookRecords.filter((record) => !shouldRemove(record));
+    const changed = nextRecords.length !== this.notebookRecords.length;
+    if (changed) {
+      this.notebookRecords = nextRecords;
+    }
+    return changed;
+  }
+
+  _prioritizeNotebookRecords(records) {
+    if (!Array.isArray(this.notebookRecords)) this.notebookRecords = [];
+
+    const sameRecord = (a, b) => a.type === b.type && a.text === b.text;
+    const prioritized = records.map((record) => (
+      this.notebookRecords.find((existing) => sameRecord(existing, record)) || record
+    ));
+    const rest = this.notebookRecords.filter((existing) => (
+      !records.some((record) => sameRecord(existing, record))
+    ));
+    const nextRecords = [...prioritized, ...rest];
+
+    const changed = nextRecords.length !== this.notebookRecords.length
+      || nextRecords.some((record, index) => this.notebookRecords[index] !== record);
+    if (changed) {
+      this.notebookRecords = nextRecords;
+    }
+    return changed;
   }
 
   /* ==========================

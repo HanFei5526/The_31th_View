@@ -61,6 +61,8 @@ export default class Chapter1PaintScene {
     this._container.classList.remove('real-world');
     this._container.classList.add('paint-world');
 
+    this.engine.ensureCarryoverForChapter?.(1);
+
     // UI 层：pointer-events:none 让点击穿透到场景，但组件自身恢复 auto
     this._uiLayer = document.createElement('div');
     this._uiLayer.className = 'scene-ui-layer';
@@ -70,10 +72,6 @@ export default class Chapter1PaintScene {
     this.notebook.mount(this._uiLayer);
     this.hudBar.mount(this._uiLayer);
     this.inventoryPopup.mount(this._uiLayer);
-
-    if (this.narrationBar._container) {
-      this.narrationBar._container.style.pointerEvents = 'auto';
-    }
 
     this.hudBar.onNotebookClick(() => {
       if (this.notebook.isExpanded()) {
@@ -163,35 +161,41 @@ export default class Chapter1PaintScene {
     this._lanxueEl.className = 'ch1-subscene';
     this._lanxueEl.style.backgroundImage = `url('${this._bgLanxue}')`;
 
-    // 按文档顺序依次解锁的热点队列
+    // 兰雪堂热点全部开放，玩家可按任意顺序探索。
     this._lanxueSpots = [];
-    this._lanxueStep = 0;
+    this._lanxueRequiredSpotIds = ['bamboo', 'stonePath', 'pillar', 'plaque'];
+    this._lanxueVisitedSpots = new Set();
+    this._lanxueExplorationComplete = false;
 
     // 氛围热点：翠竹（左侧竹林区域）— 1-7b
-    const bambooSpot = this._createHotspot(15, 50, 12, () => {
+    const bambooSpot = this._createHotspot(15, 50, 12, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你拨开竹叶。沙沙作响，但手上没有感到风。');
-      this._advanceLanxueStep();
+      await this._markLanxueSpotVisited('bamboo', { delayBeforeCompletion: 900 });
     }, '翠竹');
 
     // 氛围热点：青石板路（底部路面）— 1-7a
-    const stonePath = this._createHotspot(50, 85, 10, () => {
+    const stonePath = this._createHotspot(50, 85, 10, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你踩了踩脚下的石板。有些温热，纹理清晰得像刚刻上去的。');
-      this._advanceLanxueStep();
+      await this._markLanxueSpotVisited('stonePath', { delayBeforeCompletion: 900 });
     }, '青石板路');
 
     // 氛围热点：廊柱（建筑右侧）— 1-7c
-    const pillarSpot = this._createHotspot(70, 55, 6, () => {
+    const pillarSpot = this._createHotspot(70, 55, 6, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你走到廊柱边，伸手碰了碰。木纹里藏着细密的墨线——这不是一根真正的柱子，它是一笔画出来的。');
-      this._advanceLanxueStep();
+      await this._markLanxueSpotVisited('pillar', { delayBeforeCompletion: 900 });
     }, '廊柱');
 
     // 叙事触发：匾额（建筑区域，必须点击才能推进）— 1-8~1-14
     const plaqueSpot = this._createHotspot(50, 22, 8, async () => {
       if (this._isNarrating) return;
-      if (this.engine.gameProgress.plaqueNoted) return;
+      if (this.engine.gameProgress.plaqueNoted) {
+        this.narrationBar.showFloating('兰雪堂匾额上，那道极细的横笔已经记在笔记本里。');
+        await this._markLanxueSpotVisited('plaque', { delayBeforeCompletion: 900 });
+        return;
+      }
       this._isNarrating = true;
       await this.narrationBar.playLine(null, '你走近敞厅，抬头看向门楣上的匾额。');
       await this.narrationBar.playLine(null, '三个字——「兰雪堂」，落款是文徵明。字迹端正，墨色沉稳。');
@@ -202,47 +206,70 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.plaqueNoted = true;
       this.notebook.addClueRecord('[线索] 匾额多余笔画 — 兰雪堂匾额"兰"字草字头下多了一道极细横笔，笔力稳定，墨色一致，非败笔');
-      this.narrationBar.showFeedback('已记录线索：匾额多余笔画');
+      await this.narrationBar.playLine('系统提示', '这处异常已经写入修复笔记本。之后可以点击右下角「修复笔记本」，切到「记录」页查看已经获得的线索；如果想继续追问，也可以回到「对话」页，把你的判断写下来。');
 
       await this.narrationBar.playLine('沈念', '这座厅后面还有路。石径延伸过去，像是有什么在更深处等着。');
       this.narrationBar.dismiss();
       this._isNarrating = false;
-
-      // 显示前进箭头
-      if (!this._lanxueArrow) {
-        this._lanxueArrow = this._createNavArrow(50, 70, 10, () => this._switchToZhuiyun(), '前往缀云峰');
-        this._lanxueEl.appendChild(this._lanxueArrow);
-      }
+      await this._markLanxueSpotVisited('plaque');
     }, '匾额');
 
-    // 按文档顺序排列：翠竹 → 青石板路 → 廊柱 → 匾额
     this._lanxueSpots = [bambooSpot, stonePath, pillarSpot, plaqueSpot];
     this._lanxueSpots.forEach(spot => {
       spot.style.display = 'none';
       this._lanxueEl.appendChild(spot);
     });
 
-    // 若已从存档恢复且匾额已记录，显示所有热点 + 前进箭头
-    if (this.engine.gameProgress.plaqueNoted) {
-      this._lanxueSpots.forEach(spot => spot.style.display = '');
-      this._lanxueStep = this._lanxueSpots.length;
-      if (!this._lanxueArrow) {
-        this._lanxueArrow = this._createNavArrow(50, 70, 10, () => this._switchToZhuiyun(), '前往缀云峰');
-        this._lanxueEl.appendChild(this._lanxueArrow);
-      }
-    } else {
-      // 显示第一个热点
-      this._lanxueSpots[0].style.display = '';
-    }
-
     this._sceneRoot.appendChild(this._lanxueEl);
   }
 
-  _advanceLanxueStep() {
-    this._lanxueStep++;
-    if (this._lanxueStep < this._lanxueSpots.length) {
-      this._lanxueSpots[this._lanxueStep].style.display = '';
+  async _markLanxueSpotVisited(id, options = {}) {
+    if (!this._lanxueVisitedSpots || this._lanxueVisitedSpots.has(id)) return;
+    this._lanxueVisitedSpots.add(id);
+
+    if (this._lanxueRequiredSpotIds.every(spotId => this._lanxueVisitedSpots.has(spotId))) {
+      if (options.delayBeforeCompletion) {
+        await this._delay(options.delayBeforeCompletion);
+      }
+      await this._completeLanxueExploration();
     }
+  }
+
+  _showLanxueHotspots() {
+    if (!this._lanxueSpots) return;
+    this._lanxueSpots.forEach(spot => {
+      spot.style.display = '';
+    });
+  }
+
+  async _completeLanxueExploration() {
+    if (this._lanxueExplorationComplete) return;
+    this._lanxueExplorationComplete = true;
+
+    this._hideLanxueHotspots();
+    this.narrationBar.dismiss();
+    this._showLanxueArrow();
+
+    this._isNarrating = true;
+    await this.narrationBar.playLine('系统提示', '兰雪堂周围几处可疑细节已经看过了。场景中央出现了新的光点，点击它，就可以沿着石径进入下一处场景。');
+    this.narrationBar.dismiss();
+    this._isNarrating = false;
+  }
+
+  _hideLanxueHotspots() {
+    if (!this._lanxueSpots) return;
+    this._lanxueSpots.forEach(spot => {
+      spot.style.display = 'none';
+    });
+  }
+
+  _showLanxueArrow() {
+    if (this._lanxueArrow) return;
+    this._lanxueArrow = this._createNavArrow(50, 70, 10, () => {
+      if (this._isNarrating) return;
+      this._switchToZhuiyun();
+    }, '前往缀云峰');
+    this._lanxueEl.appendChild(this._lanxueArrow);
   }
 
   _buildZhuiyunScene() {
@@ -504,8 +531,9 @@ export default class Chapter1PaintScene {
     spot.className = 'ch1-hotspot';
     spot.style.left = `${x}%`;
     spot.style.top = `${y}%`;
-    spot.style.width = `${r * 2}vmin`;
-    spot.style.height = `${r * 2}vmin`;
+    const hitSize = `clamp(48px, ${r * 1.2}vmin, 96px)`;
+    spot.style.width = hitSize;
+    spot.style.height = hitSize;
     spot.tabIndex = 0;
     spot.setAttribute('role', 'button');
     spot.setAttribute('aria-label', ariaLabel);
@@ -577,9 +605,15 @@ export default class Chapter1PaintScene {
 
     // 旁白结束后开放 HUD，并引导玩家使用笔记本与场景探索。
     this.hudBar.show();
+    this.notebook.showQuickThoughts([
+      '笔记本现在能查到哪些内容？',
+      '《三十一景图》大致是什么？',
+      '之前的边缘痕迹能说明什么？'
+    ]);
     await this.narrationBar.playLine('系统提示', '右下角可打开修复笔记本：「对话」页可写下疑问与周老师批注讨论，「记录」页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
+    this._showLanxueHotspots();
   }
 
   async _waitForSceneReady() {

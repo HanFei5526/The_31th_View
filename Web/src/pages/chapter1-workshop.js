@@ -27,7 +27,9 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     container.appendChild(root);
 
     // 确保是现实世界主题
+    this.engine.currentChapter = 1;
     this.engine.currentWorld = 'real';
+    this.engine.ensureCarryoverForChapter?.(1);
     this.engine._applyWorldTheme();
     
     // 强制清除可能的残留样式
