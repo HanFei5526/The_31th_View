@@ -11,7 +11,7 @@
  *   4. 点击后进入古画查看器（3/4 画面 + 右侧工具栏）
  *   5. 使用工具 → 点击古画找线索 → 线索弹窗
  *   6. 找齐3条线索 → 汇聚动画 → 跌入画中转场
- *   7. 序章完成 → 收集修复笔记本 → 解锁第一章 → 返回菜单
+ *   7. 序章完成 → 解锁第一章 → 进入画中世界
  */
 
 import GameSceneBase from './game-scene.js';
@@ -23,7 +23,7 @@ import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 
 const prologueBg = '/images/prologue-workshop.png';
-const paintingImg = '/images/scene-31-painting.png';
+const paintingImg = '/images/scan-painting.png';
 
 /* ==================== 叙事文本 ==================== */
 
@@ -35,12 +35,17 @@ const PROLOGUE_SCRIPT = [
   { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
   { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
   { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
+  { speaker: null, text: '操作台旁边摞着几本旧笔记，封面上的字迹是周老师的，年份标注是九十年代。书脊磨得很旧。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '三十一景图你应该熟悉。本科课上讲过。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
+  { speaker: null, text: '太完整反而是异常——这个判断你在修复课上听过。五百年的册页没有任何修补痕迹，说明有人刻意处理过表面。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '不是画面本身有问题。是有些东西被压在了下面。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '你自己看。明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '不用急着下结论。先把你观察到的东西记下来，我们一处一处讨论。' }
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '你自己看。' },
+  { speaker: null, text: '他顿了一下，目光从屏幕上移开。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
+  { speaker: '周鹤年', portrait: '/images/zhou_henian.png', text: '不用急着下结论。先把你观察到的东西记下来。' },
+  { speaker: null, text: '你坐到扫描仪前。屏幕上是第三十一景的高精度扫描件。' }
 ];
 
 /** 三处线索的完整定义 */
@@ -61,17 +66,16 @@ const CLUE_DATA = {
   },
   clue_line: {
     id: 'clue_line',
-    title: '低位构图辅助线',
-    desc: '一条极淡的墨线横贯画面下方，不是画面内容的一部分。这是一条构图辅助线——画家在正式落笔前用来确定视角高度的参考。它的位置异常地低，说明作画者的视线几乎与地面平齐。这不是站着画的。',
-    askText: '画面下方有一条低位构图辅助线，视线几乎与地面平齐，这意味着什么？',
-    recordText: '[线索] 低位构图辅助线 — 视线异常低，作画者非站立姿态',
+    title: '底层细线',
+    desc: '一条极淡的线横贯画面下方，比裂纹规整，但不是画面内容的一部分，也不像装裱时留下的。它在那里很久了，但没有人在正式记录中提到过它。',
+    askText: '画面下方有一条极淡的线，不像裂纹也不像装裱的一部分，这可能是什么？',
+    recordText: '[线索] 底层细线 — 画面下方有一条不属于画面内容的极淡细线',
   },
 };
 
 /* ==================== 场景阶段 ==================== */
 
 const PHASE = {
-  TITLE: 0,
   NARRATION: 1,
   DIALOGUE: 2,
   PROMPT: 3,       // 等待玩家点击"查看古画"
@@ -86,7 +90,7 @@ const PHASE = {
 export default class PrologueScene extends GameSceneBase {
   constructor(engine) {
     super(engine);
-    this._phase = PHASE.TITLE;
+    this._phase = PHASE.NARRATION;
     this._paintingViewer = null;
     this._fallTransition = null;
     this._narrationBar = null;
@@ -125,11 +129,11 @@ export default class PrologueScene extends GameSceneBase {
 
     this._notebook = new NotebookFloating(this.engine);
     this._notebook.mount(root);
-    this._notebook.show();
+    this._notebook.hide();
 
     this._hud = new HudBar(this.engine);
     this._hud.mount(root);
-    this._hud.show();
+    this._hud.hide();
 
     this._inventoryPopup = new InventoryPopup(this.engine);
     this._inventoryPopup.mount(root);
@@ -166,30 +170,28 @@ export default class PrologueScene extends GameSceneBase {
     });
 
     if (!this.engine.gameProgress.prologue) {
-      // 1+2. 逐句播放脚本（旁白 + 周鹤年开场白）
+      await this._waitForWorkshopVisible();
+
       this._phase = PHASE.DIALOGUE;
+
+      // 1. 播放全部序章旁白与周鹤年对话
       for (const line of PROLOGUE_SCRIPT) {
         await this._narrationBar.playLine(line.speaker, line.text, { portrait: line.portrait });
       }
 
+      // 2. 全部对话和旁白结束后（阶段③→④过渡），玩家获得修复笔记本
+      this._grantNotebookAccess();
+
+      // 在对话框内播放获得提示（不使用 await，使其与按钮同时出现）
+      this._narrationBar.playLine('系统提示', '已获得【修复笔记本】与【物件匣】。你可在屏幕右下角点击打开它们查看详细记录或进行讨论。\n准备就绪后，点击屏幕中央的【查看古画】即可开始数字化扫描检查。');
+
       // 3. 弹出"查看古画"按钮
       this._phase = PHASE.PROMPT;
-
-      // 对话结束后，玩家获得笔记本权限
-      this.engine.gameProgress.hasNotebook = true;
-      
-      // PROMPT阶段面板不锁定，可手动收缩
-      this._notebook.unlock();
-      this._notebook.setPlaceholder('翻阅笔记本……');
-      this._notebook.showQuickThoughts([
-        '拙政园三十一景是什么？',
-        '修复笔记本里有什么？',
-      ]);
-      this._narrationBar.showFeedback('获得物件：修复笔记本');
-
       this._showViewPaintingButton();
     } else {
       // 如果已经完成序章，进入自由探索
+      this._notebook.show();
+      this._hud.show();
       this._notebook.unlock();
       this._narrationBar.showFloating('工作室：你可以在这里整理线索，或者进入画中。');
     }
@@ -220,6 +222,10 @@ export default class PrologueScene extends GameSceneBase {
       this._inventoryPopup.unmount();
       this._inventoryPopup = null;
     }
+    if (this._synthesisBtn) {
+      this._synthesisBtn.remove();
+      this._synthesisBtn = null;
+    }
     if (this._synthesisGateOff) {
       this._synthesisGateOff();
       this._synthesisGateOff = null;
@@ -229,6 +235,98 @@ export default class PrologueScene extends GameSceneBase {
     const promptBtn = document.getElementById('view-painting-prompt');
     if (promptBtn) promptBtn.remove();
     super.exit();
+  }
+
+  async _waitForWorkshopVisible() {
+    await this._waitForImage(prologueBg);
+    await this._nextFrame();
+    await this._nextFrame();
+    // 等待菜单过渡动画 overlay 完全淡出并从 DOM 移除（CSS transition 3s + remove）
+    await this._waitForOverlayGone();
+    // 背景图就位后再留一小段缓冲
+    await this._delay(300);
+  }
+
+  /**
+   * 等待菜单过渡动画 overlay 从 DOM 移除
+   * menu.js 在 overlay fadeOut 3s 结束后调用 remove()，此处轮询检测
+   * @private
+   */
+  _waitForOverlayGone() {
+    return new Promise((resolve) => {
+      const overlay = document.querySelector('.intro-transition-overlay');
+      if (!overlay) { resolve(); return; }
+
+      // Z 键快进：立即移除 overlay 并继续
+      const onKey = (e) => {
+        if (!(e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ')) return;
+        if (this._isTextInputActive()) return;
+        e.preventDefault();
+        cleanup();
+        overlay.remove();
+        resolve();
+      };
+
+      const check = () => {
+        if (!document.querySelector('.intro-transition-overlay')) {
+          cleanup();
+          resolve();
+        } else {
+          requestAnimationFrame(check);
+        }
+      };
+
+      const cleanup = () => {
+        document.removeEventListener('keydown', onKey);
+      };
+
+      document.addEventListener('keydown', onKey);
+      requestAnimationFrame(check);
+    });
+  }
+
+  _waitForImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
+      if (img.complete) resolve();
+    });
+  }
+
+  _nextFrame() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  }
+
+  _delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  _grantNotebookAccess() {
+    const alreadyHadNotebook = this.engine.gameProgress.hasNotebook || this.engine.inventory?.hasItem?.('notebook');
+    this.engine.gameProgress.hasNotebook = true;
+
+    if (!this.engine.inventory?.hasItem?.('notebook')) {
+      this.engine.collectItem({
+        id: 'notebook',
+        name: '修复笔记本',
+        description: '导师给你的笔记本，封面写着"修复记录——三十一景图"。扉页夹着一张便签，是周老师的字："修复古画的第一课，不是把缺的补上，是理解它为什么缺。"',
+        icon: '📓',
+      });
+    }
+
+    this._notebook.show();
+    this._hud.show();
+    this._hud.setNotebookDisabled(false);
+    this._notebook.unlock();
+    this._notebook.setPlaceholder('在此输入你想询问或记录的内容……');
+    this._notebook.showQuickThoughts([
+      '修复笔记本里有什么？',
+      '拙政园三十一景是什么？',
+      '文徵明与这套册页有什么关联？',
+    ]);
+    this.engine.saveProgress();
   }
 
   /* ==================== "查看古画" 入口 ==================== */
@@ -242,7 +340,6 @@ export default class PrologueScene extends GameSceneBase {
     btn.className = 'view-painting-btn';
     btn.id = 'view-painting-prompt';
     btn.innerHTML = `
-      <span class="view-painting-icon">🖼️</span>
       <span class="view-painting-label">查看古画</span>
     `;
     btn.addEventListener('click', () => {
@@ -267,16 +364,16 @@ export default class PrologueScene extends GameSceneBase {
   _enterPaintingPhase() {
     this._phase = PHASE.PAINTING;
 
-    // 隐藏立绘与旁白条
-    this._narrationBar.dismiss();
-
     // 进入扫描/探索阶段，锁定展开
     this._notebook.expand();
     this._notebook.lock(); 
     this._hud.setNotebookDisabled(true); // 📓按钮灰色禁用
 
+    // 保持对话框样式，播放顺畅的引导提示（提示玩家将三个工具全部使用一遍）
+    this._narrationBar.playLine('系统提示', '已进入古画数字化检测阶段。你可点击右下角【工具箱】选择工具对古画进行检测，并可在【修复笔记本】中与 AI 讨论这些工具的作用。请确保将三个工具全部使用一遍，之后即可在画面中寻找异常线索。');
+
     // 配置初始 Placeholder 和快捷问题
-    this._notebook.setPlaceholder('这个工具能看出什么？');
+    this._notebook.setPlaceholder('在此输入针对检测工具的疑问……');
     this._notebook.showQuickThoughts([
       '放大镜能看到什么？',
       '纸质分析有什么用？',
@@ -284,13 +381,13 @@ export default class PrologueScene extends GameSceneBase {
     ]);
 
     this._paintingViewer = new PaintingViewer({
-      imageUrl: '/images/prologue/拙政园鸟瞰_首屏.png',
+      imageUrl: paintingImg,
       onToolUsed: (toolId) => {
         // 将工具检测结果记入笔记本记录Tab
         const recordMap = {
           magnifier: '[检查] 放大镜 — 装裱接缝处有重叠痕迹，边框压住了旧题签的一角',
           fiber: '[检查] 纸质分析 — 背纸与其他三十页不一致，此页曾重装；画心本身较稳定',
-          sidelight: '[检查] 侧光照射 — 装裱边下隐现旧字残痕"……所见"及一条低位辅助线',
+          sidelight: '[检查] 侧光照射 — 装裱边下隐现旧字残痕"……所见"及一条极淡细线',
         };
         if (recordMap[toolId]) {
           this._notebook.addClueRecord(recordMap[toolId]);
@@ -311,7 +408,7 @@ export default class PrologueScene extends GameSceneBase {
         this._onConvergenceClick();
       },
       onFeedback: (text) => {
-        // painting-viewer 自带 feedback 条，不重复在 narrationBar 显示
+        this._narrationBar.playLine('系统提示', text);
       },
     });
 
@@ -369,7 +466,7 @@ export default class PrologueScene extends GameSceneBase {
         detail: { text: clueData.recordText },
       }));
       // 更新快捷问题
-      this._notebook.setPlaceholder('这条线索意味着什么？');
+      this._notebook.setPlaceholder('在此输入针对该线索的判断或讨论……');
       this._notebook.showQuickThoughts([clueData.askText]);
     }
 
@@ -407,22 +504,31 @@ export default class PrologueScene extends GameSceneBase {
   }
 
   /**
-   * 在画面下方显示"进入综合研讨"按钮
+   * 在对话框中提示进入综合研讨
    * @private
    */
-  _showSynthesisEntryButton() {
+  async _showSynthesisEntryButton() {
     if (this._synthesisBtnShown) return;
     this._synthesisBtnShown = true;
 
-    const btn = document.createElement('button');
-    btn.className = 'synthesis-entry-btn';
-    btn.textContent = '进入综合研讨：分析三处痕迹的关系';
-    btn.addEventListener('click', () => {
-      btn.remove();
+    // 创建“开启推理研讨”按钮并挂载
+    this._synthesisBtn = document.createElement('button');
+    this._synthesisBtn.className = 'hud-btn prologue-synthesis-btn';
+    this._synthesisBtn.innerHTML = '<span class="hud-btn-label">开启推理研讨</span>';
+    this._synthesisBtn.addEventListener('click', () => {
+      if (this._synthesisBtn) {
+        this._synthesisBtn.remove();
+        this._synthesisBtn = null;
+      }
       this._startSynthesisGate();
     });
-    this._root.appendChild(btn);
-    requestAnimationFrame(() => btn.classList.add('visible'));
+    this._root.appendChild(this._synthesisBtn);
+
+    // 清空任何正在显示的短反馈
+    this._narrationBar.dismiss();
+
+    // 播放较平滑的引导文本
+    await this._narrationBar.playLine('系统提示', '三处异常痕迹都找齐了。可以先在右侧笔记本“记录”里查看线索，或在“对话”里和 AI 讨论。准备好后，点击上方的“开启推理研讨”开始推导真相。');
   }
 
   /**
@@ -453,10 +559,13 @@ export default class PrologueScene extends GameSceneBase {
     // 清理之前的单条讨论消息，干净开始研讨
     this._notebook.clearChat();
 
-    this._notebook.setPlaceholder('这三处痕迹之间有什么联系？写下你的判断……');
+    // 播放新的综合研讨系统提示
+    this._narrationBar.playLine('系统提示', '已开启综合研讨推理。请在右侧笔记本的【综合研讨】页（可通过输入或点击快捷问题）与 AI 对话研讨，分析这三处痕迹的联系以推导结论；在【记录】页可随时查阅此前收集的所有线索。得出最终结论后即可继续剧情。');
+
+    this._notebook.setPlaceholder('在此输入你对这三处痕迹之间关系的判断……');
 
     // 持久提示：告知玩家当前处于研讨阶段
-    this._paintingViewer?.showPersistentFeedback('综合研讨 — 在笔记本中分析三处痕迹之间的关系');
+    this._paintingViewer?.showPersistentFeedback('开始综合研讨：去右侧笔记本里分析这三处痕迹的联系吧');
 
     this._synthesisGateOff = this.engine.on('gate-completed', (data) => {
       if (data.gateId !== gateId) return;
@@ -473,11 +582,8 @@ export default class PrologueScene extends GameSceneBase {
 
       this._notebook.setSynthesisMode(false);
       this._notebook.unlock();
-      this._notebook.setPlaceholder('继续整理这三处痕迹……');
-      this._notebook.showQuickThoughts([
-        '这意味着来源信息被遮蔽了吗？',
-        '下一步应该看交会点'
-      ]);
+      this._notebook.setPlaceholder('在此输入针对线索整理的疑问或判断……');
+      this._notebook.hideQuickThoughts();
 
       // 隐藏研讨持久提示
       this._paintingViewer?.hideFeedback();
@@ -497,7 +603,7 @@ export default class PrologueScene extends GameSceneBase {
    */
   _createNotebookGateAdapter(options = {}) {
     const openingPrefix = options.openingPrefix || '周老师批注';
-    const systemPrefix = options.systemPrefix || '研讨';
+    const systemPrefix = options.systemPrefix || '线索';
     const formatNotebookReply = (text) => {
       if (!text) return text;
       const zhouMatch = text.match(/^周鹤年：「([\s\S]*)」$/);
@@ -570,16 +676,15 @@ export default class PrologueScene extends GameSceneBase {
 
     const origin = { x: window.innerWidth / 2, y: window.innerHeight * 0.6 };
 
-    // 收集修复笔记本
-    this.engine.collectItem({
-      id: 'notebook',
-      name: '修复笔记本',
-      description: '导师给你的笔记本，封面写着"修复记录——三十一景图"。扉页夹着一张便签，是周老师的字："修复古画的第一课，不是把缺的补上，是理解它为什么缺。"',
-      icon: '📓',
-    });
-
     // 记录状态变量
     this.engine.gameProgress.foundMarginTrace = true;
+
+    await this._narrationBar.playLine(null, '你的手指在交会处停了一下。');
+    await this._narrationBar.playLine('沈念', '「所见」……什么意思？');
+    await this._narrationBar.playLine(null, '屏幕上的墨迹好像动了一下。');
+    await this._narrationBar.playLine('沈念', '……是动了吗？不对，扫描件不会动。');
+    await this._narrationBar.playLine(null, '你下意识想把手移开，但画面已经变了。');
+    this._narrationBar.dismiss();
 
     // 播放跌入转场
     this._fallTransition = new FallTransition();
@@ -588,6 +693,8 @@ export default class PrologueScene extends GameSceneBase {
     // 标记序章完成
     this._phase = PHASE.COMPLETE;
     this.engine.gameProgress.prologue = true;
+    this.engine.gameProgress.prologueComplete = true;
+    this.engine.gameProgress.prologue_completed = true;
     this.engine.gameProgress.chapter1 = true;
     this.engine.saveProgress();
 
@@ -606,7 +713,7 @@ export default class PrologueScene extends GameSceneBase {
     const solidOverlay = document.createElement('div');
     solidOverlay.style.position = 'fixed';
     solidOverlay.style.inset = '0';
-    solidOverlay.style.backgroundColor = '#2c1810'; // 与跌入画中的墨迹颜色一致
+    solidOverlay.style.backgroundColor = '#16120f'; // 与跌入画中的墨迹颜色一致
     solidOverlay.style.zIndex = '9999';
     document.body.appendChild(solidOverlay);
 

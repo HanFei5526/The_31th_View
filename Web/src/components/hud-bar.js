@@ -32,7 +32,7 @@ export class HudBar {
     this._inventoryBtn.className = 'hud-btn';
     this._inventoryBtn.dataset.id = 'inventory';
     this._inventoryBtn.dataset.tooltip = '物件匣';
-    this._inventoryBtn.innerHTML = '<span class="hud-btn-label">物件</span>';
+    this._inventoryBtn.innerHTML = '<span class="hud-btn-label">物件匣</span>';
     this._inventoryBtn.addEventListener('click', () => {
       if (this._onInventoryCb) this._onInventoryCb();
     });

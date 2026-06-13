@@ -3,22 +3,21 @@
 .notebook-floating {
   position: absolute;
   top: 1.5rem;
-  right: 0;
+  right: 2rem;
   bottom: 5.5rem;
   width: 360px;
   max-width: calc(100vw - 24px);
   background: rgba(28, 26, 24, 0.95);
-  border-left: 1px solid rgba(212, 168, 83, 0.2);
-  border-top: 1px solid rgba(212, 168, 83, 0.2);
-  border-bottom: 1px solid rgba(212, 168, 83, 0.2);
-  border-radius: 12px 0 0 12px;
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  border-radius: 12px;
   z-index: 200;
-  transform: translateX(100%);
+  transform: translateX(calc(100% + 2.5rem));
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
   pointer-events: auto; /* 允许自身接收点击 */
+  overflow: hidden; /* 裁剪直角子元素，修复底部圆角线残缺 */
 }
 
 .notebook-floating.expanded {
@@ -31,7 +30,8 @@
 
 /* 综合研讨态 */
 .notebook-floating.synthesis-mode {
-  border-left: 2px solid rgba(212, 168, 83, 0.6);
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  border-left: 3px solid rgba(212, 168, 83, 0.6);
 }
 
 .notebook-floating.synthesis-mode .notebook-header {
@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   height: 50px;
-  border-bottom: 1px solid rgba(212, 168, 83, 0.2);
+  border-bottom: 1px solid rgba(212, 168, 83, 0.12); /* 改弱底边线颜色，避免clash */
 }
 
 .notebook-tab {
@@ -68,7 +68,18 @@
 
 .notebook-tab.active {
   color: #d4a853;
-  border-bottom: 2px solid #d4a853;
+  position: relative;
+}
+
+.notebook-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px; /* 横线长度缩短为40px，不与边缘边框打架 */
+  height: 2px;
+  background-color: #d4a853;
 }
 
 .notebook-close-btn {
@@ -263,29 +274,24 @@
 .notebook-input-area {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  border-top: 1px solid rgba(212, 168, 83, 0.1);
+  border-top: 1px solid rgba(212, 168, 83, 0.12); /* 稍微改弱横线 */
   padding-top: 0.65rem;
-}
-
-.notebook-input-label {
-  font-size: 0.82rem;
-  color: #8c8375;
-  padding-left: 2px;
+  position: relative; /* 用于发送按钮的绝对定位 */
 }
 
 .notebook-input {
   flex: 1;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(212, 168, 83, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 168, 83, 0.25);
   color: #e8dcc4;
-  padding: 10px 12px;
+  padding: 10px 34px 10px 12px; /* 右侧留出 34px 空间放置发送小三角，防止遮挡文字 */
   border-radius: 4px;
   font-size: 0.95rem;
   line-height: 1.5;
   resize: none;
-  height: 58px;
-  min-height: 58px;
+  height: 80px; /* 扩大输入框高度 */
+  min-height: 80px;
+  box-sizing: border-box;
 }
 
 .notebook-input:focus {
@@ -294,25 +300,32 @@
 }
 
 .notebook-send-btn {
-  background: #d4a853;
-  color: #1c1917;
+  position: absolute;
+  right: 10px;
+  bottom: 10px; /* 定位于输入框右下角 */
+  background: transparent; /* 无背景 */
+  color: #d4a853; /* 黄色小三角 */
   border: none;
-  border-radius: 4px;
-  width: 44px;
-  min-height: 58px;
+  width: 24px;
+  height: 24px;
+  min-height: auto;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s;
+  transition: color 0.2s, opacity 0.2s;
+  font-size: 1.15rem;
+  padding: 0;
+  z-index: 5;
 }
 
 .notebook-send-btn:hover {
-  opacity: 0.9;
+  color: #f3c775;
 }
 
 .notebook-send-btn:disabled {
-  background: #554d3e;
+  color: #554d3e;
+  background: transparent;
   cursor: not-allowed;
 }
 
@@ -349,13 +362,13 @@
 
 .notebook-tool-section {
   border-top: 1px solid rgba(212, 168, 83, 0.2);
-  padding: 1.2rem 1rem;
-  background: #1c1917; /* 恢复原版深色底，以便无背景金边更显眼 */
-  box-shadow: inset 0 10px 20px -10px rgba(0,0,0,0.8);
+  padding: 0.8rem 0.8rem;
+  background: transparent; /* 去除背景色差，完美承接父级半透明色 */
   flex-shrink: 0;
   max-height: 300px;
   transition: all 0.3s ease;
   overflow: hidden;
+  border-radius: 0 0 12px 12px; /* 约束底部圆角，防溢出残缺 */
 }
 
 .notebook-tool-section.hidden {
@@ -369,7 +382,7 @@
 .notebook-tool-title {
   color: #d4af37;
   font-size: 0.9rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
   text-align: center;
   font-family: var(--font-serif);
   letter-spacing: 4px;
@@ -378,7 +391,7 @@
 .notebook-tool-grid {
   display: flex;
   justify-content: space-between;
-  gap: 0.8rem;
+  gap: 0.5rem;
 }
 
 .notebook-tool-btn {
@@ -387,15 +400,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: transparent !important; /* 无背景，强制覆盖可能存在的全局设定 */
-  border: 2px double #d4af37 !important; /* 黄色金边图案 */
-  padding: 12px 4px;
+  border: 1px solid rgba(212, 175, 55, 0.6) !important; /* 精致细单线金框 */
+  padding: 6px 4px;
   border-radius: 4px;
   cursor: pointer;
   color: #d4af37 !important; /* 配合金边的金色文字 */
   font-family: var(--font-serif);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.15), inset 0 0 8px rgba(212, 175, 55, 0.15) !important; /* 微微金光 */
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.1), inset 0 0 6px rgba(212, 175, 55, 0.1) !important; /* 微微金光 */
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -411,9 +424,9 @@
   content: '✓';
   position: absolute;
   top: 4px;
-  right: 8px;
+  right: 6px;
   color: #d4af37; 
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
 }
@@ -428,7 +441,11 @@
 }
 
 .notebook-tool-icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   /* 用滤镜将图标颜色强行往古铜/金黄色调和，带金光阴影 */
   filter: sepia(0.8) hue-rotate(5deg) saturate(1.5) drop-shadow(0 0 3px rgba(212, 175, 55, 0.6));
 }

@@ -1,7 +1,6 @@
 /**
  * 《卅一景》古画查看器组件
  *
- * 合并旧 scanner-ui.js 和 clue-explorer.js 的全部功能，
  * 提供"工具检测 → 线索探索 → 汇聚动画"完整交互流程。
  *
  * 布局：左 3/4 古画展示区 + 右 1/4 工具侧边栏
@@ -18,7 +17,7 @@
 const CLUE_DEFS = {
   clue_margin: { x: 85, y: 12, r: 8,  title: '装裱接缝残角' },
   clue_text:   { x: 14, y: 80, r: 8,  title: '"……所见"残字' },
-  clue_line:   { x: 50, y: 75, r: 10, title: '低位构图辅助线' },
+  clue_line:   { x: 50, y: 75, r: 10, title: '底层细线' },
 };
 
 // ── 工具定义 ──────────────────────────────────────────
@@ -32,9 +31,9 @@ const REQUIRED_TOOL_IDS = TOOLS.map((tool) => tool.id);
 
 // ── 工具反馈文案 ─────────────────────────────────────
 const TOOL_FEEDBACK = {
-  magnifier: '放大镜已就位。装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。',
-  fiber:     '纸质分析完成。背纸与其他三十页不完全一致，此页曾经重装；画心本身较稳定。',
-  sidelight: '侧光照射完成。装裱边下方隐约显出旧字残痕和一条极淡的低位辅助线。',
+  magnifier: '放大镜已就位。装裱接缝处有重叠痕迹，边框似乎压住了旧题签的一角。（检测结果已同步至右侧笔记本【记录】页签，可以前往查看或在【对话】页签发起研讨）',
+  fiber:     '纸质分析完成。背纸与其他三十页不完全一致，此页曾经重装；画心本身较稳定。（检测结果已同步至右侧笔记本【记录】页签，可以前往查看或在【对话】页签发起研讨）',
+  sidelight: '侧光照射完成。装裱边下方隐约显出旧字残痕和一条极淡的细线。（检测结果已同步至右侧笔记本【记录】页签，可以前往查看或在【对话】页签发起研讨）',
 };
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
@@ -125,6 +124,13 @@ export default class PaintingViewer {
     this._imgEl.src = this._opt.imageUrl;
     this._imgEl.alt = '第三十一景';
     this._imgEl.draggable = false;
+    
+    // 监听加载事件以进行尺寸自适应
+    this._imgEl.addEventListener('load', () => this._resizeContainerToFitImage());
+    if (this._imgEl.complete) {
+      requestAnimationFrame(() => this._resizeContainerToFitImage());
+    }
+    
     this._wrapperEl.appendChild(this._imgEl);
 
     // 标记层（涟漪 / 线索标记 / 汇聚连线）
@@ -199,7 +205,7 @@ export default class PaintingViewer {
   triggerConvergence() {
     if (!this._allRecorded || this._convergenceShown) return;
 
-    this._showFeedback('三处痕迹散布在画面各处……它们之间会不会有什么联系？');
+    this._showFeedback('已成功推理得出结论。你可以在右侧笔记本的【对话】中与 AI 继续探讨，或在【记录】中查阅已写入的结论摘要。如不需进一步讨论，点击古画中央的闪烁光点，即可继续剧情。');
 
     setTimeout(() => {
       this._playConvergence();
@@ -221,7 +227,7 @@ export default class PaintingViewer {
     this._updateStatus();
 
     // 即时反馈
-    this._showFeedback(`✅ 「${clue.title}」已确认并记入笔记本`);
+    this._showFeedback(`发现了「${clue.title}」的相关线索。内容已经整理到了右侧笔记本的“记录”页，如果有疑问，随时可以到“对话”页发起讨论。`);
 
     // 判断是否触发汇聚
     this._checkConvergence();
@@ -263,8 +269,8 @@ export default class PaintingViewer {
 
       // 延迟显示，避免和工具反馈重叠
       setTimeout(() => {
-        this._showFeedback('三项检查完成，已切换到放大镜。在画面中点击寻找异常。');
-      }, 3000);
+        this._showFeedback('三项基础扫描已完成。请在古画上点击寻找并收集隐藏线索（收集进度可查看画幅下方的 0/3 指示灯）。集齐全部线索后，即可开启综合研讨，推理出最终结论。');
+      }, 6000);
     }
 
     // 应用图像滤镜
@@ -430,14 +436,14 @@ export default class PaintingViewer {
     if (!this._explorable) {
       console.log('[PaintingViewer] 点击被忽略：尚未完成三项基础检查');
       const missing = this._getMissingToolLabels();
-      this._showFeedback(`请先使用右侧工具完成检查：${missing.join('、')}`);
+      this._showFeedback(`请先启用右侧的检测工具，完成以下检查：${missing.join('、')}`);
       return;
     }
 
     // 探索阶段必须切回放大镜
     if (this._currentTool !== 'magnifier') {
       console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
-      this._showFeedback('点击右侧放大镜 🔍，然后在画面中寻找线索。');
+      this._showFeedback('线索探索需要使用放大镜，请先在右侧工具箱中启用放大镜。');
       return;
     }
 
@@ -469,7 +475,7 @@ export default class PaintingViewer {
 
       // 明确反馈
       const clueTitle = this._clues[hitId].title;
-      this._showFeedback(`📌 发现线索「${clueTitle}」，已记入笔记本`);
+      this._showFeedback(`找到了线索「${clueTitle}」，已记录下来`);
 
       // 回调
       this._opt.onClueFound?.(hitId);
@@ -478,7 +484,7 @@ export default class PaintingViewer {
       this._showRipple(px, py, 'grey');
       this._wrongClicks++;
       console.log(`[PaintingViewer] 未命中 (${px.toFixed(1)}%, ${py.toFixed(1)}%), 连续错误: ${this._wrongClicks}`);
-      this._showFeedback('这里没有异常，试试别的位置。');
+      this._showFeedback('这地方看起来挺正常的，再去别的位置找找看。');
       this._checkHintTrigger();
     }
   }
@@ -537,11 +543,11 @@ export default class PaintingViewer {
     const toShow = unfound.slice(0, hintCount);
     const lastRevealed = toShow[toShow.length - 1];
     const hintTextMap = {
-      clue_margin: '💡 注意观察画面右上方的装裱边缘……',
-      clue_text: '💡 试试画面左下方，装裱层底下似乎有字迹……',
-      clue_line: '💡 画面下方中部有一条不属于画面内容的痕迹……',
+      clue_margin: '留意画面右上方的金色光圈，那里的装裱材质纹理似乎有被故意掩盖的痕迹。',
+      clue_text: '留意画面左下角的金色光圈，装裱层底下好像藏着一些没被抹干净的旧字迹。',
+      clue_line: '留意画面下方中央区域的金色光圈，那里似乎有一道极细的线条，看起来不像是画作原有的。',
     };
-    const fallback = '💡 画面边缘和下方可能还藏着什么……';
+    const fallback = '除了画中的景物，这页古画的边缘和装裱处好像还藏着别的信息，再仔细找找看吧。';
     this._showFeedback(hintTextMap[lastRevealed[0]] || fallback);
     this._showVisualHintsProgressive(hintCount);
   }
@@ -585,9 +591,11 @@ export default class PaintingViewer {
     }
 
     if (recorded === 3) {
+      this._el?.classList.add('pv-synthesis-ready');
       this._statusEl.innerHTML =
-        `✅ 三处线索全部确认 <span class="pv-circles">${circles}</span>`;
+        `三处线索已全部确认 <span class="pv-circles">${circles}</span>`;
     } else {
+      this._el?.classList.remove('pv-synthesis-ready');
       this._statusEl.innerHTML =
         `线索 <span class="pv-circles">${circles}</span>` +
         ` <span class="pv-status-detail">${found}/3 已发现${recorded > 0 ? ` · ${recorded}/3 已确认` : ''}</span>`;
@@ -672,9 +680,48 @@ export default class PaintingViewer {
   //  内部 — 工具方法
   // ══════════════════════════════════════════════
 
-  /** resize 处理（预留） */
   _onResize() {
-    // 当前不需要额外处理；预留以便未来加入自适应逻辑
+    this._resizeContainerToFitImage();
+  }
+
+  /**
+   * 动态计算并适配古画与外卡片容器的尺寸，使其黑边几乎为零（画布仅比图片大 16px 边距）
+   * @private
+   */
+  _resizeContainerToFitImage() {
+    if (!this._imgEl || !this._el) return;
+    const imgW = this._imgEl.naturalWidth;
+    const imgH = this._imgEl.naturalHeight;
+    if (!imgW || !imgH) return;
+
+    // 理想最大显示高度与宽度，预留底部对话框空间
+    const maxH = Math.min(window.innerHeight * 0.70, 680); 
+    const maxW = window.innerWidth * 0.82;
+
+    // 计算缩放比例
+    let targetH = maxH;
+    let targetW = targetH * (imgW / imgH);
+
+    if (targetW > maxW) {
+      targetW = maxW;
+      targetH = targetW * (imgH / imgW);
+    }
+
+    // 容器比图片只大一点点（四周加 padding: 0.5rem = 8px，一共 16px）
+    const borderPadding = 16;
+    const containerW = targetW + borderPadding;
+    const containerH = targetH + borderPadding;
+
+    const container = this._el.querySelector('.pv-card-container');
+    if (container) {
+      container.style.width = `${containerW}px`;
+      container.style.height = `${containerH}px`;
+    }
+
+    if (this._cardEl) {
+      this._cardEl.style.width = `${targetW}px`;
+      this._cardEl.style.height = `${targetH}px`;
+    }
   }
 
   /** 创建带 className 的元素 */

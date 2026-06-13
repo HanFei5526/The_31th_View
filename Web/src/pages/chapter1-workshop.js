@@ -157,6 +157,7 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
 
   _showChapterEnd() {
     this.engine.gameProgress.chapter1Complete = true;
+    this.engine.gameProgress.chapter1_completed = true;
     this.engine.saveProgress();
 
     this._endCard = document.createElement('div');

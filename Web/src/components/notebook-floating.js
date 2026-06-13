@@ -227,15 +227,11 @@ export class NotebookFloating {
     inputArea.className = 'notebook-input-area';
     
     const inputId = 'nb-input-' + Math.random().toString(36).slice(2, 8);
-    const inputLabel = document.createElement('label');
-    inputLabel.className = 'notebook-input-label';
-    inputLabel.htmlFor = inputId;
-    inputLabel.textContent = '翻阅笔记本';
 
     this._inputEl = document.createElement('textarea');
     this._inputEl.id = inputId;
     this._inputEl.className = 'notebook-input';
-    this._inputEl.placeholder = '在此输入你的想法……';
+    this._inputEl.placeholder = '在此输入你想询问或记录的内容……';
     this._inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -249,7 +245,6 @@ export class NotebookFloating {
     this._sendBtn.setAttribute('aria-label', '发送');
     this._sendBtn.addEventListener('click', () => this._submitInput());
 
-    inputArea.appendChild(inputLabel);
     inputArea.appendChild(this._inputEl);
     inputArea.appendChild(this._sendBtn);
 
@@ -410,7 +405,38 @@ export class NotebookFloating {
       const btn = document.createElement('button');
       btn.className = 'notebook-tool-btn';
       btn.dataset.id = tool.id;
-      btn.innerHTML = `<span class="notebook-tool-icon">${tool.icon}</span><span class="notebook-tool-label">${tool.label}</span>`;
+      
+      // 根据 tool.id 渲染简约金色矢量细线条 SVG 图标，取代原具象 emoji
+      let iconHtml = tool.icon;
+      if (tool.id === 'magnifier') {
+        iconHtml = `
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10" cy="10" r="5.5" />
+            <line x1="21" y1="21" x2="14.2" y2="14.2" />
+            <line x1="8" y1="7" x2="11" y2="7" opacity="0.4" stroke-width="0.8" />
+          </svg>
+        `;
+      } else if (tool.id === 'fiber') {
+        iconHtml = `
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="18" rx="1" />
+            <line x1="7" y1="7" x2="17" y2="7" opacity="0.7" />
+            <line x1="7" y1="11" x2="17" y2="11" opacity="0.7" />
+            <line x1="7" y1="15" x2="14" y2="15" opacity="0.7" />
+            <line x1="11" y1="3" x2="11" y2="21" opacity="0.2" stroke-dasharray="2 2" />
+          </svg>
+        `;
+      } else if (tool.id === 'sidelight') {
+        iconHtml = `
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 3 18 L 6 21 L 14 13 L 11 10 Z" />
+            <path d="M 11 10 L 14 13 L 22 9 L 15 2 Z" />
+            <circle cx="9" cy="15" r="0.6" fill="currentColor" />
+          </svg>
+        `;
+      }
+      
+      btn.innerHTML = `<span class="notebook-tool-icon">${iconHtml}</span><span class="notebook-tool-label">${tool.label}</span>`;
       btn.addEventListener('click', () => {
         if (this._toolsLocked) return;
         if (btn.classList.contains('used')) return;
@@ -483,7 +509,7 @@ export class NotebookFloating {
 
   showPassEffect(title) {
     this.hideConfirmButton();
-    this.showSystemMessage(`研讨通过：「${title}」已写入修复记录。`);
+    this.showSystemMessage(`得出结论：「${title}」已写入修复记录。`);
   }
 
   setOfflineMode(bool) { /* 占位，如需 */ }

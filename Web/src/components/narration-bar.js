@@ -14,6 +14,7 @@ export class NarrationBar {
     this._resolvePlay = null;
     this._typingTimer = null;
     this._fullText = '';
+    this._textChars = [];
     this._feedbackTimer = null;
     this._optionsEl = null;
     this._resolveOptions = null;
@@ -42,6 +43,7 @@ export class NarrationBar {
 
     this._speakerEl = document.createElement('div');
     this._speakerEl.className = 'narration-speaker';
+    this._speakerEl.style.display = 'none'; // 初始隐藏，防止加载时闪烁空白框
     this._barEl.appendChild(this._speakerEl);
 
     this._textEl = document.createElement('div');
@@ -78,11 +80,27 @@ export class NarrationBar {
   }
 
   playLine(speaker, text, options = {}) {
+    if (this._typingTimer) clearTimeout(this._typingTimer);
+    if (this._floatingTimer) clearTimeout(this._floatingTimer);
+    this._typingTimer = null;
+    this._floatingTimer = null;
+
+    if (this._resolvePlay) {
+      const oldResolve = this._resolvePlay;
+      this._resolvePlay = null;
+      oldResolve();
+    }
+
     return new Promise((resolve) => {
       this._resolvePlay = resolve;
       this._fullText = text;
+      this._textChars = Array.from(text);
       this._isTyping = true;
       this._textEl.textContent = '';
+
+      if (this._container) {
+        this._container.classList.add('visible'); // 播放时使对话框可见
+      }
 
       if (speaker) {
         this._barEl.className = 'narration-bar state-character';
@@ -181,6 +199,10 @@ export class NarrationBar {
     this._isTyping = false;
     this._hideContinue();
 
+    if (this._container) {
+      this._container.classList.add('visible'); // 浮现时显示对话框
+    }
+
     this._barEl.className = 'narration-bar state-narration';
     this._speakerEl.style.display = 'none';
     this._textEl.textContent = text;
@@ -188,6 +210,9 @@ export class NarrationBar {
     this._floatingTimer = setTimeout(() => {
       this._textEl.textContent = '';
       this._floatingTimer = null;
+      if (this._container) {
+        this._container.classList.remove('visible'); // 自动淡出隐藏
+      }
     }, 4000);
   }
 
@@ -200,6 +225,9 @@ export class NarrationBar {
     this._textEl.textContent = '';
     this._speakerEl.style.display = 'none';
     this.setPortrait(null);
+    if (this._container) {
+      this._container.classList.remove('visible'); // 关闭对话时隐藏
+    }
     if (this._optionsEl) {
       this._optionsEl.remove();
       this._optionsEl = null;
@@ -211,8 +239,8 @@ export class NarrationBar {
   }
 
   _typeChar(index) {
-    if (index < this._fullText.length) {
-      this._textEl.textContent += this._fullText.charAt(index);
+    if (index < this._textChars.length) {
+      this._textEl.textContent += this._textChars[index];
       this._typingTimer = setTimeout(() => this._typeChar(index + 1), this._typeSpeed);
     } else {
       this._isTyping = false;

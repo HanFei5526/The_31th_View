@@ -97,9 +97,8 @@ export class TransitionManager {
 
   /**
    * 卷轴转场 — 章节切换
-   * @param {Object} chapterInfo - {number, name, subtitle}
    */
-  async scrollTransition(chapterInfo, duration = 3500) {
+  async scrollTransition(duration = 2200) {
     return new Promise(resolve => {
       this.isPlaying = true;
 
@@ -112,36 +111,20 @@ export class TransitionManager {
       `;
       document.body.appendChild(scroll);
 
-      // 章节标题卡
-      const card = document.createElement('div');
-      card.className = 'transition-chapter-card';
-      card.innerHTML = `
-        <div class="chapter-number">${chapterInfo.number || ''}</div>
-        <div class="chapter-name">${chapterInfo.name}</div>
-        ${chapterInfo.subtitle ? `<div class="chapter-subtitle">${chapterInfo.subtitle}</div>` : ''}
-      `;
-      document.body.appendChild(card);
-
       // 1. 卷轴合拢
       requestAnimationFrame(() => {
         scroll.classList.add('closing');
       });
 
-      // 2. 显示章节标题
-      setTimeout(() => {
-        card.classList.add('visible');
-      }, 1000);
-
-      // 3. 卷轴打开
+      // 2. 卷轴打开
       setTimeout(() => {
         scroll.classList.remove('closing');
         scroll.classList.add('opening');
       }, duration - 1200);
 
-      // 4. 清理
+      // 3. 清理
       setTimeout(() => {
         scroll.remove();
-        card.remove();
         this.isPlaying = false;
         resolve();
       }, duration);

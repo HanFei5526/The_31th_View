@@ -9,19 +9,20 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.2rem 2.5rem;
-  background: #2b2018;
-  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
-  border: 2px solid #5c432b;
-  border-radius: 2px;
-  color: #d9c8aa;
+  padding: 0.8rem 2.2rem;
+  min-height: 48px;
+  background: #713824;
+  border: 2px solid #4a2417;
+  border-radius: 0;
+  color: #e0c296;
   font-family: var(--font-serif);
-  font-size: 1.3rem;
-  letter-spacing: 0.15em;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: inset 0 0 0 1px #1a120e, inset 0 0 15px rgba(0,0,0,0.4), 0 12px 35px rgba(0,0,0,0.4);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease-out, box-shadow 0.2s ease-out;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85);
   z-index: 15;
 }
 .view-painting-btn.visible {
@@ -29,9 +30,9 @@
   transform: translate(-50%, -50%) scale(1);
 }
 .view-painting-btn:hover {
-  background: #3b2b20;
-  border-color: #785a3a;
+  background: #5c2d1b;
   transform: translate(-50%, -50%) scale(1.03);
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
 }
 .view-painting-btn.clicked {
   opacity: 0;
@@ -45,7 +46,7 @@
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 50;
   background: transparent;
@@ -55,14 +56,15 @@
 .pv-card-container {
   display: flex;
   flex-direction: row;
-  width: min(58vw, 980px);
-  height: min(54vh, 560px);
-  margin-bottom: 11rem;
-  background: rgba(12, 9, 8, 0.92);
+  /* 由 JS 动态设置宽高，不在此硬编码 */
+  margin-top: 1.5rem;
+  margin-bottom: 13.5rem;
+  background: rgba(28, 26, 24, 0.95);
   border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: 4px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.7);
   overflow: hidden;
+  transition: margin-bottom 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .pv-main {
@@ -73,22 +75,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 3rem;
+  padding: 0.5rem;
   overflow: hidden;
   border-right: none;
 }
 .pv-painting-card {
   position: relative;
   display: flex;
-  flex: 1;
+  /* 移除 flex: 1，由 JS 动态注入高宽自适应 */
   min-height: 0;
-  max-width: 100%;
-  max-height: 100%;
   /* Remove border and black background so the image perfectly spans the container */
   background: transparent;
   transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
-  cursor: crosshair;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='5' stroke='%23dfb36c' stroke-width='1'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23dfb36c'/%3E%3C/svg%3E") 12 12, crosshair;
 }
 .pv-painting-wrapper {
   position: relative;
@@ -115,27 +115,7 @@
   pointer-events: auto;
 }
 .pv-feedback {
-  position: fixed;
-  bottom: 12.25rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(15px);
-  max-width: min(52vw, 720px);
-  background: rgba(26, 20, 16, 0.95);
-  border: 1px solid rgba(160, 120, 90, 0.4);
-  color: #e6dac3;
-  padding: 0.8rem 1.8rem;
-  border-radius: 2px;
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  text-align: center;
-  opacity: 0;
-  transition: all 0.4s ease;
-  pointer-events: none;
-  z-index: 105;
-}
-.pv-feedback.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  display: none !important;
 }
 .pv-status {
   position: absolute;
@@ -280,87 +260,6 @@
 .pv-explode .pv-convergence-pulse {
   animation: pvRippleExpand 0.4s ease-out forwards;
   background: radial-gradient(circle, rgba(255,255,255,1) 0%, transparent 60%);
-}
-
-/* ==========================================================================
-   线索弹窗
-   ========================================================================== */
-.clue-popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(3px);
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: fadeIn 0.3s ease;
-}
-.clue-popup-plaque {
-  position: relative;
-  width: 500px;
-  max-width: 90vw;
-  background: #1e1511;
-  background-image: radial-gradient(ellipse at center, rgba(40,25,15,0.4) 0%, rgba(10,5,0,0.8) 100%);
-  border: 2px solid #5a4231;
-  border-radius: 2px;
-  padding: 2rem;
-  box-shadow: inset 0 0 20px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.2) inset;
-  font-family: var(--font-serif);
-  color: #e6dac3;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
-}
-.clue-popup-header {
-  font-size: 0.9rem;
-  color: #a08c6b;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.clue-popup-dot { color: #d4af37; }
-.clue-popup-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
-  margin: 1rem 0;
-}
-.clue-popup-title {
-  font-size: 1.4rem;
-  color: #d4af37;
-  font-weight: normal;
-  margin: 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-}
-.clue-popup-desc {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  min-height: 6rem;
-  text-align: justify;
-}
-.clue-popup-footer {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-}
-.clue-popup-btn {
-  background: transparent;
-  border: 1px solid #8a6b4e;
-  color: #d4af37;
-  padding: 0.6rem 1.5rem;
-  font-family: var(--font-serif);
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 0.1em;
-}
-.clue-popup-btn:hover {
-  background: rgba(212,175,55,0.1);
-  border-color: #d4af37;
-  box-shadow: 0 0 10px rgba(212,175,55,0.2);
-}
-.clue-popup-plaque.hiding {
-  transform: scale(0.9) translateY(20px);
-  opacity: 0;
 }
 
 /* 进入综合研讨按钮 */

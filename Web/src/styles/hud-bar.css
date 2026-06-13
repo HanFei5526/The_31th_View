@@ -223,3 +223,24 @@
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0px rgba(44, 36, 22, 0.3);
 }
+
+.prologue-synthesis-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 10.6rem;
+  z-index: 120;
+  min-height: 42px;
+  height: 42px;
+  padding: 0 1.5rem;
+  font-size: 1.0rem;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.prologue-synthesis-btn:hover:not(.disabled) {
+  transform: translateX(-50%);
+}
+
+.prologue-synthesis-btn::after {
+  display: none !important;
+}

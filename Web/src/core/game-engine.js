@@ -292,6 +292,50 @@ export class GameEngine {
         return;
       }
 
+      let resolved = false;
+      const safeResolve = () => {
+        if (!resolved) {
+          resolved = true;
+          resolve();
+        }
+      };
+
+      let timer1, timer2, timer3;
+
+      const finishFast = () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        document.removeEventListener('keydown', onKey);
+
+        el.style.display = 'none';
+        el.style.opacity = '0';
+        el.classList.remove('active');
+        el.style.transition = '';
+        el.style.filter = '';
+        el.style.background = '';
+        
+        safeResolve();
+      };
+
+      const onKey = (e) => {
+        if (e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
+          const activeEl = document.activeElement;
+          const isInput = activeEl && (
+            activeEl.tagName === 'INPUT' || 
+            activeEl.tagName === 'TEXTAREA' || 
+            activeEl.tagName === 'SELECT' || 
+            activeEl.isContentEditable
+          );
+          if (!isInput) {
+            e.preventDefault();
+            finishFast();
+          }
+        }
+      };
+
+      document.addEventListener('keydown', onKey);
+
       el.classList.add('active');
       el.style.display = 'block';
       el.style.opacity = '0';
@@ -306,19 +350,20 @@ export class GameEngine {
       });
 
       // 当遮罩完全不透明时，解析 Promise 让底层引擎切换场景 DOM
-      setTimeout(() => {
-        resolve();
+      timer1 = setTimeout(() => {
+        safeResolve();
 
         // 稍微停留缓冲，然后开始淡出遮罩，露出新场景
-        setTimeout(() => {
+        timer2 = setTimeout(() => {
           el.style.opacity = '0';
           el.style.filter = 'blur(12px)';
-          setTimeout(() => {
+          timer3 = setTimeout(() => {
             el.style.display = 'none';
             el.classList.remove('active');
             el.style.transition = '';
             el.style.filter = '';
             el.style.background = '';
+            document.removeEventListener('keydown', onKey);
           }, 800); // 等待淡出结束
         }, 100);
       }, 600);

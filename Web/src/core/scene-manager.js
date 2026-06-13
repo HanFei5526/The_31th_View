@@ -167,18 +167,64 @@ export class SceneManager {
 
       overlay.classList.add('active');
 
+      let switched = false;
+      let resolved = false;
+
+      let timer1, timer2, timer3;
+
+      const safeResolve = () => {
+        if (!resolved) {
+          resolved = true;
+          resolve();
+        }
+      };
+
+      const finishFast = () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        document.removeEventListener('keydown', onKey);
+
+        if (!switched) {
+          this._doSwitch(targetScene);
+          switched = true;
+        }
+        overlay.remove();
+        safeResolve();
+      };
+
+      const onKey = (e) => {
+        if (e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
+          const activeEl = document.activeElement;
+          const isInput = activeEl && (
+            activeEl.tagName === 'INPUT' || 
+            activeEl.tagName === 'TEXTAREA' || 
+            activeEl.tagName === 'SELECT' || 
+            activeEl.isContentEditable
+          );
+          if (!isInput) {
+            e.preventDefault();
+            finishFast();
+          }
+        }
+      };
+
+      document.addEventListener('keydown', onKey);
+
       // 褪色滤镜 1s + 背景变实 1.2s = 2.2s
-      setTimeout(() => {
+      timer1 = setTimeout(() => {
         this._doSwitch(targetScene);
+        switched = true;
         
         // 停留 0.5s 后淡出
-        setTimeout(() => {
+        timer2 = setTimeout(() => {
           overlay.style.transition = 'opacity 1s ease';
           overlay.style.opacity = '0';
           
-          setTimeout(() => {
+          timer3 = setTimeout(() => {
             overlay.remove();
-            resolve();
+            document.removeEventListener('keydown', onKey);
+            safeResolve();
           }, 1000);
         }, 500);
       }, 2200);

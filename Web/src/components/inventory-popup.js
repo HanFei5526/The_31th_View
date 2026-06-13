@@ -75,7 +75,45 @@ export class InventoryPopup {
       
       const icon = document.createElement('div');
       icon.className = 'inventory-item-icon';
-      icon.textContent = item.icon || '📦';
+      
+      // 根据 item.id 使用不同的简约线条 SVG 图标
+      if (item.id === 'notebook') {
+        icon.innerHTML = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="18" y="10" width="28" height="44" rx="2" />
+            <line x1="24" y1="10" x2="24" y2="54" />
+            <circle cx="24" cy="18" r="1" fill="#d4a853" />
+            <circle cx="24" cy="32" r="1" fill="#d4a853" />
+            <circle cx="24" cy="46" r="1" fill="#d4a853" />
+            <line x1="30" y1="20" x2="40" y2="20" opacity="0.6" stroke-width="1.2" />
+            <line x1="30" y1="28" x2="40" y2="28" opacity="0.6" stroke-width="1.2" />
+            <line x1="30" y1="36" x2="36" y2="36" opacity="0.6" stroke-width="1.2" />
+          </svg>
+        `;
+      } else if (item.id === 'hairpin') {
+        icon.innerHTML = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- 簪头芙蓉轮廓 -->
+            <path d="M18 22 C18 16, 26 16, 26 22 C26 16, 34 16, 34 22 C34 26, 29 32, 26 34 C23 32, 18 26, 18 22 Z" opacity="0.9" />
+            <path d="M22 23 C23 21, 25 21, 26 23" opacity="0.6" />
+            <!-- 簪身折断线 -->
+            <line x1="26" y1="34" x2="39" y2="47" />
+            <!-- 簪断口斜线提示 -->
+            <line x1="38" y1="45" x2="41" y2="48" stroke-width="2.5" />
+            <!-- 散落的断尾 -->
+            <line x1="43" y1="51" x2="47" y2="55" opacity="0.5" stroke-dasharray="2 2" />
+          </svg>
+        `;
+      } else {
+        icon.innerHTML = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="14" y="18" width="36" height="28" rx="2" />
+            <line x1="32" y1="18" x2="32" y2="46" />
+            <line x1="14" y1="32" x2="50" y2="32" />
+            <circle cx="32" cy="32" r="3" fill="#1c1917" />
+          </svg>
+        `;
+      }
       
       const info = document.createElement('div');
       info.className = 'inventory-item-info';
