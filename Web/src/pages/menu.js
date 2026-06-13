@@ -1,4 +1,4 @@
-const bgImage = '/images/menu-bg-5.png';
+const bgImage = '/images/menu-bg.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu
@@ -182,9 +182,7 @@ export default class MenuScene {
         <button class="action-btn ${hasSave ? 'action-btn--primary' : 'action-btn--secondary'}" id="btn-continue" ${hasSave ? '' : 'disabled'}>
           继续游戏
         </button>
-        <button class="action-btn action-btn--ghost" id="btn-clear" style="${hasSave ? '' : 'display:none;'}">
-          清除存档
-        </button>
+
       </footer>
     `;
 
@@ -209,19 +207,7 @@ export default class MenuScene {
       });
     }
 
-    // 清除存档
-    const clearBtn = root.querySelector('#btn-clear');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        if (confirm('确定要清除所有存档吗？此操作不可恢复。')) {
-          this.engine.saveSystem?.clear?.();
-          this.engine.gameProgress = {};
-          this.engine.inventory.items = [];
-          // 重新渲染
-          this.engine.switchScene('menu');
-        }
-      });
-    }
+
 
     // 章节点击
     root.querySelectorAll('.chapter-item--unlocked').forEach((item) => {
@@ -372,8 +358,104 @@ export default class MenuScene {
         this._transitionTimers.push(setTimeout(finish, totalDuration));
 
       }, 1500));
+    } else if (scene === 'chapter1') {
+      // 第一章：与序章相同结构的过场动画
+      const overlay = document.createElement('div');
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
+      this._transitionOverlay = overlay;
+
+      const titleStr = '第一章 · 东园';
+      const lines = [
+        "你睁开眼，四周的一切都不对。",
+        "不是工作室，不是扫描仪的冷光。",
+        "水墨晕染的庭院在眼前铺展开来。",
+        "五百年前的园林，正向你敞开大门。"
+      ];
+
+      overlay.innerHTML = `
+        <div class="prologue-transition-layout">
+          <div class="intro-prologue-title">${titleStr}</div>
+          <div class="intro-prologue-text" id="intro-chapter1-text"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const textContainer = overlay.querySelector('#intro-chapter1-text');
+      let finished = false;
+
+      const finish = (fast = false) => {
+        if (finished) return;
+        finished = true;
+        this._clearTransitionTimers();
+        document.removeEventListener('keydown', this._transitionKeyHandler);
+        this._transitionKeyHandler = null;
+
+        textContainer.querySelectorAll('span').forEach((p) => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        });
+
+        if (this._transitionOverlay === overlay) {
+          this._transitionOverlay = null;
+        }
+
+        this.engine.switchScene(scene, true);
+
+        if (fast) {
+          overlay.style.transition = 'opacity 0.4s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 450);
+        } else {
+          overlay.style.transition = 'opacity 1s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 1100);
+        }
+      };
+
+      this._transitionKeyHandler = (e) => {
+        if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+        e.preventDefault();
+        finish(true);
+      };
+      document.addEventListener('keydown', this._transitionKeyHandler);
+
+      this._transitionTimers.push(setTimeout(() => {
+        overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }, 50));
+
+      root.classList.add('menu-scene--exiting-slow');
+
+      textContainer.innerHTML = '';
+
+      this._transitionTimers.push(setTimeout(() => {
+        lines.forEach((line, index) => {
+          const p = document.createElement('span');
+          p.textContent = line;
+          p.style.opacity = '0';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          p.style.display = 'block';
+          textContainer.appendChild(p);
+
+          this._transitionTimers.push(setTimeout(() => {
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, index * 1200));
+        });
+
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        this._transitionTimers.push(setTimeout(finish, totalDuration));
+
+      }, 1500));
     } else {
-      // 其它后续章节（第一章等）直接淡出菜单并柔和淡入目标场景
+      // 其余章节直接淡出菜单并柔和淡入目标场景
       root.classList.add('menu-scene--exiting');
       setTimeout(() => {
         this.engine.switchScene(scene, false);

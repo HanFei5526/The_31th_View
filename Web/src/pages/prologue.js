@@ -533,7 +533,7 @@ export default class PrologueScene extends GameSceneBase {
     this._narrationBar.dismiss();
 
     // 播放较平滑的引导文本
-    await this._narrationBar.playLine('系统提示', '三处异常痕迹都找齐了。可以先在右侧笔记本“记录”里查看线索，或在“对话”里和 AI 讨论。准备好后，点击上方的“开启推理研讨”开始推导真相。');
+    await this._narrationBar.playLine('系统提示', '三处异常痕迹已找齐。你可以到笔记本的“记录”页查阅线索，或在“对话”页中进行讨论。准备就绪后，点击“开启推理研讨”即可继续。');
   }
 
   /**
@@ -565,7 +565,7 @@ export default class PrologueScene extends GameSceneBase {
     this._notebook.clearChat();
 
     // 播放新的综合研讨系统提示
-    this._narrationBar.playLine('系统提示', '已开启综合研讨推理。请在右侧笔记本的【综合研讨】页（可通过输入或点击快捷问题）与 AI 对话研讨，分析这三处痕迹的联系以推导结论；在【记录】页可随时查阅此前收集的所有线索。得出最终结论后即可继续剧情。');
+    this._narrationBar.playLine('系统提示', '已进入综合研讨。你可以在右侧的“综合研讨”页与 AI 对话，推导痕迹背后的真相；随时可在“记录”页查阅已收集的线索。得出结论后即可继续。');
 
     this._notebook.setPlaceholder('在此输入你对这三处痕迹之间关系的判断……');
 
