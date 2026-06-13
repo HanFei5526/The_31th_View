@@ -2,27 +2,27 @@
  * 《卅一景》序章 · 跌入画中 转场
  *
  * 多阶段转场效果：
- *   1. 冷蓝褪色 (1.5s)    — 扫描界面色调褪去
- *   2. 墨迹扩散 (2s)      — 从点击位置墨滴径向扩散
- *   3. 过渡文字 (6s)      — 渗字效果显示叙事文本
- *   4. 周鹤年回声 (2.5s)  — 导师最后一句话回响
+ *   1. 冷蓝褪色 (1.5s)    — 扫描界面色调褪去，触发画面与工作室背景模糊缩放异变
+ *   2. 焦墨淡入 (2s)      — 全屏高质感焦墨背景平滑淡入
+ *   3. 过渡文字 (8s)      — 渗字效果显示叙事文本，内心独白使用斜体区分
+ *   4. 周鹤年回声 (7.3s)  — 异步显现导师回声和旁白台词（统一字号）
  *   5. 淡出衔接 (1s)      — 过渡到下一场景
- *
- * CSS classes used (defined in transitions.css):
- *   .fall-transition-desat, .fall-transition-ink, .fall-ink-drop,
- *   .fall-transition-text-layer, .fall-transition-line,
- *   .fall-transition-echo, .fall-transition-final
  */
 
-/** 过渡文字 */
+/** 过渡文字 (场景5 · 跌入异象) */
 const TRANSITION_LINES = [
   '冷蓝色的扫描界面渐渐褪去。',
   '纸纹变成地面，墨线变成栏杆，',
   '边缘那一枚残字像水中落叶一样沉了下去。',
+  '「怎么回事……」'
 ];
 
-/** 周鹤年回声 */
-const ECHO_TEXT = '「记住，表面完整，不等于没有缺失。」';
+/** 周鹤年回声 (场景6 · 墨迹扩散转场) */
+const ECHO_LINES = [
+  '你听见周鹤年的声音在很远的地方响了一下——',
+  '「记住，表面完整，不等于没有缺失。」',
+  '然后，所有声音都消失了。'
+];
 
 export default class FallTransition {
   constructor() {
@@ -36,7 +36,7 @@ export default class FallTransition {
 
   /**
    * Play the full fall-into-painting transition sequence
-   * @param {{x: number, y: number}} origin — click origin point for ink spread
+   * @param {{x: number, y: number}} origin — click origin point for transition
    * @returns {Promise<void>} resolves when transition is complete
    */
   async play(origin) {
@@ -44,11 +44,14 @@ export default class FallTransition {
     this._skipped = false;
     document.addEventListener('keydown', this._boundOnKeyDown);
 
-    // Phase 1: Cold blue desaturation
+    // 激活页面古画与工作室背景异变效果
+    document.body.classList.add('fall-active');
+
+    // Phase 1: Cold blue desaturation & scene zoom
     await this._phaseDesat();
     if (this._skipped) return this._finishPlay();
 
-    // Phase 2: Ink spread from origin
+    // Phase 2: Smooth ink background fade-in
     await this._phaseInkSpread(origin);
     if (this._skipped) return this._finishPlay();
 
@@ -85,30 +88,21 @@ export default class FallTransition {
   }
 
   /**
-   * Phase 2: Ink spread from click origin
+   * Phase 2: Smooth ink background fade-in
    * @private
    */
   _phaseInkSpread(origin) {
     return new Promise(resolve => {
       this._phaseResolve = resolve;
+
       const container = document.createElement('div');
       container.className = 'fall-transition-ink';
       document.body.appendChild(container);
       this._elements.push(container);
 
-      // Create ink drop at origin
-      const drop = document.createElement('div');
-      drop.className = 'fall-ink-drop';
-      drop.style.left = `${origin.x}px`;
-      drop.style.top = `${origin.y}px`;
-      drop.style.width = '40px';
-      drop.style.height = '40px';
-      drop.style.marginLeft = '-20px';
-      drop.style.marginTop = '-20px';
-      container.appendChild(drop);
-
       requestAnimationFrame(() => {
-        drop.classList.add('spreading');
+        container.classList.add('active');
+        // 2.0秒后淡入过渡完成，进入文字显现阶段
         this._setTimer(resolve, 2000);
       });
     });
@@ -127,9 +121,17 @@ export default class FallTransition {
       this._elements.push(layer);
 
       // Create text lines
-      const lineEls = TRANSITION_LINES.map(text => {
+      const lineEls = TRANSITION_LINES.map((text, idx) => {
         const el = document.createElement('div');
         el.className = 'fall-transition-line';
+        // 第 4 句是沈念内心独白，设置为斜体样式
+        if (idx === 3) {
+          el.classList.add('inner-voice');
+        }
+        // 检测开引号，注入视觉避让类
+        if (text.startsWith('「')) {
+          el.classList.add('quote-aligned');
+        }
         el.textContent = text;
         layer.appendChild(el);
         return el;
@@ -141,7 +143,7 @@ export default class FallTransition {
       });
 
       // Wait for all lines to be shown, then hold briefly
-      const totalTime = 600 + TRANSITION_LINES.length * 1500 + 1500;
+      const totalTime = 600 + TRANSITION_LINES.length * 1500 + 2500; // 最后一句话延长停留 1 秒，增强可读性
       this._setTimer(() => {
         // Fade out text
         lineEls.forEach((el, i) => {
@@ -159,7 +161,6 @@ export default class FallTransition {
   _phaseEcho() {
     return new Promise(resolve => {
       this._phaseResolve = resolve;
-      // Reuse text layer or find it
       let layer = document.querySelector('.fall-transition-text-layer');
       if (!layer) {
         layer = document.createElement('div');
@@ -171,18 +172,36 @@ export default class FallTransition {
       // Clear previous text
       layer.innerHTML = '';
 
-      const echo = document.createElement('div');
-      echo.className = 'fall-transition-echo';
-      echo.textContent = ECHO_TEXT;
-      layer.appendChild(echo);
+      // 创建回声的 3 行台词
+      const echoData = [
+        { text: ECHO_LINES[0], type: 'narration', delay: 200 },
+        { text: ECHO_LINES[1], type: 'zhou', delay: 1500 },
+        { text: ECHO_LINES[2], type: 'narration', delay: 3800 }
+      ];
 
-      this._setTimer(() => echo.classList.add('visible'), 200);
+      const els = echoData.map(data => {
+        const el = document.createElement('div');
+        el.className = `fall-transition-echo-line fall-transition-echo-line--${data.type}`;
+        // 检测开引号，注入视觉避让类
+        if (data.text.startsWith('「')) {
+          el.classList.add('quote-aligned');
+        }
+        el.textContent = data.text;
+        layer.appendChild(el);
+        return { el, delay: data.delay };
+      });
 
-      // Hold, then fade
+      // 依次延迟淡入
+      els.forEach(item => {
+        this._setTimer(() => item.el.classList.add('visible'), item.delay);
+      });
+
+      // 停留并整体淡出
+      const fadeOutDelay = 7000; // 延长停留 1.2 秒，使最后一句旁白在余音淡出时有充足阅读时间
       this._setTimer(() => {
-        echo.classList.add('fading');
-        this._setTimer(resolve, 2500);
-      }, 2500);
+        els.forEach(item => item.el.classList.add('fading'));
+        this._setTimer(resolve, 1500); // 留足 1.5s 淡出动画时间
+      }, fadeOutDelay);
     });
   }
 
@@ -247,6 +266,16 @@ export default class FallTransition {
     document.removeEventListener('keydown', this._boundOnKeyDown);
     this._isPlaying = false;
     this._phaseResolve = null;
+
+    // 清除页面古画与工作室背景异变效果类
+    if (this._skipped) {
+      // 如果是被玩家按键跳过，延迟 300ms 异步清除，防止在新场景 solidOverlay 渲染生效前产生画面复位闪跳
+      setTimeout(() => {
+        document.body.classList.remove('fall-active');
+      }, 300);
+    } else {
+      document.body.classList.remove('fall-active');
+    }
 
     this._elements.forEach(el => {
       if (el && el.parentNode) {

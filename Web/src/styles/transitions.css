@@ -477,6 +477,40 @@
    序章 · 跌入画中 转场
    ============================================ */
 
+/* ============================================
+   序章 · 跌入画中 转场
+   ============================================ */
+
+/* --- 场景5 & 6 双阶段跌入画中异变与转场系统 --- */
+
+/* 场景5 启动：大背景（工作室）与古画同步进行不同尺度的视差缩放模糊淡出，形成“飞入画卷”的三维推镜头深度感 */
+body.fall-active .game-scene {
+  transform: scale(1.6) !important;
+  filter: blur(5px) sepia(0.3) !important;
+  opacity: 0;
+  pointer-events: none !important;
+  transition: transform 3.5s cubic-bezier(0.25, 1, 0.5, 1), 
+              filter 3.5s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 3.0s ease-in !important;
+}
+
+body.fall-active .pv-card-container {
+  transform: scale(2.2) rotate(1deg) !important;
+  filter: sepia(0.65) saturate(1.25) blur(10px) !important;
+  opacity: 0;
+  pointer-events: none !important;
+  transition: transform 3.5s cubic-bezier(0.25, 1, 0.5, 1), 
+              filter 3.5s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 3.0s ease-in !important;
+}
+
+body.fall-active .notebook-floating,
+body.fall-active .hud-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 1.5s ease-out !important;
+}
+
 /* Phase 1: Cold blue desaturation */
 .fall-transition-desat {
   position: fixed;
@@ -492,45 +526,20 @@
   opacity: 1;
 }
 
-/* Phase 2: Ink spread from click origin */
+/* Phase 2: Smooth ink background fade-in (高质感暖焦墨全屏淡入) */
 .fall-transition-ink {
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-transition) + 1);
   pointer-events: none;
   overflow: hidden;
-}
-
-.fall-transition-ink .fall-ink-drop {
-  position: absolute;
-  border-radius: 50%;
-  background: #2c1810;
-  transform: scale(0);
+  background-color: #16120f;
   opacity: 0;
+  transition: opacity 2.0s ease-in-out;
 }
 
-.fall-transition-ink .fall-ink-drop.spreading {
-  animation: fallInkSpread 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes fallInkSpread {
-  0% {
-    transform: scale(0);
-    opacity: 0.85;
-    border-radius: 50%;
-  }
-  30% {
-    opacity: 1;
-    border-radius: 48% 52% 45% 55%;
-  }
-  60% {
-    border-radius: 44% 56% 50% 50%;
-  }
-  100% {
-    transform: scale(60);
-    opacity: 1;
-    border-radius: 50%;
-  }
+.fall-transition-ink.active {
+  opacity: 1;
 }
 
 /* Phase 3: Transition text on ink background */
@@ -542,9 +551,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.8rem;
+  gap: 1.35rem; /* 间距优化，不要过大也不要太小 */
   padding: 2rem;
   pointer-events: none;
+}
+
+/* 针对以直角引号「开头的字行，向左负 text-indent 偏置 0.45em，抵消符号造成的左侧视觉凹陷空隙，实现真正视觉居中 */
+.fall-transition-line.quote-aligned,
+.fall-transition-echo-line.quote-aligned {
+  text-indent: -0.45em;
 }
 
 .fall-transition-line {
@@ -572,31 +587,52 @@
   transform: translateY(-8px);
 }
 
-/* Phase 4: Zhou Henian echo */
-.fall-transition-echo {
-  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
-  font-size: 1.3rem;
-  color: rgba(200, 190, 170, 0.8);
-  letter-spacing: 0.15em;
-  text-align: center;
+.fall-transition-line.inner-voice {
+  font-style: italic;
+  color: rgba(220, 210, 190, 0.72) !important;
+}
+
+/* Phase 4: Zhou Henian echo & narration lines (场景6 · 墨迹扩散转场) */
+.fall-transition-echo-line {
   opacity: 0;
   filter: blur(4px);
-  transform: scale(1.05);
+  transform: translateY(8px);
   transition: opacity 1.5s ease, filter 1.5s ease, transform 1.5s ease;
-  margin-top: 1.5rem;
+  text-align: center;
+  margin-bottom: 0.95rem; /* 精调行间距，确保连贯不松散 */
+  line-height: 1.8;
 }
 
-.fall-transition-echo.visible {
-  opacity: 0.85;
+.fall-transition-echo-line.visible {
+  opacity: 0.8;
   filter: blur(0);
-  transform: scale(1);
+  transform: translateY(0);
 }
 
-.fall-transition-echo.fading {
+.fall-transition-echo-line.fading {
   opacity: 0;
   filter: blur(6px);
-  transform: scale(0.97);
-  transition: opacity 2.5s ease, filter 2.5s ease, transform 2.5s ease;
+  transform: translateY(-8px);
+}
+
+.fall-transition-echo-line--zhou {
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  font-size: 1.1rem;
+  color: rgba(232, 224, 208, 0.95) !important;
+  letter-spacing: 0.15em;
+  margin: 0.8rem 0 0.8rem 0; /* 调密上下间距，避免过大的物理空洞 */
+  transition-duration: 2.0s;
+}
+
+.fall-transition-echo-line--zhou.visible {
+  opacity: 0.95;
+}
+
+.fall-transition-echo-line--narration {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 1.1rem;
+  color: rgba(200, 190, 170, 0.62) !important;
+  letter-spacing: 0.1em;
 }
 
 /* Phase 5: Final fade to next scene */
@@ -604,7 +640,7 @@
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-transition) + 3);
-  background: #2c1810;
+  background: #16120f;
   opacity: 1;
   pointer-events: none;
   transition: opacity 1.2s ease;
@@ -617,18 +653,14 @@
 /* Reduced motion fallback */
 @media (prefers-reduced-motion: reduce) {
   .fall-transition-desat { transition-duration: 0.3s; }
-  .fall-transition-ink .fall-ink-drop.spreading {
-    animation: fallInkFade 0.6s ease forwards;
-  }
-  @keyframes fallInkFade {
-    from { opacity: 0; transform: scale(60); }
-    to { opacity: 1; transform: scale(60); }
+  .fall-transition-ink {
+    transition-duration: 0.3s !important;
   }
   .fall-transition-line {
     transition-duration: 0.3s;
     filter: none;
   }
-  .fall-transition-echo {
+  .fall-transition-echo-line {
     transition-duration: 0.3s;
     filter: none;
   }

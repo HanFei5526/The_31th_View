@@ -713,7 +713,7 @@ export default class PrologueScene extends GameSceneBase {
     const solidOverlay = document.createElement('div');
     solidOverlay.style.position = 'fixed';
     solidOverlay.style.inset = '0';
-    solidOverlay.style.backgroundColor = '#2c1810'; // 与跌入画中的墨迹颜色一致
+    solidOverlay.style.backgroundColor = '#16120f'; // 与跌入画中的墨迹颜色一致
     solidOverlay.style.zIndex = '9999';
     document.body.appendChild(solidOverlay);
 
