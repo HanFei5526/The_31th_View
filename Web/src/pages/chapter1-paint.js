@@ -554,12 +554,17 @@ export default class Chapter1PaintScene {
   async _startSequence() {
     this.engine.currentChapter = 1;
     this.engine.currentWorld = 'paint';
-    await this._waitForSceneReady();
+    // 图片加载完成后立即激活子场景，避免遮罩淡出时露出黄色底色
+    await this._waitForImage(this._bgLanxue);
     if (this._exited) return;
-
-    // 激活兰雪堂
     this._lanxueEl.classList.add('active');
     this.state = SCENE_STATES.LANXUE;
+
+    await this._nextFrame();
+    await this._nextFrame();
+    await this._waitForIntroOverlayGone();
+    await this._delay(250);
+    if (this._exited) return;
     this._isNarrating = true;
 
     await this.narrationBar.playLine(null, '你睁开眼。四周的一切都不对——不是工作室，不是扫描仪的冷光。自己站在一个陌生的地方。');
@@ -572,8 +577,7 @@ export default class Chapter1PaintScene {
 
     // 旁白结束后开放 HUD，并引导玩家使用笔记本与场景探索。
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '你可以先打开右下角的【修复笔记本】，在【记录】里查看此前发现的线索；也可以在【对话】里写下疑问，看看周老师的批注能不能帮你理清眼前的情况。');
-    await this.narrationBar.playLine('系统提示', '如果暂时不想停下来整理，也可以直接在兰雪堂周围点击探索。脚下石径、竹影和廊柱边都像在等你靠近，后续的环境细节和剧情会从这些观察里慢慢展开。');
+    await this.narrationBar.playLine('系统提示', '右下角可打开修复笔记本：「对话」页可写下疑问与周老师批注讨论，「记录」页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
   }

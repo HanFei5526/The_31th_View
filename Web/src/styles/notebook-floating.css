@@ -1,5 +1,9 @@
 /* notebook-floating.css */
 
+.notebook-floating button:focus-visible {
+  outline: none;
+}
+
 .notebook-floating {
   position: absolute;
   top: 1.5rem;
