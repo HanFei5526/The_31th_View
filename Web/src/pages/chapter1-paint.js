@@ -483,7 +483,8 @@ export default class Chapter1PaintScene {
     this._hairpinReal = document.createElement('div');
     this._hairpinReal.className = 'furong-hairpin';
     this._hairpinReal.style.left = '45%';
-    this._hairpinReal.style.top = '28%';
+    // 容器会 scaleY(-1)，这里用 72% 才会在玩家看到的 28% 位置出现。
+    this._hairpinReal.style.top = '72%';
     this._hairpinReal.style.display = 'none';
     this._hairpinReal.tabIndex = 0;
     this._hairpinReal.setAttribute('role', 'button');
@@ -730,9 +731,9 @@ export default class Chapter1PaintScene {
     this._isNarrating = false;
 
     this.notebook.showQuickThoughts([
-      '真实栏杆和水中倒影为什么不一致？',
-      '水面分界线的微光可能说明什么？',
-      '倒影里多出的那件东西该怎么看？'
+      '栏杆上明明什么都没有，为什么水面的倒影里会多出一件东西？',
+      '水面上有一条光线在闪，我该点它看看吗？',
+      '倒影里挂着的那件东西，有办法看得更清楚吗？'
     ]);
 
     // 旁白已经暗示了倒影中有东西，给出不剧透顺序的谜题提示。
