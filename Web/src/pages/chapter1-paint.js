@@ -280,7 +280,14 @@ export default class Chapter1PaintScene {
     // 可选互动：石缝（峰石左下方）— 2-3~2-7
     const crackSpot = this._createHotspot(30, 72, 8, async () => {
       if (this._isNarrating) return;
-      if (this.engine.gameProgress.zhuiyunExplored) return;
+      if (this.engine.gameProgress.zhuiyunExplored) {
+        this._isNarrating = true;
+        await this.narrationBar.playLine(null, '你再次蹲低，看向峰石背后的缝隙。那一线光仍在那里，只有把视线压到足够低时才会出现。');
+        await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在「记录」页查看，也可到「对话」页继续梳理它和此前线索的关系。');
+        this.narrationBar.dismiss();
+        this._isNarrating = false;
+        return;
+      }
       this._isNarrating = true;
       await this.narrationBar.playLine(null, '你绕到峰石背后，注意到底部有一处极窄的石缝。');
       await this.narrationBar.playLine(null, '站着似乎看不到什么。你蹲下来，把视线压到石缝的高度。');
@@ -289,7 +296,7 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.zhuiyunExplored = true;
       this.notebook.addClueRecord('有些景，只从低处出现。');
-      this.narrationBar.showFeedback('笔记本自动记录');
+      await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在「记录」页查看，也可到「对话」页继续梳理它和此前线索的关系。');
       this.narrationBar.dismiss();
       this._isNarrating = false;
 
@@ -322,8 +329,10 @@ export default class Chapter1PaintScene {
     this._furongBg.style.backgroundImage = `url('${this._bgFurong}')`;
     this._furongWrap.appendChild(this._furongBg);
 
-    // 芙蓉榭探索阶段追踪
-    this._furongStep = 0; // 0=栏杆, 1=水面线, 2=倒影断簪, 3+=后续由状态标志控制
+    // 芙蓉榭谜题交互追踪：允许玩家自由点击，用次数递进提示。
+    this._furongRailingClicks = 0;
+    this._furongWaterlineClicks = 0;
+    this._furongReflectionClicks = 0;
 
     // 水面线
     this._waterline = document.createElement('div');
@@ -333,10 +342,11 @@ export default class Chapter1PaintScene {
     this._waterline.setAttribute('role', 'button');
     this._waterline.setAttribute('aria-label', '水面分界线');
     const onWaterlineInteract = async () => {
-      if (this._isFlipping) return;
+      if (this._isNarrating || this._isFlipping) return;
       if (this.state !== SCENE_STATES.FURONG && this.state !== SCENE_STATES.PUZZLE) return;
 
       if (!this._hairpinIdentified) {
+        this._furongWaterlineClicks += 1;
         this._createRipple(50, 55, this._furongWrap);
         this.narrationBar.showFloating('水面微微晃动，什么也没发生。');
         return;
@@ -414,8 +424,14 @@ export default class Chapter1PaintScene {
     // 真实栏杆（第一个可点击元素）— 3-6
     const realRailing = this._createHotspot(50, 35, 12, () => {
       if (this._isNarrating) return;
+      this._furongRailingClicks += 1;
       let msg = '你摸了摸栏杆。什么都没有。';
-      if (!this._isFlipped) msg += '但水面的倒影里，那件东西还在。';
+      if (!this._isFlipped) {
+        msg += '但水面的倒影里，那件东西还在。';
+        if (this._furongRailingClicks >= 3 && !this._hairpinIdentified) {
+          msg += ' 也许该试试看水面倒影。';
+        }
+      }
       this.narrationBar.showFloating(msg);
     }, '栏杆');
     this._furongWrap.appendChild(realRailing);
@@ -434,6 +450,7 @@ export default class Chapter1PaintScene {
     `;
     const onHairpinReflectionInteract = async () => {
       if (this._isNarrating) return;
+      this._furongReflectionClicks += 1;
       if (!this._hairpinIdentified) {
         this._isNarrating = true;
         this._createRipple(45, 72, this._furongWrap);
@@ -712,8 +729,17 @@ export default class Chapter1PaintScene {
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
-    // 旁白已经暗示了倒影中有东西，给出场景内提示
-    this.narrationBar.showFloating('水面与栏杆之间，有一点微弱金光没有随倒影散去。');
+    this.notebook.showQuickThoughts([
+      '真实栏杆和水中倒影为什么不一致？',
+      '水面分界线的微光可能说明什么？',
+      '倒影里多出的那件东西该怎么看？'
+    ]);
+
+    // 旁白已经暗示了倒影中有东西，给出不剧透顺序的谜题提示。
+    this._isNarrating = true;
+    await this.narrationBar.playLine('系统提示', '倒影谜题已开始。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要梳理时，可打开修复笔记本的「对话」页提问。');
+    this.narrationBar.dismiss();
+    this._isNarrating = false;
     this._resetIdleTimer('initial');
   }
 
