@@ -683,7 +683,12 @@ export default class Chapter1PaintScene {
     this._isNarrating = false;
 
     // 提示玩家可探索或直接前进
-    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。');
+    this.notebook.showQuickThoughts([
+      '这块石头的纹路为什么画得这么细？',
+      '峰石背后低处那点微光是什么？',
+      '这座峰石周围还藏着什么？'
+    ]);
+    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。你可以打开笔记本查看线索或继续讨论，也可以点击场景中的光点探索。');
   }
 
   async _switchToFurong() {
