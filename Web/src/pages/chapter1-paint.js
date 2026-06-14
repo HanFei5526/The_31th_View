@@ -606,9 +606,9 @@ export default class Chapter1PaintScene {
     // 旁白结束后开放 HUD，并引导玩家使用笔记本与场景探索。
     this.hudBar.show();
     this.notebook.showQuickThoughts([
-      '笔记本现在能查到哪些内容？',
-      '《三十一景图》大致是什么？',
-      '之前的边缘痕迹能说明什么？'
+      '这里是兰雪堂，我该留意什么？',
+      '第三十一景和前面三十幅，感觉上有什么不同？',
+      '为什么我看到的兰雪堂和照片里不一样？'
     ]);
     await this.narrationBar.playLine('系统提示', '右下角可打开修复笔记本：「对话」页可写下疑问与周老师批注讨论，「记录」页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
