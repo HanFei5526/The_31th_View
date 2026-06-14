@@ -393,9 +393,10 @@ export default class MenuScene {
       document.body.appendChild(overlay);
 
       const textContainer = overlay.querySelector('#intro-chapter1-text');
+      const chapter1Ready = this._preloadImage('/images/chapter1-lanxuetang.png');
       let finished = false;
 
-      const finish = (fast = false) => {
+      const finish = async (fast = false) => {
         if (finished) return;
         finished = true;
         this._clearTransitionTimers();
@@ -411,7 +412,9 @@ export default class MenuScene {
           this._transitionOverlay = null;
         }
 
-        this.engine.switchScene(scene, true);
+        await chapter1Ready;
+        await this.engine.switchScene(scene, true);
+        await this._nextFrame();
 
         if (fast) {
           overlay.style.transition = 'opacity 0.4s ease';
@@ -501,6 +504,28 @@ export default class MenuScene {
     if (!el) return false;
     const tag = el.tagName;
     return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  }
+
+  _preloadImage(src, timeout = 3000) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(done, timeout);
+      img.onload = done;
+      img.onerror = done;
+      img.src = src;
+      if (img.complete) done();
+    });
+  }
+
+  _nextFrame() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
   }
 
   _hasSaveData() {
