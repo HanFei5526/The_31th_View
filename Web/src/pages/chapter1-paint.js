@@ -610,7 +610,7 @@ export default class Chapter1PaintScene {
       '第三十一景和前面三十幅，感觉上有什么不同？',
       '为什么我看到的兰雪堂和照片里不一样？'
     ]);
-    await this.narrationBar.playLine('系统提示', '右下角可打开修复笔记本：「对话」页可写下疑问与周老师批注讨论，「记录」页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
+    await this.narrationBar.playLine('系统提示', '你可以打开右下角的修复笔记本，在"记录"页查看已获得的线索，或在"对话"页中讨论你的疑问。也可以直接点击场景中的光点开始探索。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
     this._showLanxueHotspots();
