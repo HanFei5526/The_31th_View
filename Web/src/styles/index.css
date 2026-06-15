@@ -30,6 +30,16 @@
   --paint-vermillion-glow: rgba(200, 64, 50, 0.3);
   --paint-gold: #b8860b;
 
+  /* 浅纸色遮罩 · 比纯白更温、更低亮度 */
+  --wash-paper-light: #f2ecdf;
+  --wash-paper-mid: #e7decb;
+  --wash-paper-deep: #dcd0b8;
+  --wash-paper-glow: rgba(246, 241, 230, 0.72);
+  --wash-paper-grain: rgba(118, 94, 54, 0.007);
+  --wash-paper-grain-soft: rgba(118, 94, 54, 0.004);
+  --wash-paper-gradient: linear-gradient(180deg, rgba(242, 236, 222, 0.99), rgba(226, 216, 197, 0.98));
+  --wash-paper-radial: radial-gradient(ellipse at center, var(--wash-paper-glow) 0%, rgba(218, 207, 186, 0.5) 100%);
+
   /* 共用 */
   --font-serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
   --font-handwrite: 'LXGW WenKai', 'KaiTi', 'STKaiti', serif;
@@ -97,15 +107,15 @@ body {
       0deg,
       transparent,
       transparent 3px,
-      rgba(139, 119, 79, 0.03) 3px,
-      rgba(139, 119, 79, 0.03) 6px
+      rgba(139, 119, 79, 0.012) 3px,
+      rgba(139, 119, 79, 0.012) 6px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 3px,
-      rgba(139, 119, 79, 0.02) 3px,
-      rgba(139, 119, 79, 0.02) 6px
+      rgba(139, 119, 79, 0.008) 3px,
+      rgba(139, 119, 79, 0.008) 6px
     );
 }
 
@@ -201,7 +211,7 @@ a {
   pointer-events: none;
   z-index: 2; /* 确保在背景图之上，但在UI层之下 */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.08; /* 控制噪点强度 */
+  opacity: 0.045; /* 控制噪点强度 */
   mix-blend-mode: multiply;
 }
 
@@ -221,7 +231,7 @@ a {
 
 /* 画中世界 */
 .paint-world {
-  background: var(--paint-bg);
+  background: var(--wash-paper-mid);
   color: var(--paint-text);
   font-family: var(--font-handwrite);
 }
@@ -240,9 +250,10 @@ a {
       0deg,
       transparent,
       transparent 2px,
-      rgba(139, 69, 19, 0.02) 2px,
-      rgba(139, 69, 19, 0.02) 4px
+      var(--wash-paper-grain-soft) 2px,
+      var(--wash-paper-grain-soft) 4px
     );
+  opacity: 0.32;
   pointer-events: none;
   z-index: 1;
 }
@@ -1150,7 +1161,7 @@ a {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: var(--paint-bg-deep);
+  background: var(--wash-paper-gradient), var(--wash-paper-mid);
 }
 
 .ch1-subscene {
@@ -1158,6 +1169,7 @@ a {
   inset: 0;
   background-size: cover;
   background-position: center;
+  background-color: var(--wash-paper-mid);
   transition: opacity 0.6s ease;
   opacity: 0;
   pointer-events: none;
@@ -1186,8 +1198,8 @@ a {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at center, transparent 55%, rgba(40, 30, 20, 0.35) 100%),
-    rgba(60, 48, 32, 0.12);
+    radial-gradient(ellipse at center, transparent 58%, rgba(50, 38, 24, 0.24) 100%),
+    rgba(78, 58, 34, 0.06);
   z-index: 1;
 }
 
@@ -1339,7 +1351,7 @@ a {
 
 @keyframes dreamyBlur {
   0% { filter: blur(0) brightness(1) sepia(0); }
-  50% { filter: blur(8px) brightness(1.2) sepia(0.3); }
+  50% { filter: blur(7px) brightness(1.08) sepia(0.14); }
   100% { filter: blur(0) brightness(1) sepia(0); }
 }
 
@@ -1348,6 +1360,7 @@ a {
   inset: 0;
   background-size: cover;
   background-position: center;
+  background-color: var(--wash-paper-mid);
 }
 
 .furong-waterline {
@@ -1509,5 +1522,5 @@ a {
 .fade-to-sepia-overlay.active {
   backdrop-filter: sepia(0.8) grayscale(0.5);
   -webkit-backdrop-filter: sepia(0.8) grayscale(0.5);
-  background: #eeece6; /* 然后淡入到浅纸色实色 */
+  background: var(--wash-paper-mid); /* 然后淡入到浅纸色实色 */
 }

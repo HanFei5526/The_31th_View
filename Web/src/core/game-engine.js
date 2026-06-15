@@ -372,7 +372,7 @@ export class GameEngine {
       overlay.className = 'world-transition-overlay';
       overlay.style.cssText = `
         position: fixed; inset: 0; z-index: 250;
-        background: linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96));
+        background: var(--wash-paper-gradient);
         opacity: 0; pointer-events: none;
         transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
       `;
@@ -507,8 +507,8 @@ export class GameEngine {
       el.style.opacity = '0';
       el.style.filter = 'blur(8px)';
       el.style.background = [
-        'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96))',
-        'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(226, 220, 208, 0.5) 100%)'
+        'var(--wash-paper-gradient)',
+        'var(--wash-paper-radial)'
       ].join(', ');
 
       // 柔缓淡入遮罩
@@ -603,8 +603,8 @@ export class GameEngine {
       el.style.opacity = '0';
       el.style.filter = prefersReducedMotion ? 'none' : 'blur(4px)';
       el.style.background = [
-        'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(239, 236, 229, 0.97))',
-        'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(232, 228, 219, 0.58) 100%)'
+        'var(--wash-paper-gradient)',
+        'var(--wash-paper-radial)'
       ].join(', ');
 
       requestAnimationFrame(() => {
@@ -645,7 +645,7 @@ export class GameEngine {
     const el = document.createElement('div');
     el.className = 'transition-overlay';
     el.style.display = 'none';
-    el.style.background = 'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96))';
+    el.style.background = 'var(--wash-paper-gradient)';
     this._appElement.appendChild(el);
     this._transitionEl = el;
   }
@@ -662,7 +662,7 @@ export class GameEngine {
     );
     // 同步为浅纸色过渡遮罩，避免切换时出现黑屏或浓黄闪屏
     if (this._transitionEl) {
-      this._transitionEl.style.background = 'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96))';
+      this._transitionEl.style.background = 'var(--wash-paper-gradient)';
     }
   }
 

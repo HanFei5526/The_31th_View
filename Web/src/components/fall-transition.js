@@ -3,8 +3,8 @@
  *
  * 多阶段转场效果：
  *   1. 冷蓝褪色 (1.5s)    — 扫描界面色调褪去，触发画面与工作室背景模糊缩放异变
- *   2. 焦墨淡入 (2s)      — 全屏高质感焦墨背景平滑淡入
- *   3. 过渡文字 (8s)      — 渗字效果显示叙事文本，内心独白使用斜体区分
+ *   2. 浅纸色淡入 (2s)    — 放大古画底层与半透明纸色遮罩平滑淡入
+ *   3. 过渡文字 (8s)      — 渗字效果显示叙事文本，引号内声音统一样式
  *   4. 周鹤年回声 (7.3s)  — 异步显现导师回声和旁白台词（统一字号）
  *   5. 淡出衔接 (1s)      — 过渡到下一场景
  */
@@ -23,6 +23,8 @@ const ECHO_LINES = [
   '「记住，表面完整，不等于没有缺失。」',
   '然后，所有声音都消失了。'
 ];
+
+const PAINTING_BACKDROP_SRC = '/images/scan-painting.png';
 
 export default class FallTransition {
   constructor() {
@@ -51,7 +53,7 @@ export default class FallTransition {
     await this._phaseDesat();
     if (this._skipped) return this._finishPlay();
 
-    // Phase 2: Smooth ink background fade-in
+    // Phase 2: Enlarged painting backdrop & light paper background fade-in
     await this._phaseInkSpread(origin);
     if (this._skipped) return this._finishPlay();
 
@@ -88,12 +90,18 @@ export default class FallTransition {
   }
 
   /**
-   * Phase 2: Smooth ink background fade-in
+   * Phase 2: Enlarged painting backdrop & light paper background fade-in
    * @private
    */
   _phaseInkSpread(origin) {
     return new Promise(resolve => {
       this._phaseResolve = resolve;
+
+      const backdrop = document.createElement('div');
+      backdrop.className = 'fall-transition-painting-backdrop';
+      backdrop.style.backgroundImage = `url("${PAINTING_BACKDROP_SRC}")`;
+      document.body.appendChild(backdrop);
+      this._elements.push(backdrop);
 
       const container = document.createElement('div');
       container.className = 'fall-transition-ink';
@@ -101,6 +109,7 @@ export default class FallTransition {
       this._elements.push(container);
 
       requestAnimationFrame(() => {
+        backdrop.classList.add('active');
         container.classList.add('active');
         // 2.0秒后淡入过渡完成，进入文字显现阶段
         this._setTimer(resolve, 2000);
@@ -124,7 +133,7 @@ export default class FallTransition {
       const lineEls = TRANSITION_LINES.map((text, idx) => {
         const el = document.createElement('div');
         el.className = 'fall-transition-line';
-        // 第 4 句是沈念内心独白，设置为斜体样式
+        // 第 4 句是沈念内心独白，使用“引号内声音”样式
         if (idx === 3) {
           el.classList.add('inner-voice');
         }
@@ -285,6 +294,6 @@ export default class FallTransition {
     this._elements = [];
 
     // Also clean up any orphaned transition elements
-    document.querySelectorAll('.fall-transition-desat, .fall-transition-ink, .fall-transition-text-layer, .fall-transition-final').forEach(el => el.remove());
+    document.querySelectorAll('.fall-transition-desat, .fall-transition-painting-backdrop, .fall-transition-ink, .fall-transition-text-layer, .fall-transition-final').forEach(el => el.remove());
   }
 }

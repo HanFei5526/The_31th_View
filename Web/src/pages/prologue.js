@@ -718,7 +718,7 @@ export default class PrologueScene extends GameSceneBase {
     const solidOverlay = document.createElement('div');
     solidOverlay.style.position = 'fixed';
     solidOverlay.style.inset = '0';
-    solidOverlay.style.background = 'linear-gradient(180deg, rgba(248, 247, 243, 0.99), rgba(238, 235, 226, 0.98))';
+    solidOverlay.style.background = 'var(--wash-paper-gradient)';
     solidOverlay.style.zIndex = '9999';
     document.body.appendChild(solidOverlay);
 

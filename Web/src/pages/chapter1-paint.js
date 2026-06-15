@@ -829,7 +829,8 @@ export default class Chapter1PaintScene {
       this.narrationBar.dismiss();
 
       await this.narrationBar.playLine(null, '水面重新归于平静。你把断簪小心地收起来。');
-      await this.narrationBar.playLine('沈念', '蘅。一个女子的名字？她把自己藏在一支簪子的背面——不想被别人看见，又不甘心完全消失。');
+      await this.narrationBar.playLine('沈念', '蘅。按周老师的批注，这个字有女子名的意味。');
+      await this.narrationBar.playLine('沈念', '它偏偏刻在簪身背面，又小得几乎要错过。像是刻字的人想留下一点痕迹，却仍把它收在不显眼处。');
       await this.narrationBar.playLine(null, '你站在榭前，忽然觉得眼前的光线在变。周围的墨色好像在一点点褪去，像清水洗过宣纸。');
       this.narrationBar.dismiss();
 
