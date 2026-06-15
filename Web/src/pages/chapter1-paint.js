@@ -30,9 +30,9 @@ export default class Chapter1PaintScene {
     this.state = SCENE_STATES.LANXUE;
 
     // 三张独立背景图
-    this._bgLanxue = '/images/chapter1-lanxue.png';
-    this._bgZhuiyun = '/images/chapter1-zhuiyun.png';
-    this._bgFurong = '/images/chapter1-furong.png';
+    this._bgLanxue = '/images/chapter1-lanxuetang.png';
+    this._bgZhuiyun = '/images/chapter1-zhuiyunfeng.png';
+    this._bgFurong = '/images/chapter1-furongxie.png';
 
     // 存档状态
     this.engine.gameProgress.plaqueNoted = this.engine.gameProgress.plaqueNoted || false;
@@ -48,15 +48,21 @@ export default class Chapter1PaintScene {
     this._container = null;
     this._sceneRoot = null;
     this._uiLayer = null;
+    this._lightDiscussionSkipBtn = null;
+    this._exited = false;
   }
 
   /* ==================== 生命周期 ==================== */
 
   enter(container) {
+    this._exited = false;
     this._container = container;
+    this.engine.currentChapter = 1;
     this.engine.currentWorld = 'paint';
     this._container.classList.remove('real-world');
     this._container.classList.add('paint-world');
+
+    this.engine.ensureCarryoverForChapter?.(1);
 
     // UI 层：pointer-events:none 让点击穿透到场景，但组件自身恢复 auto
     this._uiLayer = document.createElement('div');
@@ -68,10 +74,6 @@ export default class Chapter1PaintScene {
     this.hudBar.mount(this._uiLayer);
     this.inventoryPopup.mount(this._uiLayer);
 
-    if (this.narrationBar._container) {
-      this.narrationBar._container.style.pointerEvents = 'auto';
-    }
-
     this.hudBar.onNotebookClick(() => {
       if (this.notebook.isExpanded()) {
         this.notebook.collapse();
@@ -82,7 +84,6 @@ export default class Chapter1PaintScene {
     this.hudBar.onInventoryClick(() => {
       this.inventoryPopup.open();
     });
-    this.hudBar.show();
 
     // 绑定 Notebook 提交事件
     this.notebook.onSubmit(async (text) => {
@@ -139,12 +140,14 @@ export default class Chapter1PaintScene {
   }
 
   exit() {
+    this._exited = true;
     this._clearIdleTimer();
     if (this._flipTimeout) {
       clearTimeout(this._flipTimeout);
       this._flipTimeout = null;
     }
     this.narrationBar.unmount();
+    this._hideLightDiscussionSkipButton();
     this.notebook.unmount();
     this.hudBar.unmount();
     this.inventoryPopup.unmount();
@@ -160,35 +163,41 @@ export default class Chapter1PaintScene {
     this._lanxueEl.className = 'ch1-subscene';
     this._lanxueEl.style.backgroundImage = `url('${this._bgLanxue}')`;
 
-    // 按文档顺序依次解锁的热点队列
+    // 兰雪堂热点全部开放，玩家可按任意顺序探索。
     this._lanxueSpots = [];
-    this._lanxueStep = 0;
+    this._lanxueRequiredSpotIds = ['bamboo', 'stonePath', 'pillar', 'plaque'];
+    this._lanxueVisitedSpots = new Set();
+    this._lanxueExplorationComplete = false;
 
     // 氛围热点：翠竹（左侧竹林区域）— 1-7b
-    const bambooSpot = this._createHotspot(15, 50, 12, () => {
+    const bambooSpot = this._createHotspot(15, 50, 12, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你拨开竹叶。沙沙作响，但手上没有感到风。');
-      this._advanceLanxueStep();
+      await this._markLanxueSpotVisited('bamboo', { delayBeforeCompletion: 900 });
     }, '翠竹');
 
     // 氛围热点：青石板路（底部路面）— 1-7a
-    const stonePath = this._createHotspot(50, 85, 10, () => {
+    const stonePath = this._createHotspot(50, 85, 10, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你踩了踩脚下的石板。有些温热，纹理清晰得像刚刻上去的。');
-      this._advanceLanxueStep();
+      await this._markLanxueSpotVisited('stonePath', { delayBeforeCompletion: 900 });
     }, '青石板路');
 
     // 氛围热点：廊柱（建筑右侧）— 1-7c
-    const pillarSpot = this._createHotspot(70, 55, 6, () => {
+    const pillarSpot = this._createHotspot(70, 55, 6, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你走到廊柱边，伸手碰了碰。木纹里藏着细密的墨线——这不是一根真正的柱子，它是一笔画出来的。');
-      this._advanceLanxueStep();
+      await this._markLanxueSpotVisited('pillar', { delayBeforeCompletion: 900 });
     }, '廊柱');
 
     // 叙事触发：匾额（建筑区域，必须点击才能推进）— 1-8~1-14
     const plaqueSpot = this._createHotspot(50, 22, 8, async () => {
       if (this._isNarrating) return;
-      if (this.engine.gameProgress.plaqueNoted) return;
+      if (this.engine.gameProgress.plaqueNoted) {
+        this.narrationBar.showFloating('兰雪堂匾额上，那道极细的横笔已经记在笔记本里。');
+        await this._markLanxueSpotVisited('plaque', { delayBeforeCompletion: 900 });
+        return;
+      }
       this._isNarrating = true;
       await this.narrationBar.playLine(null, '你走近敞厅，抬头看向门楣上的匾额。');
       await this.narrationBar.playLine(null, '三个字——「兰雪堂」，落款是文徵明。字迹端正，墨色沉稳。');
@@ -199,47 +208,70 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.plaqueNoted = true;
       this.notebook.addClueRecord('[线索] 匾额多余笔画 — 兰雪堂匾额"兰"字草字头下多了一道极细横笔，笔力稳定，墨色一致，非败笔');
-      this.narrationBar.showFeedback('已记录线索：匾额多余笔画');
+      await this.narrationBar.playLine('系统提示', '这处异常已经写入修复笔记本。之后可以点击右下角「修复笔记本」，切到「记录」页查看已经获得的线索；如果想继续追问，也可以回到「对话」页，把你的判断写下来。');
 
       await this.narrationBar.playLine('沈念', '这座厅后面还有路。石径延伸过去，像是有什么在更深处等着。');
       this.narrationBar.dismiss();
       this._isNarrating = false;
-
-      // 显示前进箭头
-      if (!this._lanxueArrow) {
-        this._lanxueArrow = this._createNavArrow(50, 70, 10, () => this._switchToZhuiyun(), '前往缀云峰');
-        this._lanxueEl.appendChild(this._lanxueArrow);
-      }
+      await this._markLanxueSpotVisited('plaque');
     }, '匾额');
 
-    // 按文档顺序排列：翠竹 → 青石板路 → 廊柱 → 匾额
     this._lanxueSpots = [bambooSpot, stonePath, pillarSpot, plaqueSpot];
     this._lanxueSpots.forEach(spot => {
       spot.style.display = 'none';
       this._lanxueEl.appendChild(spot);
     });
 
-    // 若已从存档恢复且匾额已记录，显示所有热点 + 前进箭头
-    if (this.engine.gameProgress.plaqueNoted) {
-      this._lanxueSpots.forEach(spot => spot.style.display = '');
-      this._lanxueStep = this._lanxueSpots.length;
-      if (!this._lanxueArrow) {
-        this._lanxueArrow = this._createNavArrow(50, 70, 10, () => this._switchToZhuiyun(), '前往缀云峰');
-        this._lanxueEl.appendChild(this._lanxueArrow);
-      }
-    } else {
-      // 显示第一个热点
-      this._lanxueSpots[0].style.display = '';
-    }
-
     this._sceneRoot.appendChild(this._lanxueEl);
   }
 
-  _advanceLanxueStep() {
-    this._lanxueStep++;
-    if (this._lanxueStep < this._lanxueSpots.length) {
-      this._lanxueSpots[this._lanxueStep].style.display = '';
+  async _markLanxueSpotVisited(id, options = {}) {
+    if (!this._lanxueVisitedSpots || this._lanxueVisitedSpots.has(id)) return;
+    this._lanxueVisitedSpots.add(id);
+
+    if (this._lanxueRequiredSpotIds.every(spotId => this._lanxueVisitedSpots.has(spotId))) {
+      if (options.delayBeforeCompletion) {
+        await this._delay(options.delayBeforeCompletion);
+      }
+      await this._completeLanxueExploration();
     }
+  }
+
+  _showLanxueHotspots() {
+    if (!this._lanxueSpots) return;
+    this._lanxueSpots.forEach(spot => {
+      spot.style.display = '';
+    });
+  }
+
+  async _completeLanxueExploration() {
+    if (this._lanxueExplorationComplete) return;
+    this._lanxueExplorationComplete = true;
+
+    this._hideLanxueHotspots();
+    this.narrationBar.dismiss();
+    this._showLanxueArrow();
+
+    this._isNarrating = true;
+    await this.narrationBar.playLine('系统提示', '兰雪堂周围几处可疑细节已经看过了。你可以继续在笔记本里翻阅线索或讨论，也可以直接点击画面中央的光点，沿石径前往下一处场景。');
+    this.narrationBar.dismiss();
+    this._isNarrating = false;
+  }
+
+  _hideLanxueHotspots() {
+    if (!this._lanxueSpots) return;
+    this._lanxueSpots.forEach(spot => {
+      spot.style.display = 'none';
+    });
+  }
+
+  _showLanxueArrow() {
+    if (this._lanxueArrow) return;
+    this._lanxueArrow = this._createNavArrow(50, 70, 10, () => {
+      if (this._isNarrating) return;
+      this._switchToZhuiyun();
+    }, '前往缀云峰');
+    this._lanxueEl.appendChild(this._lanxueArrow);
   }
 
   _buildZhuiyunScene() {
@@ -250,7 +282,14 @@ export default class Chapter1PaintScene {
     // 可选互动：石缝（峰石左下方）— 2-3~2-7
     const crackSpot = this._createHotspot(30, 72, 8, async () => {
       if (this._isNarrating) return;
-      if (this.engine.gameProgress.zhuiyunExplored) return;
+      if (this.engine.gameProgress.zhuiyunExplored) {
+        this._isNarrating = true;
+        await this.narrationBar.playLine(null, '你再次蹲低，看向峰石背后的缝隙。那一线光仍在那里，只有把视线压到足够低时才会出现。');
+        await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在「记录」页查看，也可到「对话」页继续梳理它和此前线索的关系。');
+        this.narrationBar.dismiss();
+        this._isNarrating = false;
+        return;
+      }
       this._isNarrating = true;
       await this.narrationBar.playLine(null, '你绕到峰石背后，注意到底部有一处极窄的石缝。');
       await this.narrationBar.playLine(null, '站着似乎看不到什么。你蹲下来，把视线压到石缝的高度。');
@@ -259,7 +298,7 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.zhuiyunExplored = true;
       this.notebook.addClueRecord('有些景，只从低处出现。');
-      this.narrationBar.showFeedback('笔记本自动记录');
+      await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在「记录」页查看，也可到「对话」页继续梳理它和此前线索的关系。');
       this.narrationBar.dismiss();
       this._isNarrating = false;
 
@@ -292,22 +331,25 @@ export default class Chapter1PaintScene {
     this._furongBg.style.backgroundImage = `url('${this._bgFurong}')`;
     this._furongWrap.appendChild(this._furongBg);
 
-    // 芙蓉榭探索阶段追踪
-    this._furongStep = 0; // 0=栏杆, 1=水面线, 2=倒影断簪, 3+=后续由状态标志控制
+    // 芙蓉榭谜题交互追踪：允许玩家自由点击，用次数递进提示。
+    this._furongRailingClicks = 0;
+    this._furongWaterlineClicks = 0;
+    this._furongReflectionClicks = 0;
 
     // 水面线
     this._waterline = document.createElement('div');
     this._waterline.className = 'furong-waterline';
-    this._waterline.style.top = '55%';
+    this._waterline.style.top = '66%';
     this._waterline.tabIndex = 0;
     this._waterline.setAttribute('role', 'button');
     this._waterline.setAttribute('aria-label', '水面分界线');
     const onWaterlineInteract = async () => {
-      if (this._isFlipping) return;
+      if (this._isNarrating || this._isFlipping) return;
       if (this.state !== SCENE_STATES.FURONG && this.state !== SCENE_STATES.PUZZLE) return;
 
       if (!this._hairpinIdentified) {
-        this._createRipple(50, 55, this._furongWrap);
+        this._furongWaterlineClicks += 1;
+        this._createRipple(50, 66, this._furongWrap);
         this.narrationBar.showFloating('水面微微晃动，什么也没发生。');
         return;
       }
@@ -325,6 +367,12 @@ export default class Chapter1PaintScene {
         this._furongWrap.classList.add('flipped');
         this._isFlipped = true;
         this.state = SCENE_STATES.PUZZLE;
+        if (this._realRailing) this._realRailing.style.display = 'none';
+        if (this._hairpinReflection) this._hairpinReflection.style.display = 'none';
+        if (this._waterline) {
+          this._waterline.style.display = 'none';
+          this._waterline.style.pointerEvents = 'none';
+        }
 
         this._flipTimeout = setTimeout(async () => {
           this._isFlipping = false;
@@ -338,10 +386,7 @@ export default class Chapter1PaintScene {
           this.narrationBar.dismiss();
           this._isNarrating = false;
 
-          // 显示翻转后的断簪，隐藏倒影中断簪
-          if (this._hairpinReflection) this._hairpinReflection.style.display = 'none';
           if (this._hairpinReal) this._hairpinReal.style.display = 'block';
-
           this.narrationBar.showFloating('断簪停在近前，金光轻轻一闪。');
           this._resetIdleTimer('flipper');
         }, 2400);
@@ -368,6 +413,7 @@ export default class Chapter1PaintScene {
 
         if (this._hairpinReflection) this._hairpinReflection.style.display = 'block';
         if (this._hairpinReal) this._hairpinReal.style.display = 'none';
+        if (this._realRailing) this._realRailing.style.display = '';
 
         this._resetIdleTimer('identified');
       }
@@ -382,13 +428,19 @@ export default class Chapter1PaintScene {
     this._furongWrap.appendChild(this._waterline);
 
     // 真实栏杆（第一个可点击元素）— 3-6
-    const realRailing = this._createHotspot(50, 35, 12, () => {
+    this._realRailing = this._createHotspot(50, 35, 12, () => {
       if (this._isNarrating) return;
+      this._furongRailingClicks += 1;
       let msg = '你摸了摸栏杆。什么都没有。';
-      if (!this._isFlipped) msg += '但水面的倒影里，那件东西还在。';
+      if (!this._isFlipped) {
+        msg += '但水面的倒影里，那件东西还在。';
+        if (this._furongRailingClicks >= 3 && !this._hairpinIdentified) {
+          msg += ' 也许该试试看水面倒影。';
+        }
+      }
       this.narrationBar.showFloating(msg);
     }, '栏杆');
-    this._furongWrap.appendChild(realRailing);
+    this._furongWrap.appendChild(this._realRailing);
 
     // 倒影中断簪（翻转前可见）— 3-7~3-9
     this._hairpinReflection = document.createElement('div');
@@ -400,10 +452,17 @@ export default class Chapter1PaintScene {
     this._hairpinReflection.setAttribute('aria-label', '水面倒影中的物件');
     this._hairpinReflection.innerHTML = `
       <div class="hairpin-gleam visible"></div>
-      <span class="hairpin-icon" aria-hidden="true"></span>
+      <span class="hairpin-icon" aria-hidden="true">
+        <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
+          <path class="hairpin-stem" d="M18 36 C20 28 23 18 27 8" />
+          <path class="hairpin-break" d="M15 29 L22 24" />
+          <path class="hairpin-flower" d="M27 9 C20 10 17 15 20 21 C25 19 29 15 27 9" />
+        </svg>
+      </span>
     `;
     const onHairpinReflectionInteract = async () => {
       if (this._isNarrating) return;
+      this._furongReflectionClicks += 1;
       if (!this._hairpinIdentified) {
         this._isNarrating = true;
         this._createRipple(45, 72, this._furongWrap);
@@ -436,14 +495,21 @@ export default class Chapter1PaintScene {
     this._hairpinReal = document.createElement('div');
     this._hairpinReal.className = 'furong-hairpin';
     this._hairpinReal.style.left = '45%';
-    this._hairpinReal.style.top = '28%';
+    // 容器会 scaleY(-1)，这里用 72% 才会在玩家看到的 28% 位置出现。
+    this._hairpinReal.style.top = '72%';
     this._hairpinReal.style.display = 'none';
     this._hairpinReal.tabIndex = 0;
     this._hairpinReal.setAttribute('role', 'button');
     this._hairpinReal.setAttribute('aria-label', '断簪');
     this._hairpinReal.innerHTML = `
       <div class="hairpin-gleam visible"></div>
-      <span class="hairpin-icon" aria-hidden="true"></span>
+      <span class="hairpin-icon" aria-hidden="true">
+        <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
+          <path class="hairpin-stem" d="M18 36 C20 28 23 18 27 8" />
+          <path class="hairpin-break" d="M15 29 L22 24" />
+          <path class="hairpin-flower" d="M27 9 C20 10 17 15 20 21 C25 19 29 15 27 9" />
+        </svg>
+      </span>
     `;
     const onHairpinRealInteract = async () => {
       if (this._isNarrating) return;
@@ -472,9 +538,10 @@ export default class Chapter1PaintScene {
 
       this.notebook.addClueRecord('[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字');
       this.notebook.addClueRecord('[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明');
-      this.narrationBar.showFeedback('已记录线索：断簪"蘅"字刻痕');
+      this.notebook.expand();
+      this.notebook.setLightweightMode(true);
+      await this.narrationBar.playLine('系统提示', '已获得物件：「断簪」。断簪与「蘅」字刻痕已写入修复笔记本；可在「记录」页查看，也可在「梳理」页轻量讨论；如果暂时不想讨论，也可以跳过。');
 
-      this.narrationBar.dismiss();
       this._isNarrating = false;
       this._startLightDiscussion();
     };
@@ -501,8 +568,9 @@ export default class Chapter1PaintScene {
     spot.className = 'ch1-hotspot';
     spot.style.left = `${x}%`;
     spot.style.top = `${y}%`;
-    spot.style.width = `${r * 2}vmin`;
-    spot.style.height = `${r * 2}vmin`;
+    const hitSize = `clamp(48px, ${r * 1.2}vmin, 96px)`;
+    spot.style.width = hitSize;
+    spot.style.height = hitSize;
     spot.tabIndex = 0;
     spot.setAttribute('role', 'button');
     spot.setAttribute('aria-label', ariaLabel);
@@ -546,15 +614,47 @@ export default class Chapter1PaintScene {
     setTimeout(() => ripple.remove(), 600);
   }
 
+  _showLightDiscussionSkipButton(onSkip) {
+    this._hideLightDiscussionSkipButton();
+    if (!this._uiLayer) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ch1-discussion-skip-btn';
+    btn.textContent = '跳过讨论';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.disabled = true;
+      onSkip?.();
+    });
+
+    this._lightDiscussionSkipBtn = btn;
+    this._uiLayer.appendChild(btn);
+  }
+
+  _hideLightDiscussionSkipButton() {
+    if (this._lightDiscussionSkipBtn) {
+      this._lightDiscussionSkipBtn.remove();
+      this._lightDiscussionSkipBtn = null;
+    }
+  }
+
   /* ==================== 流程控制 ==================== */
 
   async _startSequence() {
     this.engine.currentChapter = 1;
     this.engine.currentWorld = 'paint';
-
-    // 激活兰雪堂
+    // 图片加载完成后立即激活子场景，避免遮罩淡出时露出黄色底色
+    await this._waitForImage(this._bgLanxue);
+    if (this._exited) return;
     this._lanxueEl.classList.add('active');
     this.state = SCENE_STATES.LANXUE;
+
+    await this._nextFrame();
+    await this._nextFrame();
+    await this._waitForIntroOverlayGone();
+    await this._delay(250);
+    if (this._exited) return;
     this._isNarrating = true;
 
     await this.narrationBar.playLine(null, '你睁开眼。四周的一切都不对——不是工作室，不是扫描仪的冷光。自己站在一个陌生的地方。');
@@ -564,10 +664,66 @@ export default class Chapter1PaintScene {
     await this.narrationBar.playLine('沈念', '等等……这个地方我见过。是拙政园东部的兰雪堂。但不对，它不是我在照片里看到的样子。它更旧，更轻——像是一笔还没有干透的线。');
     await this.narrationBar.playLine('沈念', '不会吧。我在画里？');
     this.narrationBar.dismiss();
-    this._isNarrating = false;
 
-    // 旁白结束后，以场景反馈引导玩家观察
-    this.narrationBar.showFloating('脚下石径、竹影和廊柱边，都像在等你靠近。');
+    // 旁白结束后开放 HUD，并引导玩家使用笔记本与场景探索。
+    this.hudBar.show();
+    this.notebook.showQuickThoughts([
+      '这里是兰雪堂，我该留意什么？',
+      '第三十一景和前面三十幅，感觉上有什么不同？',
+      '为什么我看到的兰雪堂和照片里不一样？'
+    ]);
+    await this.narrationBar.playLine('系统提示', '右下角可打开修复笔记本：「对话」页可写下疑问与周老师批注讨论，「记录」页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
+    this.narrationBar.dismiss();
+    this._isNarrating = false;
+    this._showLanxueHotspots();
+  }
+
+  async _waitForSceneReady() {
+    await this._waitForImage(this._bgLanxue);
+    await this._nextFrame();
+    await this._nextFrame();
+    await this._waitForIntroOverlayGone();
+    await this._delay(250);
+  }
+
+  _waitForImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
+      if (img.complete) resolve();
+    });
+  }
+
+  _waitForIntroOverlayGone() {
+    return new Promise((resolve) => {
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const check = () => {
+        if (settled) return;
+        if (this._exited || !document.querySelector('.intro-transition-overlay')) {
+          done();
+          return;
+        }
+        requestAnimationFrame(check);
+      };
+      const timer = setTimeout(done, 4500);
+      requestAnimationFrame(check);
+    });
+  }
+
+  _nextFrame() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  }
+
+  _delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async _switchToZhuiyun() {
@@ -589,7 +745,12 @@ export default class Chapter1PaintScene {
     this._isNarrating = false;
 
     // 提示玩家可探索或直接前进
-    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。');
+    this.notebook.showQuickThoughts([
+      '这块石头的纹路为什么画得这么细？',
+      '峰石背后低处那点微光是什么？',
+      '这座峰石周围还藏着什么？'
+    ]);
+    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。你可以打开笔记本查看线索或继续讨论，也可以点击场景中的光点探索。');
   }
 
   async _switchToFurong() {
@@ -613,8 +774,17 @@ export default class Chapter1PaintScene {
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
-    // 旁白已经暗示了倒影中有东西，给出场景内提示
-    this.narrationBar.showFloating('水面与栏杆之间，有一点微弱金光没有随倒影散去。');
+    this.notebook.showQuickThoughts([
+      '栏杆上明明什么都没有，为什么水面的倒影里会多出一件东西？',
+      '水面上有一条光线在闪，我该点它看看吗？',
+      '倒影里挂着的那件东西，有办法看得更清楚吗？'
+    ]);
+
+    // 旁白已经暗示了倒影中有东西，给出不剧透顺序的谜题提示。
+    this._isNarrating = true;
+    await this.narrationBar.playLine('系统提示', '倒影谜题已开始。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要梳理时，可打开修复笔记本的「对话」页提问。');
+    this.narrationBar.dismiss();
+    this._isNarrating = false;
     this._resetIdleTimer('initial');
   }
 
@@ -626,20 +796,23 @@ export default class Chapter1PaintScene {
     this.notebook.showNPCMessage('周老师的批注："蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。刻在簪身背面，不是正面——如果是工匠标记，通常会在簪头或底座。这更像是物主自己留给自己的。那么，是谁把自己的名字藏在了一支断簪上？');
 
     this.notebook.showQuickThoughts([
-      '也许是这支簪子主人的名字',
-      '为什么要藏在背面？'
+      '「蘅」字可能指什么？',
+      '为什么刻在断簪背面？',
+      '一个字能说明是谁留下的吗？'
     ]);
 
-    let answered = 0;
+    const answeredThoughts = new Set();
+    const responses = {
+      '「蘅」字可能指什么？': '“蘅”可指杜衡，是一种香草，古人也常借它比喻品性高洁的女子。这里只能先记下字义，不能直接推出身份。',
+      '为什么刻在断簪背面？': '背面更隐蔽，不像公开署名，更像私人的记号。这个位置值得记下，但还不能单独定论。',
+      '一个字能说明是谁留下的吗？': '不能。一个字只能说明有人留下过痕迹，至于是谁、为什么留下，还需要更多线索互相印证。'
+    };
     this.notebook.onQuickThought((text) => {
+      if (answeredThoughts.has(text)) return;
+      answeredThoughts.add(text);
       this.notebook.showPlayerMessage(text);
-      if (text === '也许是这支簪子主人的名字') {
-        this.notebook.showNPCMessage('这是最大的可能。一个字不足以证明她的身份，但这是第一条直接的线索。');
-      } else {
-        this.notebook.showNPCMessage('背面更隐蔽，说明她既想留下痕迹，又不想太招摇。这种矛盾本身就很值得玩味。');
-      }
-      answered++;
-      if (answered >= 2) {
+      this.notebook.showNPCMessage(responses[text] || '这个问题可以先记下，等更多线索出现后再一起判断。');
+      if (answeredThoughts.size >= 3) {
         setTimeout(() => {
           if (!this._discussionEnded) endDiscussion();
         }, 2500);
@@ -649,12 +822,15 @@ export default class Chapter1PaintScene {
     const endDiscussion = async () => {
       if (this._discussionEnded) return;
       this._discussionEnded = true;
+      this._hideLightDiscussionSkipButton();
       this.notebook.hideConfirmButton();
       this.notebook.setLightweightMode(false);
       this.notebook.collapse();
+      this.narrationBar.dismiss();
 
       await this.narrationBar.playLine(null, '水面重新归于平静。你把断簪小心地收起来。');
-      await this.narrationBar.playLine('沈念', '蘅。一个女子的名字？她把自己藏在一支簪子的背面——不想被别人看见，又不甘心完全消失。');
+      await this.narrationBar.playLine('沈念', '蘅。按周老师的批注，这个字有女子名的意味。');
+      await this.narrationBar.playLine('沈念', '它偏偏刻在簪身背面，又小得几乎要错过。像是刻字的人想留下一点痕迹，却仍把它收在不显眼处。');
       await this.narrationBar.playLine(null, '你站在榭前，忽然觉得眼前的光线在变。周围的墨色好像在一点点褪去，像清水洗过宣纸。');
       this.narrationBar.dismiss();
 
@@ -663,8 +839,9 @@ export default class Chapter1PaintScene {
 
     this._discussionEnded = false;
 
-    // 跳过按钮触发
-    this.notebook.showSkipButton(() => endDiscussion());
+    // 跳过按钮放在叙事框上方，不占用笔记本内容区。
+    this.notebook.hideConfirmButton();
+    this._showLightDiscussionSkipButton(() => endDiscussion());
 
     // 监听面板收起也触发转场
     this._collapseHandler = () => {

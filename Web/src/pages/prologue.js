@@ -93,6 +93,7 @@ export default class PrologueScene extends GameSceneBase {
     this._phase = PHASE.NARRATION;
     this._paintingViewer = null;
     this._fallTransition = null;
+    this._introTransition = null;
     this._narrationBar = null;
     this._notebook = null;
     this._hud = null;
@@ -205,6 +206,10 @@ export default class PrologueScene extends GameSceneBase {
     if (this._fallTransition) {
       this._fallTransition.destroy();
       this._fallTransition = null;
+    }
+    if (this._introTransition) {
+      this._introTransition.destroy();
+      this._introTransition = null;
     }
     if (this._narrationBar) {
       this._narrationBar.unmount();
@@ -528,7 +533,7 @@ export default class PrologueScene extends GameSceneBase {
     this._narrationBar.dismiss();
 
     // 播放较平滑的引导文本
-    await this._narrationBar.playLine('系统提示', '三处异常痕迹都找齐了。可以先在右侧笔记本“记录”里查看线索，或在“对话”里和 AI 讨论。准备好后，点击上方的“开启推理研讨”开始推导真相。');
+    await this._narrationBar.playLine('系统提示', '三处异常痕迹已找齐。你可以到笔记本的“记录”页查阅线索，或在“对话”页中进行讨论。准备就绪后，点击“开启推理研讨”即可继续。');
   }
 
   /**
@@ -560,7 +565,7 @@ export default class PrologueScene extends GameSceneBase {
     this._notebook.clearChat();
 
     // 播放新的综合研讨系统提示
-    this._narrationBar.playLine('系统提示', '已开启综合研讨推理。请在右侧笔记本的【综合研讨】页（可通过输入或点击快捷问题）与 AI 对话研讨，分析这三处痕迹的联系以推导结论；在【记录】页可随时查阅此前收集的所有线索。得出最终结论后即可继续剧情。');
+    this._narrationBar.playLine('系统提示', '已进入综合研讨。你可以在右侧的“综合研讨”页与 AI 对话，推导痕迹背后的真相；随时可在“记录”页查阅已收集的线索。得出结论后，点击“确认这个推断”即可继续。');
 
     this._notebook.setPlaceholder('在此输入你对这三处痕迹之间关系的判断……');
 
@@ -713,7 +718,7 @@ export default class PrologueScene extends GameSceneBase {
     const solidOverlay = document.createElement('div');
     solidOverlay.style.position = 'fixed';
     solidOverlay.style.inset = '0';
-    solidOverlay.style.backgroundColor = '#16120f'; // 与跌入画中的墨迹颜色一致
+    solidOverlay.style.background = 'var(--wash-paper-gradient)';
     solidOverlay.style.zIndex = '9999';
     document.body.appendChild(solidOverlay);
 
@@ -723,20 +728,125 @@ export default class PrologueScene extends GameSceneBase {
     // 现在安全地销毁原有的跌入转场元素
     if (transition) transition.destroy();
 
-    // 切换到第一章，跳过 SceneManager 的默认转场
-    this.engine.switchScene('chapter1', true);
-
-    // 稍微等待新场景(Chapter1)的 DOM 加载和图片渲染，然后平滑淡出遮罩
-    setTimeout(() => {
-      solidOverlay.style.transition = 'opacity 2s ease-in-out';
-      solidOverlay.style.opacity = '0';
-      setTimeout(() => solidOverlay.remove(), 2000);
-    }, 800);
+    await this._playChapter1IntroTransition(async () => {
+      if (solidOverlay.parentNode) solidOverlay.remove();
+      await this.engine.switchScene('chapter1', true);
+      await this._nextFrame();
+    });
   }
 
   /* ==================== 工具方法 ==================== */
 
   _delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  _playChapter1IntroTransition(onReveal) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
+
+      const lines = [
+        '你睁开眼，四周的一切都不对。',
+        '不是工作室，不是扫描仪的冷光。',
+        '水墨晕染的庭院在眼前铺展开来。',
+        '五百年前的园林，正向你敞开大门。'
+      ];
+
+      overlay.innerHTML = `
+        <div class="prologue-transition-layout">
+          <div class="intro-prologue-title">第一章 · 东园</div>
+          <div class="intro-prologue-text"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const textContainer = overlay.querySelector('.intro-prologue-text');
+      const timers = [];
+      let finished = false;
+
+      const clearTimers = () => timers.forEach((timer) => clearTimeout(timer));
+      const removeKeyHandler = () => document.removeEventListener('keydown', onKey);
+
+      const finish = async (fast = false) => {
+        if (finished) return;
+        finished = true;
+        clearTimers();
+        removeKeyHandler();
+
+        textContainer.querySelectorAll('span').forEach((line) => {
+          line.style.opacity = '1';
+          line.style.transform = 'translateY(0)';
+        });
+
+        await this._preloadImage('/images/chapter1-lanxuetang.png');
+        await onReveal?.();
+
+        overlay.style.transition = fast ? 'opacity 0.4s ease' : 'opacity 1s ease';
+        overlay.classList.remove('active');
+        overlay.classList.add('fade-out');
+
+        setTimeout(() => {
+          overlay.remove();
+          resolve();
+        }, fast ? 450 : 1100);
+      };
+
+      const onKey = (e) => {
+        if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+        e.preventDefault();
+        finish(true);
+      };
+      document.addEventListener('keydown', onKey);
+
+      timers.push(setTimeout(() => {
+        overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }, 50));
+
+      timers.push(setTimeout(() => {
+        lines.forEach((line, index) => {
+          const p = document.createElement('span');
+          p.textContent = line;
+          p.style.opacity = '0';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          p.style.display = 'block';
+          textContainer.appendChild(p);
+
+          timers.push(setTimeout(() => {
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, index * 1200));
+        });
+
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        timers.push(setTimeout(() => finish(false), totalDuration));
+      }, 1500));
+    });
+  }
+
+  _isFastForwardKey(e) {
+    return e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ';
+  }
+
+  _preloadImage(src, timeout = 3000) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const timer = setTimeout(resolve, timeout);
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      img.src = src;
+    });
   }
 }

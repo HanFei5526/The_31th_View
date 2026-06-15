@@ -49,7 +49,7 @@ export class Inventory {
    * 添加物品
    * @param {object} item - 物品对象 { id, name, description, icon }
    */
-  addItem(item) {
+  addItem(item, options = {}) {
     // 避免重复添加
     if (this.hasItem(item.id)) {
       console.warn(`[Inventory] 物品 "${item.id}" 已存在，跳过添加`);
@@ -58,8 +58,10 @@ export class Inventory {
 
     const newItem = { ...item, used: false };
     this.items.push(newItem);
-    this.engine.emit('item-collected', newItem);
-    console.log(`[Inventory] 获得物品: ${item.name}`);
+    if (!options.silent) {
+      this.engine.emit('item-collected', newItem);
+      console.log(`[Inventory] 获得物品: ${item.name}`);
+    }
   }
 
   /**

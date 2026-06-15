@@ -269,7 +269,7 @@ export default class PaintingViewer {
 
       // 延迟显示，避免和工具反馈重叠
       setTimeout(() => {
-        this._showFeedback('三项基础扫描已完成。请在古画上点击寻找并收集隐藏线索（收集进度可查看画幅下方的 0/3 指示灯）。集齐全部线索后，即可开启综合研讨，推理出最终结论。');
+        this._showFeedback('三项基础检测已经全部做完了。现在可以用放大镜在古画里仔细找找看，应该有隐藏的异常痕迹。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
       }, 6000);
     }
 
@@ -436,14 +436,14 @@ export default class PaintingViewer {
     if (!this._explorable) {
       console.log('[PaintingViewer] 点击被忽略：尚未完成三项基础检查');
       const missing = this._getMissingToolLabels();
-      this._showFeedback(`请先启用右侧的检测工具，完成以下检查：${missing.join('、')}`);
+      this._showFeedback(`请先在右侧工具箱启用对应的工具，还有${missing.join('、')}没做检查。`);
       return;
     }
 
     // 探索阶段必须切回放大镜
     if (this._currentTool !== 'magnifier') {
       console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
-      this._showFeedback('线索探索需要使用放大镜，请先在右侧工具箱中启用放大镜。');
+      this._showFeedback('找寻暗藏的痕迹需要借用放大镜，去右侧工具栏换一下吧。');
       return;
     }
 
@@ -658,11 +658,6 @@ export default class PaintingViewer {
       pulse.className = 'pv-convergence-pulse';
       point.appendChild(pulse);
 
-      const label = document.createElement('div');
-      label.className = 'pv-convergence-label';
-      label.textContent = '点击查看';
-      point.appendChild(label);
-
       // 交会点点击 → 触发最终回调
       point.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -694,21 +689,22 @@ export default class PaintingViewer {
     const imgH = this._imgEl.naturalHeight;
     if (!imgW || !imgH) return;
 
-    // 理想最大显示高度与宽度，预留底部对话框空间
-    const maxH = Math.min(window.innerHeight * 0.70, 680); 
-    const maxW = window.innerWidth * 0.82;
+    // 理想尺寸：外框宽度贴近底部叙事对话框宽度，并预留右侧笔记本空间
+    const borderPadding = 16;
+    const maxH = Math.min(window.innerHeight * 0.70, 780);
+    const preferredContainerW = window.innerWidth * 0.55;
+    const maxContainerW = window.innerWidth * 0.76;
 
     // 计算缩放比例
-    let targetH = maxH;
-    let targetW = targetH * (imgW / imgH);
+    let targetW = Math.min(preferredContainerW, maxContainerW) - borderPadding;
+    let targetH = targetW * (imgH / imgW);
 
-    if (targetW > maxW) {
-      targetW = maxW;
-      targetH = targetW * (imgH / imgW);
+    if (targetH > maxH) {
+      targetH = maxH;
+      targetW = targetH * (imgW / imgH);
     }
 
     // 容器比图片只大一点点（四周加 padding: 0.5rem = 8px，一共 16px）
-    const borderPadding = 16;
     const containerW = targetW + borderPadding;
     const containerH = targetH + borderPadding;
 
@@ -716,6 +712,15 @@ export default class PaintingViewer {
     if (container) {
       container.style.width = `${containerW}px`;
       container.style.height = `${containerH}px`;
+
+      const edgeGap = 24;
+      const notebookEl = document.querySelector('.notebook-floating.expanded:not(.hidden)');
+      const notebookRect = notebookEl?.getBoundingClientRect();
+      const availableRight = notebookRect ? notebookRect.left - edgeGap : window.innerWidth - edgeGap;
+      const centeredLeft = (window.innerWidth - containerW) / 2;
+      const maxSafeLeft = availableRight - containerW;
+      const targetLeft = Math.max(edgeGap, Math.min(centeredLeft, maxSafeLeft));
+      container.style.marginLeft = `${targetLeft}px`;
     }
 
     if (this._cardEl) {

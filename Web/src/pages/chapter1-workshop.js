@@ -27,7 +27,9 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     container.appendChild(root);
 
     // 确保是现实世界主题
+    this.engine.currentChapter = 1;
     this.engine.currentWorld = 'real';
+    this.engine.ensureCarryoverForChapter?.(1);
     this.engine._applyWorldTheme();
     
     // 强制清除可能的残留样式
@@ -145,7 +147,13 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
       this.notebook.addClueRecord('[沈念的判断] 画里有人留下了东西——不是画家本人的正式创作，而是某个人的私人痕迹。');
     }
     this.notebook.addClueRecord('[周老师的建议] 关注题跋、匾额与边注——这些地方最容易留下不够正式、却最诚实的东西。');
-    this.narrationBar.showFeedback('笔记本记录更新：周老师建议——关注题跋、匾额与边注');
+    this.notebook.showQuickThoughts([
+      '“蘅”字现在能说明到哪一步？',
+      '断簪为什么要把字刻在背面？',
+      '接下来为什么要看题跋、匾额和边注？'
+    ]);
+
+    await this.narrationBar.playLine('系统提示', '笔记本记录更新：周老师建议——关注题跋、匾额与边注。你可以在修复笔记本的「记录」页查看刚更新的判断和线索；如果想继续梳理，也可以回到「对话」页，用新的快捷问题或自己的话继续讨论。');
 
     await this.narrationBar.playLine(null, '窗外的梧桐树在晚风里轻轻摇动。你合上笔记本，但脑海中仍然浮着那个字。');
     await this.narrationBar.playLine('沈念', '蘅。是谁？', { portrait: '/images/shennian.png' });

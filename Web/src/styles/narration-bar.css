@@ -155,9 +155,15 @@
   /* 右下角古典花枝装饰示意 */
   content: "❀";
   position: absolute;
-  bottom: -6px;
   right: 18px;
-  font-size: 2.5rem;
+  bottom: 10px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  line-height: 1;
   color: rgba(160, 140, 100, 0.25); /* 颜色更深沉，融入背景 */
   pointer-events: none;
 }
@@ -234,6 +240,13 @@
 }
 
 .paint-world .narration-continue {
+  right: 18px;
+  bottom: 10px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: rgba(90, 70, 45, 0.6);
 }
 

@@ -47,7 +47,7 @@
   inset: 0;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
   z-index: 50;
   background: transparent;
   animation: fadeIn 0.4s ease;
@@ -142,36 +142,35 @@
 /* Sidebar CSS removed */
 .pv-ripple {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  margin-left: -10px;
-  margin-top: -10px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
   border-radius: 50%;
-  border: 2px solid transparent;
+  background: radial-gradient(circle, rgba(255, 224, 112, 0.72) 0%, rgba(212, 175, 55, 0.22) 52%, transparent 78%);
   animation: pvRippleExpand 1s ease-out forwards;
   pointer-events: none;
 }
-.pv-ripple-gold { border-color: rgba(212, 175, 55, 0.8); }
-.pv-ripple-grey { border-color: rgba(150, 150, 150, 0.5); }
+.pv-ripple-gold { background: radial-gradient(circle, rgba(255, 224, 112, 0.72) 0%, rgba(212, 175, 55, 0.22) 52%, transparent 78%); }
+.pv-ripple-grey { background: radial-gradient(circle, rgba(190, 190, 180, 0.58) 0%, rgba(150, 150, 150, 0.18) 54%, transparent 78%); }
 @keyframes pvRippleExpand {
   0%   { transform: scale(1); opacity: 1; }
   100% { transform: scale(4); opacity: 0; }
 }
 .pv-hint-spot {
   position: absolute;
-  width: 90px;
-  height: 90px;
-  margin-left: -45px;
-  margin-top: -45px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  margin-top: -17px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0.15) 40%, transparent 70%);
-  border: 2px solid rgba(212, 175, 55, 0.4);
+  background: radial-gradient(circle, rgba(255, 224, 112, 0.86) 0%, rgba(212, 175, 55, 0.34) 48%, transparent 76%);
   animation: pvHintPulse 1.8s infinite ease-in-out;
   pointer-events: none;
 }
 @keyframes pvHintPulse {
-  0%, 100% { transform: scale(0.8); opacity: 0.4; border-color: rgba(212, 175, 55, 0.4); }
-  50% { transform: scale(1.2); opacity: 0.9; border-color: rgba(212, 175, 55, 0.8); }
+  0%, 100% { transform: scale(0.86); opacity: 0.45; }
+  50% { transform: scale(1.16); opacity: 0.9; }
 }
 .pv-marker {
   position: absolute;
@@ -223,10 +222,10 @@
 }
 .pv-convergence-point {
   position: absolute;
-  width: 96px;
-  height: 96px;
-  margin-left: -48px;
-  margin-top: -48px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  margin-top: -17px;
   cursor: pointer;
   pointer-events: auto;
   z-index: 20;
@@ -235,31 +234,20 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 220, 80, 1) 0%, rgba(212, 175, 55, 0.6) 40%, transparent 70%);
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4);
-  animation: pvPointPulse 1.5s infinite;
+  background: radial-gradient(circle, rgba(245, 213, 72, 0.92) 0%, rgba(224, 181, 44, 0.5) 48%, rgba(224, 181, 44, 0.08) 100%);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  animation: pvPointGlow 1.6s ease-in-out infinite;
 }
-@keyframes pvPointPulse {
-  0%   { transform: scale(0.6); opacity: 1; }
-  70%  { transform: scale(1.1); opacity: 0.7; }
-  100% { transform: scale(0.6); opacity: 1; }
+@keyframes pvPointGlow {
+  0%, 100% { opacity: 0.78; filter: brightness(0.95); }
+  50% { opacity: 1; filter: brightness(1.18); }
 }
-.pv-convergence-label {
-  position: absolute;
-  bottom: -24px;
-  width: 80px;
-  left: -10px;
-  text-align: center;
-  color: #d4af37;
-  font-family: var(--font-serif);
-  font-size: 0.8rem;
-  opacity: 0;
-  animation: pvTextFade 0.8s forwards 1.2s;
-}
-@keyframes pvTextFade { to { opacity: 0.8; } }
 .pv-explode .pv-convergence-pulse {
-  animation: pvRippleExpand 0.4s ease-out forwards;
-  background: radial-gradient(circle, rgba(255,255,255,1) 0%, transparent 60%);
+  animation: pvPointFade 0.35s ease-out forwards;
+  background: radial-gradient(circle, rgba(245, 213, 72, 0.9) 0%, rgba(224, 181, 44, 0.2) 100%);
+}
+@keyframes pvPointFade {
+  to { opacity: 0; transform: scale(0.9); }
 }
 
 /* 进入综合研讨按钮 */

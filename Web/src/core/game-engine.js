@@ -17,13 +17,48 @@
  */
 
 import { SceneManager } from './scene-manager.js';
-import { Inventory } from './inventory.js';
+import { Inventory, ITEM_TEMPLATES } from './inventory.js';
 import { HintSystem } from './hint-system.js';
 import { DiscussionGateManager } from './discussion-gate.js';
 import { GatePanel } from '../components/gate-panel.js';
 import { DialogueSystem } from './dialogue.js';
 import { SaveSystem } from './save-system.js';
 import { AIService } from './ai-service.js';
+
+const PROLOGUE_NOTEBOOK_ITEM = {
+  id: 'notebook',
+  name: '修复笔记本',
+  description: '导师给你的笔记本，封面写着"修复记录——三十一景图"。扉页夹着一张便签，是周老师的字："修复古画的第一课，不是把缺的补上，是理解它为什么缺。"',
+  icon: '📓',
+};
+
+const PROLOGUE_CLUE_IDS = ['clue_margin', 'clue_text', 'clue_line'];
+
+const DEPRECATED_NOTEBOOK_RECORDS = [
+  {
+    type: 'annotation',
+    text: '获得了物件 [修复笔记本]',
+  },
+];
+
+const PROLOGUE_CARRYOVER_RECORDS = [
+  {
+    type: 'clue',
+    text: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+  },
+  {
+    type: 'clue',
+    text: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+  },
+  {
+    type: 'clue',
+    text: '[线索] 底层细线 — 画面下方有一条不属于画面内容的极淡细线',
+  },
+  {
+    type: 'clue',
+    text: '[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息',
+  },
+];
 
 export class GameEngine {
   constructor() {
@@ -37,6 +72,10 @@ export class GameEngine {
     this.currentWorld = 'real';
     /** 通用进度标记，场景可自由读写 */
     this.gameProgress = {};
+    /** 修复笔记本记录：跨章节累积 */
+    this.notebookRecords = [];
+    /** 修复笔记本对话：按章节隔离 */
+    this.notebookChatsByChapter = {};
 
     /* ---- 事件系统 ---- */
 
@@ -104,14 +143,7 @@ export class GameEngine {
     const save = this.saveSystem.load();
 
     if (save) {
-      // 恢复存档状态
-      this.currentChapter = save.chapter ?? 0;
-      this.currentScene = save.scene ?? null;
-      this.currentWorld = save.world ?? 'real';
-      this.gameProgress = save.progress ?? {};
-      if (save.inventory) {
-        this.inventory.restore(save.inventory);
-      }
+      this.restoreFromSave(save);
       console.log(`[GameEngine] 从存档恢复: 章节${this.currentChapter}, 场景${this.currentScene}`);
       // 切换到存档场景
       if (this.currentScene) {
@@ -121,6 +153,140 @@ export class GameEngine {
       console.log('[GameEngine] 无存档，从头开始');
       this.emit('game-start');
     }
+  }
+
+  /**
+   * 从存档快照恢复完整运行时状态。
+   * @param {object} save
+   */
+  restoreFromSave(save = {}) {
+    this.currentChapter = save.chapter ?? 0;
+    this.currentScene = save.scene ?? null;
+    this.currentWorld = save.world ?? 'real';
+    this.gameProgress = save.progress ?? {};
+    this.notebookRecords = Array.isArray(save.notebookRecords) ? save.notebookRecords : [];
+    this.notebookChatsByChapter = save.notebookChatsByChapter ?? {};
+
+    if (save.inventory) {
+      this.inventory.restore(save.inventory);
+    } else {
+      this.inventory.restore([]);
+    }
+
+    this._restoreDerivedInventoryFromProgress();
+    this.ensureCarryoverForChapter(this.currentChapter, { persist: false });
+  }
+
+  /**
+   * 兼容旧存档：有些进度只保存了标记，没有保存物件对象。
+   * @private
+   */
+  _restoreDerivedInventoryFromProgress() {
+    const progress = this.gameProgress || {};
+    if (progress.hasNotebook && !this.inventory.hasItem('notebook')) {
+      this.inventory.addItem(PROLOGUE_NOTEBOOK_ITEM, { silent: true });
+    }
+    if (progress.hasHairpin && !this.inventory.hasItem('hairpin')) {
+      this.inventory.addItem(ITEM_TEMPLATES.hairpin, { silent: true });
+    }
+  }
+
+  /**
+   * 后续章节进入时，补齐前序章节已经应当拥有的基础内容。
+   * 记录页跨章累积；对话记录仍由 NotebookFloating 按章节隔离。
+   * @param {number} chapter
+   * @param {{persist?: boolean}} options
+   * @returns {boolean} 是否发生补齐
+   */
+  ensureCarryoverForChapter(chapter, options = {}) {
+    const shouldPersist = options.persist !== false;
+    if (chapter < 1) return false;
+
+    let changed = false;
+    const progress = this.gameProgress || {};
+    this.gameProgress = progress;
+
+    if (!progress.hasNotebook) {
+      progress.hasNotebook = true;
+      changed = true;
+    }
+
+    if (!Array.isArray(progress.cluesFound)) {
+      progress.cluesFound = [];
+      changed = true;
+    }
+    PROLOGUE_CLUE_IDS.forEach((clueId) => {
+      if (!progress.cluesFound.includes(clueId)) {
+        progress.cluesFound.push(clueId);
+        changed = true;
+      }
+    });
+
+    if (!progress.synthesisPassed) {
+      progress.synthesisPassed = true;
+      changed = true;
+    }
+
+    if (!progress.prologueComplete) {
+      progress.prologueComplete = true;
+      changed = true;
+    }
+    if (!progress.prologue_completed) {
+      progress.prologue_completed = true;
+      changed = true;
+    }
+
+    if (!this.inventory.hasItem('notebook')) {
+      this.inventory.addItem(PROLOGUE_NOTEBOOK_ITEM, { silent: true });
+      changed = true;
+    }
+
+    if (this._removeNotebookRecords(DEPRECATED_NOTEBOOK_RECORDS)) {
+      changed = true;
+    }
+
+    if (this._prioritizeNotebookRecords(PROLOGUE_CARRYOVER_RECORDS)) {
+      changed = true;
+    }
+
+    if (changed && shouldPersist) {
+      this.saveSystem?.autoSave?.();
+    }
+    return changed;
+  }
+
+  _removeNotebookRecords(records) {
+    if (!Array.isArray(this.notebookRecords)) this.notebookRecords = [];
+
+    const shouldRemove = (existing) => records.some((record) => (
+      existing.type === record.type && existing.text === record.text
+    ));
+    const nextRecords = this.notebookRecords.filter((record) => !shouldRemove(record));
+    const changed = nextRecords.length !== this.notebookRecords.length;
+    if (changed) {
+      this.notebookRecords = nextRecords;
+    }
+    return changed;
+  }
+
+  _prioritizeNotebookRecords(records) {
+    if (!Array.isArray(this.notebookRecords)) this.notebookRecords = [];
+
+    const sameRecord = (a, b) => a.type === b.type && a.text === b.text;
+    const prioritized = records.map((record) => (
+      this.notebookRecords.find((existing) => sameRecord(existing, record)) || record
+    ));
+    const rest = this.notebookRecords.filter((existing) => (
+      !records.some((record) => sameRecord(existing, record))
+    ));
+    const nextRecords = [...prioritized, ...rest];
+
+    const changed = nextRecords.length !== this.notebookRecords.length
+      || nextRecords.some((record, index) => this.notebookRecords[index] !== record);
+    if (changed) {
+      this.notebookRecords = nextRecords;
+    }
+    return changed;
   }
 
   /* ==========================
@@ -206,7 +372,7 @@ export class GameEngine {
       overlay.className = 'world-transition-overlay';
       overlay.style.cssText = `
         position: fixed; inset: 0; z-index: 250;
-        background: ${targetWorld === 'paint' ? 'var(--paint-bg-deep)' : 'var(--real-bg-deep)'};
+        background: var(--wash-paper-gradient);
         opacity: 0; pointer-events: none;
         transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
       `;
@@ -340,7 +506,10 @@ export class GameEngine {
       el.style.display = 'block';
       el.style.opacity = '0';
       el.style.filter = 'blur(8px)';
-      el.style.background = 'radial-gradient(ellipse at center, #c8b898 0%, #e8e0d0 100%)';
+      el.style.background = [
+        'var(--wash-paper-gradient)',
+        'var(--wash-paper-radial)'
+      ].join(', ');
 
       // 柔缓淡入遮罩
       requestAnimationFrame(() => {
@@ -370,6 +539,100 @@ export class GameEngine {
     });
   }
 
+  /**
+   * 播放返回主页专用过渡动画：更白、更轻的纸色遮罩。
+   * @returns {Promise<void>}
+   */
+  playMenuReturnTransition() {
+    return new Promise((resolve) => {
+      const el = this._transitionEl;
+      if (!el) {
+        resolve();
+        return;
+      }
+
+      let resolved = false;
+      const safeResolve = () => {
+        if (!resolved) {
+          resolved = true;
+          resolve();
+        }
+      };
+
+      let timer1, timer2, timer3;
+      const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      const fadeInMs = prefersReducedMotion ? 80 : 260;
+      const fadeOutMs = prefersReducedMotion ? 120 : 560;
+
+      const finishFast = () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        document.removeEventListener('keydown', onKey);
+
+        el.style.display = 'none';
+        el.style.opacity = '0';
+        el.classList.remove('active');
+        el.style.transition = '';
+        el.style.filter = '';
+        el.style.background = '';
+
+        safeResolve();
+      };
+
+      const onKey = (e) => {
+        if (e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
+          const activeEl = document.activeElement;
+          const isInput = activeEl && (
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.isContentEditable
+          );
+          if (!isInput) {
+            e.preventDefault();
+            finishFast();
+          }
+        }
+      };
+
+      document.addEventListener('keydown', onKey);
+
+      el.classList.add('active');
+      el.style.display = 'block';
+      el.style.opacity = '0';
+      el.style.filter = prefersReducedMotion ? 'none' : 'blur(4px)';
+      el.style.background = [
+        'var(--wash-paper-gradient)',
+        'var(--wash-paper-radial)'
+      ].join(', ');
+
+      requestAnimationFrame(() => {
+        el.style.transition = `opacity ${fadeInMs}ms ease, filter ${fadeInMs}ms ease`;
+        el.style.opacity = '1';
+        el.style.filter = 'none';
+      });
+
+      timer1 = setTimeout(() => {
+        safeResolve();
+
+        timer2 = setTimeout(() => {
+          el.style.transition = `opacity ${fadeOutMs}ms ease, filter ${fadeOutMs}ms ease`;
+          el.style.opacity = '0';
+          el.style.filter = prefersReducedMotion ? 'none' : 'blur(6px)';
+          timer3 = setTimeout(() => {
+            el.style.display = 'none';
+            el.classList.remove('active');
+            el.style.transition = '';
+            el.style.filter = '';
+            el.style.background = '';
+            document.removeEventListener('keydown', onKey);
+          }, fadeOutMs);
+        }, prefersReducedMotion ? 20 : 160);
+      }, fadeInMs);
+    });
+  }
+
   /* ==========================
      内部方法
      ========================== */
@@ -382,8 +645,7 @@ export class GameEngine {
     const el = document.createElement('div');
     el.className = 'transition-overlay';
     el.style.display = 'none';
-    // 根据当前世界设置过渡颜色
-    el.style.background = 'var(--real-bg-deep)';
+    el.style.background = 'var(--wash-paper-gradient)';
     this._appElement.appendChild(el);
     this._transitionEl = el;
   }
@@ -398,12 +660,9 @@ export class GameEngine {
     this._appElement.classList.add(
       this.currentWorld === 'paint' ? 'paint-world' : 'real-world'
     );
-    // 同步过渡遮罩背景色
+    // 同步为浅纸色过渡遮罩，避免切换时出现黑屏或浓黄闪屏
     if (this._transitionEl) {
-      this._transitionEl.style.background =
-        this.currentWorld === 'paint'
-          ? 'var(--paint-bg-deep)'
-          : 'var(--real-bg-deep)';
+      this._transitionEl.style.background = 'var(--wash-paper-gradient)';
     }
   }
 

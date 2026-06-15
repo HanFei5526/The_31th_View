@@ -1,3 +1,61 @@
+const NOTEBOOK_RECORD_SEEDS = [
+  {
+    type: 'clue',
+    text: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+    when: (progress) => progress.cluesFound?.includes('clue_margin'),
+  },
+  {
+    type: 'clue',
+    text: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+    when: (progress) => progress.cluesFound?.includes('clue_text'),
+  },
+  {
+    type: 'clue',
+    text: '[线索] 底层细线 — 画面下方有一条不属于画面内容的极淡细线',
+    when: (progress) => progress.cluesFound?.includes('clue_line'),
+  },
+  {
+    type: 'clue',
+    text: '[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息',
+    when: (progress) => Boolean(progress.synthesisPassed),
+  },
+  {
+    type: 'clue',
+    text: '[线索] 匾额多余笔画 — 兰雪堂匾额"兰"字草字头下多了一道极细横笔，笔力稳定，墨色一致，非败笔',
+    when: (progress) => Boolean(progress.plaqueNoted),
+  },
+  {
+    type: 'clue',
+    text: '有些景，只从低处出现。',
+    when: (progress) => Boolean(progress.zhuiyunExplored),
+  },
+  {
+    type: 'clue',
+    text: '[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字',
+    when: (progress) => Boolean(progress.hasHairpin),
+  },
+  {
+    type: 'clue',
+    text: '[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明',
+    when: (progress) => Boolean(progress.hasHairpin),
+  },
+  {
+    type: 'clue',
+    text: '[沈念的判断] 这页画底下藏着另一套说明——画面结构可能有隐藏的辅助标注层。',
+    when: (progress) => progress.chapter1Choice === 'A',
+  },
+  {
+    type: 'clue',
+    text: '[沈念的判断] 画里有人留下了东西——不是画家本人的正式创作，而是某个人的私人痕迹。',
+    when: (progress) => progress.chapter1Choice === 'B',
+  },
+  {
+    type: 'clue',
+    text: '[周老师的建议] 关注题跋、匾额与边注——这些地方最容易留下不够正式、却最诚实的东西。',
+    when: (progress) => Boolean(progress.chapter1Complete || progress.chapter1_completed),
+  },
+];
+
 export class NotebookFloating {
   constructor(engine) {
     this.engine = engine;
@@ -34,9 +92,11 @@ export class NotebookFloating {
     this._boundOnItemCollected = this._onItemCollected.bind(this);
     this._boundOnToolUsed = this._onToolUsed.bind(this);
     this._boundOnAllToolsUsed = this._onAllToolsUsed.bind(this);
+    this._offNotebookGuidance = null;
   }
 
   mount(root) {
+    this._ensureNotebookState();
     this._rootEl = root;
     this._container = document.createElement('div');
     this._container.className = 'notebook-floating';
@@ -83,12 +143,21 @@ export class NotebookFloating {
     this._container.appendChild(this._toolSectionEl);
 
     root.appendChild(this._container);
+    this._confirmAreaEl = document.createElement('div');
+    this._confirmAreaEl.className = 'notebook-confirm-area hidden';
+    root.appendChild(this._confirmAreaEl);
+
+    this._renderRecords();
+    this._renderCurrentChapterChat();
 
     // 绑定事件总线
     window.addEventListener('clue-collected', this._boundOnClueCollected);
     window.addEventListener('item-collected', this._boundOnItemCollected);
     window.addEventListener('tool-used', this._boundOnToolUsed);
     window.addEventListener('all-tools-used', this._boundOnAllToolsUsed);
+    this._offNotebookGuidance = this.engine.on?.('notebook-guidance-shown', () => {
+      this._expandForGuidance();
+    });
   }
 
   unmount() {
@@ -96,6 +165,8 @@ export class NotebookFloating {
     window.removeEventListener('item-collected', this._boundOnItemCollected);
     window.removeEventListener('tool-used', this._boundOnToolUsed);
     window.removeEventListener('all-tools-used', this._boundOnAllToolsUsed);
+    this._offNotebookGuidance?.();
+    this._offNotebookGuidance = null;
     
     this._rootEl?.classList.remove('notebook-panel-expanded');
     if (this._scrollFrame) {
@@ -103,7 +174,9 @@ export class NotebookFloating {
       this._scrollFrame = null;
     }
     if (this._container) this._container.remove();
+    if (this._confirmAreaEl) this._confirmAreaEl.remove();
     this._container = null;
+    this._confirmAreaEl = null;
     this._rootEl = null;
   }
 
@@ -178,11 +251,19 @@ export class NotebookFloating {
     return this._expanded;
   }
 
+  _expandForGuidance() {
+    if (!this._container || this._container.classList.contains('hidden') || this._expanded) return;
+    this.expand();
+  }
+
   // === Tab ===
 
   switchTab(tabId) {
     if (this._currentTab === tabId) return;
     this._currentTab = tabId;
+    if (tabId === 'records') {
+      this._renderRecords();
+    }
     
     Object.keys(this._tabs).forEach(id => {
       if (id === tabId) {
@@ -220,9 +301,6 @@ export class NotebookFloating {
     this._quickThoughtsEl = document.createElement('div');
     this._quickThoughtsEl.className = 'notebook-quick-thoughts';
 
-    this._confirmAreaEl = document.createElement('div');
-    this._confirmAreaEl.className = 'notebook-confirm-area hidden';
-
     const inputArea = document.createElement('div');
     inputArea.className = 'notebook-input-area';
     
@@ -249,7 +327,6 @@ export class NotebookFloating {
     inputArea.appendChild(this._sendBtn);
 
     pane.appendChild(this._historyEl);
-    pane.appendChild(this._confirmAreaEl);
     pane.appendChild(this._quickThoughtsEl);
     pane.appendChild(inputArea);
 
@@ -270,10 +347,13 @@ export class NotebookFloating {
 
   clearChat() {
     if (!this._historyEl) return;
+    this._ensureNotebookState();
+    this.engine.notebookChatsByChapter[this._getChapterKey()] = [];
     this._historyEl.innerHTML = '';
+    this._historyEl.appendChild(this._emptyGuideEl);
   }
 
-  _appendMessage(text, type) {
+  _appendMessage(text, type, persist = true) {
     if (this._emptyGuideEl && this._emptyGuideEl.parentNode) {
       this._emptyGuideEl.remove();
     }
@@ -281,6 +361,15 @@ export class NotebookFloating {
     bubble.className = `chat-bubble ${type}`;
     bubble.textContent = text;
     this._historyEl.appendChild(bubble);
+    if (persist) {
+      this._ensureNotebookState();
+      const chapterKey = this._getChapterKey();
+      if (!this.engine.notebookChatsByChapter[chapterKey]) {
+        this.engine.notebookChatsByChapter[chapterKey] = [];
+      }
+      this.engine.notebookChatsByChapter[chapterKey].push({ text, type });
+      this._persistNotebookState();
+    }
     this._scrollToBottom();
   }
 
@@ -381,18 +470,97 @@ export class NotebookFloating {
   }
 
   addClueRecord(clueText) {
-    const card = document.createElement('div');
-    card.className = 'clue-card';
-    card.textContent = clueText;
-    this._recordsListEl.appendChild(card);
+    this._ensureNotebookState();
+    if (this._hasRecord('clue', clueText)) {
+      this._renderRecords();
+      this._persistNotebookState();
+      return;
+    }
+    this._rememberRecord({ type: 'clue', text: clueText });
+    this._appendRecordCard({ type: 'clue', text: clueText });
+    this._persistNotebookState();
   }
 
   addAnnotation(text) {
+    this._ensureNotebookState();
+    if (this._hasRecord('annotation', text)) {
+      this._renderRecords();
+      this._persistNotebookState();
+      return;
+    }
+    this._rememberRecord({ type: 'annotation', text });
+    this._appendRecordCard({ type: 'annotation', text });
+    this._persistNotebookState();
+  }
+
+  _appendRecordCard(record) {
+    if (!this._recordsListEl) return;
     const card = document.createElement('div');
-    card.className = 'clue-card annotation';
-    card.style.borderColor = '#8c8375';
-    card.innerHTML = `<em>沈念批注：</em><br>${text}`;
+    if (record.type === 'annotation') {
+      card.className = 'clue-card annotation';
+      card.style.borderColor = '#8c8375';
+      const label = document.createElement('em');
+      label.textContent = '沈念批注：';
+      card.appendChild(label);
+      card.appendChild(document.createElement('br'));
+      card.appendChild(document.createTextNode(record.text));
+    } else {
+      card.className = 'clue-card';
+      card.textContent = record.text;
+    }
     this._recordsListEl.appendChild(card);
+  }
+
+  _renderRecords() {
+    if (!this._recordsListEl) return;
+    this._ensureNotebookState();
+    this._recordsListEl.innerHTML = '';
+    this.engine.notebookRecords.forEach(record => this._appendRecordCard(record));
+  }
+
+  _renderCurrentChapterChat() {
+    if (!this._historyEl) return;
+    this._ensureNotebookState();
+    const messages = this.engine.notebookChatsByChapter[this._getChapterKey()] || [];
+    this._historyEl.innerHTML = '';
+    if (!messages.length) {
+      this._historyEl.appendChild(this._emptyGuideEl);
+      return;
+    }
+    messages.forEach(message => this._appendMessage(message.text, message.type, false));
+  }
+
+  _ensureNotebookState() {
+    if (!this.engine.notebookRecords) this.engine.notebookRecords = [];
+    if (!this.engine.notebookChatsByChapter) this.engine.notebookChatsByChapter = {};
+    this._seedRecordsFromProgress();
+  }
+
+  _hasRecord(type, text) {
+    return this.engine.notebookRecords.some(record => record.type === type && record.text === text);
+  }
+
+  _rememberRecord(record) {
+    if (this._hasRecord(record.type, record.text)) return;
+    this.engine.notebookRecords.push(record);
+  }
+
+  _seedRecordsFromProgress() {
+    const progress = this.engine.gameProgress || {};
+    NOTEBOOK_RECORD_SEEDS.forEach((seed) => {
+      if (seed.when(progress)) {
+        this._rememberRecord({ type: seed.type, text: seed.text });
+      }
+    });
+  }
+
+  _persistNotebookState() {
+    this.engine.saveSystem?.autoSave?.();
+  }
+
+  _getChapterKey() {
+    const chapter = Number.isFinite(this.engine.currentChapter) ? this.engine.currentChapter : 0;
+    return `chapter-${chapter}`;
   }
 
   // === Tools ===

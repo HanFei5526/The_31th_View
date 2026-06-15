@@ -74,7 +74,11 @@ export class SceneManager {
 
     // 1. 播放过渡动画
     if (!skipTransition) {
-      await this.engine.playTransition();
+      if (name === 'menu' && typeof this.engine.playMenuReturnTransition === 'function') {
+        await this.engine.playMenuReturnTransition();
+      } else {
+        await this.engine.playTransition();
+      }
     }
 
     // 2. 退出当前场景

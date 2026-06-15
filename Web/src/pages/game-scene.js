@@ -537,30 +537,32 @@ export default class GameSceneBase {
 
     .gs-hotspot-glow {
       position: absolute;
-      inset: -4px;
-      border-radius: 10px;
+      left: 50%;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      border-radius: 50%;
       animation: gsHotspotPulse 2.5s ease-in-out infinite;
       pointer-events: none;
     }
 
     .game-scene--dark .gs-hotspot-glow {
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+      background: radial-gradient(circle, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.24) 46%, transparent 76%);
+      box-shadow: 0 0 12px rgba(255,255,255,0.18);
     }
 
     .game-scene--dark .gs-hotspot:hover .gs-hotspot-glow {
-      border-color: rgba(255,255,255,0.5);
-      box-shadow: 0 0 25px rgba(255,255,255,0.2);
+      box-shadow: 0 0 18px rgba(255,255,255,0.26);
     }
 
     .game-scene--light .gs-hotspot-glow {
-      border: 1px solid rgba(180,140,60,0.3);
-      box-shadow: 0 0 15px rgba(180,140,60,0.15);
+      background: radial-gradient(circle, rgba(255, 224, 124, 0.82) 0%, rgba(212, 168, 83, 0.34) 48%, transparent 76%);
+      box-shadow: 0 0 12px rgba(180,140,60,0.2);
     }
 
     .game-scene--light .gs-hotspot:hover .gs-hotspot-glow {
-      border-color: rgba(180,140,60,0.6);
-      box-shadow: 0 0 25px rgba(180,140,60,0.3);
+      box-shadow: 0 0 18px rgba(180,140,60,0.32);
     }
 
     @keyframes gsHotspotPulse {
@@ -601,8 +603,12 @@ export default class GameSceneBase {
     }
 
     .gs-hotspot:focus-visible {
-      outline: 2px solid rgba(200, 180, 140, 0.6);
-      outline-offset: 4px;
+      outline: none;
+    }
+
+    .gs-hotspot:focus-visible .gs-hotspot-glow {
+      transform: scale(1.15);
+      opacity: 1;
     }
 
     .gs-btn-back:focus-visible,
