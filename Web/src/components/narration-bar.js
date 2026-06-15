@@ -119,6 +119,7 @@ export class NarrationBar {
         this.setPortrait(null);
       }
 
+      this._emitNotebookGuidanceIfNeeded(speaker, text);
       this._typeChar(0);
     });
   }
@@ -209,6 +210,7 @@ export class NarrationBar {
     this._barEl.className = 'narration-bar state-narration';
     this._speakerEl.style.display = 'none';
     this._textEl.textContent = text;
+    this._emitNotebookGuidanceIfNeeded(null, text);
 
     this._floatingTimer = setTimeout(() => {
       this._textEl.textContent = '';
@@ -302,5 +304,26 @@ export class NarrationBar {
 
   _hideContinue() {
     if (this._continueEl) this._continueEl.classList.remove('visible');
+  }
+
+  _emitNotebookGuidanceIfNeeded(speaker, text) {
+    if (!text) return;
+
+    const isNotebookGuidance = [
+      '修复笔记本',
+      '笔记本',
+      '记录页',
+      '对话页',
+      '查看线索',
+      '继续讨论',
+      '快捷问题',
+      '已写入',
+      '已收录',
+      '线索'
+    ].some(keyword => text.includes(keyword));
+
+    if (isNotebookGuidance) {
+      this.engine?.emit?.('notebook-guidance-shown', { text });
+    }
   }
 }

@@ -3,20 +3,20 @@
    ============================================ */
 
 /* --- 宣纸晕染转场 (跌入画中) --- */
-/* 用暖米色宣纸质感从中心向外晕开，配合水墨模糊，替代生硬的黑色圆点扩散 */
+/* 用浅白偏纸黄的宣纸质感从中心向外晕开，避免黑屏和浓黄闪屏 */
 .transition-ink-spread {
   position: fixed;
   inset: 0;
   z-index: var(--z-transition);
   pointer-events: none;
   overflow: hidden;
-  /* 宣纸底色 */
+  /* 浅纸底色 */
   background:
     radial-gradient(ellipse at 50% 48%,
-      #e8dcc0 0%,
-      #d4c49a 35%,
-      #c8b484 60%,
-      #b8a070 100%
+      #fbfaf6 0%,
+      #f1eee6 42%,
+      #e7e1d4 72%,
+      #ded6c7 100%
     );
   /* 宣纸纹理 */
   background-image:
@@ -24,21 +24,21 @@
       0deg,
       transparent,
       transparent 3px,
-      rgba(100, 80, 40, 0.04) 3px,
-      rgba(100, 80, 40, 0.04) 6px
+      rgba(120, 100, 62, 0.025) 3px,
+      rgba(120, 100, 62, 0.025) 6px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 4px,
-      rgba(100, 80, 40, 0.02) 4px,
-      rgba(100, 80, 40, 0.02) 8px
+      rgba(120, 100, 62, 0.015) 4px,
+      rgba(120, 100, 62, 0.015) 8px
     ),
     radial-gradient(ellipse at 50% 48%,
-      #e8dcc0 0%,
-      #d4c49a 35%,
-      #c8b484 60%,
-      #b8a070 100%
+      #fbfaf6 0%,
+      #f1eee6 42%,
+      #e7e1d4 72%,
+      #ded6c7 100%
     );
   opacity: 0;
   transform: scale(0.06);
@@ -93,7 +93,9 @@
   inset: 0;
   z-index: var(--z-transition);
   pointer-events: none;
-  background: var(--real-bg);
+  background:
+    linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96)),
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(226, 220, 208, 0.5) 100%);
   opacity: 0;
 }
 
@@ -135,12 +137,12 @@
 }
 
 .transition-scroll .scroll-left {
-  background: linear-gradient(to right, var(--paint-bg-deep) 90%, var(--paint-border));
+  background: linear-gradient(to right, #f4f1ea 88%, rgba(207, 195, 174, 0.92));
   transform: translateX(-100%);
 }
 
 .transition-scroll .scroll-right {
-  background: linear-gradient(to left, var(--paint-bg-deep) 90%, var(--paint-border));
+  background: linear-gradient(to left, #f4f1ea 88%, rgba(207, 195, 174, 0.92));
   transform: translateX(100%);
 }
 
@@ -180,7 +182,9 @@
   inset: 0;
   z-index: var(--z-transition);
   pointer-events: none;
-  background: black;
+  background:
+    linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96)),
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(226, 220, 208, 0.5) 100%);
   opacity: 0;
 }
 
@@ -356,7 +360,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #e8e0d0;
+  background: #eeece6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,13 +531,13 @@ body.fall-active .hud-bar {
   transition: opacity 1.5s ease-out !important;
 }
 
-/* Phase 1: Cold blue desaturation */
+/* Phase 1: Light paper desaturation */
 .fall-transition-desat {
   position: fixed;
   inset: 0;
   z-index: var(--z-transition);
   pointer-events: all;
-  background: rgba(74, 109, 124, 0.05);
+  background: rgba(248, 247, 243, 0.18);
   opacity: 0;
   transition: opacity 1.5s ease;
 }
@@ -542,14 +546,23 @@ body.fall-active .hud-bar {
   opacity: 1;
 }
 
-/* Phase 2: Smooth ink background fade-in (高质感暖焦墨全屏淡入) */
+/* Phase 2: Light paper background fade-in */
 .fall-transition-ink {
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-transition) + 1);
   pointer-events: none;
   overflow: hidden;
-  background-color: #16120f;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(120, 100, 62, 0.018) 3px,
+      rgba(120, 100, 62, 0.018) 6px
+    ),
+    linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.97)),
+    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(226, 220, 208, 0.5) 100%);
   opacity: 0;
   transition: opacity 2.0s ease-in-out;
 }
@@ -558,7 +571,7 @@ body.fall-active .hud-bar {
   opacity: 1;
 }
 
-/* Phase 3: Transition text on ink background */
+/* Phase 3: Transition text on paper background */
 .fall-transition-text-layer {
   position: fixed;
   inset: 0;
@@ -581,7 +594,7 @@ body.fall-active .hud-bar {
 .fall-transition-line {
   font-family: var(--font-serif, 'Noto Serif SC', serif);
   font-size: 1.15rem;
-  color: rgba(232, 224, 208, 0.9);
+  color: rgba(72, 100, 110, 0.92);
   letter-spacing: 0.12em;
   line-height: 1.8;
   text-align: center;
@@ -605,7 +618,7 @@ body.fall-active .hud-bar {
 
 .fall-transition-line.inner-voice {
   font-style: italic;
-  color: rgba(220, 210, 190, 0.72) !important;
+  color: rgba(82, 71, 55, 0.68) !important;
 }
 
 /* Phase 4: Zhou Henian echo & narration lines (场景6 · 墨迹扩散转场) */
@@ -634,7 +647,7 @@ body.fall-active .hud-bar {
 .fall-transition-echo-line--zhou {
   font-family: var(--font-handwrite, 'LXGW WenKai', serif);
   font-size: 1.1rem;
-  color: rgba(232, 224, 208, 0.95) !important;
+  color: rgba(62, 52, 38, 0.9) !important;
   letter-spacing: 0.15em;
   margin: 0.8rem 0 0.8rem 0; /* 调密上下间距，避免过大的物理空洞 */
   transition-duration: 2.0s;
@@ -647,7 +660,7 @@ body.fall-active .hud-bar {
 .fall-transition-echo-line--narration {
   font-family: var(--font-serif, 'Noto Serif SC', serif);
   font-size: 1.1rem;
-  color: rgba(200, 190, 170, 0.62) !important;
+  color: rgba(72, 100, 110, 0.66) !important;
   letter-spacing: 0.1em;
 }
 
@@ -656,7 +669,7 @@ body.fall-active .hud-bar {
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-transition) + 3);
-  background: #16120f;
+  background: linear-gradient(180deg, rgba(248, 247, 243, 0.99), rgba(238, 235, 226, 0.98));
   opacity: 1;
   pointer-events: none;
   transition: opacity 1.2s ease;

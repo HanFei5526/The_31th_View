@@ -232,7 +232,17 @@
 
 /* 研讨确认 */
 .notebook-confirm-area {
-  margin-bottom: 0.75rem;
+  position: absolute;
+  left: 50%;
+  bottom: 192px;
+  z-index: 165;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  width: min(55vw, 520px);
+  max-width: calc(100vw - 440px);
+  pointer-events: none;
+  animation: notebook-confirm-in 0.24s ease-out;
 }
 
 .notebook-confirm-area.hidden {
@@ -240,38 +250,72 @@
 }
 
 .notebook-confirm-btn {
-  width: 100%;
-  display: flex;
+  min-height: 44px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(112, 157, 102, 0.55);
-  border-radius: 4px;
-  background: rgba(112, 157, 102, 0.12);
-  color: #bfe0b8;
+  padding: 0.55rem 1.55rem;
   font-family: var(--font-serif);
-  font-size: 0.92rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #e0c296;
+  background: #713824;
+  border: 2px solid #4a2417;
+  border-radius: 0;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85);
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  pointer-events: auto;
+  white-space: nowrap;
+  transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .notebook-confirm-btn:hover:not(:disabled) {
-  background: rgba(112, 157, 102, 0.2);
-  border-color: rgba(112, 157, 102, 0.8);
+  transform: translate(2px, 2px);
+  background: #5c2d1b;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
 }
 
 .notebook-confirm-btn:disabled {
   cursor: default;
-  opacity: 0.75;
+  opacity: 0.7;
 }
 
 .notebook-confirm-btn.confirmed {
-  background: rgba(112, 157, 102, 0.24);
+  transform: translate(2px, 2px);
+  background: #5c2d1b;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
 }
 
 .notebook-confirm-icon {
   font-size: 1rem;
+}
+
+@keyframes notebook-confirm-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 720px) {
+  .notebook-confirm-area {
+    bottom: 184px;
+    width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+  }
+
+  .notebook-confirm-btn {
+    min-height: 42px;
+    max-width: 100%;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.92rem;
+    letter-spacing: 0.14em;
+  }
 }
 
 /* 输入框区 */

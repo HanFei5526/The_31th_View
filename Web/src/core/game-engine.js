@@ -372,7 +372,7 @@ export class GameEngine {
       overlay.className = 'world-transition-overlay';
       overlay.style.cssText = `
         position: fixed; inset: 0; z-index: 250;
-        background: ${targetWorld === 'paint' ? 'var(--paint-bg-deep)' : 'var(--real-bg-deep)'};
+        background: linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96));
         opacity: 0; pointer-events: none;
         transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
       `;
@@ -506,7 +506,10 @@ export class GameEngine {
       el.style.display = 'block';
       el.style.opacity = '0';
       el.style.filter = 'blur(8px)';
-      el.style.background = 'radial-gradient(ellipse at center, #c8b898 0%, #e8e0d0 100%)';
+      el.style.background = [
+        'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96))',
+        'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(226, 220, 208, 0.5) 100%)'
+      ].join(', ');
 
       // 柔缓淡入遮罩
       requestAnimationFrame(() => {
@@ -536,6 +539,100 @@ export class GameEngine {
     });
   }
 
+  /**
+   * 播放返回主页专用过渡动画：更白、更轻的纸色遮罩。
+   * @returns {Promise<void>}
+   */
+  playMenuReturnTransition() {
+    return new Promise((resolve) => {
+      const el = this._transitionEl;
+      if (!el) {
+        resolve();
+        return;
+      }
+
+      let resolved = false;
+      const safeResolve = () => {
+        if (!resolved) {
+          resolved = true;
+          resolve();
+        }
+      };
+
+      let timer1, timer2, timer3;
+      const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      const fadeInMs = prefersReducedMotion ? 80 : 260;
+      const fadeOutMs = prefersReducedMotion ? 120 : 560;
+
+      const finishFast = () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        document.removeEventListener('keydown', onKey);
+
+        el.style.display = 'none';
+        el.style.opacity = '0';
+        el.classList.remove('active');
+        el.style.transition = '';
+        el.style.filter = '';
+        el.style.background = '';
+
+        safeResolve();
+      };
+
+      const onKey = (e) => {
+        if (e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
+          const activeEl = document.activeElement;
+          const isInput = activeEl && (
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.isContentEditable
+          );
+          if (!isInput) {
+            e.preventDefault();
+            finishFast();
+          }
+        }
+      };
+
+      document.addEventListener('keydown', onKey);
+
+      el.classList.add('active');
+      el.style.display = 'block';
+      el.style.opacity = '0';
+      el.style.filter = prefersReducedMotion ? 'none' : 'blur(4px)';
+      el.style.background = [
+        'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(239, 236, 229, 0.97))',
+        'radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86) 0%, rgba(232, 228, 219, 0.58) 100%)'
+      ].join(', ');
+
+      requestAnimationFrame(() => {
+        el.style.transition = `opacity ${fadeInMs}ms ease, filter ${fadeInMs}ms ease`;
+        el.style.opacity = '1';
+        el.style.filter = 'none';
+      });
+
+      timer1 = setTimeout(() => {
+        safeResolve();
+
+        timer2 = setTimeout(() => {
+          el.style.transition = `opacity ${fadeOutMs}ms ease, filter ${fadeOutMs}ms ease`;
+          el.style.opacity = '0';
+          el.style.filter = prefersReducedMotion ? 'none' : 'blur(6px)';
+          timer3 = setTimeout(() => {
+            el.style.display = 'none';
+            el.classList.remove('active');
+            el.style.transition = '';
+            el.style.filter = '';
+            el.style.background = '';
+            document.removeEventListener('keydown', onKey);
+          }, fadeOutMs);
+        }, prefersReducedMotion ? 20 : 160);
+      }, fadeInMs);
+    });
+  }
+
   /* ==========================
      内部方法
      ========================== */
@@ -548,8 +645,7 @@ export class GameEngine {
     const el = document.createElement('div');
     el.className = 'transition-overlay';
     el.style.display = 'none';
-    // 根据当前世界设置过渡颜色
-    el.style.background = 'var(--real-bg-deep)';
+    el.style.background = 'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96))';
     this._appElement.appendChild(el);
     this._transitionEl = el;
   }
@@ -564,12 +660,9 @@ export class GameEngine {
     this._appElement.classList.add(
       this.currentWorld === 'paint' ? 'paint-world' : 'real-world'
     );
-    // 同步过渡遮罩背景色
+    // 同步为浅纸色过渡遮罩，避免切换时出现黑屏或浓黄闪屏
     if (this._transitionEl) {
-      this._transitionEl.style.background =
-        this.currentWorld === 'paint'
-          ? 'var(--paint-bg-deep)'
-          : 'var(--real-bg-deep)';
+      this._transitionEl.style.background = 'linear-gradient(180deg, rgba(248, 247, 243, 0.98), rgba(238, 235, 226, 0.96))';
     }
   }
 

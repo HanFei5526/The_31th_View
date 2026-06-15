@@ -569,7 +569,7 @@ export default class MenuScene {
     .menu-scene {
       width: 100vw;
       min-height: 100vh;
-      background-color: #e0d8cc;
+      background-color: #ece9e1;
       position: relative;
       overflow: hidden;
       display: flex;

@@ -1088,38 +1088,61 @@ a {
 /* --- 叙事对话框：选项分支 --- */
 .narration-options {
   display: flex;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   justify-content: center;
-  margin-bottom: 1.5rem;
-  padding: 0.5rem 1rem 0;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  padding: 0 0.5rem;
+  pointer-events: auto;
 }
 
 .narration-option-btn {
-  background: var(--btn-bg);
-  border: 1px solid var(--btn-border);
-  box-shadow: 2px 2px 0 var(--btn-shadow);
-  color: var(--real-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  max-width: min(21rem, 100%);
+  padding: 0.5rem 1rem;
   font-family: var(--font-serif);
-  font-size: var(--font-size-base);
-  padding: 0.8rem 1.5rem;
-  min-width: 160px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: #e0c296;
+  background: #713824;
+  border: 2px solid #4a2417;
+  border-radius: 0;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 3px 3px 0 rgba(44, 36, 22, 0.85);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .narration-option-btn:hover {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--btn-shadow);
-  background: rgba(139, 119, 79, 0.1);
-  color: var(--btn-hover-text);
+  background: #5c2d1b;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0 rgba(44, 36, 22, 0.85);
 }
 
 .narration-option-btn:active {
   transform: translate(2px, 2px);
   box-shadow: 0 0 0 transparent;
+}
+
+@media (max-width: 900px) {
+  .narration-options {
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .narration-option-btn {
+    width: min(100%, 18rem);
+    min-height: 40px;
+    font-size: 0.9rem;
+  }
 }
 
 /* --- 第一章：画中场景 --- */
@@ -1143,6 +1166,17 @@ a {
 .ch1-subscene.active {
   opacity: 1;
   pointer-events: auto;
+}
+
+.ch1-scene [role="button"] {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ch1-scene [role="button"]:focus,
+.ch1-scene [role="button"]:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 /* 画中世界氛围：宣纸暖色 + 轻微暗角，让原作淡墨更沉 */
@@ -1287,7 +1321,7 @@ a {
 }
 
 /* --- 芙蓉榭谜题 --- */
-/* 整体翻转容器：以水面线（55%）为轴做 Y 轴镜像，模拟"倒影变正像" */
+/* 整体翻转容器：做 Y 轴镜像，模拟"倒影变正像" */
 .furong-wrap {
   position: absolute;
   inset: 0;
@@ -1324,8 +1358,19 @@ a {
   transform: translateY(-50%);
   cursor: pointer;
   z-index: 5;
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.12) 40%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.12) 60%, transparent);
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background:
+    linear-gradient(to bottom, transparent, rgba(226, 183, 72, 0.08) 38%, rgba(226, 183, 72, 0.26) 50%, rgba(226, 183, 72, 0.08) 62%, transparent),
+    radial-gradient(ellipse at center, rgba(237, 205, 112, 0.22) 0%, rgba(237, 205, 112, 0) 55%);
   animation: waterGleam 4s infinite ease-in-out;
+}
+
+.furong-waterline:focus,
+.furong-waterline:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 @keyframes waterGleam {
@@ -1340,6 +1385,14 @@ a {
   transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 6;
+  border: 0;
+  outline: none;
+}
+
+.furong-hairpin:focus,
+.furong-hairpin:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .furong-hairpin .hairpin-icon {
@@ -1348,30 +1401,34 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: drop-shadow(0 0 5px rgba(212, 168, 83, 0.48));
 }
 
-/* CSS 绘制簪子图标，替代 emoji */
-.furong-hairpin .hairpin-icon::before {
-  content: '';
-  display: block;
-  width: 4px;
-  height: 22px;
-  background: linear-gradient(to bottom, #c4a96a, #8b7355);
-  border-radius: 2px;
-  position: relative;
+.furong-hairpin .hairpin-svg {
+  width: 38px;
+  height: 38px;
+  overflow: visible;
 }
 
-.furong-hairpin .hairpin-icon::after {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 10px;
-  background: radial-gradient(ellipse at center, #d4a853 0%, #b8964a 100%);
-  border-radius: 50% 50% 40% 40%;
-  box-shadow: 0 0 6px rgba(212, 168, 83, 0.5);
+.furong-hairpin .hairpin-svg path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.furong-hairpin .hairpin-stem {
+  stroke: rgba(104, 82, 52, 0.82);
+  stroke-width: 2.1;
+}
+
+.furong-hairpin .hairpin-break {
+  stroke: rgba(226, 183, 72, 0.9);
+  stroke-width: 1.7;
+}
+
+.furong-hairpin .hairpin-flower {
+  stroke: rgba(212, 168, 83, 0.92);
+  stroke-width: 1.5;
 }
 
 /* 翻转后让图标重新正立（抵消容器的 scaleY(-1)） */
@@ -1399,6 +1456,44 @@ a {
   50% { transform: scale(1.5); opacity: 0.8; }
 }
 
+.ch1-discussion-skip-btn {
+  position: absolute;
+  left: 50%;
+  bottom: calc(2vh + 166px);
+  transform: translateX(-50%);
+  z-index: 130;
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 0.55rem 1.55rem;
+  border-radius: 0;
+  border: 2px solid rgba(142, 112, 74, 0.72);
+  background: rgba(225, 215, 195, 0.9);
+  color: #4a3424;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.22), 4px 4px 0 rgba(88, 72, 48, 0.36);
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.ch1-discussion-skip-btn:hover:not(:disabled) {
+  transform: translate(-50%, 2px);
+  background: rgba(238, 229, 210, 0.96);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.28), 2px 2px 0 rgba(88, 72, 48, 0.4);
+}
+
+.ch1-discussion-skip-btn:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.ch1-discussion-skip-btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.24), 2px 2px 0 rgba(88, 72, 48, 0.4), 0 0 0 3px rgba(142, 112, 74, 0.22);
+}
+
 /* 褪色转场 */
 .fade-to-sepia-overlay {
   position: fixed;
@@ -1414,5 +1509,5 @@ a {
 .fade-to-sepia-overlay.active {
   backdrop-filter: sepia(0.8) grayscale(0.5);
   -webkit-backdrop-filter: sepia(0.8) grayscale(0.5);
-  background: #e8e0d0; /* 然后淡入到实色 */
+  background: #eeece6; /* 然后淡入到浅纸色实色 */
 }

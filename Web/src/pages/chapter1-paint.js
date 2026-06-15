@@ -48,6 +48,7 @@ export default class Chapter1PaintScene {
     this._container = null;
     this._sceneRoot = null;
     this._uiLayer = null;
+    this._lightDiscussionSkipBtn = null;
     this._exited = false;
   }
 
@@ -146,6 +147,7 @@ export default class Chapter1PaintScene {
       this._flipTimeout = null;
     }
     this.narrationBar.unmount();
+    this._hideLightDiscussionSkipButton();
     this.notebook.unmount();
     this.hudBar.unmount();
     this.inventoryPopup.unmount();
@@ -337,7 +339,7 @@ export default class Chapter1PaintScene {
     // 水面线
     this._waterline = document.createElement('div');
     this._waterline.className = 'furong-waterline';
-    this._waterline.style.top = '55%';
+    this._waterline.style.top = '66%';
     this._waterline.tabIndex = 0;
     this._waterline.setAttribute('role', 'button');
     this._waterline.setAttribute('aria-label', '水面分界线');
@@ -347,7 +349,7 @@ export default class Chapter1PaintScene {
 
       if (!this._hairpinIdentified) {
         this._furongWaterlineClicks += 1;
-        this._createRipple(50, 55, this._furongWrap);
+        this._createRipple(50, 66, this._furongWrap);
         this.narrationBar.showFloating('水面微微晃动，什么也没发生。');
         return;
       }
@@ -365,6 +367,12 @@ export default class Chapter1PaintScene {
         this._furongWrap.classList.add('flipped');
         this._isFlipped = true;
         this.state = SCENE_STATES.PUZZLE;
+        if (this._realRailing) this._realRailing.style.display = 'none';
+        if (this._hairpinReflection) this._hairpinReflection.style.display = 'none';
+        if (this._waterline) {
+          this._waterline.style.display = 'none';
+          this._waterline.style.pointerEvents = 'none';
+        }
 
         this._flipTimeout = setTimeout(async () => {
           this._isFlipping = false;
@@ -378,10 +386,7 @@ export default class Chapter1PaintScene {
           this.narrationBar.dismiss();
           this._isNarrating = false;
 
-          // 显示翻转后的断簪，隐藏倒影中断簪
-          if (this._hairpinReflection) this._hairpinReflection.style.display = 'none';
           if (this._hairpinReal) this._hairpinReal.style.display = 'block';
-
           this.narrationBar.showFloating('断簪停在近前，金光轻轻一闪。');
           this._resetIdleTimer('flipper');
         }, 2400);
@@ -408,6 +413,7 @@ export default class Chapter1PaintScene {
 
         if (this._hairpinReflection) this._hairpinReflection.style.display = 'block';
         if (this._hairpinReal) this._hairpinReal.style.display = 'none';
+        if (this._realRailing) this._realRailing.style.display = '';
 
         this._resetIdleTimer('identified');
       }
@@ -422,7 +428,7 @@ export default class Chapter1PaintScene {
     this._furongWrap.appendChild(this._waterline);
 
     // 真实栏杆（第一个可点击元素）— 3-6
-    const realRailing = this._createHotspot(50, 35, 12, () => {
+    this._realRailing = this._createHotspot(50, 35, 12, () => {
       if (this._isNarrating) return;
       this._furongRailingClicks += 1;
       let msg = '你摸了摸栏杆。什么都没有。';
@@ -434,7 +440,7 @@ export default class Chapter1PaintScene {
       }
       this.narrationBar.showFloating(msg);
     }, '栏杆');
-    this._furongWrap.appendChild(realRailing);
+    this._furongWrap.appendChild(this._realRailing);
 
     // 倒影中断簪（翻转前可见）— 3-7~3-9
     this._hairpinReflection = document.createElement('div');
@@ -446,7 +452,13 @@ export default class Chapter1PaintScene {
     this._hairpinReflection.setAttribute('aria-label', '水面倒影中的物件');
     this._hairpinReflection.innerHTML = `
       <div class="hairpin-gleam visible"></div>
-      <span class="hairpin-icon" aria-hidden="true"></span>
+      <span class="hairpin-icon" aria-hidden="true">
+        <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
+          <path class="hairpin-stem" d="M18 36 C20 28 23 18 27 8" />
+          <path class="hairpin-break" d="M15 29 L22 24" />
+          <path class="hairpin-flower" d="M27 9 C20 10 17 15 20 21 C25 19 29 15 27 9" />
+        </svg>
+      </span>
     `;
     const onHairpinReflectionInteract = async () => {
       if (this._isNarrating) return;
@@ -491,7 +503,13 @@ export default class Chapter1PaintScene {
     this._hairpinReal.setAttribute('aria-label', '断簪');
     this._hairpinReal.innerHTML = `
       <div class="hairpin-gleam visible"></div>
-      <span class="hairpin-icon" aria-hidden="true"></span>
+      <span class="hairpin-icon" aria-hidden="true">
+        <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
+          <path class="hairpin-stem" d="M18 36 C20 28 23 18 27 8" />
+          <path class="hairpin-break" d="M15 29 L22 24" />
+          <path class="hairpin-flower" d="M27 9 C20 10 17 15 20 21 C25 19 29 15 27 9" />
+        </svg>
+      </span>
     `;
     const onHairpinRealInteract = async () => {
       if (this._isNarrating) return;
@@ -520,9 +538,10 @@ export default class Chapter1PaintScene {
 
       this.notebook.addClueRecord('[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字');
       this.notebook.addClueRecord('[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明');
-      this.narrationBar.showFeedback('已记录线索：断簪"蘅"字刻痕');
+      this.notebook.expand();
+      this.notebook.setLightweightMode(true);
+      await this.narrationBar.playLine('系统提示', '已获得物件：「断簪」。断簪与「蘅」字刻痕已写入修复笔记本；可在「记录」页查看，也可在「梳理」页轻量讨论；如果暂时不想讨论，也可以跳过。');
 
-      this.narrationBar.dismiss();
       this._isNarrating = false;
       this._startLightDiscussion();
     };
@@ -593,6 +612,31 @@ export default class Chapter1PaintScene {
     ripple.style.top = `${y}%`;
     container.appendChild(ripple);
     setTimeout(() => ripple.remove(), 600);
+  }
+
+  _showLightDiscussionSkipButton(onSkip) {
+    this._hideLightDiscussionSkipButton();
+    if (!this._uiLayer) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ch1-discussion-skip-btn';
+    btn.textContent = '跳过讨论';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.disabled = true;
+      onSkip?.();
+    });
+
+    this._lightDiscussionSkipBtn = btn;
+    this._uiLayer.appendChild(btn);
+  }
+
+  _hideLightDiscussionSkipButton() {
+    if (this._lightDiscussionSkipBtn) {
+      this._lightDiscussionSkipBtn.remove();
+      this._lightDiscussionSkipBtn = null;
+    }
   }
 
   /* ==================== 流程控制 ==================== */
@@ -752,20 +796,23 @@ export default class Chapter1PaintScene {
     this.notebook.showNPCMessage('周老师的批注："蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。刻在簪身背面，不是正面——如果是工匠标记，通常会在簪头或底座。这更像是物主自己留给自己的。那么，是谁把自己的名字藏在了一支断簪上？');
 
     this.notebook.showQuickThoughts([
-      '也许是这支簪子主人的名字',
-      '为什么要藏在背面？'
+      '「蘅」字可能指什么？',
+      '为什么刻在断簪背面？',
+      '一个字能说明是谁留下的吗？'
     ]);
 
-    let answered = 0;
+    const answeredThoughts = new Set();
+    const responses = {
+      '「蘅」字可能指什么？': '“蘅”可指杜衡，是一种香草，古人也常借它比喻品性高洁的女子。这里只能先记下字义，不能直接推出身份。',
+      '为什么刻在断簪背面？': '背面更隐蔽，不像公开署名，更像私人的记号。这个位置值得记下，但还不能单独定论。',
+      '一个字能说明是谁留下的吗？': '不能。一个字只能说明有人留下过痕迹，至于是谁、为什么留下，还需要更多线索互相印证。'
+    };
     this.notebook.onQuickThought((text) => {
+      if (answeredThoughts.has(text)) return;
+      answeredThoughts.add(text);
       this.notebook.showPlayerMessage(text);
-      if (text === '也许是这支簪子主人的名字') {
-        this.notebook.showNPCMessage('这是最大的可能。一个字不足以证明她的身份，但这是第一条直接的线索。');
-      } else {
-        this.notebook.showNPCMessage('背面更隐蔽，说明她既想留下痕迹，又不想太招摇。这种矛盾本身就很值得玩味。');
-      }
-      answered++;
-      if (answered >= 2) {
+      this.notebook.showNPCMessage(responses[text] || '这个问题可以先记下，等更多线索出现后再一起判断。');
+      if (answeredThoughts.size >= 3) {
         setTimeout(() => {
           if (!this._discussionEnded) endDiscussion();
         }, 2500);
@@ -775,9 +822,11 @@ export default class Chapter1PaintScene {
     const endDiscussion = async () => {
       if (this._discussionEnded) return;
       this._discussionEnded = true;
+      this._hideLightDiscussionSkipButton();
       this.notebook.hideConfirmButton();
       this.notebook.setLightweightMode(false);
       this.notebook.collapse();
+      this.narrationBar.dismiss();
 
       await this.narrationBar.playLine(null, '水面重新归于平静。你把断簪小心地收起来。');
       await this.narrationBar.playLine('沈念', '蘅。一个女子的名字？她把自己藏在一支簪子的背面——不想被别人看见，又不甘心完全消失。');
@@ -789,8 +838,9 @@ export default class Chapter1PaintScene {
 
     this._discussionEnded = false;
 
-    // 跳过按钮触发
-    this.notebook.showSkipButton(() => endDiscussion());
+    // 跳过按钮放在叙事框上方，不占用笔记本内容区。
+    this.notebook.hideConfirmButton();
+    this._showLightDiscussionSkipButton(() => endDiscussion());
 
     // 监听面板收起也触发转场
     this._collapseHandler = () => {

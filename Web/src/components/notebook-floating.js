@@ -92,6 +92,7 @@ export class NotebookFloating {
     this._boundOnItemCollected = this._onItemCollected.bind(this);
     this._boundOnToolUsed = this._onToolUsed.bind(this);
     this._boundOnAllToolsUsed = this._onAllToolsUsed.bind(this);
+    this._offNotebookGuidance = null;
   }
 
   mount(root) {
@@ -142,6 +143,10 @@ export class NotebookFloating {
     this._container.appendChild(this._toolSectionEl);
 
     root.appendChild(this._container);
+    this._confirmAreaEl = document.createElement('div');
+    this._confirmAreaEl.className = 'notebook-confirm-area hidden';
+    root.appendChild(this._confirmAreaEl);
+
     this._renderRecords();
     this._renderCurrentChapterChat();
 
@@ -150,6 +155,9 @@ export class NotebookFloating {
     window.addEventListener('item-collected', this._boundOnItemCollected);
     window.addEventListener('tool-used', this._boundOnToolUsed);
     window.addEventListener('all-tools-used', this._boundOnAllToolsUsed);
+    this._offNotebookGuidance = this.engine.on?.('notebook-guidance-shown', () => {
+      this._expandForGuidance();
+    });
   }
 
   unmount() {
@@ -157,6 +165,8 @@ export class NotebookFloating {
     window.removeEventListener('item-collected', this._boundOnItemCollected);
     window.removeEventListener('tool-used', this._boundOnToolUsed);
     window.removeEventListener('all-tools-used', this._boundOnAllToolsUsed);
+    this._offNotebookGuidance?.();
+    this._offNotebookGuidance = null;
     
     this._rootEl?.classList.remove('notebook-panel-expanded');
     if (this._scrollFrame) {
@@ -164,7 +174,9 @@ export class NotebookFloating {
       this._scrollFrame = null;
     }
     if (this._container) this._container.remove();
+    if (this._confirmAreaEl) this._confirmAreaEl.remove();
     this._container = null;
+    this._confirmAreaEl = null;
     this._rootEl = null;
   }
 
@@ -239,6 +251,11 @@ export class NotebookFloating {
     return this._expanded;
   }
 
+  _expandForGuidance() {
+    if (!this._container || this._container.classList.contains('hidden') || this._expanded) return;
+    this.expand();
+  }
+
   // === Tab ===
 
   switchTab(tabId) {
@@ -284,9 +301,6 @@ export class NotebookFloating {
     this._quickThoughtsEl = document.createElement('div');
     this._quickThoughtsEl.className = 'notebook-quick-thoughts';
 
-    this._confirmAreaEl = document.createElement('div');
-    this._confirmAreaEl.className = 'notebook-confirm-area hidden';
-
     const inputArea = document.createElement('div');
     inputArea.className = 'notebook-input-area';
     
@@ -313,7 +327,6 @@ export class NotebookFloating {
     inputArea.appendChild(this._sendBtn);
 
     pane.appendChild(this._historyEl);
-    pane.appendChild(this._confirmAreaEl);
     pane.appendChild(this._quickThoughtsEl);
     pane.appendChild(inputArea);
 
