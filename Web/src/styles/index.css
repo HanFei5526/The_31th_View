@@ -1524,3 +1524,344 @@ a {
   -webkit-backdrop-filter: sepia(0.8) grayscale(0.5);
   background: var(--wash-paper-mid); /* 然后淡入到浅纸色实色 */
 }
+
+/* ===========================
+   Chapter 2 · 中园
+   =========================== */
+
+.ch2-scene-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.ch2-subscene {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--wash-paper-mid);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 1;
+}
+
+.ch2-subscene.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.ch2-subscene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 入场转场 */
+.ch2-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.ch2-intro .intro-line {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.ch2-intro .intro-line.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ch2-intro.fade-out {
+  animation: fadeOut 1s ease forwards;
+}
+
+/* 热点 */
+.ch2-hotspot {
+  position: absolute;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: all;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+.ch2-hotspot-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255, 225, 80, 0.9) 10%, rgba(230, 180, 60, 0.7) 40%, rgba(210, 150, 40, 0.2) 65%, transparent 85%);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+  animation: ch2HotspotPulse 2s ease-in-out infinite;
+}
+
+.ch2-hotspot-strong .ch2-hotspot-glow {
+  animation: ch2HotspotStrong 1.5s ease-in-out infinite;
+}
+
+@keyframes ch2HotspotPulse {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 18px rgba(255, 215, 0, 0.6); }
+}
+
+@keyframes ch2HotspotStrong {
+  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); box-shadow: 0 0 24px rgba(255, 215, 0, 0.8); }
+}
+
+/* "画非一人"揭示 */
+.ch2-reveal-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 230, 200, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.ch2-reveal-overlay.active {
+  opacity: 1;
+}
+
+.ch2-reveal-overlay.fade-out {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.ch2-reveal-chars {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ch2-reveal-char {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  color: var(--paint-ink, #2c1810);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: ch2RevealChar 0.8s ease forwards;
+}
+
+.ch2-reveal-char:nth-child(1) { animation-delay: 0s; }
+.ch2-reveal-char:nth-child(2) { animation-delay: 0.3s; }
+.ch2-reveal-char:nth-child(3) { animation-delay: 0.6s; }
+.ch2-reveal-char:nth-child(4) { animation-delay: 0.9s; }
+
+@keyframes ch2RevealChar {
+  0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 旧批注 */
+.ch2-old-comment {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 200; /* 确保在画面正中间显示时不被遮挡 */
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
+  transition: opacity 2.5s ease, transform 2.5s ease; /* 缓慢显现 */
+  pointer-events: none;
+}
+
+.ch2-old-comment.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.ch2-old-comment-paper {
+  max-width: 320px;
+  padding: 1.2rem 1.5rem;
+  background: rgba(245, 235, 210, 0.92);
+  border: 1px solid rgba(120, 90, 50, 0.25);
+  border-radius: 2px;
+  box-shadow: 2px 3px 12px rgba(80, 60, 30, 0.15);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  line-height: 1.9;
+  color: rgba(60, 43, 31, 0.7);
+  letter-spacing: 0.05em;
+}
+
+/* 小飞虹水面文字 */
+.ch2-water-text {
+  position: absolute;
+  bottom: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  letter-spacing: 0.2em; /* 从 span 移到父级，方便动画控制 */
+  
+  /* 添加与旧批注纸张相同的 UI 组件背景 */
+  padding: 0.8rem 1.8rem;
+  background: rgba(245, 235, 210, 0.85);
+  border: 1px solid rgba(120, 90, 50, 0.25);
+  border-radius: 2px;
+  box-shadow: 2px 3px 12px rgba(80, 60, 30, 0.15);
+  white-space: nowrap;
+}
+
+.ch2-water-text.visible {
+  animation: inkRippleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes inkRippleReveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.8) scaleX(0.95);
+    filter: blur(12px);
+    letter-spacing: -0.1em;
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(2px);
+    letter-spacing: 0.1em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1) scaleX(1);
+    filter: blur(0);
+    letter-spacing: 0.2em;
+  }
+}
+
+.ch2-water-text.dissolve {
+  animation: inkRippleDissolve 3s ease forwards;
+}
+
+@keyframes inkRippleDissolve {
+  0% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(10px); transform: translateX(-50%) scale(1.05); }
+}
+
+.ch2-water-text span {
+  display: inline-block;
+  font-family: var(--font-handwrite);
+  font-size: 1.6rem;
+  color: var(--paint-ink, #2c1810);
+  text-shadow: 0 0 8px rgba(44, 24, 16, 0.3);
+  animation: ch2WaterChars 2s ease-in-out infinite alternate;
+}
+
+@keyframes ch2WaterChars {
+  0% { transform: translateY(0); opacity: 0.8; }
+  100% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* 跳过讨论按钮（复用ch1样式模式） */
+.ch2-discussion-skip-btn {
+  position: absolute;
+  left: 50%;
+  bottom: calc(2vh + 166px);
+  transform: translateX(-50%);
+  z-index: 130;
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 0.55rem 1.55rem;
+  border-radius: 0;
+  border: 2px solid rgba(142, 112, 74, 0.72);
+  background: rgba(225, 215, 195, 0.9);
+  color: #4a3424;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.22), 4px 4px 0 rgba(88, 72, 48, 0.36);
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.ch2-discussion-skip-btn:hover {
+  transform: translate(-50%, 2px);
+  background: rgba(238, 229, 210, 0.96);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.28), 2px 2px 0 rgba(88, 72, 48, 0.4);
+}
+
+/* ---- 物件展示浮层（场景内UI组件，不拦截对话框点击） ---- */
+.item-display-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.item-display-overlay.visible {
+  opacity: 1;
+}
+
+.item-display-overlay.fade-out {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.item-display-image {
+  max-width: min(360px, 60vw);
+  max-height: min(360px, 50vh);
+  /* 使用 drop-shadow 替代 box-shadow，让发光和阴影只贴合不透明像素的轮廓，避免出现长方形隐框 */
+  filter: drop-shadow(0 8px 30px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 40px rgba(180, 140, 80, 0.2));
+  object-fit: contain;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.item-display-image.flipping {
+  opacity: 0;
+  transform: rotateY(90deg) scale(0.95);
+}
+
+.item-display-label {
+  margin-top: 1rem;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: rgba(232, 213, 168, 0.9);
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.item-display-label.visible {
+  opacity: 1;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .ch2-reveal-char { font-size: 2.5rem; }
+  .ch2-old-comment-paper { max-width: 240px; font-size: 0.8rem; }
+  .ch2-water-text span { font-size: 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch2-hotspot-glow { animation: none; opacity: 0.7; }
+  .ch2-reveal-char { animation: none; opacity: 1; transform: none; }
+  .ch2-water-text span { animation: none; }
+}

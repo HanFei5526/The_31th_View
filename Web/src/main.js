@@ -13,6 +13,7 @@ import './styles/narration-bar.css'
 import './styles/notebook-floating.css'
 import './styles/hud-bar.css'
 import './styles/inventory-popup.css'
+import './styles/poem-compare.css'
 
 // 游戏引擎
 import gameEngine from './core/game-engine.js'
@@ -23,6 +24,8 @@ import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
 import Chapter1PaintScene from './pages/chapter1-paint.js'
 import Chapter1WorkshopScene from './pages/chapter1-workshop.js'
+import Chapter2PaintScene from './pages/chapter2-paint.js'
+import Chapter2WorkshopScene from './pages/chapter2-workshop.js'
 import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
 
 // ==================== 初始化 ====================
@@ -44,12 +47,8 @@ gameEngine.sceneManager.register('menu', MenuScene)
 gameEngine.sceneManager.register('prologue', PrologueScene)
 gameEngine.sceneManager.register('chapter1', Chapter1PaintScene)
 gameEngine.sceneManager.register('chapter1-workshop', Chapter1WorkshopScene)
-gameEngine.sceneManager.register('chapter2', createChapterPlaceholderScene({
-  eyebrow: '第二章',
-  title: '中园',
-  subtitle: '远香堂至小飞虹',
-  description: '第二章尚未开放。后续会承接题诗异文与画作来源疑问，补齐中园段落的探索流程。',
-}))
+gameEngine.sceneManager.register('chapter2', Chapter2PaintScene)
+gameEngine.sceneManager.register('chapter2-workshop', Chapter2WorkshopScene)
 gameEngine.sceneManager.register('chapter3', createChapterPlaceholderScene({
   eyebrow: '第三章',
   title: '西园',
