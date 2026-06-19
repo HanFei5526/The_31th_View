@@ -374,20 +374,20 @@
   top: -2%;
   bottom: -2%;
   left: 0;
-  width: 200%;
+  width: 130%;
   z-index: -1;
-  background-image: url('/images/transition-landing.png');
+  background-image: url('/images/过渡页0.png');
   background-size: cover;
   background-position: left center;
   opacity: 0.65;
   filter: blur(2px) contrast(0.95) sepia(0.1);
   transform: translateX(0);
-  transition: transform 8s linear;
+  transition: transform 10s linear;
 }
 
 .intro-transition-overlay--prologue.active::before,
 .intro-transition-overlay--prologue.fade-out::before {
-  transform: translateX(-50%);
+  transform: translateX(-15%);
 }
 
 .intro-transition-overlay--chapter1::before {
@@ -396,7 +396,7 @@
   top: -2%;
   bottom: -2%;
   left: 0;
-  width: 200%;
+  width: 130%;
   z-index: -1;
   background-image: url('/images/transition-chapter1.png');
   background-size: cover;
@@ -404,12 +404,12 @@
   opacity: 0.65;
   filter: blur(2px) contrast(0.95) sepia(0.1);
   transform: translateX(0);
-  transition: transform 8s linear;
+  transition: transform 10s linear;
 }
 
 .intro-transition-overlay--chapter1.active::before,
 .intro-transition-overlay--chapter1.fade-out::before {
-  transform: translateX(-50%);
+  transform: translateX(-15%);
 }
 
 .intro-transition-overlay--chapter2::before {
@@ -418,7 +418,7 @@
   top: -2%;
   bottom: -2%;
   left: 0;
-  width: 200%;
+  width: 130%;
   z-index: -1;
   background-image: url('/images/transition-chapter2.png');
   background-size: cover;
@@ -426,12 +426,12 @@
   opacity: 0.65;
   filter: blur(2px) contrast(0.95) sepia(0.1);
   transform: translateX(0);
-  transition: transform 8s linear;
+  transition: transform 10s linear;
 }
 
 .intro-transition-overlay--chapter2.active::before,
 .intro-transition-overlay--chapter2.fade-out::before {
-  transform: translateX(-50%);
+  transform: translateX(-15%);
 }
 
 .intro-transition-overlay::after {
@@ -537,6 +537,88 @@
   transition: opacity 1.5s ease, transform 1.5s ease;
 }
 
+.intro-transition-overlay--chapter3 {
+  background: transparent;
+}
+
+.intro-transition-overlay--chapter3::before {
+  content: none;
+}
+
+.ch3-transition-bg {
+  position: absolute;
+  inset: -4% 0;
+  width: 130%;
+  z-index: 0;
+  background-image: url('/images/chapter3-transition-bg.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.85;
+  filter: contrast(0.9) saturate(0.8);
+  transform: translateX(0);
+  animation: ch3BgPan 10s linear forwards;
+}
+
+@keyframes ch3BgPan {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-15%); }
+}
+
+.intro-transition-overlay--chapter3.fade-out .ch3-transition-bg {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.intro-transition-overlay--chapter3 .intro-title-group {
+  border-right-color: rgba(44, 36, 22, 0.2);
+}
+
+/* --- 终章过渡页 --- */
+.intro-transition-overlay--finale {
+  background: transparent;
+}
+
+.intro-transition-overlay--finale::before {
+  content: none;
+}
+
+.finale-transition-bg {
+  position: absolute;
+  inset: -4% 0;
+  width: 130%;
+  z-index: 0;
+  background-image: url('/images/过渡页0.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  filter: contrast(0.95) saturate(0.7) sepia(0.15);
+  transform: translateX(0);
+  animation: finaleBgPan 10s linear forwards;
+}
+
+@keyframes finaleBgPan {
+  0% { transform: translateX(0); opacity: 0; }
+  8% { opacity: 0.65; }
+  100% { transform: translateX(-15%); opacity: 0.65; }
+}
+
+.intro-transition-overlay--finale.fade-out .finale-transition-bg {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.intro-transition-overlay--finale .intro-title-group {
+  border-right-color: rgba(44, 36, 22, 0.15);
+}
+
+.intro-transition-overlay--finale .intro-prologue-title {
+  color: #1a1510;
+}
+
+.intro-transition-overlay--finale .intro-prologue-text span {
+  color: rgba(30, 24, 16, 0.88);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro-transition-overlay {
     transition-duration: 0.3s;
@@ -546,6 +628,11 @@
   .intro-transition-overlay--chapter1::before,
   .intro-transition-overlay--chapter2::before {
     transition-duration: 0.3s;
+    transform: none !important;
+  }
+
+  .ch3-transition-bg {
+    animation: none;
     transform: none !important;
   }
 

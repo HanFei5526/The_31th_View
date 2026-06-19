@@ -1,0 +1,619 @@
+/* ============================================
+   第三章 · 西园 — 专属样式
+   暗黄昏调，潮湿寂静，区别于前两章午后暖光
+   ============================================ */
+
+/* --- 场景容器 --- */
+.ch3-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #1a1714;
+}
+
+.ch3-subscene {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-color: #1a1714;
+  transition: opacity 0.6s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ch3-subscene.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ch3-scene [role="button"] {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ch3-scene [role="button"]:focus,
+.ch3-scene [role="button"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 画中世界氛围：暗湿暗角，黄昏前 */
+.ch3-subscene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 48%, rgba(20, 16, 10, 0.38) 100%),
+    rgba(26, 23, 20, 0.12);
+  z-index: 1;
+}
+
+/* --- 交互热点（暖黄光点，略暗于第一章） --- */
+.ch3-hotspot {
+  position: absolute;
+  cursor: pointer;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+}
+
+.ch3-hotspot::before {
+  content: none;
+}
+
+.ch3-hotspot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 210, 96, 0.88) 0%, rgba(210, 168, 48, 0.55) 44%, transparent 72%);
+  filter: blur(0.4px);
+  pointer-events: none;
+  animation: ch3HotspotPulse 2.8s infinite ease-in-out;
+}
+
+.ch3-hotspot:hover::after {
+  opacity: 0.95;
+}
+
+.ch3-hotspot:active::after {
+  opacity: 1;
+  transform: scale(1.12);
+  transition: transform 0.1s ease;
+}
+
+.ch3-hotspot:focus-visible {
+  outline: none;
+  border-radius: 50%;
+}
+
+.ch3-hotspot:focus-visible::after {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+@keyframes ch3HotspotPulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.88); }
+  50% { opacity: 0.92; transform: scale(1.06); }
+}
+
+/* --- 前进箭头/场景切换光点 --- */
+.ch3-nav-arrow {
+  position: absolute;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.ch3-nav-arrow::before {
+  content: none;
+}
+
+.ch3-nav-arrow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 218, 112, 0.92) 0%, rgba(220, 180, 48, 0.65) 44%, transparent 74%);
+  filter: blur(0.3px);
+  pointer-events: none;
+  animation: ch3NavPulse 2.6s infinite ease-in-out;
+}
+
+.ch3-nav-arrow:hover::after {
+  opacity: 1;
+}
+
+.ch3-nav-arrow:focus-visible {
+  outline: none;
+  border-radius: 50%;
+}
+
+.ch3-nav-arrow:focus-visible::after {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+@keyframes ch3NavPulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.88); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+/* --- 渗字效果（UI组件卡片） --- */
+.ch3-seep-panel {
+  position: absolute;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem 2rem;
+  background: rgba(42, 36, 28, 0.06);
+  border: 1px solid rgba(120, 100, 70, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), inset 0 0 30px rgba(60, 45, 25, 0.05);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  pointer-events: none;
+}
+
+.ch3-seep-panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ch3-seep-panel.ch3-seep-panel--center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(8px);
+}
+
+.ch3-seep-panel--center.visible {
+  transform: translate(-50%, -50%) translateY(0);
+}
+
+.ch3-seep-panel.ch3-seep-panel--left {
+  top: 50%;
+  right: 58%;
+  transform: translateY(-50%) translateX(8px);
+}
+
+.ch3-seep-panel--left.visible {
+  transform: translateY(-50%) translateX(0);
+}
+
+.ch3-seep-panel-text {
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  color: rgba(42, 36, 28, 0.88);
+  font-size: 1.2rem;
+  letter-spacing: 0.18em;
+  line-height: 2.2;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.ch3-seep-panel-text .ch3-seep-char {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(5px);
+  transform: scale(1.1);
+  transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease;
+}
+
+.ch3-seep-panel-text .ch3-seep-char.visible {
+  opacity: 0.88;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.ch3-seep-panel--emphasis .ch3-seep-panel-text {
+  font-size: 1.7rem;
+  color: rgba(62, 48, 32, 0.95);
+  font-weight: 600;
+  letter-spacing: 0.35em;
+}
+
+/* --- 渗字效果（场景内原位渐显 - 已废弃，保留兼容） --- */
+.ch3-seep-container {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  color: rgba(42, 36, 28, 0.88);
+  font-size: 1.3rem;
+  letter-spacing: 0.2em;
+  line-height: 2;
+}
+
+.ch3-seep-char {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(6px);
+  transform: scale(1.15);
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 0.8s ease;
+}
+
+.ch3-seep-char.visible {
+  opacity: 0.82;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.ch3-seep-char.emphasis {
+  font-size: 1.8rem;
+  color: rgba(62, 48, 32, 0.95);
+  font-weight: 600;
+}
+
+/* --- 物件选择浮层 --- */
+.ch3-item-select-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem 2rem;
+  background: linear-gradient(to top, rgba(20, 16, 12, 0.92) 0%, rgba(20, 16, 12, 0.7) 70%, transparent 100%);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.ch3-item-select-overlay.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.ch3-item-select-title {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 0.9rem;
+  color: rgba(220, 208, 185, 0.7);
+  margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.ch3-item-select-buttons {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ch3-item-btn {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 0.95rem;
+  color: rgba(232, 220, 200, 0.9);
+  background: rgba(60, 48, 32, 0.6);
+  border: 1px solid rgba(180, 160, 120, 0.3);
+  border-radius: 6px;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.ch3-item-btn:hover {
+  background: rgba(80, 62, 38, 0.75);
+  border-color: rgba(210, 185, 130, 0.5);
+}
+
+.ch3-item-btn:active {
+  background: rgba(100, 78, 44, 0.8);
+}
+
+.ch3-item-btn--cancel {
+  color: rgba(180, 168, 150, 0.7);
+  background: rgba(40, 34, 26, 0.5);
+  border-color: rgba(120, 108, 88, 0.3);
+}
+
+/* --- 蒙太奇叠加层（回看匾额） --- */
+.ch3-montage-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+.ch3-montage-overlay.active {
+  opacity: 0.65;
+}
+
+.ch3-montage-highlight {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(185, 75, 57, 0.3) 0%, transparent 70%);
+  animation: montageHighlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes montageHighlightPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* --- 蹲下观察按钮 --- */
+.ch3-crouch-btn {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 0.95rem;
+  color: rgba(232, 220, 200, 0.9);
+  background: rgba(50, 40, 28, 0.7);
+  border: 1px solid rgba(180, 160, 120, 0.35);
+  border-radius: 8px;
+  padding: 0.65rem 1.8rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.6s ease, background 0.2s ease;
+  pointer-events: none;
+}
+
+.ch3-crouch-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ch3-crouch-btn:hover {
+  background: rgba(70, 56, 36, 0.8);
+  border-color: rgba(210, 185, 130, 0.5);
+}
+
+/* --- 蹲下视角动画（草图组件上移，背景不动） --- */
+.ch3-sketch-panel.crouching {
+  transform: translate(-50%, -50%) translateY(-18%);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ch3-sketch-panel.crouch-restore {
+  transform: translate(-50%, -50%) translateY(0);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- 墙面草图组件（居中展示，不覆盖背景） --- */
+.ch3-sketch-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  max-width: 55%;
+  max-height: 65%;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+.ch3-sketch-panel.visible {
+  opacity: 1;
+}
+
+.ch3-plaque-panel.visible {
+  opacity: 0.72;
+}
+
+.ch3-plaque-panel .ch3-sketch-img {
+  border: 3px solid rgba(180, 160, 120, 0.45);
+  box-shadow: 0 0 0 1px rgba(100, 80, 50, 0.2),
+              0 6px 32px rgba(0, 0, 0, 0.5),
+              inset 0 0 20px rgba(60, 45, 25, 0.15);
+  filter: sepia(0.2) contrast(0.9) brightness(0.95);
+}
+
+.ch3-sketch-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(180, 160, 120, 0.15);
+  filter: sepia(0.15) contrast(0.95);
+}
+
+/* --- 灰泥剥落动画 --- */
+.ch3-plaster-overlay {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 3;
+  transition: opacity 1.2s ease;
+}
+
+.ch3-plaster-overlay.cracking {
+  animation: plasterCrack 1.2s ease forwards;
+}
+
+@keyframes plasterCrack {
+  0% { opacity: 1; filter: none; }
+  40% { opacity: 0.7; filter: blur(1px); }
+  100% { opacity: 0; filter: blur(3px); }
+}
+
+/* --- 红线浮现动画 --- */
+.ch3-redlines-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+.ch3-redlines-overlay.visible {
+  opacity: 1;
+}
+
+/* --- 信件阅读浮层 --- */
+.ch3-letter-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(60, 50, 40, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.ch3-letter-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ch3-letter-content {
+  position: relative;
+  max-width: 520px;
+  max-height: 72vh;
+  overflow-y: auto;
+  padding: 3rem 2.5rem 2.5rem;
+  background: linear-gradient(
+    168deg,
+    #f7f2e8 0%,
+    #f0e8d8 40%,
+    #ece3d0 100%
+  );
+  border: none;
+  border-radius: 2px;
+  box-shadow:
+    0 8px 32px rgba(60, 45, 20, 0.35),
+    inset 0 0 60px rgba(180, 155, 110, 0.12);
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  font-size: 1.05rem;
+  color: #3a2e1e;
+  line-height: 2.4;
+  letter-spacing: 0.12em;
+}
+
+.ch3-letter-content::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(160, 130, 80, 0.25);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.ch3-letter-content p {
+  margin-bottom: 1.2em;
+  text-indent: 2em;
+}
+
+.ch3-letter-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 1.2rem;
+  color: rgba(100, 80, 50, 0.5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.ch3-letter-close:hover {
+  color: #3a2e1e;
+}
+
+/* --- 跳过讨论按钮 --- */
+.ch3-discussion-skip-btn {
+  position: absolute;
+  top: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 0.85rem;
+  color: rgba(200, 188, 168, 0.7);
+  background: rgba(40, 34, 26, 0.6);
+  border: 1px solid rgba(140, 120, 88, 0.25);
+  border-radius: 4px;
+  padding: 0.4rem 1.2rem;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ch3-discussion-skip-btn:hover {
+  background: rgba(60, 50, 36, 0.75);
+  color: rgba(220, 208, 185, 0.9);
+}
+
+/* --- 章节结束卡 --- */
+.ch3-end-card {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background: #1a1714;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.ch3-end-card.active {
+  opacity: 1;
+}
+
+.ch3-end-card-title {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 1.8rem;
+  color: rgba(220, 208, 185, 0.85);
+  letter-spacing: 0.3em;
+}
+
+.ch3-end-card-btn {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 0.9rem;
+  color: rgba(200, 188, 168, 0.7);
+  background: transparent;
+  border: 1px solid rgba(140, 120, 88, 0.3);
+  border-radius: 4px;
+  padding: 0.5rem 1.6rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ch3-end-card-btn:hover {
+  background: rgba(60, 50, 36, 0.5);
+  color: rgba(220, 208, 185, 0.9);
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .ch3-hotspot::after,
+  .ch3-nav-arrow::after { animation: none; opacity: 0.85; }
+  .ch3-subscene { transition: none; }
+  .ch3-seep-char { transition-duration: 0.1s; }
+  .ch3-montage-highlight { animation: none; opacity: 0.6; }
+  .ch3-subscene.crouching,
+  .ch3-subscene.crouch-restore { transition-duration: 0.1s; }
+}
