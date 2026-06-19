@@ -76,4 +76,39 @@ export const KNOWLEDGE_SNIPPETS = [
     content: `【低处观察】
 第一章的场景探索会反复出现“站着看不到、低下来才看得到”的瞬间。它暂时不是结论，而是一种观察方法：有些痕迹需要换到更低、更偏、更不正式的位置才会显现。`,
   },
+  {
+    id: 'ch2_yiwen',
+    chapter: 2,
+    unlockCondition: ({ chapter }) => chapter >= 2,
+    content: `【异文与版本比对】
+异文指同一文本在不同版本中出现的字词差异。古籍校勘中，逐字对照不同抄本或刻本是发现隐藏信息的基础方法。单个差异可能是传抄讹误，但多处差异如果构成可读句式，则可能是有意嵌入。`,
+  },
+  {
+    id: 'ch2_huafeiyiren',
+    chapter: 2,
+    unlockCondition: ({ progress }) => Boolean(progress.poemDiffsFound >= 4),
+    content: `【"画非一人"】
+五首拙政园题诗中，四处异文字组合为"画·非·一·人"。这不是随机讹误——四字分散在不同诗中，各处位置不统一，但串读后构成完整语义。异文串读法揭示了有人在题诗中刻意藏入一句断言。`,
+  },
+  {
+    id: 'ch2_old_comment',
+    chapter: 2,
+    unlockCondition: ({ progress }) => Boolean(progress.foundOldComment),
+    content: `【旧批注与规范化遮蔽】
+旧批注提到"视点卑近，似非成稿"和"宜配边压覆"。这说明后人在整理画册时，将"不符合体例"的边旁痕迹（杂线、残字、旧签）用装裱边框覆盖。这不是恶意销毁，而是出于规范化的体例整理——但客观上遮蔽了来源信息。`,
+  },
+  {
+    id: 'ch2_inkstone',
+    chapter: 2,
+    unlockCondition: ({ progress }) => Boolean(progress.hasInkstone),
+    content: `【残砚与朱砂】
+朱砂（辰砂）在传统绘画中用于底稿线、定位标记和辅助构图线。这些朱砂线通常在最终成稿后被覆盖或洗去，但在年代久远的作品中可能部分残留。残砚是随身私人工具，砚池中的朱砂残留表明其主人曾在画面上做过标记或打过底稿。`,
+  },
+  {
+    id: 'ch2_voice',
+    chapter: 2,
+    unlockCondition: ({ progress }) => Boolean(progress.heardVoice),
+    content: `【水面回声】
+小飞虹桥下浮现文字"知我者，唯有此园"。这句话暗示留下痕迹的人将园林本身视为唯一的理解者——她的观看不被他人所知，但园林的空间结构保存了她的视角。`,
+  },
 ];

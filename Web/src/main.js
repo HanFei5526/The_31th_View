@@ -13,6 +13,9 @@ import './styles/narration-bar.css'
 import './styles/notebook-floating.css'
 import './styles/hud-bar.css'
 import './styles/inventory-popup.css'
+import './styles/poem-compare.css'
+import './styles/chapter3.css'
+import './styles/finale.css'
 
 // 游戏引擎
 import gameEngine from './core/game-engine.js'
@@ -23,7 +26,11 @@ import MenuScene from './pages/menu.js'
 import PrologueScene from './pages/prologue.js'
 import Chapter1PaintScene from './pages/chapter1-paint.js'
 import Chapter1WorkshopScene from './pages/chapter1-workshop.js'
-import { createChapterPlaceholderScene } from './pages/chapter-placeholder.js'
+import Chapter2PaintScene from './pages/chapter2-paint.js'
+import Chapter2WorkshopScene from './pages/chapter2-workshop.js'
+import Chapter3PaintScene from './pages/chapter3-paint.js'
+import Chapter3WorkshopScene from './pages/chapter3-workshop.js'
+import FinaleScene from './pages/finale.js'
 
 // ==================== 初始化 ====================
 
@@ -44,24 +51,11 @@ gameEngine.sceneManager.register('menu', MenuScene)
 gameEngine.sceneManager.register('prologue', PrologueScene)
 gameEngine.sceneManager.register('chapter1', Chapter1PaintScene)
 gameEngine.sceneManager.register('chapter1-workshop', Chapter1WorkshopScene)
-gameEngine.sceneManager.register('chapter2', createChapterPlaceholderScene({
-  eyebrow: '第二章',
-  title: '中园',
-  subtitle: '远香堂至小飞虹',
-  description: '第二章尚未开放。后续会承接题诗异文与画作来源疑问，补齐中园段落的探索流程。',
-}))
-gameEngine.sceneManager.register('chapter3', createChapterPlaceholderScene({
-  eyebrow: '第三章',
-  title: '西园',
-  subtitle: '卅六鸳鸯馆至留听阁',
-  description: '第三章尚未开放。这里将用于承接墙上草图、低位视角与最终证据链的推进。',
-}))
-gameEngine.sceneManager.register('finale', createChapterPlaceholderScene({
-  eyebrow: '终章',
-  title: '第三十一景',
-  subtitle: '最终复原仍在筹备',
-  description: '终章尚未开放。三结局与修复报告生成逻辑会在核心章节完成后接入。',
-}))
+gameEngine.sceneManager.register('chapter2', Chapter2PaintScene)
+gameEngine.sceneManager.register('chapter2-workshop', Chapter2WorkshopScene)
+gameEngine.sceneManager.register('chapter3', Chapter3PaintScene)
+gameEngine.sceneManager.register('chapter3-workshop', Chapter3WorkshopScene)
+gameEngine.sceneManager.register('finale', FinaleScene)
 
 // 启动：直接进入着陆页
 gameEngine.switchScene('landing')

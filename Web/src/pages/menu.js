@@ -371,9 +371,9 @@ export default class MenuScene {
 
       }, 1500));
     } else if (scene === 'chapter1') {
-      // 第一章：与序章相同结构的过场动画
+      // 第一章：使用自己的 chapter1 类名
       const overlay = document.createElement('div');
-      overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--chapter1';
       this._transitionOverlay = overlay;
 
       const titleStr = '第一章 · 东园';
@@ -426,6 +426,311 @@ export default class MenuScene {
           overlay.classList.remove('active');
           overlay.classList.add('fade-out');
           setTimeout(() => overlay.remove(), 1100);
+        }
+      };
+
+      this._transitionKeyHandler = (e) => {
+        if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+        e.preventDefault();
+        finish(true);
+      };
+      document.addEventListener('keydown', this._transitionKeyHandler);
+
+      this._transitionTimers.push(setTimeout(() => {
+        overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }, 50));
+
+      root.classList.add('menu-scene--exiting-slow');
+
+      textContainer.innerHTML = '';
+
+      this._transitionTimers.push(setTimeout(() => {
+        lines.forEach((line, index) => {
+          const p = document.createElement('span');
+          p.textContent = line;
+          p.style.opacity = '0';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          p.style.display = 'block';
+          textContainer.appendChild(p);
+
+          this._transitionTimers.push(setTimeout(() => {
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, index * 1200));
+        });
+
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        this._transitionTimers.push(setTimeout(finish, totalDuration));
+
+      }, 1500));
+    } else if (scene === 'chapter2') {
+      // 第二章：过渡页
+      const overlay = document.createElement('div');
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--chapter2';
+      this._transitionOverlay = overlay;
+
+      const titleStr = '第二章 · 中园';
+      const lines = [
+        "你走向中园，远香堂的荷风依然清冷。",
+        "然而三十一景图中，唯有这里的题诗多了一分违和。",
+        "不是一人的笔迹，不是一人的目光。",
+        "有人曾在这里，留下了不属于正史的残痕。"
+      ];
+
+      overlay.innerHTML = `
+        <div class="prologue-transition-layout">
+          <div class="intro-prologue-title">${titleStr}</div>
+          <div class="intro-prologue-text" id="intro-chapter2-text"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const textContainer = overlay.querySelector('#intro-chapter2-text');
+      const chapter2Ready = this._preloadImage('/images/chapter2-yuanxiangtang.png');
+      let finished = false;
+
+      const finish = async (fast = false) => {
+        if (finished) return;
+        finished = true;
+        this._clearTransitionTimers();
+        document.removeEventListener('keydown', this._transitionKeyHandler);
+        this._transitionKeyHandler = null;
+
+        textContainer.querySelectorAll('span').forEach((p) => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        });
+
+        if (this._transitionOverlay === overlay) {
+          this._transitionOverlay = null;
+        }
+
+        await chapter2Ready;
+        await this.engine.switchScene(scene, true);
+        await this._nextFrame();
+
+        if (fast) {
+          overlay.style.transition = 'opacity 0.4s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 450);
+        } else {
+          overlay.style.transition = 'opacity 1s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 1100);
+        }
+      };
+
+      this._transitionKeyHandler = (e) => {
+        if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+        e.preventDefault();
+        finish(true);
+      };
+      document.addEventListener('keydown', this._transitionKeyHandler);
+
+      this._transitionTimers.push(setTimeout(() => {
+        overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }, 50));
+
+      root.classList.add('menu-scene--exiting-slow');
+
+      textContainer.innerHTML = '';
+
+      this._transitionTimers.push(setTimeout(() => {
+        lines.forEach((line, index) => {
+          const p = document.createElement('span');
+          p.textContent = line;
+          p.style.opacity = '0';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          p.style.display = 'block';
+          textContainer.appendChild(p);
+
+          this._transitionTimers.push(setTimeout(() => {
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, index * 1200));
+        });
+
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        this._transitionTimers.push(setTimeout(finish, totalDuration));
+
+      }, 1500));
+    } else if (scene === 'chapter3') {
+      // 第三章：背景图过渡页（缓慢平移）
+      const overlay = document.createElement('div');
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--chapter3';
+      this._transitionOverlay = overlay;
+
+      const titleStr = '第三章 · 西园';
+      const lines = [
+        "西园的光线不一样了。",
+        "天色暗了，像黄昏，又像一场雨要来之前。",
+        "空气变得潮湿。竹叶上凝着水珠。",
+        "有人在画画。或者，曾经有人在这里画画。"
+      ];
+      const preloadImg = '/images/chapter3-yuanyang-south.png';
+
+      overlay.innerHTML = `
+        <div class="ch3-transition-bg"></div>
+        <div class="prologue-transition-layout">
+          <div class="intro-title-group">
+            <div class="intro-prologue-title">${titleStr}</div>
+          </div>
+          <div class="intro-prologue-text" id="intro-chapter3-text"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const textContainer = overlay.querySelector('#intro-chapter3-text');
+      const sceneReady = this._preloadImage(preloadImg);
+      let finished = false;
+
+      const finish = async (fast = false) => {
+        if (finished) return;
+        finished = true;
+        this._clearTransitionTimers();
+        document.removeEventListener('keydown', this._transitionKeyHandler);
+        this._transitionKeyHandler = null;
+
+        textContainer.querySelectorAll('span').forEach((p) => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        });
+
+        if (this._transitionOverlay === overlay) {
+          this._transitionOverlay = null;
+        }
+
+        await sceneReady;
+        await this.engine.switchScene(scene, true);
+        await this._nextFrame();
+
+        if (fast) {
+          overlay.style.transition = 'opacity 0.4s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 450);
+        } else {
+          overlay.style.transition = 'opacity 1s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 1100);
+        }
+      };
+
+      this._transitionKeyHandler = (e) => {
+        if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+        e.preventDefault();
+        finish(true);
+      };
+      document.addEventListener('keydown', this._transitionKeyHandler);
+
+      this._transitionTimers.push(setTimeout(() => {
+        overlay.classList.add('active');
+        const title = overlay.querySelector('.intro-prologue-title');
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+      }, 50));
+
+      root.classList.add('menu-scene--exiting-slow');
+
+      textContainer.innerHTML = '';
+
+      this._transitionTimers.push(setTimeout(() => {
+        lines.forEach((line, index) => {
+          const p = document.createElement('span');
+          p.textContent = line;
+          p.style.opacity = '0';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          p.style.display = 'block';
+          textContainer.appendChild(p);
+
+          this._transitionTimers.push(setTimeout(() => {
+            p.style.opacity = '1';
+            p.style.transform = 'translateY(0)';
+          }, index * 1200));
+        });
+
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+        this._transitionTimers.push(setTimeout(finish, totalDuration));
+
+      }, 1500));
+    } else if (scene === 'finale') {
+      // 终章：背景图过渡页（缓慢平移），与第三章同结构
+      const overlay = document.createElement('div');
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--finale';
+      this._transitionOverlay = overlay;
+
+      const titleStr = '终章 · 第三十一景';
+      const lines = [
+        "所有线索在这一刻汇聚。",
+        "三十幅画卷之外，还有一景从未被命名。",
+        "不是遗失，是被正式体系收编后，来源痕迹归于沉寂。",
+        "五百年后，你将亲手唤回那双眼睛看见过的一切。"
+      ];
+      const preloadImg = '/images/finale-truth-space.png';
+
+      overlay.innerHTML = `
+        <div class="finale-transition-bg"></div>
+        <div class="prologue-transition-layout">
+          <div class="intro-title-group">
+            <div class="intro-prologue-title">${titleStr}</div>
+          </div>
+          <div class="intro-prologue-text" id="intro-finale-text"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const textContainer = overlay.querySelector('#intro-finale-text');
+      const sceneReady = this._preloadImage(preloadImg);
+      let finished = false;
+
+      const finish = async (fast = false) => {
+        if (finished) return;
+        finished = true;
+        this._clearTransitionTimers();
+        document.removeEventListener('keydown', this._transitionKeyHandler);
+        this._transitionKeyHandler = null;
+
+        textContainer.querySelectorAll('span').forEach((p) => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        });
+
+        if (this._transitionOverlay === overlay) {
+          this._transitionOverlay = null;
+        }
+
+        await sceneReady;
+        await this.engine.switchScene(scene, true);
+        await this._nextFrame();
+
+        if (fast) {
+          overlay.style.transition = 'opacity 0.4s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 450);
+        } else {
+          overlay.style.transition = 'opacity 1.2s ease';
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 1300);
         }
       };
 
@@ -546,12 +851,8 @@ export default class MenuScene {
 
   _isChapterUnlocked(ch) {
     if (ch.alwaysUnlocked) return true;
-    const progress = this._getProgress();
-    // 各章节的解锁条件：前一章完成
-    if (ch.id === 'chapter2') return !!progress.chapter1Complete;
-    if (ch.id === 'chapter3') return !!progress.chapter2Complete;
-    if (ch.id === 'finale') return !!progress.chapter3Complete;
-    return !!progress[ch.unlockKey];
+    // 开发阶段：所有章节解锁
+    return true;
   }
 
   /* ==================== 样式注入 ==================== */

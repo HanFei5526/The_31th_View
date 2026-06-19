@@ -19,6 +19,7 @@ export class NarrationBar {
     this._isFloating = false;
     this._optionsEl = null;
     this._resolveOptions = null;
+    this._portraitLocked = false;
 
     this._boundOnClick = this._onClick.bind(this);
     this._boundOnKeyDown = this._onKeyDown.bind(this);
@@ -113,10 +114,8 @@ export class NarrationBar {
         this._speakerEl.style.display = 'none';
       }
 
-      if (options.portrait) {
+      if ('portrait' in options) {
         this.setPortrait(options.portrait);
-      } else {
-        this.setPortrait(null);
       }
 
       this._emitNotebookGuidanceIfNeeded(speaker, text);
@@ -125,18 +124,32 @@ export class NarrationBar {
   }
 
   setPortrait(src) {
+    if (!src && this._portraitLocked) return;
     if (src) {
       this._portraitImg.src = src;
       this._portraitImg.onerror = () => {
-        // 立绘加载失败时静默隐藏
         this._portraitContainer.classList.remove('visible');
       };
       this._portraitImg.onload = () => {
         this._portraitContainer.classList.add('visible');
       };
+      if (src.includes('shennian_3')) {
+        this._portraitContainer.classList.add('portrait-reach');
+      } else {
+        this._portraitContainer.classList.remove('portrait-reach');
+      }
     } else {
       this._portraitContainer.classList.remove('visible');
+      this._portraitContainer.classList.remove('portrait-reach');
     }
+  }
+
+  lockPortrait() {
+    this._portraitLocked = true;
+  }
+
+  unlockPortrait() {
+    this._portraitLocked = false;
   }
 
   showOptions(options) {

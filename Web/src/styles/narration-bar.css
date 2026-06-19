@@ -82,12 +82,19 @@
 .narration-portrait-container {
   position: fixed;
   bottom: 0;
-  left: 3%;
-  height: 70vh;
+  left: 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 99;
+}
+
+.narration-portrait-container.portrait-aside {
+  /* 古画查看阶段不改变位置 */
+}
+
+.narration-portrait-container.portrait-reach {
+  left: 4%;
 }
 
 .narration-portrait-container.visible {
@@ -95,12 +102,11 @@
 }
 
 .narration-portrait {
-  height: 100%;
+  display: block;
+  height: 82vh;
   width: auto;
   object-fit: contain;
   object-position: bottom left;
-  mask-image: linear-gradient(to top, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
 }
 
 /* 反馈提示条 */
