@@ -111,16 +111,18 @@
   font-weight: 700;
   letter-spacing: 0.25em; 
   cursor: pointer;
-  pointer-events: auto;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
   transition: all 0.2s ease-out;
   border-radius: 0;
   color: #e0c296; 
   background: #713824;
   border: 2px solid #4a2417;
   box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 4px 4px 0px rgba(44, 36, 22, 0.85); 
-  opacity: 0;
+  opacity: 1;
 }
 
+/* 即使没有 visible 类也保持可见 */
 .hud-back-btn.visible {
   opacity: 1 !important;
 }
@@ -131,11 +133,16 @@
   box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
 }
 
+.hud-back-btn svg,
+.hud-back-btn span {
+  pointer-events: none;
+}
+
 /* 退出确认卡片 */
 .hud-confirm-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 100000 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,11 +150,13 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 
 .hud-confirm-overlay.visible {
   opacity: 1;
+  pointer-events: auto !important;
 }
 
 .hud-confirm-card {

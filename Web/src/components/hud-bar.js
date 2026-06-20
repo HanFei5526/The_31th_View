@@ -107,7 +107,7 @@ export class HudBar {
 
   hide() {
     if (this._container) this._container.classList.remove('visible');
-    if (this._backBtn) this._backBtn.classList.remove('visible');
+    // 强制返回键常驻显示，不移除其 visible 类
   }
 
   setNotebookDisabled(disabled) {
