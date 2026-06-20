@@ -262,7 +262,7 @@ export class AIService {
 
     if (!this.isAvailable) {
       return options.unavailableText
-        || '（AI 后端未启用。请启动 Web/server 并在服务端 .env 中配置 DEEPSEEK_API_KEY）';
+        || '（笔记本暂时没有回应。可以先继续查看记录，稍后再试。）';
     }
 
     const maxAttempts = (options.retryOnEmpty || options.retryOnShort) ? 2 : 1;
@@ -284,7 +284,7 @@ export class AIService {
         if (!response.ok) {
           const errText = await response.text();
           console.error('[AIService] 请求失败:', response.status, errText);
-          return '（大模型有些困惑，暂时无法辨认……）';
+          return options.fallbackText || '（笔记本页边的字迹暂时散开了，稍后再试。）';
         }
 
         const data = await response.json();
@@ -293,7 +293,7 @@ export class AIService {
         if (!content) {
           console.error('[AIService] 返回格式异常:', data);
           if (attempt < maxAttempts && options.retryOnEmpty) continue;
-          return options.fallbackText || '（模型返回空文本……）';
+          return options.fallbackText || '（笔记本页边没有浮现新的记录。）';
         }
 
         if (options.retryOnShort && this._isLikelyIncompleteReply(content)) {
@@ -306,10 +306,10 @@ export class AIService {
       }
     } catch (err) {
       console.error('[AIService] 网络错误:', err);
-      return options.networkFallbackText || '（连接中断，请稍后再试……）';
+      return options.networkFallbackText || '（笔记本暂时没有回应。可以先继续查看记录，稍后再试。）';
     }
 
-    return options.fallbackText || '（大模型有些困惑，暂时无法辨认……）';
+    return options.fallbackText || '（笔记本页边的字迹暂时散开了，稍后再试。）';
   }
 
   _isLikelyIncompleteReply(content) {
