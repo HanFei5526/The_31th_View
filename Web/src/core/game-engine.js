@@ -714,6 +714,12 @@ export class GameEngine {
       world: this.currentWorld,
       items: this.inventory.getItems(),
       progress: { ...this.gameProgress },
+      notebookRecords: Array.isArray(this.notebookRecords)
+        ? this.notebookRecords.map((record) => ({
+          type: record.type,
+          text: record.text,
+        }))
+        : [],
       annotations: this.notebookPanel ? this.notebookPanel.getAnnotations() : [],
     };
   }

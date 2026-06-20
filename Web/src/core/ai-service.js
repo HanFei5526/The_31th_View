@@ -168,8 +168,11 @@ export class AIService {
     ];
 
     return this._callAPI(messages, {
-      temperature: 0.5,
-      max_tokens: 200,
+      temperature: 0.2,
+      max_tokens: 280,
+      retryOnEmpty: true,
+      retryOnShort: true,
+      fallbackText: '（翻了翻，相关记录没有形成清晰答复。可以换个线索名再问一次。）',
     });
   }
 
@@ -244,37 +247,68 @@ export class AIService {
       return '（AI 后端未启用。请启动 Web/server 并在服务端 .env 中配置 DEEPSEEK_API_KEY）';
     }
 
+    const maxAttempts = (options.retryOnEmpty || options.retryOnShort) ? 2 : 1;
+
     try {
-      const response = await fetch(CHAT_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages,
-          temperature: options.temperature ?? 0.7,
-          max_tokens: options.max_tokens ?? 300,
-        }),
-      });
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const response = await fetch(CHAT_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages,
+            temperature: options.temperature ?? 0.7,
+            max_tokens: options.max_tokens ?? 300,
+          }),
+        });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error('[AIService] 请求失败:', response.status, errText);
-        return '（大模型有些困惑，暂时无法辨认……）';
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error('[AIService] 请求失败:', response.status, errText);
+          return '（大模型有些困惑，暂时无法辨认……）';
+        }
+
+        const data = await response.json();
+        const content = typeof data.content === 'string' ? data.content.trim() : '';
+
+        if (!content) {
+          console.error('[AIService] 返回格式异常:', data);
+          if (attempt < maxAttempts && options.retryOnEmpty) continue;
+          return options.fallbackText || '（模型返回空文本……）';
+        }
+
+        if (options.retryOnShort && this._isLikelyIncompleteReply(content)) {
+          console.warn('[AIService] 回复疑似截断，准备重试:', content);
+          if (attempt < maxAttempts) continue;
+          return options.fallbackText || content;
+        }
+
+        return content;
       }
-
-      const data = await response.json();
-      const content = data.content;
-
-      if (!content) {
-        console.error('[AIService] 返回格式异常:', data);
-        return '（模型返回空文本……）';
-      }
-
-      return content.trim();
     } catch (err) {
       console.error('[AIService] 网络错误:', err);
       return '（连接中断，请稍后再试……）';
     }
+
+    return options.fallbackText || '（大模型有些困惑，暂时无法辨认……）';
+  }
+
+  _isLikelyIncompleteReply(content) {
+    const text = String(content || '').trim();
+    if (!text) return true;
+
+    const totalLength = Array.from(text).length;
+    if (totalLength <= 3) return true;
+
+    const closingIndex = text.indexOf('）');
+    if (text.startsWith('（') && closingIndex >= 0) {
+      const afterPrefix = text.slice(closingIndex + 1).trim();
+      if (afterPrefix && Array.from(afterPrefix).length <= 2) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
