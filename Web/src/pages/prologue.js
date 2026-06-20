@@ -798,10 +798,10 @@ export default class PrologueScene extends GameSceneBase {
       overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
 
       const lines = [
-        '你睁开眼，四周的一切都不对。',
-        '不是工作室，不是扫描仪的冷光。',
-        '水墨晕染的庭院在眼前铺展开来。',
-        '五百年前的园林，正向你敞开大门。'
+        '兰雪堂，拙政园东部的入口。',
+        '在画册里它只是几笔墨线和一块匾额。',
+        '但此刻你站在它面前，石板微温，竹叶在无风中摇动。',
+        '这座园，比它画出来的样子要深。'
       ];
 
       overlay.innerHTML = `

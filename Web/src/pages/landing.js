@@ -153,14 +153,12 @@ export default class LandingScene {
       const overlay = document.createElement('div');
       overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
       
-      const titleStr = '寻找拙政园';
+      const titleStr = '引子 · 三十一景';
       const lines = [
-        "你是一位古画修复师的学生。",
-        "在修复文徵明《拙政园三十一景图》的过程中，",
-        "你发现最后一页的画心异常完整，",
-        "被遮蔽的却是边缘的来源痕迹。",
-        "从修复工作室到明代园林，从断簪到残砚，",
-        "一步步复原她留下的低位视角。"
+        "文徵明为拙政园作图三十一幅，收入册页，传世至今。",
+        "前三十幅各有来历，唯独最后一幅取景极低，视角极偏。",
+        "其笔法画意皆确认为文徵明手笔，五百年来鲜有人质疑。",
+        "然而，貌似合理的东西，往往也会藏着异常。"
       ];
 
       overlay.innerHTML = `
