@@ -694,7 +694,7 @@ export default class LandingScene {
     .landing-actions {
       position: absolute;
       bottom: 4rem;
-      left: 50%;
+      left: 45%;
       transform: translateX(-50%);
       display: flex;
       gap: 1.5rem;
