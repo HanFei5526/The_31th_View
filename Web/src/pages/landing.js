@@ -101,11 +101,10 @@ export default class LandingScene {
         <!-- 顶部导航 -->
         <nav class="landing-nav">
           <div class="landing-logo">
-            <span class="logo-name">卅一景</span>
+            <span class="logo-name">THIRTY-ONE VIEWS</span>
           </div>
           <div class="landing-nav-links">
-            <span class="nav-link active">首页</span>
-            <span class="nav-link">入画</span>
+            <span class="nav-link">玩法</span>
             <span class="nav-link">关于</span>
           </div>
         </nav>
@@ -115,18 +114,16 @@ export default class LandingScene {
           <div class="landing-left">
             <div class="landing-label">
               <span class="label-line"></span>
-              <span class="label-text">叙事驱动的解谜游戏</span>
+              <span class="label-text">园林文化 · 双世界叙事 · AI 互动解谜</span>
             </div>
 
             <h1 class="landing-title">
-              <span class="title-line">寻找拙政园</span>
-              <span class="title-line">复原五百年前的<em class="title-verm">隐秘回眸</em></span>
+              <span class="title-line">卅一景</span>
+              <span class="title-line">寻找五百年前一段沉入纸下的观看</span>
             </h1>
 
             <p class="landing-desc">
-              你是一位古画修复师的学生。在修复文徵明《拙政园三十一景图》的过程中，
-              你发现最后一页的画心异常完整，真正被遮蔽的却是边缘的来源痕迹。
-              从修复工作室到明代园林，从断簪到残砚，一步步复原王蘅留下的低位视角。
+              你是一名古画修复专业的研究生，在为《拙政园三十一景图》最后一页做数字化归档时，发现放大的扫描件装裱层下有细微的异常痕迹。一页五百年来鲜有人怀疑的画，一段被规范无声覆盖的过往，一层完好得不像经历过五百年的装裱。修复课上学过的那句话浮上来——太完整，反而可疑。现实工作室的修复检测，画中园林的追踪探索，修复笔记本上的记录推理——表象之下，这页画还在沉默地讲述着什么？
             </p>
           </div>
         </main>
@@ -680,10 +677,9 @@ export default class LandingScene {
       font-size: 1.125rem;
       color: #111111;
       line-height: 1.8;
-      max-width: 52ch;
       text-wrap: pretty;
       font-kerning: normal;
-      margin-top: 6vh; /* Moved up significantly */
+      margin-top: 6vh;
       animation: descFadeIn 1.2s 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
@@ -698,7 +694,7 @@ export default class LandingScene {
     .landing-actions {
       position: absolute;
       bottom: 4rem;
-      left: 30%; /* Shifted significantly left */
+      left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 1.5rem;

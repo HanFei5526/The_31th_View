@@ -13,6 +13,13 @@ const SCENE_STATES = {
   ENDING_SCREEN: 'ending_screen',
 };
 
+const CHECKPOINTS = {
+  TRUTH: 'finale_truth_start',
+  QUESTIONS: 'finale_questions_start',
+  ENDINGS: 'finale_endings_start',
+  COMPLETE: 'finale_complete'
+};
+
 const PORTRAITS = {
   zhou: '/images/zhou_henian_1.png',
   shennian: '/images/shennian_1.png',
@@ -52,7 +59,7 @@ export default class FinaleScene {
     container.classList.add('paint-world');
     container.classList.add('finale-active');
 
-    this.engine.ensureCarryoverForChapter?.(4);
+    this.engine.ensureCarryoverForChapter?.(4, { persist: false });
     this._ensureFinaleItems();
 
     this._buildUI();
@@ -63,7 +70,22 @@ export default class FinaleScene {
     container.appendChild(this._uiLayer);
 
     this._wireComponents();
-    this._startTruthSpace();
+
+    if (this.engine.currentCheckpointId === CHECKPOINTS.QUESTIONS) {
+      this._startFourQuestions();
+    } else if (
+      this.engine.currentCheckpointId === CHECKPOINTS.ENDINGS ||
+      this.engine.currentCheckpointId === CHECKPOINTS.COMPLETE
+    ) {
+      this._showEndingChoices();
+    } else {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.TRUTH, {
+        chapter: 4,
+        scene: 'finale',
+        world: 'paint'
+      });
+      this._startTruthSpace();
+    }
   }
 
   exit() {
@@ -211,11 +233,8 @@ export default class FinaleScene {
 
     this.notebook.expand?.();
     this.notebook.switchTab?.('records');
-    this.notebook.showQuickThoughts?.([
-      '断簪、残砚、草图、信件——它们之间的关系是什么？',
-      '第三十一景的视角为什么和前三十景不同？',
-      '后人是怎样把来源痕迹遮蔽的？',
-    ]);
+    this.notebook.hideQuickThoughts?.();
+    this.notebook.showSystemMessage?.('终章只开放「记录」回顾。请根据已经获得的线索完成复原。');
 
     await this._delay(500);
     if (this._exited) return;
@@ -227,6 +246,11 @@ export default class FinaleScene {
       btn.classList.remove('visible');
       this.notebook.collapse?.();
       this.notebook.hideQuickThoughts?.();
+      this.engine.saveCheckpoint?.(CHECKPOINTS.QUESTIONS, {
+        chapter: 4,
+        scene: 'finale',
+        world: 'paint'
+      });
       this._startFourQuestions();
     }, { once: true });
   }
@@ -261,6 +285,13 @@ export default class FinaleScene {
   }
 
   async _startFourQuestions() {
+    if (this.engine.currentCheckpointId !== CHECKPOINTS.QUESTIONS) {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.QUESTIONS, {
+        chapter: 4,
+        scene: 'finale',
+        world: 'paint'
+      });
+    }
     this.state = SCENE_STATES.FOUR_QUESTIONS;
     this._switchSubscene(this._questionsEl);
     await this._delay(800);
@@ -660,6 +691,13 @@ export default class FinaleScene {
   }
 
   async _showEndingChoices() {
+    if (this.engine.currentCheckpointId !== CHECKPOINTS.COMPLETE) {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.ENDINGS, {
+        chapter: 4,
+        scene: 'finale',
+        world: 'paint'
+      });
+    }
     this.state = SCENE_STATES.THREE_ENDINGS;
     this._switchSubscene(this._endingsEl);
     await this._delay(600);
@@ -719,7 +757,11 @@ export default class FinaleScene {
         this.engine.gameProgress[`endingSeen_${endingId}`] = true;
         this.engine.gameProgress.finaleComplete = true;
         this.engine.gameProgress.endingChoice = endingId;
-        this.engine.saveProgress?.();
+        this.engine.saveCheckpoint?.(CHECKPOINTS.COMPLETE, {
+          chapter: 4,
+          scene: 'finale',
+          world: 'paint'
+        });
         await this._playEnding(endingId);
       } else {
         this.narrationBar.dismiss?.();
@@ -933,6 +975,10 @@ export default class FinaleScene {
     if (!inv.hasItem('letter')) {
       inv.addItem(ITEM_TEMPLATES.letter, { silent: true });
       progress.hasLetter = true;
+    }
+    if (!inv.hasItem('rubbing')) {
+      inv.addItem(ITEM_TEMPLATES.rubbing, { silent: true });
+      progress.hasRubbing = true;
     }
 
     if (!progress.chapter1Complete) progress.chapter1Complete = true;

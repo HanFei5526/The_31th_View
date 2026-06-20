@@ -555,7 +555,9 @@ export class NotebookFloating {
   }
 
   _persistNotebookState() {
-    this.engine.saveSystem?.autoSave?.();
+    this.engine.emit?.('notebook-chat-updated', {
+      chapter: this._getChapterKey(),
+    });
   }
 
   _getChapterKey() {

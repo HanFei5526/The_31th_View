@@ -5,6 +5,7 @@ import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 
 const workshopBg = '/images/prologue-workshop.png';
+const CHAPTER3_WORKSHOP_CHECKPOINT = 'chapter3_workshop_start';
 
 export default class Chapter3WorkshopScene extends GameSceneBase {
   constructor(engine) {
@@ -28,7 +29,7 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
 
     this.engine.currentChapter = 3;
     this.engine.currentWorld = 'real';
-    this.engine.ensureCarryoverForChapter?.(3);
+    this.engine.ensureCarryoverForChapter?.(3, { persist: false });
     this.engine._applyWorldTheme?.();
 
     if (document.body) document.body.classList.remove('paint-world');
@@ -63,6 +64,14 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
 
     this.notebook.onSubmit(async (text) => await this._askNotebook(text));
     this.notebook.onQuickThought(async (text) => await this._askNotebook(text));
+
+    if (this.engine.currentCheckpointId !== CHAPTER3_WORKSHOP_CHECKPOINT) {
+      this.engine.saveCheckpoint?.(CHAPTER3_WORKSHOP_CHECKPOINT, {
+        chapter: 3,
+        scene: 'chapter3-workshop',
+        world: 'real'
+      });
+    }
 
     this.hudBar.show();
     this._startDialogue();
@@ -120,7 +129,12 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
 
   _showChapterEnd() {
     this.engine.gameProgress.chapter3Complete = true;
-    this.engine.saveProgress();
+    this.engine.gameProgress.chapter3_completed = true;
+    this.engine.saveCheckpoint?.('finale_truth_start', {
+      chapter: 4,
+      scene: 'finale',
+      world: 'paint'
+    });
 
     this._endCard = document.createElement('div');
     this._endCard.className = 'chapter-end-card full-viewport flex-center flex-col';

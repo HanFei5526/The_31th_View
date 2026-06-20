@@ -85,6 +85,13 @@ const PHASE = {
   COMPLETE: 7,
 };
 
+const CHECKPOINTS = {
+  START: 'prologue_start',
+  SCAN: 'prologue_scan_start',
+  SYNTHESIS: 'prologue_synthesis_start',
+  CHAPTER1: 'chapter1_lanxue_start'
+};
+
 /* ==================== 序章场景类 ==================== */
 
 export default class PrologueScene extends GameSceneBase {
@@ -117,6 +124,7 @@ export default class PrologueScene extends GameSceneBase {
     container.appendChild(root);
 
     // 确保无论何时进入工作室，都是“现实世界”主题
+    this.engine.currentChapter = 0;
     this.engine.currentWorld = 'real';
     this.engine._applyWorldTheme();
 
@@ -170,7 +178,27 @@ export default class PrologueScene extends GameSceneBase {
       }
     });
 
+    if (this.engine.currentCheckpointId === CHECKPOINTS.SCAN) {
+      this._grantNotebookAccess({ saveCheckpoint: false });
+      this._enterPaintingPhase();
+      return;
+    }
+
+    if (this.engine.currentCheckpointId === CHECKPOINTS.SYNTHESIS) {
+      this._grantNotebookAccess({ saveCheckpoint: false });
+      this._recordedClues = new Set(this.engine.gameProgress.cluesFound || Object.keys(CLUE_DATA));
+      this._enterPaintingPhase();
+      Object.keys(CLUE_DATA).forEach((clueId) => this._markClueRecorded(clueId));
+      this._showSynthesisEntryButton();
+      return;
+    }
+
     if (!this.engine.gameProgress.prologue) {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.START, {
+        chapter: 0,
+        scene: 'prologue',
+        world: 'real'
+      });
       await this._waitForWorkshopVisible();
 
       this._phase = PHASE.DIALOGUE;
@@ -308,8 +336,8 @@ export default class PrologueScene extends GameSceneBase {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  _grantNotebookAccess() {
-    const alreadyHadNotebook = this.engine.gameProgress.hasNotebook || this.engine.inventory?.hasItem?.('notebook');
+  _grantNotebookAccess(options = {}) {
+    const shouldSaveCheckpoint = options.saveCheckpoint !== false;
     this.engine.gameProgress.hasNotebook = true;
 
     if (!this.engine.inventory?.hasItem?.('notebook')) {
@@ -331,7 +359,13 @@ export default class PrologueScene extends GameSceneBase {
       '拙政园三十一景是什么？',
       '文徵明与这套册页有什么关联？',
     ]);
-    this.engine.saveProgress();
+    if (shouldSaveCheckpoint) {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.SCAN, {
+        chapter: 0,
+        scene: 'prologue',
+        world: 'real'
+      });
+    }
   }
 
   /* ==================== "查看古画" 入口 ==================== */
@@ -551,6 +585,11 @@ export default class PrologueScene extends GameSceneBase {
     if (this._recordedClues.size < 3) return;
 
     this._synthesisGateStarted = true;
+    this.engine.saveCheckpoint?.(CHECKPOINTS.SYNTHESIS, {
+      chapter: 0,
+      scene: 'prologue',
+      world: 'real'
+    });
 
     if (this._activeGateId && this._activeGateId !== gateId) {
       this.engine.discussionManager.closeDiscussion(this._activeGateId);
@@ -585,7 +624,6 @@ export default class PrologueScene extends GameSceneBase {
       this._activeGateId = null;
 
       this.engine.gameProgress.synthesisPassed = true;
-      this.engine.saveProgress();
 
       // 将研讨结论摘要记入笔记本记录Tab，供后续章节查阅
       this._notebook.addClueRecord('[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息');
@@ -710,7 +748,11 @@ export default class PrologueScene extends GameSceneBase {
     this.engine.gameProgress.prologueComplete = true;
     this.engine.gameProgress.prologue_completed = true;
     this.engine.gameProgress.chapter1 = true;
-    this.engine.saveProgress();
+    this.engine.saveCheckpoint?.(CHECKPOINTS.CHAPTER1, {
+      chapter: 1,
+      scene: 'chapter1',
+      world: 'paint'
+    });
 
     // 跌入画中：切换世界主题，进入第一章画中世界
     this.engine.currentWorld = 'paint';

@@ -25,14 +25,20 @@ export const ITEM_TEMPLATES = {
   inkstone: {
     id: 'inkstone',
     name: '残砚',
-    description: '一方残破的砚台，砚底刻有一行小字，已被岁月侵蚀得难以辨认。',
+    description: '小型端砚，砚池残留朱砂。砚背刻有小词，像是随身携带的私人用砚。',
     icon: '🪨',
+  },
+  rubbing: {
+    id: 'rubbing',
+    name: '草图拓片',
+    description: '留听阁墙面低位视角草图的拓片，证实王蘅的空间观看能力。',
+    icon: '',
   },
   letter: {
     id: 'letter',
     name: '王蘅的信',
-    description: '一封写在泛黄宣纸上的信件，落款为"蘅"。字迹娟秀，墨色深浅不一，似乎写了很久。',
-    icon: '✉️',
+    description: '"不必有名，不必有形。只要有痕迹。"',
+    icon: '',
   },
 };
 

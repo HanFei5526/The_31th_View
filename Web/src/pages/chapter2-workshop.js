@@ -10,6 +10,7 @@ import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 
 const prologueBg = '/images/prologue-workshop.png';
+const CHAPTER2_WORKSHOP_CHECKPOINT = 'chapter2_workshop_start';
 
 export default class Chapter2WorkshopScene extends GameSceneBase {
   constructor(engine) {
@@ -28,7 +29,7 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
 
     this.engine.currentChapter = 2;
     this.engine.currentWorld = 'real';
-    this.engine.ensureCarryoverForChapter?.(2);
+    this.engine.ensureCarryoverForChapter?.(2, { persist: false });
     this.engine._applyWorldTheme?.();
     container.classList.remove('paint-world');
     container.classList.add('real-world');
@@ -76,6 +77,14 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
 
     container.appendChild(uiLayer);
     this._uiLayer = uiLayer;
+
+    if (this.engine.currentCheckpointId !== CHAPTER2_WORKSHOP_CHECKPOINT) {
+      this.engine.saveCheckpoint?.(CHAPTER2_WORKSHOP_CHECKPOINT, {
+        chapter: 2,
+        scene: 'chapter2-workshop',
+        world: 'real'
+      });
+    }
 
     this._startDialogue();
   }
@@ -142,7 +151,11 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
   _showChapterEnd() {
     this.engine.gameProgress.chapter2Complete = true;
     this.engine.gameProgress.chapter2_completed = true;
-    this.engine.saveProgress();
+    this.engine.saveCheckpoint?.('chapter3_south_start', {
+      chapter: 3,
+      scene: 'chapter3',
+      world: 'paint'
+    });
 
     this._endCard = document.createElement('div');
     this._endCard.className = 'chapter-end-card full-viewport flex-center flex-col';

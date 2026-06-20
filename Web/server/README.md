@@ -52,11 +52,24 @@ npm start                # 启动在 http://localhost:8787
 
 ## 前端如何连上
 
-前端 `AIService` 默认请求 `http://localhost:8787`。
-如需改地址（例如部署到远程），在 `Web/.env` 设置：
+前端 `AIService` 默认请求同源 `/api/health` 和 `/api/chat`。开发环境下，`Web/vite.config.js` 会把 `/api` 代理到 `http://localhost:8787`。
+
+因此本地联调需要同时启动两个服务：
+
+```bash
+# 终端 1
+cd Web/server
+npm start
+
+# 终端 2
+cd Web
+npm run dev
+```
+
+如需改成远程代理地址，在 `Web/.env` 设置：
 
 ```
 VITE_AI_BACKEND_URL=https://your-host:port
 ```
 
-不配置就走本地默认值。后端没启动或没填 Key 时，游戏自动降级到离线预写对话，序章仍可完整通关。
+不配置就走同源 `/api`。前端只会暴露代理地址，不会接触真实 DeepSeek API Key。后端没启动或没填 Key 时，游戏自动降级到离线预写对话，主流程仍可推进。

@@ -18,6 +18,13 @@ const SCENE_STATES = {
   WORKSHOP: 'workshop'
 };
 
+const CHECKPOINTS = {
+  SOUTH: 'chapter3_south_start',
+  NORTH: 'chapter3_north_start',
+  LIUTING: 'chapter3_liuting_start',
+  WORKSHOP: 'chapter3_workshop_start'
+};
+
 export default class Chapter3PaintScene {
   constructor(engine) {
     this.engine = engine;
@@ -68,7 +75,7 @@ export default class Chapter3PaintScene {
     this._container.classList.remove('real-world');
     this._container.classList.add('paint-world');
 
-    this.engine.ensureCarryoverForChapter?.(3);
+    this.engine.ensureCarryoverForChapter?.(3, { persist: false });
 
     // UI 层
     this._uiLayer = document.createElement('div');
@@ -101,11 +108,20 @@ export default class Chapter3PaintScene {
     this._container.appendChild(this._sceneRoot);
     this._container.appendChild(this._uiLayer);
 
-    this._unsubscribers = [
-      this.engine.on('item-collected', () => this.engine.saveProgress()),
-    ];
+    this._unsubscribers = [];
 
-    this._startSequence();
+    if (this.engine.currentCheckpointId === CHECKPOINTS.NORTH) {
+      this._switchToNorth();
+    } else if (this.engine.currentCheckpointId === CHECKPOINTS.LIUTING) {
+      this._switchToLiuting();
+    } else {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.SOUTH, {
+        chapter: 3,
+        scene: 'chapter3',
+        world: 'paint'
+      });
+      this._startSequence();
+    }
   }
 
   exit() {
@@ -314,7 +330,13 @@ export default class Chapter3PaintScene {
   }
 
   async _switchToNorth() {
+    this.engine.saveCheckpoint?.(CHECKPOINTS.NORTH, {
+      chapter: 3,
+      scene: 'chapter3',
+      world: 'paint'
+    });
     this.state = SCENE_STATES.YUANYANG_NORTH;
+    this.hudBar.show();
 
     this._northEl.style.zIndex = '2';
     this._northEl.classList.add('active');
@@ -331,7 +353,6 @@ export default class Chapter3PaintScene {
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.seenScatteredSketches = true;
-    this.engine.saveProgress();
 
     // 探索态
     this.notebook.showQuickThoughts([
@@ -374,8 +395,6 @@ export default class Chapter3PaintScene {
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
-    this.engine.saveProgress();
-
     // 解锁出口
     this._northExit.style.display = '';
 
@@ -392,8 +411,14 @@ export default class Chapter3PaintScene {
   }
 
   async _switchToLiuting() {
+    this.engine.saveCheckpoint?.(CHECKPOINTS.LIUTING, {
+      chapter: 3,
+      scene: 'chapter3',
+      world: 'paint'
+    });
     this.state = SCENE_STATES.LIUTINGGE;
     this._clearAllIdleTimers();
+    this.hudBar.show();
 
     this._liutingEl.style.zIndex = '2';
     this._liutingEl.classList.add('active');
@@ -513,7 +538,6 @@ export default class Chapter3PaintScene {
     // 红线显现动画
     this._redlinesOverlay.classList.add('visible');
     this.engine.gameProgress.redLinesRevealed = true;
-    this.engine.saveProgress();
 
     await this.narrationBar.playLine('系统提示', '红线已显现。再次点击封墙，尝试用物件沿线剥离灰泥。');
     this.narrationBar.dismiss();
@@ -543,9 +567,6 @@ export default class Chapter3PaintScene {
     await this._nextFrame();
     this._sketchOverlay.classList.add('visible');
 
-    this.engine.gameProgress.sketchRevealed = true;
-    this.engine.saveProgress();
-
     // 隐藏封墙热点
     this._hideSpots(this._liutingSpots);
 
@@ -558,6 +579,9 @@ export default class Chapter3PaintScene {
     await this.narrationBar.playLine(null, '灰泥一片片落下。墙面露出一幅画——不，与其说是画，不如说是草图。');
     await this.narrationBar.playLine(null, '它很拙。远香堂画得太低，小飞虹弯得太急，竹影几乎压到画面边缘。线条有几处犹豫的地方，像画的人反复擦掉，又重新落笔。');
     await this.narrationBar.playLine('沈念', '这笔触……和北厅地上那些散落的草图太像了。同样的犹豫，同样的比例失调。但这一张没有被撕碎，没有被放弃——它被留在了墙上。', { portrait: '/images/shennian_1.png' });
+
+    this.engine.gameProgress.sketchRevealed = true;
+
     await this.narrationBar.playLine('系统提示', '试试后退一步，蹲下来看。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
@@ -621,7 +645,6 @@ export default class Chapter3PaintScene {
     ]);
 
     this._isNarrating = false;
-    this.engine.saveProgress();
 
     // 显示凹槽热点
     await this.narrationBar.playLine('系统提示', '草图右下角似乎有一处凹陷，点击查看。');
@@ -667,7 +690,6 @@ export default class Chapter3PaintScene {
     ]);
 
     this._isNarrating = false;
-    this.engine.saveProgress();
 
     // 进入轻量讨论
     await this._delay(1000);
@@ -749,7 +771,6 @@ export default class Chapter3PaintScene {
     this.notebook.setLightweightMode?.(false);
     this.notebook.collapse?.();
     this.engine.gameProgress.ch3DiscussionDone = true;
-    this.engine.saveProgress();
 
     await this._delay(500);
     await this._playPlaqueRecall();
@@ -786,7 +807,6 @@ export default class Chapter3PaintScene {
 
     this.engine.gameProgress.plaqueRecognized = true;
     this.notebook.addClueRecord('[线索] 匾额追认 — 匾额上那一笔与墙面题字、断簪"蘅"字出自同一只手');
-    this.engine.saveProgress();
 
     // 匾额淡出
     plaque.classList.remove('visible');
@@ -799,6 +819,11 @@ export default class Chapter3PaintScene {
 
   async _startFadeTransition() {
     // 使用和前几章一样的褪色转场，切换到独立工作室场景
+    this.engine.saveCheckpoint?.(CHECKPOINTS.WORKSHOP, {
+      chapter: 3,
+      scene: 'chapter3-workshop',
+      world: 'real'
+    });
     await this.engine.sceneManager.switchWithFadeToSepia('chapter3-workshop');
   }
 

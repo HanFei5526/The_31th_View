@@ -1,7 +1,7 @@
 /**
  * 《卅一景》AI 服务
  *
- * 统一封装 DeepSeek V4 Pro API 调用。
+ * 统一封装 AI 后端代理调用。
  * 作为引擎子系统，由 GameEngine 持有。
  *
  * 四个对外接口：
@@ -20,10 +20,11 @@ import {
 } from './ai-prompts.js';
 
 /**
- * API 配置。直接调用 DeepSeek 官方 API
+ * API 配置。前端只请求本地/同源代理，不持有真实 DeepSeek Key。
  */
-const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || '';
-const CHAT_ENDPOINT = 'https://api.deepseek.com/chat/completions';
+const AI_BACKEND_URL = (import.meta.env?.VITE_AI_BACKEND_URL || '').replace(/\/$/, '');
+const HEALTH_ENDPOINT = `${AI_BACKEND_URL}/api/health`;
+const CHAT_ENDPOINT = `${AI_BACKEND_URL}/api/chat`;
 
 export class AIService {
   constructor(engine) {
@@ -32,6 +33,8 @@ export class AIService {
 
     /** 后端是否可用（健康检查通过后置为 true） */
     this._available = false;
+    this._configured = false;
+    this._healthCheckPromise = null;
 
     /** 周鹤年对话历史（每次场景切换时清空） */
     this._zhouHistory = [];
@@ -46,14 +49,35 @@ export class AIService {
    * @returns {Promise<boolean>}
    */
   async configure() {
-    if (DEEPSEEK_API_KEY) {
-      this._available = true;
-      console.log('[AIService] DeepSeek API Key 已配置，模型就绪');
-    } else {
-      this._available = false;
-      console.warn('[AIService] 未在 .env 中找到 VITE_DEEPSEEK_API_KEY，将走离线降级模式');
-    }
-    return this._available;
+    if (this._healthCheckPromise) return this._healthCheckPromise;
+
+    this._healthCheckPromise = fetch(HEALTH_ENDPOINT)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`health check failed: ${response.status}`);
+        }
+        const data = await response.json();
+        this._available = Boolean(data.ok && data.configured);
+        this._configured = true;
+
+        if (this._available) {
+          console.log(`[AIService] AI 后端代理已就绪，模型：${data.model || 'unknown'}`);
+        } else {
+          console.warn('[AIService] AI 后端未配置 DEEPSEEK_API_KEY，将走离线降级模式');
+        }
+        return this._available;
+      })
+      .catch((err) => {
+        this._available = false;
+        this._configured = true;
+        console.warn('[AIService] AI 后端不可用，将走离线降级模式:', err);
+        return false;
+      })
+      .finally(() => {
+        this._healthCheckPromise = null;
+      });
+
+    return this._healthCheckPromise;
   }
 
   /** @returns {boolean} 后端是否可用 */
@@ -212,8 +236,12 @@ export class AIService {
      ========================== */
 
   async _callAPI(messages, options = {}) {
+    if (!this._configured) {
+      await this.configure();
+    }
+
     if (!this.isAvailable) {
-      return '（AI 功能未启用，请在 Web/.env 中配置 VITE_DEEPSEEK_API_KEY）';
+      return '（AI 后端未启用。请启动 Web/server 并在服务端 .env 中配置 DEEPSEEK_API_KEY）';
     }
 
     try {
@@ -221,10 +249,8 @@ export class AIService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
           messages,
           temperature: options.temperature ?? 0.7,
           max_tokens: options.max_tokens ?? 300,
@@ -238,7 +264,7 @@ export class AIService {
       }
 
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      const content = data.content;
 
       if (!content) {
         console.error('[AIService] 返回格式异常:', data);

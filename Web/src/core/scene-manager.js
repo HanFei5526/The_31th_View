@@ -102,13 +102,13 @@ export class SceneManager {
     const scene = new SceneClass(this.engine);
     this._currentScene = scene;
     this._currentName = name;
+    this.engine.currentScene = name;
 
     if (typeof scene.enter === 'function') {
       scene.enter(this._container);
     }
 
     // 6. 更新引擎状态
-    this.engine.currentScene = name;
     this.engine.emit('scene-enter', { scene: name });
   }
 
@@ -262,12 +262,12 @@ export class SceneManager {
     const scene = new SceneClass(this.engine);
     this._currentScene = scene;
     this._currentName = name;
+    this.engine.currentScene = name;
 
     if (typeof scene.enter === 'function') {
       scene.enter(this._container);
     }
 
-    this.engine.currentScene = name;
     this.engine.emit('scene-enter', { scene: name });
   }
 }

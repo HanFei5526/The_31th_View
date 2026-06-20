@@ -22,7 +22,7 @@ export class SaveSystem {
       const saveData = {
         ...data,
         timestamp: Date.now(),
-        version: '1.0.0',
+        version: data.version || '1.1.0',
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
       this.engine.emit('game-saved', saveData);
@@ -65,18 +65,31 @@ export class SaveSystem {
   }
 
   /**
-   * 自动保存 — 从引擎当前状态生成存档快照
+   * 从引擎当前状态生成存档快照。
+   * @param {object} overrides
+   * @returns {object}
    */
-  autoSave() {
-    const state = {
-      chapter: this.engine.currentChapter,
-      scene: this.engine.currentScene,
-      world: this.engine.currentWorld,
-      inventory: this.engine.inventory.getItems(),
-      progress: { ...this.engine.gameProgress },
-      notebookRecords: this.engine.notebookRecords || [],
-      notebookChatsByChapter: this.engine.notebookChatsByChapter || {},
+  createSnapshot(overrides = {}) {
+    return {
+      checkpointId: overrides.checkpointId ?? this.engine.currentCheckpointId ?? null,
+      chapter: overrides.chapter ?? this.engine.currentChapter,
+      scene: overrides.scene ?? this.engine.currentScene,
+      world: overrides.world ?? this.engine.currentWorld,
+      inventory: overrides.inventory ?? this.engine.inventory.getItems(),
+      progress: {
+        ...(this.engine.gameProgress || {}),
+        ...(overrides.progress || {}),
+      },
+      notebookRecords: overrides.notebookRecords ?? (this.engine.notebookRecords || []),
+      notebookChatsByChapter: overrides.notebookChatsByChapter ?? (this.engine.notebookChatsByChapter || {}),
     };
-    this.save(state);
+  }
+
+  /**
+   * 自动保存 — 从引擎当前状态生成存档快照。
+   * 兼容旧调用；新流程优先使用 GameEngine.saveCheckpoint。
+   */
+  autoSave(overrides = {}) {
+    this.save(this.createSnapshot(overrides));
   }
 }

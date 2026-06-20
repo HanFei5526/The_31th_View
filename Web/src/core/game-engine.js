@@ -70,6 +70,8 @@ export class GameEngine {
     this.currentScene = null;
     /** 当前世界 'real' | 'paint' */
     this.currentWorld = 'real';
+    /** 当前正式存档点 */
+    this.currentCheckpointId = null;
     /** 通用进度标记，场景可自由读写 */
     this.gameProgress = {};
     /** 修复笔记本记录：跨章节累积 */
@@ -163,7 +165,11 @@ export class GameEngine {
     this.currentChapter = save.chapter ?? 0;
     this.currentScene = save.scene ?? null;
     this.currentWorld = save.world ?? 'real';
+    this.currentCheckpointId = save.checkpointId ?? save.progress?.currentCheckpointId ?? null;
     this.gameProgress = save.progress ?? {};
+    if (this.currentCheckpointId) {
+      this.gameProgress.currentCheckpointId = this.currentCheckpointId;
+    }
     this.notebookRecords = Array.isArray(save.notebookRecords) ? save.notebookRecords : [];
     this.notebookChatsByChapter = save.notebookChatsByChapter ?? {};
 
@@ -188,6 +194,15 @@ export class GameEngine {
     }
     if (progress.hasHairpin && !this.inventory.hasItem('hairpin')) {
       this.inventory.addItem(ITEM_TEMPLATES.hairpin, { silent: true });
+    }
+    if (progress.hasInkstone && !this.inventory.hasItem('inkstone')) {
+      this.inventory.addItem(ITEM_TEMPLATES.inkstone, { silent: true });
+    }
+    if (progress.hasRubbing && !this.inventory.hasItem('rubbing')) {
+      this.inventory.addItem(ITEM_TEMPLATES.rubbing, { silent: true });
+    }
+    if (progress.hasLetter && !this.inventory.hasItem('letter')) {
+      this.inventory.addItem(ITEM_TEMPLATES.letter, { silent: true });
     }
   }
 
@@ -249,8 +264,8 @@ export class GameEngine {
       changed = true;
     }
 
-    if (changed && shouldPersist) {
-      this.saveSystem?.autoSave?.();
+    if (changed && shouldPersist && this.currentCheckpointId) {
+      this.saveCheckpoint(this.currentCheckpointId);
     }
     return changed;
   }
@@ -417,6 +432,29 @@ export class GameEngine {
    */
   saveProgress() {
     this.saveSystem.autoSave();
+    this._showSaveIndicator();
+  }
+
+  /**
+   * 保存正式大场景入口 checkpoint。
+   * @param {string} checkpointId
+   * @param {object} overrides
+   */
+  saveCheckpoint(checkpointId, overrides = {}) {
+    if (!checkpointId) return;
+    this.currentCheckpointId = checkpointId;
+    this.gameProgress = {
+      ...(this.gameProgress || {}),
+      currentCheckpointId: checkpointId,
+    };
+    this.saveSystem.save(this.saveSystem.createSnapshot({
+      ...overrides,
+      checkpointId,
+      progress: {
+        ...(overrides.progress || {}),
+        currentCheckpointId: checkpointId,
+      },
+    }));
     this._showSaveIndicator();
   }
 

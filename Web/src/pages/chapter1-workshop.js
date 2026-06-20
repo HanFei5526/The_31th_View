@@ -5,6 +5,7 @@ import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 
 const prologueBg = '/images/prologue-workshop.png';
+const CHAPTER1_WORKSHOP_CHECKPOINT = 'chapter1_workshop_start';
 
 export default class Chapter1WorkshopScene extends GameSceneBase {
   constructor(engine) {
@@ -29,7 +30,7 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     // 确保是现实世界主题
     this.engine.currentChapter = 1;
     this.engine.currentWorld = 'real';
-    this.engine.ensureCarryoverForChapter?.(1);
+    this.engine.ensureCarryoverForChapter?.(1, { persist: false });
     this.engine._applyWorldTheme();
     
     // 强制清除可能的残留样式
@@ -86,6 +87,14 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
         await this._askNotebook(text);
       }
     });
+
+    if (this.engine.currentCheckpointId !== CHAPTER1_WORKSHOP_CHECKPOINT) {
+      this.engine.saveCheckpoint?.(CHAPTER1_WORKSHOP_CHECKPOINT, {
+        chapter: 1,
+        scene: 'chapter1-workshop',
+        world: 'real'
+      });
+    }
 
     this._startDialogue();
   }
@@ -166,7 +175,11 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
   _showChapterEnd() {
     this.engine.gameProgress.chapter1Complete = true;
     this.engine.gameProgress.chapter1_completed = true;
-    this.engine.saveProgress();
+    this.engine.saveCheckpoint?.('chapter2_yuanxiang_start', {
+      chapter: 2,
+      scene: 'chapter2',
+      world: 'paint'
+    });
 
     this._endCard = document.createElement('div');
     this._endCard.className = 'chapter-end-card full-viewport flex-center flex-col';

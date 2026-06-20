@@ -18,6 +18,13 @@ const SCENE_STATES = {
   LIGHT_DISCUSSION: 'light_discussion'
 };
 
+const CHECKPOINTS = {
+  LANXUE: 'chapter1_lanxue_start',
+  ZHUIYUN: 'chapter1_zhuiyun_start',
+  FURONG: 'chapter1_furong_start',
+  WORKSHOP: 'chapter1_workshop_start'
+};
+
 export default class Chapter1PaintScene {
   constructor(engine) {
     this.engine = engine;
@@ -62,7 +69,7 @@ export default class Chapter1PaintScene {
     this._container.classList.remove('real-world');
     this._container.classList.add('paint-world');
 
-    this.engine.ensureCarryoverForChapter?.(1);
+    this.engine.ensureCarryoverForChapter?.(1, { persist: false });
 
     // UI 层：pointer-events:none 让点击穿透到场景，但组件自身恢复 auto
     this._uiLayer = document.createElement('div');
@@ -114,12 +121,21 @@ export default class Chapter1PaintScene {
     this._container.appendChild(this._sceneRoot);
     this._container.appendChild(this._uiLayer);
 
-    this._unsubscribers = [
-      this.engine.on('item-collected', () => this.engine.saveProgress()),
-    ];
+    this._unsubscribers = [];
 
     // 开始演出
-    this._startSequence();
+    if (this.engine.currentCheckpointId === CHECKPOINTS.ZHUIYUN) {
+      this._switchToZhuiyun();
+    } else if (this.engine.currentCheckpointId === CHECKPOINTS.FURONG) {
+      this._switchToFurong();
+    } else {
+      this.engine.saveCheckpoint?.(CHECKPOINTS.LANXUE, {
+        chapter: 1,
+        scene: 'chapter1',
+        world: 'paint'
+      });
+      this._startSequence();
+    }
   }
 
   async _askNotebook(text) {
@@ -534,7 +550,6 @@ export default class Chapter1PaintScene {
         icon: ''
       });
       this.engine.gameProgress.hasHairpin = true;
-      this.engine.saveProgress();
 
       this.notebook.addClueRecord('[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字');
       this.notebook.addClueRecord('[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明');
@@ -727,8 +742,14 @@ export default class Chapter1PaintScene {
   }
 
   async _switchToZhuiyun() {
+    this.engine.saveCheckpoint?.(CHECKPOINTS.ZHUIYUN, {
+      chapter: 1,
+      scene: 'chapter1',
+      world: 'paint'
+    });
     this.state = SCENE_STATES.ZHUIYUN;
     this._isNarrating = true;
+    this.hudBar.show();
 
     // 平滑转场：交叉淡入淡出 (新场景在上方淡入，完全盖住旧场景后再移除旧的，避免漏出黄色底色)
     this._zhuiyunEl.style.zIndex = '2';
@@ -754,8 +775,14 @@ export default class Chapter1PaintScene {
   }
 
   async _switchToFurong() {
+    this.engine.saveCheckpoint?.(CHECKPOINTS.FURONG, {
+      chapter: 1,
+      scene: 'chapter1',
+      world: 'paint'
+    });
     this.state = SCENE_STATES.FURONG;
     this._isNarrating = true;
+    this.hudBar.show();
 
     // 平滑转场：交叉淡入淡出
     this._furongEl.style.zIndex = '2';
@@ -854,6 +881,11 @@ export default class Chapter1PaintScene {
 
   async _startFadeTransition() {
     this.state = 'TRANSITION';
+    this.engine.saveCheckpoint?.(CHECKPOINTS.WORKSHOP, {
+      chapter: 1,
+      scene: 'chapter1-workshop',
+      world: 'real'
+    });
     await this.engine.sceneManager.switchWithFadeToSepia('chapter1-workshop');
   }
 

@@ -65,14 +65,14 @@ export const KNOWLEDGE_SNIPPETS = [
   {
     id: 'ch1_heng',
     chapter: 1,
-    unlockCondition: ({ chapter }) => chapter >= 1,
+    unlockCondition: ({ progress }) => Boolean(progress.hasHairpin),
     content: `【“蘅”字的含义】
-蘅，即杜衡，一种香草名。《楚辞》中有云：“芷葺兮荷屋，缭之兮杜衡。”在中国古典意象中，常用来指代高洁的女子。在三十一景的线索中，它可能是留下这些痕迹的主人名字。`,
+蘅，即杜衡，一种香草名。《楚辞》中有云：“芷葺兮荷屋，缭之兮杜衡。”在中国古典意象中，常用来指代高洁的女子。断簪背面刻有这个字，说明它更像私人的物主记号，而不是正式题名或工匠标记；此时只能判断它可能指向某位留下痕迹的人，不能确认身份。`,
   },
   {
     id: 'ch1_low_viewpoint',
     chapter: 1,
-    unlockCondition: ({ chapter }) => chapter >= 1,
+    unlockCondition: ({ progress }) => Boolean(progress.zhuiyunExplored),
     content: `【低处观察】
 第一章的场景探索会反复出现“站着看不到、低下来才看得到”的瞬间。它暂时不是结论，而是一种观察方法：有些痕迹需要换到更低、更偏、更不正式的位置才会显现。`,
   },
@@ -110,5 +110,61 @@ export const KNOWLEDGE_SNIPPETS = [
     unlockCondition: ({ progress }) => Boolean(progress.heardVoice),
     content: `【水面回声】
 小飞虹桥下浮现文字"知我者，唯有此园"。这句话暗示留下痕迹的人将园林本身视为唯一的理解者——她的观看不被他人所知，但园林的空间结构保存了她的视角。`,
+  },
+  {
+    id: 'ch3_scattered_sketches',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenScatteredSketches),
+    content: `【北厅散落草图】
+鸳鸯馆北厅的散落草图笔力弱、比例失准，水面过重，桥线过弯，亭阁被压得很低。它们说明留下痕迹的人曾反复尝试画园中景物，但这些草图还不能证明她完成了正式画心，也不能直接说明第三十一景的来源。`,
+  },
+  {
+    id: 'ch3_bleeding_text',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText),
+    content: `【“看得到吗”】
+画纸上渗出的“看得到吗”不是对当下某个人的直接指认，而像一句长期悬置的询问：她希望有人确认这些痕迹确实存在。这里的重点是“被见证”，不是被召唤或被正名。`,
+  },
+  {
+    id: 'ch3_red_lines',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.redLinesRevealed),
+    content: `【墙面朱砂线】
+残砚中的朱砂与墙面红线产生呼应，说明两者属于同一条材料线索。朱砂线更像底稿线、定位线或辅助构图线，能帮助追溯观看位置，但此时仍不能把它等同于正式成稿。`,
+  },
+  {
+    id: 'ch3_sketch_revealed',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.sketchRevealed),
+    content: `【留听阁墙面草图】
+灰泥下露出的不是成熟画作，而是一幅被保留下来的低位视角草图。它与北厅散落草图一样拙，但这一次没有被撕掉或放弃，而是被藏在墙面里，说明留下者希望这个观看位置能被保存。`,
+  },
+  {
+    id: 'ch3_low_viewpoint_confirmed',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.understoodNotPainter || progress.hasRubbing),
+    content: `【她画得不好，但看得很准】
+蹲下到墙面低位线的高度后，草图中原本“不对”的比例关系变得合理：远香堂倒影、小飞虹弧线、梧竹幽居竹影可以同入一眼。她的贡献不是成熟笔墨，也不是正式构图方案，而是发现并留下了一个观看位置。`,
+  },
+  {
+    id: 'ch3_letter',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.hasLetter),
+    content: `【王蘅的信】
+信中写到“不必有名，不必有形。只要有痕迹。”这说明她的核心愿望不是进入正式署名体系，也不是要求后人为她塑造身份，而是希望自己的观看曾经存在这件事能留下痕迹。`,
+  },
+  {
+    id: 'ch3_plaque_recognized',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.plaqueRecognized),
+    content: `【匾额追认】
+兰雪堂匾额上多余的一笔、断簪背面的“蘅”、墙面题字和信件互相呼应，指向同一只手、同一种心思。它们构成的是痕迹链，而不是正式署名链；它们让人看见王蘅曾在园中观看过。`,
+  },
+  {
+    id: 'finale_records_only',
+    chapter: 4,
+    unlockCondition: ({ progress }) => Boolean(progress.chapter3Complete || progress.hasLetter || progress.hasRubbing),
+    content: `【终章笔记本边界】
+终章只应回顾已经获得的记录和证据链，不替玩家回答四问，不推荐结局，也不判断哪一种选择更正确。四问和三结局属于玩家的价值判断，修复笔记本只能提醒证据已经在哪里。`,
   },
 ];

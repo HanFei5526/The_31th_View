@@ -29,7 +29,7 @@ const CHAPTERS = [
     subtitle: '东园 · 兰雪堂至芙蓉榭',
     tagline: '水面倒影里，第一次看见她留下的痕迹',
     unlockKey: 'chapter1',
-    alwaysUnlocked: true,
+    alwaysUnlocked: false,
   },
   {
     id: 'chapter2',
@@ -243,6 +243,7 @@ export default class MenuScene {
     this.engine.notebookRecords = [];
     this.engine.notebookChatsByChapter = {};
     this.engine.currentChapter = 0;
+    this.engine.currentCheckpointId = null;
     this.engine.currentWorld = 'real';
     this._transitionToSceneWithOverlay(root, 'prologue');
   }
@@ -252,7 +253,7 @@ export default class MenuScene {
     if (save) {
       this.engine.restoreFromSave?.(save);
     }
-    const lastScene = save?.scene || 'prologue';
+    const lastScene = this._getContinueScene(save);
     this._transitionToSceneWithOverlay(root, lastScene);
   }
 
@@ -851,8 +852,50 @@ export default class MenuScene {
 
   _isChapterUnlocked(ch) {
     if (ch.alwaysUnlocked) return true;
-    // 开发阶段：所有章节解锁
+    // 测试阶段保持章节全开，便于直接跳转验证各章节。
+    // 上线前需改回按完成进度逐章解锁。
     return true;
+  }
+
+  _getContinueScene(save) {
+    const savedScene = save?.scene;
+    const checkpointScene = this._getSceneForCheckpoint(save?.checkpointId);
+    if (checkpointScene) return checkpointScene;
+
+    if (savedScene && savedScene !== 'menu' && savedScene !== 'landing') {
+      return savedScene;
+    }
+
+    const progress = save?.progress || this._getProgress();
+    if (progress.finaleComplete || progress.chapter3Complete || progress.chapter3_completed) return 'finale';
+    if (progress.chapter2Complete || progress.chapter2_completed) return 'chapter3';
+    if (progress.chapter1Complete || progress.chapter1_completed) return 'chapter2';
+    if (progress.prologueComplete || progress.prologue_completed || progress.chapter1) return 'chapter1';
+    return 'prologue';
+  }
+
+  _getSceneForCheckpoint(checkpointId) {
+    const checkpointScenes = {
+      prologue_start: 'prologue',
+      prologue_scan_start: 'prologue',
+      prologue_synthesis_start: 'prologue',
+      chapter1_lanxue_start: 'chapter1',
+      chapter1_zhuiyun_start: 'chapter1',
+      chapter1_furong_start: 'chapter1',
+      chapter1_workshop_start: 'chapter1-workshop',
+      chapter2_yuanxiang_start: 'chapter2',
+      chapter2_xiaofeihong_start: 'chapter2',
+      chapter2_workshop_start: 'chapter2-workshop',
+      chapter3_south_start: 'chapter3',
+      chapter3_north_start: 'chapter3',
+      chapter3_liuting_start: 'chapter3',
+      chapter3_workshop_start: 'chapter3-workshop',
+      finale_truth_start: 'finale',
+      finale_questions_start: 'finale',
+      finale_endings_start: 'finale',
+      finale_complete: 'finale',
+    };
+    return checkpointScenes[checkpointId] || null;
   }
 
   /* ==================== 样式注入 ==================== */
