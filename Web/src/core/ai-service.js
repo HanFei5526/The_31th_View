@@ -8,14 +8,14 @@
  *   chatWithZhou   — 周鹤年对话（方案 A）
  *   queryNotebook  — 笔记本查阅（方案 B）
  *   generateAnnotation — 批注生成（方案 B）
- *   generateReport — 修复报告（方案 C）
+ *   generateFinalNote — 终章后结案笔记（方案 C）
  */
 
 import {
   buildZhouPrompt,
   buildNotebookQueryPrompt,
   buildAnnotationPrompt,
-  buildReportPrompt,
+  buildFinalNotePrompt,
   buildGateZhouPrompt,
 } from './ai-prompts.js';
 
@@ -207,31 +207,48 @@ export class AIService {
   }
 
   /* ==========================
-     方案 C · 修复报告
+     方案 C · 结案笔记
      ========================== */
 
   /**
-   * 生成个性化修复报告（终章，一次性调用）
+   * 生成结局后的沈念结案笔记（终章后可选调用）
    * @param {string} endingChoice - 'archive' | 'secret' | 'continue'
-   * @returns {Promise<string>} 报告全文
+   * @returns {Promise<string>} 结案笔记全文
    */
-  async generateReport(endingChoice) {
+  async generateFinalNote(endingChoice) {
     const ctx = this.engine.getAIContext();
-    const systemPrompt = buildReportPrompt(ctx, endingChoice);
+    const systemPrompt = buildFinalNotePrompt(ctx, endingChoice);
+    const fallbackText = this._getFinalNoteFallback(endingChoice);
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: '请撰写最终文本。' },
+      { role: 'user', content: '请写下这页结案笔记。' },
     ];
 
-    const report = await this._callAPI(messages, {
-      temperature: 0.4,
-      max_tokens: 800,
+    const note = await this._callAPI(messages, {
+      temperature: 0.35,
+      max_tokens: 520,
+      retryOnEmpty: true,
+      retryOnShort: true,
+      fallbackText,
+      unavailableText: fallbackText,
+      networkFallbackText: fallbackText,
     });
 
-    this.engine.emit('ai-report-generated', { report, ending: endingChoice });
+    const finalNote = this._isInvalidFinalNote(note) ? fallbackText : note;
 
-    return report;
+    this.engine.emit('ai-final-note-generated', { note: finalNote, ending: endingChoice });
+
+    return finalNote;
+  }
+
+  /**
+   * 兼容旧接口：当前终章不再让 AI 生成结局正文或正式修复报告。
+   * @param {string} endingChoice
+   * @returns {Promise<string>}
+   */
+  async generateReport(endingChoice) {
+    return this.generateFinalNote(endingChoice);
   }
 
   /* ==========================
@@ -244,7 +261,8 @@ export class AIService {
     }
 
     if (!this.isAvailable) {
-      return '（AI 后端未启用。请启动 Web/server 并在服务端 .env 中配置 DEEPSEEK_API_KEY）';
+      return options.unavailableText
+        || '（AI 后端未启用。请启动 Web/server 并在服务端 .env 中配置 DEEPSEEK_API_KEY）';
     }
 
     const maxAttempts = (options.retryOnEmpty || options.retryOnShort) ? 2 : 1;
@@ -288,7 +306,7 @@ export class AIService {
       }
     } catch (err) {
       console.error('[AIService] 网络错误:', err);
-      return '（连接中断，请稍后再试……）';
+      return options.networkFallbackText || '（连接中断，请稍后再试……）';
     }
 
     return options.fallbackText || '（大模型有些困惑，暂时无法辨认……）';
@@ -309,6 +327,46 @@ export class AIService {
       }
     }
 
-    return false;
+    return !/[。！？.!?”"）】]$/.test(text);
+  }
+
+  _isInvalidFinalNote(content) {
+    const text = String(content || '').trim();
+    if (!text) return true;
+    const forbidden = [
+      '足够构成学术定论',
+      '这个视角不属于文徵明',
+      '应被正式署名',
+      '正式档案已更新',
+      '报告已提交',
+      '正式报告已归档',
+      '档案已封存',
+      '绝非文徵明',
+      '不属于文徵明',
+      '不是文徵明的',
+      '这幅画里不止文徵明',
+      '不是画者的位置',
+      '不是成稿之手',
+      '仅仅归于文徵明',
+      '摹手',
+      '附会',
+      '足够确认',
+      '不值得被',
+    ];
+    if (forbidden.some((phrase) => text.includes(phrase))) return true;
+
+    const body = text.replace(/^【修复记录终页】\s*/, '').trim();
+    const bodyLength = Array.from(body).length;
+    return bodyLength < 120 || bodyLength > 220;
+  }
+
+  _getFinalNoteFallback(endingChoice) {
+    const fallbackByEnding = {
+      archive: '【修复记录终页】\n\n我把这个可能性写进了正式报告，但仍只能用谨慎的语气。旧题签残角、残字旁注与低位草图彼此照应，足以让我相信这里曾有另一种观看。画心仍是文徵明完成，王蘅留下的是视角的来源痕迹。我不能替她正名，也不能把推想写成定论；能做的，只是让这条痕迹从此有处可查。',
+      secret: '【修复记录终页】\n\n正式档案仍保持平静，我把没有提交的部分留在这里。旧题签、残字、细线、断簪与残砚，已经足以让我看见她曾经看见。这个选择不是否认，也不是遗忘；只是承认有些痕迹不必被公开命名，仍然可以被认真保存。我知道答案会停在暗处，但暗处并不等于消失；这页笔记会替我记住。',
+      continue: '【修复记录终页】\n\n我没有把这件事写成定论，而是铺开新纸。第三十一景保存了她看见的园，我想记录的是那个曾经蹲下去观看的人。新画不是证据，也不能替她正名；它只是我对那些痕迹的回应。有人看见过，也终于有人记住了这种观看。我不把它当作结论，只当作迟来的回应，也把这一刻留在笔记里。',
+    };
+
+    return fallbackByEnding[endingChoice] || '【修复记录终页】\n\n那些线索仍然留在笔记本里：旧题签、残字、细线、物件与草图彼此照应。它们不能把一切变成无可争议的定论，却足以让沈念知道，曾经有一种观看被保存下来。无需替她正名，只要让痕迹继续被看见。';
   }
 }

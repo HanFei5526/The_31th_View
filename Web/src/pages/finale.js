@@ -916,6 +916,14 @@ export default class FinaleScene {
         <p>"谨以此作，向那些曾改变事物被看见的方式、却没有留下名字的人致意。"</p>
         <div class="finale-credits-sign">《卅一景》项目组全体：夏虫、翰飛、一只鱼、Vespera.l，敬上。</div>
       </div>
+      <div class="finale-final-note" id="finale-final-note">
+        <button class="finale-final-note-btn" id="finale-final-note-btn">写下结案笔记</button>
+        <div class="finale-final-note-status" id="finale-final-note-status" aria-live="polite"></div>
+        <article class="finale-final-note-paper hidden" id="finale-final-note-paper">
+          <h3>修复记录终页</h3>
+          <div class="finale-final-note-text" id="finale-final-note-text"></div>
+        </article>
+      </div>
       <div class="finale-end-buttons" id="finale-end-buttons">
         <button class="finale-end-btn" id="finale-btn-rechoose">回到选择前</button>
         <button class="finale-end-btn" id="finale-btn-menu">返回菜单</button>
@@ -948,6 +956,42 @@ export default class FinaleScene {
     content.querySelector('#finale-btn-menu').addEventListener('click', () => {
       this.engine.switchScene('menu');
     });
+
+    content.querySelector('#finale-final-note-btn')?.addEventListener('click', () => {
+      this._generateFinalNote(endingId, content);
+    });
+  }
+
+  async _generateFinalNote(endingId, content) {
+    const btn = content.querySelector('#finale-final-note-btn');
+    const status = content.querySelector('#finale-final-note-status');
+    const paper = content.querySelector('#finale-final-note-paper');
+    const textEl = content.querySelector('#finale-final-note-text');
+    if (!btn || !status || !paper || !textEl) return;
+
+    btn.disabled = true;
+    btn.textContent = '正在书写……';
+    status.textContent = '笔记本末页正在浮现新的字迹……';
+    paper.classList.add('hidden');
+    textEl.textContent = '';
+
+    try {
+      const note = await this.engine.aiService.generateFinalNote(endingId);
+      if (this._exited) return;
+      status.textContent = '';
+      textEl.textContent = note || '（笔记本末页暂时没有新的字迹浮现。）';
+      paper.classList.remove('hidden');
+      btn.textContent = '重新书写结案笔记';
+    } catch (err) {
+      console.error('[Finale] 结案笔记生成失败:', err);
+      if (this._exited) return;
+      status.textContent = '';
+      textEl.textContent = '（笔记本末页暂时没有新的字迹浮现。）';
+      paper.classList.remove('hidden');
+      btn.textContent = '重新书写结案笔记';
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   /* ==================== 工具方法 ==================== */
