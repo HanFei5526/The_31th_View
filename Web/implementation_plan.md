@@ -192,7 +192,13 @@ Web/
     │   ├── menu.js
     │   ├── prologue.js
     │   ├── chapter1-paint.js
-    │   └── chapter-placeholder.js
+    │   ├── chapter1-workshop.js
+    │   ├── chapter2-paint.js
+    │   ├── chapter2-workshop.js
+    │   ├── chapter3-paint.js
+    │   ├── chapter3-workshop.js
+    │   ├── finale.js
+    │   └── chapter-placeholder.js ← legacy, not registered
     └── styles/
         ├── index.css
         ├── transitions.css

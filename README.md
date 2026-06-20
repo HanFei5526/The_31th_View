@@ -104,7 +104,7 @@ npm run preview
 
 当前前端已包含：
 
-- 注册场景：`landing`、`menu`、`prologue`、`chapter1`（画中世界）、`chapter2`/`chapter3`/`finale`（占位）
+- 注册场景：`landing`、`menu`、`prologue`、`chapter1`、`chapter1-workshop`、`chapter2`、`chapter2-workshop`、`chapter3`、`chapter3-workshop`、`finale`
 - 核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`、`discussion-gate`、`gate-config`、`knowledge-base`、`fallback-dialogues`
 - 已有组件：`painting-viewer`（古画查看器）、`narration-bar`（叙事对话框）、`notebook-floating`（悬浮笔记本面板）、`hud-bar`（HUD按钮）、`inventory-popup`（物件匣）、`fall-transition`（跌入转场）
 - 正式图片目录：`Web/public/images/`

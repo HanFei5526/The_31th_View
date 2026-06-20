@@ -54,7 +54,13 @@
 │       │   ├── menu.js                  # 主菜单
 │       │   ├── prologue.js              # 序章场景
 │       │   ├── chapter1-paint.js        # 第一章画中世界
-│       │   └── chapter-placeholder.js   # 章节占位（二/三/终章）
+│       │   ├── chapter1-workshop.js     # 第一章现实工作室复盘
+│       │   ├── chapter2-paint.js        # 第二章画中世界
+│       │   ├── chapter2-workshop.js     # 第二章现实工作室复盘
+│       │   ├── chapter3-paint.js        # 第三章画中世界
+│       │   ├── chapter3-workshop.js     # 第三章现实工作室复盘
+│       │   ├── finale.js                # 终章场景
+│       │   └── chapter-placeholder.js   # 遗留占位文件（当前入口未注册）
 │       ├── components/                 # 通用组件
 │       │   ├── transition.js            # 转场动画组件
 │       │   ├── fall-transition.js       # 跌入画中转场
@@ -115,7 +121,7 @@
 ## 当前前端状态
 
 - 前端目录为 `Web/`，技术栈为 Vite + 原生 JavaScript / CSS。
-- 当前注册场景：`landing`、`menu`、`prologue`、`chapter1`（画中世界）、`chapter2`/`chapter3`/`finale`（占位）。
+- 当前注册场景：`landing`、`menu`、`prologue`、`chapter1`、`chapter1-workshop`、`chapter2`、`chapter2-workshop`、`chapter3`、`chapter3-workshop`、`finale`。
 - 已有核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`、`discussion-gate`、`gate-config`、`knowledge-base`、`fallback-dialogues`。
 - 已有组件：`painting-viewer`（古画查看器，含缩放/拖拽/滤镜/线索探索/渐进提示）、`narration-bar`（叙事对话框）、`notebook-floating`（悬浮笔记本面板，AI对话+记录+工具区+研讨态）、`hud-bar`（右下角HUD按钮）、`inventory-popup`（物件匣弹出浮层）、`fall-transition`（跌入转场）、`gate-panel`（研讨全屏面板，已废弃，由notebook-floating研讨态替代）。
 - AI 接入 DeepSeek，真实 API Key 只通过 `Web/server/.env` 中的 `DEEPSEEK_API_KEY` 配置；前端只请求 AI 代理，不持有真实密钥。
