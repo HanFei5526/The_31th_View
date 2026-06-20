@@ -67,6 +67,7 @@ export default class MenuScene {
     this._transitionTimers = [];
     this._transitionKeyHandler = null;
     this._transitionOverlay = null;
+    this._fullscreenHandler = null;
   }
 
   /* ==================== 生命周期 ==================== */
@@ -81,6 +82,10 @@ export default class MenuScene {
   exit() {
     if (this._styleEl) this._styleEl.remove();
     this._clearIntroTransition();
+    if (this._fullscreenHandler) {
+      document.removeEventListener('fullscreenchange', this._fullscreenHandler);
+      this._fullscreenHandler = null;
+    }
   }
 
   /* ==================== DOM 构建 ==================== */
@@ -115,6 +120,9 @@ export default class MenuScene {
       <button class="menu-back" id="btn-back">
         <span>返回</span>
       </button>
+
+      <!-- 全屏按钮 -->
+      <button class="menu-fullscreen-btn" id="menu-fullscreen" title="网页全屏">⤢</button>
 
       <!-- 主面板 -->
       <div class="menu-panel">
@@ -208,7 +216,7 @@ export default class MenuScene {
       });
     }
 
-
+    this._bindFullscreenButton(root);
 
     // 章节点击
     root.querySelectorAll('.chapter-item--unlocked').forEach((item) => {
@@ -230,6 +238,35 @@ export default class MenuScene {
     });
 
     return root;
+  }
+
+  _bindFullscreenButton(root) {
+    const fsBtn = root.querySelector('#menu-fullscreen');
+    if (!fsBtn) return;
+
+    const syncFullscreenState = () => {
+      if (document.fullscreenElement) {
+        fsBtn.textContent = '⤡';
+        fsBtn.title = '退出全屏';
+      } else {
+        fsBtn.textContent = '⤢';
+        fsBtn.title = '网页全屏';
+      }
+    };
+
+    syncFullscreenState();
+
+    fsBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        const request = document.documentElement.requestFullscreen?.();
+        request?.catch?.(() => {});
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+
+    this._fullscreenHandler = syncFullscreenState;
+    document.addEventListener('fullscreenchange', this._fullscreenHandler);
   }
 
   /* ==================== 操作方法 ==================== */
@@ -1032,6 +1069,34 @@ export default class MenuScene {
       box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 2px 2px 0px rgba(44, 36, 22, 0.85);
     }
 
+    .menu-fullscreen-btn {
+      position: absolute;
+      right: 2rem;
+      bottom: 2rem;
+      z-index: 50;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid rgba(224, 194, 150, 0.28);
+      background: rgba(62, 52, 39, 0.68);
+      color: rgba(255, 248, 232, 0.92);
+      font-size: 1.55rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(42, 34, 23, 0.25);
+      backdrop-filter: blur(4px);
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .menu-fullscreen-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(62, 52, 39, 0.78);
+      border-color: rgba(224, 194, 150, 0.42);
+    }
+
     /* ===========================
        Main Panel — 卷轴展开
        =========================== */
@@ -1460,6 +1525,11 @@ export default class MenuScene {
       .menu-back {
         top: 1rem;
         left: 1rem;
+      }
+
+      .menu-fullscreen-btn {
+        right: 1rem;
+        bottom: 1rem;
       }
 
       .menu-title {
