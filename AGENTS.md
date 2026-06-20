@@ -26,10 +26,9 @@
 ├── TestPic/                            # 过程图片 / 生成图 / 临时参考图
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
-│   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
-│   ├── server/                         # Express 后端（AI 代理，可选）
+│   ├── server/                         # Express 后端（AI 代理，API Key 放在 server/.env）
 │   ├── public/                         # 正式静态资源
 │   │   └── images/                     # 正式使用的背景图 / 场景图
 │   └── src/                            # 前端源码
@@ -119,7 +118,7 @@
 - 当前注册场景：`landing`、`menu`、`prologue`、`chapter1`（画中世界）、`chapter2`/`chapter3`/`finale`（占位）。
 - 已有核心模块：`game-engine`、`scene-manager`、`inventory`、`hint-system`、`dialogue`、`save-system`、`ai-service`、`ai-prompts`、`discussion-gate`、`gate-config`、`knowledge-base`、`fallback-dialogues`。
 - 已有组件：`painting-viewer`（古画查看器，含缩放/拖拽/滤镜/线索探索/渐进提示）、`narration-bar`（叙事对话框）、`notebook-floating`（悬浮笔记本面板，AI对话+记录+工具区+研讨态）、`hud-bar`（右下角HUD按钮）、`inventory-popup`（物件匣弹出浮层）、`fall-transition`（跌入转场）、`gate-panel`（研讨全屏面板，已废弃，由notebook-floating研讨态替代）。
-- AI 接入 DeepSeek，API Key 通过 `Web/.env` 中的 `VITE_DEEPSEEK_API_KEY` 配置。
+- AI 接入 DeepSeek，真实 API Key 只通过 `Web/server/.env` 中的 `DEEPSEEK_API_KEY` 配置；前端只请求 AI 代理，不持有真实密钥。
 - 正式图片集中放在 `Web/public/images/`，代码中使用 `/images/文件名` 引用。
 - `TestPic/` 只作为过程图片、生成图和临时参考图目录，不作为正式代码引用目录。
 - 如需启动前端，先进入 `Web/`，安装依赖后运行 `npm run dev`。
@@ -144,5 +143,5 @@
 - AI Prompt 修改须回看 `总分工文档/AI_提示词_后端数据设计.md`，确保与提示系统约束一致
 - AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框中；综合研讨中AI以"预置批注浮现"形式介入（非实时对话）
 - 正式图片统一放入 `Web/public/images/`；过程图、临时图保留在 `TestPic/`
-- `.env` 文件中的 API Key 不得提交到代码仓库
+- `Web/server/.env` 文件中的 API Key 不得提交到代码仓库；前端不得持有真实 API Key
 - 所有改动在实施前须先在 `当前改动计划/` 目录下创建计划文档，审批通过后再动代码

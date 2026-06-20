@@ -29,10 +29,9 @@
 ├── TestPic/                            # 过程图片 / 生成图 / 临时参考图
 ├── Web/                                # Vite 前端原型
 │   ├── package.json                    # 前端脚本与依赖
-│   ├── .env                            # 本地环境变量（DeepSeek API Key）
 │   ├── implementation_plan.md          # 前端实现方案
 │   ├── index.html                      # 应用入口 HTML
-│   ├── server/                         # Express 后端（AI 代理，可选）
+│   ├── server/                         # Express 后端（AI 代理，API Key 放在 server/.env）
 │   ├── public/                         # 正式静态资源
 │   │   └── images/                     # 正式使用的背景图 / 场景图
 │   └── src/                            # 前端源码
@@ -71,11 +70,21 @@ npm install
 npm run dev
 ```
 
-AI 功能需要配置 DeepSeek API Key，请在 `Web/.env` 中填入：
+AI 功能通过本地后端代理调用 DeepSeek。真实 API Key 只放在 `Web/server/.env`，不要放进前端环境变量：
 
 ```env
-VITE_DEEPSEEK_API_KEY=你的_DEEPSEEK_API_KEY
+DEEPSEEK_API_KEY=你的_DEEPSEEK_API_KEY
 ```
+
+启动 AI 代理：
+
+```powershell
+cd Web/server
+npm install
+npm start
+```
+
+前端默认请求同源 `/api`；如代理部署在其他地址，只在前端配置代理地址 `VITE_AI_BACKEND_URL`，不要配置真实 API Key。
 
 构建检查：
 
@@ -143,7 +152,7 @@ npm run preview
 - 前端改动应保持与现有 Vite + 原生 JavaScript / CSS 结构一致。
 - AI 面板统一为"修复笔记本"身份（非人格化），可包含"周老师批注"做引导；周鹤年当面对话仅出现在叙事对话框中（立绘在对话框左侧）；综合研讨中AI以"预置批注浮现"形式介入。
 - 正式图片统一放入 `Web/public/images/` 并用 `/images/文件名` 引用；`TestPic/` 只保留过程图、草图和临时参考。
-- `.env` 文件中的 API Key 不得提交到代码仓库。
+- `Web/server/.env` 文件中的 API Key 不得提交到代码仓库；前端不得持有真实 API Key。
 - 所有改动在实施前须先在 `当前改动计划/` 目录下创建计划文档，审批通过后再动代码。
 - 未经明确要求，不引入额外框架、遥测、分析或网络请求。
 
