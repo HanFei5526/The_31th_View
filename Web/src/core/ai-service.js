@@ -1,7 +1,7 @@
 /**
  * 《卅一景》AI 服务
  *
- * 统一封装 DeepSeek V4 Pro API 调用。
+ * 统一封装修复笔记本 AI 后端调用。
  * 作为引擎子系统，由 GameEngine 持有。
  *
  * 四个对外接口：
@@ -13,17 +13,14 @@
 
 import {
   buildZhouPrompt,
-  buildNotebookQueryPrompt,
   buildAnnotationPrompt,
   buildReportPrompt,
-  buildGateZhouPrompt,
 } from './ai-prompts.js';
 
 /**
- * API 配置。直接调用 DeepSeek 官方 API
+ * API 配置。前端只调用本地/部署后的 AI 后端。
  */
-const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || '';
-const CHAT_ENDPOINT = 'https://api.deepseek.com/chat/completions';
+const AI_BACKEND_URL = (import.meta.env.VITE_AI_BACKEND_URL || 'http://localhost:8787').replace(/\/$/, '');
 
 export class AIService {
   constructor(engine) {
@@ -46,12 +43,19 @@ export class AIService {
    * @returns {Promise<boolean>}
    */
   async configure() {
-    if (DEEPSEEK_API_KEY) {
-      this._available = true;
-      console.log('[AIService] DeepSeek API Key 已配置，模型就绪');
-    } else {
+    try {
+      const response = await fetch(`${AI_BACKEND_URL}/api/health`);
+      if (!response.ok) throw new Error(`health ${response.status}`);
+      const data = await response.json();
+      this._available = Boolean(data.configured);
+      if (this._available) {
+        console.log(`[AIService] AI 后端就绪，模型：${data.model || 'unknown'}`);
+      } else {
+        console.warn('[AIService] AI 后端未配置 API Key，将走离线降级模式');
+      }
+    } catch (err) {
       this._available = false;
-      console.warn('[AIService] 未在 .env 中找到 VITE_DEEPSEEK_API_KEY，将走离线降级模式');
+      console.warn('[AIService] AI 后端不可用，将走离线降级模式:', err);
     }
     return this._available;
   }
@@ -111,16 +115,13 @@ export class AIService {
    * @returns {Promise<string>} 周鹤年的回复
    */
   async discussWithZhou(gateId, userMessage, history = [], systemHint = '') {
-    const ctx = this.engine.getAIContext();
-    const systemPrompt = buildGateZhouPrompt(ctx, gateId, systemHint);
-
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...history,
-    ];
-
-    return this._callAPI(messages, {
-      temperature: 0.7,
+    return this._callNotebook({
+      mode: gateId === 'gate_prologue_synthesis' ? 'synthesis' : 'discussion',
+      gateId,
+      message: userMessage,
+      history,
+      systemHint,
+      temperature: 0.65,
       max_tokens: 300,
     });
   }
@@ -132,20 +133,19 @@ export class AIService {
   /**
    * 通过笔记本查阅信息（画中世界，单轮）
    * @param {string} question - 玩家问题
+   * @param {Object} extraContext - 场景可选附加上下文
+   * @param {Object} options - 调用选项
    * @returns {Promise<string>} 笔记本的回答
    */
-  async queryNotebook(question) {
-    const ctx = this.engine.getAIContext();
-    const systemPrompt = buildNotebookQueryPrompt(ctx, this.engine.gameProgress);
-
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: question },
-    ];
-
-    return this._callAPI(messages, {
-      temperature: 0.5,
-      max_tokens: 200,
+  async queryNotebook(question, extraContext = {}, options = {}) {
+    return this._callNotebook({
+      mode: 'query',
+      message: question,
+      temperature: 0.45,
+      max_tokens: 320,
+      extraContext,
+      isPresetQuestion: Boolean(options.isPresetQuestion),
+      presetSource: options.source || '',
     });
   }
 
@@ -213,18 +213,16 @@ export class AIService {
 
   async _callAPI(messages, options = {}) {
     if (!this.isAvailable) {
-      return '（AI 功能未启用，请在 Web/.env 中配置 VITE_DEEPSEEK_API_KEY）';
+      return '（AI 功能未启用，请启动 Web/server 并配置 DEEPSEEK_API_KEY）';
     }
 
     try {
-      const response = await fetch(CHAT_ENDPOINT, {
+      const response = await fetch(`${AI_BACKEND_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
           messages,
           temperature: options.temperature ?? 0.7,
           max_tokens: options.max_tokens ?? 300,
@@ -238,7 +236,7 @@ export class AIService {
       }
 
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      const content = data.content || data.choices?.[0]?.message?.content;
 
       if (!content) {
         console.error('[AIService] 返回格式异常:', data);
@@ -249,6 +247,46 @@ export class AIService {
     } catch (err) {
       console.error('[AIService] 网络错误:', err);
       return '（连接中断，请稍后再试……）';
+    }
+  }
+
+  async _callNotebook(payload = {}) {
+    if (!this.isAvailable) {
+      return '（AI 功能未启用，请启动 Web/server 并配置 DEEPSEEK_API_KEY）';
+    }
+
+    const ctx = this.engine.getAIContext();
+
+    try {
+      const response = await fetch(`${AI_BACKEND_URL}/api/notebook/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...payload,
+          context: {
+            ...ctx,
+            ...(payload.extraContext || {}),
+          },
+          progress: this.engine.gameProgress,
+          chapter: this.engine.currentChapter,
+          world: this.engine.currentWorld,
+          items: ctx.items || [],
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error('[AIService] 修复笔记本请求失败:', response.status, errText);
+        return '周老师批注：翻了翻，没有找到相关记录。';
+      }
+
+      const data = await response.json();
+      return (data.content || '周老师批注：翻了翻，没有找到相关记录。').trim();
+    } catch (err) {
+      console.error('[AIService] 修复笔记本网络错误:', err);
+      return '周老师批注：翻了翻，没有找到相关记录。';
     }
   }
 }

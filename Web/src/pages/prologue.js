@@ -162,11 +162,11 @@ export default class PrologueScene extends GameSceneBase {
       }
     });
 
-    this._notebook.onQuickThought(async (text) => {
+    this._notebook.onQuickThought(async (text, meta) => {
       if (this._activeGateId) {
         await this.engine.discussionManager.handleQuickThought(text);
       } else {
-        await this._askNotebook(text);
+        await this._askNotebook(text, meta);
       }
     });
 
@@ -644,18 +644,18 @@ export default class PrologueScene extends GameSceneBase {
    * @param {string} text
    * @private
    */
-  async _askNotebook(text) {
+  async _askNotebook(text, meta = {}) {
     if (!text?.trim()) return;
 
     this._notebook.showPlayerMessage(text);
     this._notebook.setLoading(true);
 
     try {
-      const reply = await this.engine.aiService.queryNotebook(text);
+      const reply = await this.engine.aiService.queryNotebook(text, {}, meta);
       this._notebook.showNPCMessage(reply);
     } catch (err) {
       console.error('[PrologueScene] 笔记本查询失败:', err);
-      this._notebook.showNPCMessage('（翻了翻，没有找到相关记录）');
+      this._notebook.showNPCMessage('周老师批注：翻了翻，没有找到相关记录。');
     } finally {
       this._notebook.setLoading(false);
     }

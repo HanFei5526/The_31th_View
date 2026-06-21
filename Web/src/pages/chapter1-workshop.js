@@ -79,29 +79,29 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
       }
     });
 
-    this.notebook.onQuickThought(async (text) => {
+    this.notebook.onQuickThought(async (text, meta) => {
       if (this._activeGateId) {
         await this.engine.discussionManager.handleQuickThought(text);
       } else {
-        await this._askNotebook(text);
+        await this._askNotebook(text, meta);
       }
     });
 
     this._startDialogue();
   }
 
-  async _askNotebook(text) {
+  async _askNotebook(text, meta = {}) {
     if (!text?.trim()) return;
 
     this.notebook.showPlayerMessage(text);
     this.notebook.setLoading(true);
 
     try {
-      const reply = await this.engine.aiService.queryNotebook(text);
+      const reply = await this.engine.aiService.queryNotebook(text, {}, meta);
       this.notebook.showNPCMessage(reply);
     } catch (err) {
       console.error('[Chapter1Workshop] 笔记本查询失败:', err);
-      this.notebook.showNPCMessage('（翻了翻，没有找到相关记录）');
+      this.notebook.showNPCMessage('周老师批注：翻了翻，没有找到相关记录。');
     } finally {
       this.notebook.setLoading(false);
     }

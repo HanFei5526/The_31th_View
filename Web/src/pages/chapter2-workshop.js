@@ -59,18 +59,24 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
       this.notebook.showPlayerMessage(text);
       this.notebook.setLoading(true);
       try {
-        const reply = await this.engine.aiService.queryNotebook(text);
+        const reply = await this.engine.aiService.queryNotebook(text, {
+          sceneState: 'chapter2-workshop',
+          chapterScene: 'chapter2-workshop',
+        });
         this.notebook.showNPCMessage(reply);
-      } catch { this.notebook.showNPCMessage('（笔记本暂时无法回应）'); }
+      } catch { this.notebook.showNPCMessage('周老师批注：翻了翻，没有找到相关记录。'); }
       this.notebook.setLoading(false);
     });
-    this.notebook.onQuickThought(async (text) => {
+    this.notebook.onQuickThought(async (text, meta) => {
       this.notebook.showPlayerMessage(text);
       this.notebook.setLoading(true);
       try {
-        const reply = await this.engine.aiService.queryNotebook(text);
+        const reply = await this.engine.aiService.queryNotebook(text, {
+          sceneState: 'chapter2-workshop',
+          chapterScene: 'chapter2-workshop',
+        }, meta);
         this.notebook.showNPCMessage(reply);
-      } catch { this.notebook.showNPCMessage('（笔记本暂时无法回应）'); }
+      } catch { this.notebook.showNPCMessage('周老师批注：翻了翻，没有找到相关记录。'); }
       this.notebook.setLoading(false);
     });
 
