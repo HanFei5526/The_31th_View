@@ -406,7 +406,7 @@ export default class PrologueScene extends GameSceneBase {
     // 显示沈念立绘（思考态），并向左偏移避免挡住古画
     this._narrationBar.setPortrait('/images/shennian_1.png');
     this._narrationBar.lockPortrait();
-    this._narrationBar._portraitContainer.classList.add('portrait-aside');
+
 
     // 进入扫描/探索阶段，锁定展开
     this._notebook.expand();
@@ -724,7 +724,7 @@ export default class PrologueScene extends GameSceneBase {
 
     // 解除立绘锁定，后续对话可正常切换立绘
     this._narrationBar.unlockPortrait();
-    this._narrationBar._portraitContainer.classList.remove('portrait-aside');
+
 
     const origin = { x: window.innerWidth / 2, y: window.innerHeight * 0.6 };
 

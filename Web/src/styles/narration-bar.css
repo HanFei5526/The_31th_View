@@ -89,10 +89,6 @@
   z-index: 99;
 }
 
-.narration-portrait-container.portrait-aside {
-  /* 古画查看阶段不改变位置 */
-}
-
 .narration-portrait-container.portrait-reach {
   left: 4%;
 }
