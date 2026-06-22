@@ -140,6 +140,9 @@ export default class MenuScene {
             ${CHAPTERS.map((ch, i) => {
               const unlocked = this._isChapterUnlocked(ch);
               const completed = progress[ch.unlockKey + '_completed'] || progress[ch.unlockKey + 'Complete'];
+              const parts = ch.subtitle.split(' · ');
+              const mainSubtitle = parts[0];
+              const detailSubtitle = parts[1] || '';
               return `
               <div class="chapter-item ${unlocked ? 'chapter-item--unlocked' : 'chapter-item--locked'}"
                    data-scene="${ch.scene}"
@@ -149,9 +152,9 @@ export default class MenuScene {
                   <div class="chapter-header">
                     <span class="chapter-name">${ch.name}</span>
                     <span class="chapter-sep">·</span>
-                    <span class="chapter-subtitle">${ch.subtitle}</span>
+                    <span class="chapter-subtitle">${mainSubtitle}</span>
                   </div>
-                  <p class="chapter-tagline">${ch.tagline}</p>
+                  ${detailSubtitle ? `<p class="chapter-desc">${detailSubtitle}</p>` : ''}
                 </div>
                 <div class="chapter-side">
                   <div class="chapter-marker">
@@ -1120,19 +1123,17 @@ export default class MenuScene {
       position: absolute;
       inset: 0;
       z-index: -1;
-      background-color: #d4bc9d; /* 温暖复古的牛皮纸/宣纸底色 */
+      background-color: rgba(244, 230, 208, 0.62);
       background-image: 
-        /* 细微的交叉纤维纹理，模拟纸张物理颗粒感 */
-        repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.04) 1px, rgba(100, 70, 40, 0.04) 2px),
-        repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.04) 1px, rgba(100, 70, 40, 0.04) 2px),
-        /* 四周泛黄氧化晕染 */
-        radial-gradient(circle at 50% 50%, transparent 40%, rgba(101, 60, 20, 0.25) 120%),
-        /* 局部陈旧水渍斑块 */
-        radial-gradient(circle at 15% 85%, rgba(120, 80, 40, 0.15) 0%, transparent 30%),
-        radial-gradient(circle at 85% 15%, rgba(120, 80, 40, 0.12) 0%, transparent 25%);
-      /* 不使用容易引发渲染 Bug 的 blend-mode 和 SVG base64 */
+        repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.01) 1px, rgba(100, 70, 40, 0.01) 2px),
+        repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.01) 1px, rgba(100, 70, 40, 0.01) 2px),
+        radial-gradient(circle at 50% 50%, transparent 60%, rgba(101, 60, 20, 0.015) 120%), /* 泛黄晕染再次调淡 */
+        radial-gradient(circle at 15% 85%, rgba(120, 80, 40, 0.005) 0%, transparent 20%),
+        radial-gradient(circle at 85% 15%, rgba(120, 80, 40, 0.003) 0%, transparent 20%);
       filter: url(#paper-tear);
-      box-shadow: inset 0 0 50px rgba(90, 50, 20, 0.15); /* 内阴影加深边缘厚重感 */
+      /* 外阴影做极微弱的羽化（不透明度降至0.015），几乎无重力感，彻底解决硬边问题 */
+      box-shadow: 0 10px 40px rgba(90, 55, 30, 0.015);
+      backdrop-filter: blur(8px);
     }
 
     @keyframes panelSlideUp {
@@ -1177,11 +1178,11 @@ export default class MenuScene {
     }
 
     .menu-title {
-      font-family: var(--font-serif);
-      font-size: clamp(2.05rem, 3.6vw, 2.75rem);
-      font-weight: 300;
-      color: rgba(55, 43, 29, 0.94);
-      letter-spacing: 0.15em;
+      font-family: 'Noto Serif SC', var(--font-serif); /* 使用传统端庄的思源宋体衬线字，骨架清奇，撇捺挺拔 */
+      font-size: clamp(2.25rem, 4.2vw, 3.0rem);
+      font-weight: 600; /* 加粗展现宋体字横细竖粗的雕版美感，参考图二字形 */
+      color: rgba(92, 59, 36, 0.94); /* 温暖端庄的深古铜褐色，完美贴合图二色调 */
+      letter-spacing: 0.12em;
       margin: 0 0 0.5rem;
       text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
     }
@@ -1211,44 +1212,32 @@ export default class MenuScene {
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 0 0.5rem;
-      border-radius: 1px 3px 2px 4px; /* Slightly irregular corners */
-      border: 1px solid rgba(139, 119, 79, 0.4);
-      border-left: 4px dashed rgba(139, 119, 79, 0.4); /* Torn edge illusion */
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px; /* 增加细微的圆角，更柔和 */
+      border: none; /* 去除一切边框与底部虚线，彻底解决小锯齿问题 */
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       cursor: pointer;
       overflow: hidden;
-      min-height: 54px; /* Very thin, horizontal slip */
-      /* Kraft Paper Texture & Coloring */
-      background-color: #dfcdba;
-      background-image: 
-        linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.05) 100%),
-        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
-      box-shadow:
-        inset 0 0 25px rgba(101, 77, 49, 0.2), /* Oxidized edges */
-        0 4px 6px rgba(44, 36, 22, 0.15),
-        2px 2px 0 rgba(101, 77, 49, 0.15); /* Faux thickness */
+      min-height: 60px;
+      background: rgba(255, 255, 255, 0.35); /* 略微提高对比度，让选项更清晰白净 */
     }
 
     .chapter-item:nth-child(odd) {
-      transform: rotate(-0.5deg);
+      transform: none;
     }
     
     .chapter-item:nth-child(even) {
-      transform: rotate(0.5deg);
+      transform: none;
     }
 
     .chapter-item--unlocked {
-      background-color: #e6d5c3;
+      background: rgba(255, 255, 255, 0.35);
     }
 
     .chapter-item--unlocked:hover {
-      background-color: #eee0d0;
-      box-shadow:
-        inset 0 0 15px rgba(101, 77, 49, 0.1),
-        0 10px 20px rgba(44, 36, 22, 0.25),
-        4px 4px 0 rgba(101, 77, 49, 0.1);
-      transform: translateY(-4px) rotate(0deg) scale(1.02);
+      background: rgba(255, 255, 255, 0.55);
+      box-shadow: none;
+      transform: translateX(4px);
       z-index: 2;
     }
 
@@ -1263,22 +1252,13 @@ export default class MenuScene {
       background-color: #c8baa9;
     }
 
-    /* 笺纸右侧红栏（暗示批注/批阅） */
+    /* 笺纸右侧红栏（隐藏，改为极简风格） */
     .chapter-item::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: rgba(179, 54, 38, 0.7); /* Deep cinnabar */
-      border-left: 1px solid rgba(101, 77, 49, 0.2);
-      transition: all 0.3s ease;
+      display: none;
     }
 
     .chapter-item--unlocked:hover::after {
-      width: 6px;
-      background: rgba(179, 54, 38, 0.9);
+      display: none;
     }
 
     /* 抖动动画（锁定点击） */
@@ -1312,41 +1292,50 @@ export default class MenuScene {
     }
 
     .chapter-num {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      width: auto;
+      height: auto;
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-handwrite);
-      font-size: 0.8rem;
-      color: rgba(63, 49, 31, 0.86);
-      background: rgba(255, 255, 255, 0.22);
-      border: 1px solid rgba(94, 76, 50, 0.16);
+      font-size: 1.1rem;
+      color: rgba(63, 49, 31, 0.75);
+      background: transparent;
+      border: none;
       letter-spacing: 0.05em;
     }
 
     .chapter-num--dim {
-      color: rgba(78, 62, 39, 0.36);
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(94, 76, 50, 0.08);
+      color: rgba(78, 62, 39, 0.3);
+      background: transparent;
+      border: none;
     }
 
-    /* 朱砂印章 */
+    /* 朱砂印章 — 使用低饱和朱红色，整体调淡，低调且精细 */
     .seal {
-      width: 38px;
-      height: 38px;
-      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      border-radius: 1px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--font-handwrite);
-      font-size: 0.7rem;
-      color: #9a3f31;
-      background: rgba(174, 65, 47, 0.1);
-      border: 1px solid rgba(174, 65, 47, 0.34);
-      letter-spacing: 0.1em;
+      font-family: var(--font-serif);
+      font-size: 0.68rem;
+      font-weight: normal;
+      color: rgba(179, 62, 45, 0.68); /* 使用饱和度不太高、更纯正的朱红色，配合 0.68 不透明度使其极度温和 */
+      background: transparent;
+      border: 1.2px solid rgba(179, 62, 45, 0.52); /* 采用极细实线框，还原戳记印文边缘的精细感 */
+      letter-spacing: 0.05em;
       transform: rotate(-3deg);
+      box-sizing: border-box;
+      opacity: 0.82;
+      transition: all 0.3s ease;
+    }
+    
+    .chapter-item--unlocked:hover .seal {
+      color: rgba(166, 58, 43, 0.75);
+      border-color: rgba(166, 58, 43, 0.65);
     }
 
     /* ===========================
@@ -1357,45 +1346,56 @@ export default class MenuScene {
       position: relative;
       z-index: 1;
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      padding: 0 0.5rem;
+      flex-direction: column; /* 改为纵向列排，使长副标题另起一行，形成错落感 */
+      justify-content: center;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 0.1rem 0.5rem;
     }
 
     .chapter-header {
       display: flex;
       flex-direction: row;
-      align-items: center;
-      gap: 0.5rem;
+      align-items: baseline; /* 以基准线对齐 */
+      gap: 0.4rem;
       width: auto;
     }
 
     .chapter-name {
       font-family: var(--font-serif);
-      font-size: 1rem;
-      font-weight: 600;
-      color: rgba(46, 35, 21, 0.96);
+      font-size: 0.98rem;
+      font-weight: 500; /* 调细字重，使其更具宋体钢笔字清秀感 */
+      color: rgba(46, 35, 21, 0.92);
       letter-spacing: 0.05em;
     }
 
     .chapter-sep {
       display: inline-block;
-      color: rgba(94, 76, 50, 0.4);
+      color: rgba(94, 76, 50, 0.3);
+      font-size: 0.9rem;
     }
 
     .chapter-subtitle {
-      font-family: var(--font-handwrite);
-      font-size: 0.85rem;
-      color: rgba(70, 55, 34, 0.74);
+      font-family: var(--font-serif); /* 统一为主标题行使用衬线体，清爽整洁 */
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: rgba(62, 48, 30, 0.85);
       letter-spacing: 0.05em;
     }
 
-    .chapter-tagline {
-      display: none; /* Hide tagline for compact slips */
+    /* 详细定位副标题 — 类似书籍旁注，采用草书手写体，淡雅错落 */
+    .chapter-desc {
+      font-family: var(--font-handwrite);
+      font-size: 0.78rem;
+      color: rgba(94, 76, 50, 0.62);
+      margin: 0;
+      letter-spacing: 0.05em;
+      text-align: left;
+      line-height: 1.2;
     }
 
-    .chapter-item--unlocked:hover .chapter-tagline {
-      color: rgba(50, 39, 24, 0.78);
+    .chapter-item--unlocked:hover .chapter-desc {
+      color: rgba(70, 55, 34, 0.8);
     }
 
     /* ===========================
