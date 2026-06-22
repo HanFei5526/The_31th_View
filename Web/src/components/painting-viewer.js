@@ -38,7 +38,7 @@ const TOOL_FEEDBACK = {
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
 const TOOL_FILTERS = {
-  magnifier:  { transform: 'translate(-36%, 24%) scale(1.65)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
+  magnifier:  { transform: 'translate(-42%, 28%) scale(1.65)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
   fiber:      { transform: 'scale(1)',                          filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
   sidelight:  { transform: 'translate(24%, -14%) scale(1.25)',   filter: 'brightness(0.70) contrast(1.65) sepia(0.35) saturate(0.8)' },
 };
@@ -316,6 +316,8 @@ export default class PaintingViewer {
         if (toolId === 'magnifier') {
           // 如果已解锁自由探索
           if (this._explorable) {
+            // 自由探索阶段：放大镜下彻底清空检测滤镜，使玩家能以最干净、纯真的原画色彩进行细节探寻
+            filter = '';
             // 只有当玩家确实放大了（_zoomLevel > 1.0）或者有平移时，才使用动态 transform
             if (this._zoomLevel > 1.0 || this._panX !== 0 || this._panY !== 0) {
               transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoomLevel})`;
