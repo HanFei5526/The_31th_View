@@ -112,9 +112,10 @@ export class NarrationBar {
       } else {
         this._barEl.className = 'narration-bar state-narration';
         this._speakerEl.style.display = 'none';
+        this.setPortrait(null); // 旁白状态下，自动隐藏立绘
       }
 
-      if ('portrait' in options) {
+      if ('portrait' in options && speaker !== null) {
         this.setPortrait(options.portrait);
       }
 

@@ -215,11 +215,11 @@ export default class Chapter1PaintScene {
         return;
       }
       this._isNarrating = true;
-      await this.narrationBar.playLine(null, '你走近敞厅，抬头看向门楣上的匾额。', { portrait: '/images/shennian_1.png' });
-      await this.narrationBar.playLine(null, '三个字——「兰雪堂」，落款是文徵明。字迹端正，墨色沉稳。', { portrait: '/images/shennian_1.png' });
-      await this.narrationBar.playLine(null, '你本想移开视线，但不知为什么，目光停住了。你又看了一眼。', { portrait: '/images/shennian_1.png' });
+      await this.narrationBar.playLine(null, '你走近敞厅，抬头看向门楣上的匾额。');
+      await this.narrationBar.playLine(null, '三个字——「兰雪堂」，落款是文徵明。字迹端正，墨色沉稳。');
+      await this.narrationBar.playLine(null, '你本想移开视线，但不知为什么，目光停住了。你又看了一眼。');
       await this.narrationBar.playLine('沈念', '「兰」字的草字头……下面好像多了一道横笔。很细，几乎要看不见。', { portrait: '/images/shennian_3.png' });
-      await this.narrationBar.playLine(null, '你凑近了一些。那一笔确实在那里——笔力很稳，墨色和主体一致，不像是无意的败笔。但它又不能单独解释成一个字。', { portrait: '/images/shennian_1.png' });
+      await this.narrationBar.playLine(null, '你凑近了一些。那一笔确实在那里——笔力很稳，墨色和主体一致，不像是无意的败笔。但它又不能单独解释成一个字。');
       await this.narrationBar.playLine('沈念', '奇怪。先记下来吧。', { portrait: '/images/shennian_2.png' });
 
       this.engine.gameProgress.plaqueNoted = true;
@@ -300,16 +300,16 @@ export default class Chapter1PaintScene {
       if (this._isNarrating) return;
       if (this.engine.gameProgress.zhuiyunExplored) {
         this._isNarrating = true;
-        await this.narrationBar.playLine(null, '你再次蹲低，看向峰石背后的缝隙。那一线光仍在那里，只有把视线压到足够低时才会出现。', { portrait: '/images/shennian_1.png' });
+        await this.narrationBar.playLine(null, '你再次蹲低，看向峰石背后的缝隙。那一线光仍在那里，只有把视线压到足够低时才会出现。');
         await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在「记录」页查看，也可到「对话」页继续梳理它和此前线索的关系。');
         this.narrationBar.dismiss();
         this._isNarrating = false;
         return;
       }
       this._isNarrating = true;
-      await this.narrationBar.playLine(null, '你绕到峰石背后，注意到底部有一处极窄的石缝。', { portrait: '/images/shennian_1.png' });
-      await this.narrationBar.playLine(null, '站着似乎看不到什么。你蹲下来，把视线压到石缝的高度。', { portrait: '/images/shennian_1.png' });
-      await this.narrationBar.playLine(null, '缝隙里忽然露出远处水面的一线光——站着的时候完全看不见的光。', { portrait: '/images/shennian_3.png' });
+      await this.narrationBar.playLine(null, '你绕到峰石背后，注意到底部有一处极窄的石缝。');
+      await this.narrationBar.playLine(null, '站着似乎看不到什么。你蹲下来，把视线压到石缝的高度。');
+      await this.narrationBar.playLine(null, '缝隙里忽然露出远处水面的一线光——站着的时候完全看不见的光。');
       await this.narrationBar.playLine('沈念', '奇怪……站着的时候明明什么都看不到。这个角度，好像藏着什么。', { portrait: '/images/shennian_3.png' });
 
       this.engine.gameProgress.zhuiyunExplored = true;
@@ -398,7 +398,7 @@ export default class Chapter1PaintScene {
 
           // 翻转完成后叙事
           this._isNarrating = true;
-          await this.narrationBar.playLine(null, '世界颠倒了一瞬，又重新安定。倒影变成了正像，断簪就在你面前，触手可及。', { portrait: '/images/shennian_3.png' });
+          await this.narrationBar.playLine(null, '世界颠倒了一瞬，又重新安定。倒影变成了正像，断簪就在你面前，触手可及。');
           this.narrationBar.dismiss();
           this._isNarrating = false;
 
@@ -482,8 +482,8 @@ export default class Chapter1PaintScene {
       if (!this._hairpinIdentified) {
         this._isNarrating = true;
         this._createRipple(45, 72, this._furongWrap);
-        await this.narrationBar.playLine(null, '你把目光压低，盯着水面里那件东西。涟漪轻轻散开，它的轮廓逐渐清晰。', { portrait: '/images/shennian_1.png' });
-        await this.narrationBar.playLine(null, '是一支簪子。簪头是半朵芙蓉的形状，断了，断口处已经发黑。它静静地挂在倒影的栏杆上。', { portrait: '/images/shennian_1.png' });
+        await this.narrationBar.playLine(null, '你把目光压低，盯着水面里那件东西。涟漪轻轻散开，它的轮廓逐渐清晰。');
+        await this.narrationBar.playLine(null, '是一支簪子。簪头是半朵芙蓉的形状，断了，断口处已经发黑。它静静地挂在倒影的栏杆上。');
         await this.narrationBar.playLine('沈念', '只在倒影里存在的东西……我怎么把它拿出来？', { portrait: '/images/shennian_2.png' });
         this.narrationBar.dismiss();
         this._isNarrating = false;
@@ -538,8 +538,8 @@ export default class Chapter1PaintScene {
       // 隐藏断簪
       this._hairpinReal.style.display = 'none';
 
-      await this.narrationBar.playLine(null, '你伸手，取下了那支断簪。银质已经发暗，簪头是半朵未开的芙蓉，做工细致。', { portrait: '/images/shennian_1.png' });
-      await this.narrationBar.playLine(null, '你下意识翻过来看簪身背面——一个极小的字，刻在不显眼的位置。', { portrait: '/images/shennian_1.png' });
+      await this.narrationBar.playLine(null, '你伸手，取下了那支断簪。银质已经发暗，簪头是半朵未开的芙蓉，做工细致。');
+      await this.narrationBar.playLine(null, '你下意识翻过来看簪身背面——一个极小的字，刻在不显眼的位置。');
       await this.narrationBar.playLine('沈念', '蘅。', { portrait: '/images/shennian_3.png' });
       await this.narrationBar.playLine('沈念', '刻在背面，这么小……不像题名，也不像工匠的标记。那是什么？', { portrait: '/images/shennian_2.png' });
 
@@ -672,10 +672,10 @@ export default class Chapter1PaintScene {
     if (this._exited) return;
     this._isNarrating = true;
 
-    await this.narrationBar.playLine(null, '你睁开眼。四周的一切都不对——不是工作室，不是扫描仪的冷光。自己站在一个陌生的地方。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你睁开眼。四周的一切都不对——不是工作室，不是扫描仪的冷光。自己站在一个陌生的地方。');
     await this.narrationBar.playLine('沈念', '这是哪里？', { portrait: '/images/shennian_3.png' });
-    await this.narrationBar.playLine(null, '低下头，脚下是青石板路，微微发暖。空气里有一种说不出的气味——不是花香，更像旧纸和松烟墨混在一起的味道。抬起头，两侧翠竹如墙，在没有风的空气中轻轻摇动。', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine(null, '顺着石径看过去。前方有一座敞厅，像是某种入口建筑。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '低下头，脚下是青石板路，微微发暖。空气里有一种说不出的气味——不是花香，更像旧纸和松烟墨混在一起的味道。抬起头，两侧翠竹如墙，在没有风的空气中轻轻摇动。');
+    await this.narrationBar.playLine(null, '顺着石径看过去。前方有一座敞厅，像是某种入口建筑。');
     await this.narrationBar.playLine('沈念', '等等……这个地方我见过。是拙政园东部的兰雪堂。但不对，它不是我在照片里看到的样子。它更旧，更轻——像是一笔还没有干透的线。', { portrait: '/images/shennian_3.png' });
     await this.narrationBar.playLine('沈念', '不会吧。我在画里？', { portrait: '/images/shennian_3.png' });
     this.narrationBar.dismiss();
@@ -760,7 +760,7 @@ export default class Chapter1PaintScene {
     this._lanxueEl.classList.remove('active');
     this._zhuiyunEl.style.zIndex = '';
 
-    await this.narrationBar.playLine(null, '沿着石径往前走。转过一个弯，一块巨石挡住了去路——不，不是挡住，是立在路旁，像某种标记。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '沿着石径往前走。转过一个弯，一块巨石挡住了去路——不，不是挡住，是立在路旁，像某种标记。');
     await this.narrationBar.playLine('沈念', '缀云峰。我认得这块湖石。但亲眼见到又不一样——石头上的纹路像是有人用极细的笔，一笔一笔勾出来的。', { portrait: '/images/shennian_3.png' });
     this.narrationBar.dismiss();
     this._isNarrating = false;
@@ -793,10 +793,10 @@ export default class Chapter1PaintScene {
     this._zhuiyunEl.classList.remove('active');
     this._furongEl.style.zIndex = '';
 
-    await this.narrationBar.playLine(null, '你循着水声走出石径。眼前豁然开朗——一座临水小榭安静地立在岸边，屋檐低垂，栏杆探入水面。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你循着水声走出石径。眼前豁然开朗——一座临水小榭安静地立在岸边，屋檐低垂，栏杆探入水面。');
     await this.narrationBar.playLine('沈念', '芙蓉榭。拙政园东部最靠近水面的地方。', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine(null, '你走到栏杆前，往下看。水面很静，倒影清晰得像另一个世界——每一根栏杆、每一片瓦都被原样映在水里。', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine(null, '但看了一会儿，你发现不对。倒影里的栏杆上，好像多了什么东西。', { portrait: '/images/shennian_2.png' });
+    await this.narrationBar.playLine(null, '你走到栏杆前，往下看。水面很静，倒影清晰得像另一个世界——每一根栏杆、每一片瓦都被原样映在水里。');
+    await this.narrationBar.playLine(null, '但看了一会儿，你发现不对。倒影里的栏杆上，好像多了什么东西。');
     await this.narrationBar.playLine('沈念', '上面什么都没有。可水里……水里的栏杆上挂着一件东西。', { portrait: '/images/shennian_3.png' });
     this.narrationBar.dismiss();
     this._isNarrating = false;
@@ -855,10 +855,10 @@ export default class Chapter1PaintScene {
       this.notebook.collapse();
       this.narrationBar.dismiss();
 
-      await this.narrationBar.playLine(null, '水面重新归于平静。你把断簪小心地收起来。', { portrait: '/images/shennian_1.png' });
+      await this.narrationBar.playLine(null, '水面重新归于平静。你把断簪小心地收起来。');
       await this.narrationBar.playLine('沈念', '蘅。按周老师的批注，这个字有女子名的意味。', { portrait: '/images/shennian_1.png' });
       await this.narrationBar.playLine('沈念', '它偏偏刻在簪身背面，又小得几乎要错过。像是刻字的人想留下一点痕迹，却仍把它收在不显眼处。', { portrait: '/images/shennian_2.png' });
-      await this.narrationBar.playLine(null, '你站在榭前，忽然觉得眼前的光线在变。周围的墨色好像在一点点褪去，像清水洗过宣纸。', { portrait: '/images/shennian_1.png' });
+      await this.narrationBar.playLine(null, '你站在榭前，忽然觉得眼前的光线在变。周围的墨色好像在一点点褪去，像清水洗过宣纸。');
       this.narrationBar.dismiss();
 
       await this._startFadeTransition();

@@ -32,20 +32,20 @@ const paintingImg = '/images/scan-painting.png';
  * speaker 为 null 表示旁白，否则显示说话人名。
  */
 const PROLOGUE_SCRIPT = [
-  { speaker: null, portrait: '/images/shennian_1.png', text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
-  { speaker: null, portrait: '/images/shennian_1.png', text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
-  { speaker: null, portrait: '/images/zhou_henian_2.png', text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
-  { speaker: null, portrait: '/images/shennian_1.png', text: '操作台旁边摞着几本旧笔记，封面上的字迹是周老师的，年份标注是九十年代。书脊磨得很旧。' },
+  { speaker: null, text: '工作室在美术学院旧楼的三层，窗外是梧桐树。你面前的操作台上，高精度扫描仪正在低声嗡鸣。' },
+  { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
+  { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
+  { speaker: null, text: '操作台旁边摞着几本旧笔记，封面上的字迹是周老师的，年份标注是九十年代。书脊磨得很旧。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '三十一景图你应该熟悉。本科课上讲过。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
-  { speaker: null, portrait: '/images/shennian_1.png', text: '太完整反而是异常——这个判断你在修复课上听过。五百年的册页没有任何修补痕迹，说明有人刻意处理过表面。' },
+  { speaker: null, text: '太完整反而是异常——这个判断你在修复课上听过。五百年的册页没有任何修补痕迹，说明有人刻意处理过表面。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '不是画面本身有问题。是有些东西被压在了下面。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '你自己看。' },
-  { speaker: null, portrait: '/images/zhou_henian_2.png', text: '他顿了一下，目光从屏幕上移开。' },
+  { speaker: null, text: '他顿了一下，目光从屏幕上移开。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
   { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '不用急着下结论。先把你观察到的东西记下来。' },
-  { speaker: null, portrait: '/images/shennian_1.png', text: '你坐到扫描仪前。屏幕上是第三十一景的高精度扫描件。' }
+  { speaker: null, text: '你坐到扫描仪前。屏幕上是第三十一景的高精度扫描件。' }
 ];
 
 /** 三处线索的完整定义 */
@@ -731,11 +731,11 @@ export default class PrologueScene extends GameSceneBase {
     // 记录状态变量
     this.engine.gameProgress.foundMarginTrace = true;
 
-    await this._narrationBar.playLine(null, '你的手指在交会处停了一下。', { portrait: '/images/shennian_1.png' });
+    await this._narrationBar.playLine(null, '你的手指在交会处停了一下。');
     await this._narrationBar.playLine('沈念', '「所见」……什么意思？', { portrait: '/images/shennian_3.png' });
-    await this._narrationBar.playLine(null, '屏幕上的墨迹好像动了一下。', { portrait: '/images/shennian_3.png' });
+    await this._narrationBar.playLine(null, '屏幕上的墨迹好像动了一下。');
     await this._narrationBar.playLine('沈念', '……是动了吗？不对，扫描件不会动。', { portrait: '/images/shennian_3.png' });
-    await this._narrationBar.playLine(null, '你下意识想把手移开，但画面已经变了。', { portrait: '/images/shennian_3.png' });
+    await this._narrationBar.playLine(null, '你下意识想把手移开，但画面已经变了。');
     this._narrationBar.dismiss();
 
     // 播放跌入转场

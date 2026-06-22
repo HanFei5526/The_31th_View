@@ -279,6 +279,12 @@ export default class FinaleScene {
         <button class="finale-location-label" data-loc="zhuiyunfeng" style="left:73%;top:25%">缀云峰</button>
         <button class="finale-location-label" data-loc="yuanyangguan" style="left:83%;top:55%">卅六鸳鸯馆</button>
       </div>
+      <div class="finale-canvas-container" id="finale-canvas-container" aria-hidden="true">
+        <div class="finale-canvas-layer finale-canvas-layer--1" id="canvas-layer-reflection"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--2" id="canvas-layer-bridge"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--3" id="canvas-layer-bamboo"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--4" id="canvas-layer-full"></div>
+      </div>
       <div class="finale-question-panel" id="finale-qpanel"></div>
     `;
     return el;
@@ -293,6 +299,7 @@ export default class FinaleScene {
       });
     }
     this.state = SCENE_STATES.FOUR_QUESTIONS;
+    this._resetQuestionView();
     this._switchSubscene(this._questionsEl);
     await this._delay(800);
     if (this._exited) return;
@@ -422,7 +429,7 @@ export default class FinaleScene {
 
         if (loc === 'furongxie') {
           labels.forEach(l => l.removeEventListener('click', handler));
-          this._enableLocationLabels(false);
+          labels.forEach(l => l.classList.remove('interactive'));
           e.currentTarget.classList.add('correct');
           this._isNarrating = true;
           await this._delay(600);
@@ -430,6 +437,7 @@ export default class FinaleScene {
           if (this._exited) { resolve(); return; }
           this._isNarrating = false;
           this._highlightSpot('xiaofeihong');
+          await this._showLowViewCanvas();
           resolve();
         } else {
           this._q2Errors++;
@@ -512,6 +520,7 @@ export default class FinaleScene {
       if (isCorrect) {
         this._isNarrating = true;
         panel.innerHTML = '';
+        this._revealCanvasLayers(['reflection', 'bridge', 'bamboo']);
         await this.narrationBar.playLine(null, '三处景物同时着色——倒影、弧线、竹影在画面中浮现，相互照应。第三十一景几乎完成了。');
         if (this._exited) return;
         this._isNarrating = false;
@@ -553,11 +562,12 @@ export default class FinaleScene {
 
     if (choice === 'B') {
       this._isNarrating = true;
+      this._completeCanvasReveal();
       await this.narrationBar.playLine(null, '最后一笔落下。');
       if (this._exited) return;
       this._isNarrating = false;
       this._highlightSpot('wuzhuyouju');
-      await this._delay(1200);
+      await this._delay(1800);
       await this._showPaintingComplete();
     } else {
       this._q4Errors++;
@@ -1002,6 +1012,48 @@ export default class FinaleScene {
       if (el !== targetEl) el.classList.remove('active');
     });
     targetEl.classList.add('active');
+  }
+
+  _resetQuestionView() {
+    this._questionsEl.classList.remove('low-view-active');
+    this._questionsEl.querySelector('.finale-location-labels')?.classList.remove('visible', 'fade-out');
+    this._questionsEl.querySelectorAll('.finale-location-label').forEach(label => {
+      label.classList.remove('interactive', 'correct', 'wrong', 'hint-pulse');
+    });
+    this._questionsEl.querySelectorAll('.finale-highlight-spot').forEach(spot => {
+      spot.classList.remove('lit');
+    });
+    this._questionsEl.querySelector('#finale-canvas-container')?.classList.remove('visible', 'full');
+    this._questionsEl.querySelectorAll('.finale-canvas-layer').forEach(layer => {
+      layer.classList.remove('revealed', 'full');
+    });
+  }
+
+  async _showLowViewCanvas() {
+    const labels = this._questionsEl.querySelector('.finale-location-labels');
+    const canvas = this._questionsEl.querySelector('#finale-canvas-container');
+
+    labels?.classList.add('fade-out');
+    this._questionsEl.classList.add('low-view-active');
+
+    await this._delay(500);
+    if (this._exited) return;
+
+    canvas?.classList.add('visible');
+    await this._delay(900);
+  }
+
+  _revealCanvasLayers(layerNames) {
+    layerNames.forEach(name => {
+      this._questionsEl.querySelector(`#canvas-layer-${name}`)?.classList.add('revealed');
+    });
+  }
+
+  _completeCanvasReveal() {
+    const canvas = this._questionsEl.querySelector('#finale-canvas-container');
+    const fullLayer = this._questionsEl.querySelector('#canvas-layer-full');
+    canvas?.classList.add('full');
+    fullLayer?.classList.add('revealed', 'full');
   }
 
   _ensureFinaleItems() {

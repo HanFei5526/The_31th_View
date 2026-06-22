@@ -149,10 +149,10 @@ export default class Chapter2PaintScene {
     if (this._exited) return;
 
     this._isNarrating = true;
-    await this.narrationBar.playLine(null, '穿过月洞门，视野骤然开阔。一片水面横在眼前，荷叶如盖，远处一座敞厅临水而立。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '穿过月洞门，视野骤然开阔。一片水面横在眼前，荷叶如盖，远处一座敞厅临水而立。');
     await this.narrationBar.playLine('沈念', '远香堂。拙政园的核心建筑。我在文献里读过无数次这个名字。', { portrait: '/images/shennian_2.png' });
-    await this.narrationBar.playLine(null, '你还没走近，就闻到一股异香。不是荷花香——是墨香，浓烈而新鲜，像有人刚刚在这里磨过墨。', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine(null, '走进敞厅，四壁空旷，只有左侧墙壁挂着数幅竖轴——是有题诗的画作，一首一幅，墨迹端正。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你还没走近，就闻到一股异香。不是荷花香——是墨香，浓烈而新鲜，像有人刚刚在这里磨过墨。');
+    await this.narrationBar.playLine(null, '走进敞厅，四壁空旷，只有左侧墙壁挂着数幅竖轴——是有题诗的画作，一首一幅，墨迹端正。');
     await this.narrationBar.playLine('沈念', '画案上有刚研过的墨迹……但周围空无一人。是谁刚才在这里？', { portrait: '/images/shennian_3.png' });
     this._isNarrating = false;
 
@@ -191,9 +191,9 @@ export default class Chapter2PaintScene {
     this._isNarrating = true;
     this._clearIdleTimer();
 
-    await this.narrationBar.playLine(null, '你走近左侧墙壁。竖轴上每一幅都是园中某处景致的小画，旁边配有一首题诗。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你走近左侧墙壁。竖轴上每一幅都是园中某处景致的小画，旁边配有一首题诗。');
     await this.narrationBar.playLine('沈念', '这些诗……我见过。文徵明为拙政园三十一景各写的题诗，存世版本一直在各种诗集里流传。', { portrait: '/images/shennian_2.png' });
-    await this.narrationBar.playLine(null, '你从袖中取出随身携带的参考抄本，展开来与墙上的题诗对照。乍一看并无不同——但你是做文物修复的人，逐字对比是基本功。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你从袖中取出随身携带的参考抄本，展开来与墙上的题诗对照。乍一看并无不同——但你是做文物修复的人，逐字对比是基本功。');
     await this.narrationBar.playLine('沈念', '等等。这里有一个字……和传世版本不一样。', { portrait: '/images/shennian_3.png' });
     await this.narrationBar.playLine(null, '诗词比对已开始。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开修复笔记本的「对话」页提问。');
     this.narrationBar.dismiss();
@@ -268,8 +268,8 @@ export default class Chapter2PaintScene {
     revealEl.classList.add('active');
     await this._delay(1200);
 
-    await this.narrationBar.playLine(null, '四个字悬在眼前，像是从墨迹中浮了出来。', { portrait: '/images/shennian_3.png' });
-    await this.narrationBar.playLine(null, '画。非。一。人。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine(null, '四个字悬在眼前，像是从墨迹中浮了出来。');
+    await this.narrationBar.playLine(null, '画。非。一。人。');
     await this.narrationBar.playLine('沈念', '画非一人……这套画，不是一个人画的？', { portrait: '/images/shennian_3.png' });
     await this.narrationBar.playLine('沈念', '四个字，分散在五首诗里。如果只看到一处，会以为是抄错。但四处合在一起……', { portrait: '/images/shennian_2.png' });
     await this.narrationBar.playLine('沈念', '断簪上的"蘅"……会是同一个人吗？留下名字，又在诗里藏了一句话？', { portrait: '/images/shennian_1.png' });
@@ -297,7 +297,7 @@ export default class Chapter2PaintScene {
     await this._delay(100);
     commentEl.classList.add('visible');
 
-    await this.narrationBar.playLine(null, '你的目光被墙角一片几乎脱落的纸片吸引。是一则旧批注，字迹比题诗小得多，墨色也更淡。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你的目光被墙角一片几乎脱落的纸片吸引。是一则旧批注，字迹比题诗小得多，墨色也更淡。');
     await this.narrationBar.playLine(null, '"此页视点卑近，似非成稿。画心尚佳，惟边旁杂线、残字、旧签皆碍全册体例，宜配边压覆……"');
     await this.narrationBar.playLine('沈念', '"视点卑近，似非成稿"——写批注的人觉得这幅画的视角太低，不像正式作品。', { portrait: '/images/shennian_2.png' });
     await this.narrationBar.playLine('沈念', '"宜配边压覆"……他要用装裱的边框把旁边那些杂线、残字、旧签盖住。', { portrait: '/images/shennian_2.png' });
@@ -346,9 +346,9 @@ export default class Chapter2PaintScene {
     }
 
     this._isNarrating = true;
-    await this.narrationBar.playLine(null, '你合上参考抄本，把它小心地收起来。四个字仍然浮在脑海里，像一个尚未回答的问题。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你合上参考抄本，把它小心地收起来。四个字仍然浮在脑海里，像一个尚未回答的问题。');
     await this.narrationBar.playLine('沈念', '画非一人。如果真是这样——另一个人是谁？是"蘅"吗？', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine(null, '你向厅外走去。远处那座红色廊桥在水面上投下弯曲的倒影，像一道没有写完的句子。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你向厅外走去。远处那座红色廊桥在水面上投下弯曲的倒影，像一道没有写完的句子。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -381,9 +381,9 @@ export default class Chapter2PaintScene {
     if (this._exited) return;
 
     this._isNarrating = true;
-    await this.narrationBar.playLine(null, '一座红色廊桥横跨水面。桥身不高，弯如虹弧，倒影与桥身合在一起，恰好画出一个完整的圆。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '一座红色廊桥横跨水面。桥身不高，弯如虹弧，倒影与桥身合在一起，恰好画出一个完整的圆。');
     await this.narrationBar.playLine('沈念', '小飞虹。我记得这个名字——"飞虹"不是说彩虹，是说桥身弯曲的弧度像一道飞起来的虹。', { portrait: '/images/shennian_2.png' });
-    await this.narrationBar.playLine(null, '你走到桥中央。四周很静，只有水面偶尔泛起的涟漪。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你走到桥中央。四周很静，只有水面偶尔泛起的涟漪。');
     this._isNarrating = false;
 
     await this.narrationBar.playLine(null, '小飞虹周围可以继续探索。笔记本「记录」页已有之前的发现，「对话」页可继续讨论。点击场景中的光点查看可交互的位置。');
@@ -411,8 +411,8 @@ export default class Chapter2PaintScene {
     this._isNarrating = true;
     this._clearIdleTimer();
 
-    await this.narrationBar.playLine(null, '你俯身看向桥下的水面。忽然，水中泛起一圈暗色涟漪——没有风，但水面在动，像是有什么从水底浮上来。', { portrait: '/images/shennian_3.png' });
-    await this.narrationBar.playLine(null, '涟漪扩散开去，在水面上留下痕迹。那些痕迹是墨迹。一个字，又一个字，从涟漪间隙中逐渐浮现。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine(null, '你俯身看向桥下的水面。忽然，水中泛起一圈暗色涟漪——没有风，但水面在动，像是有什么从水底浮上来。');
+    await this.narrationBar.playLine(null, '涟漪扩散开去，在水面上留下痕迹。那些痕迹是墨迹。一个字，又一个字，从涟漪间隙中逐渐浮现。');
 
     const rippleEl = document.createElement('div');
     rippleEl.className = 'ch2-water-text';
@@ -421,8 +421,8 @@ export default class Chapter2PaintScene {
     await this._delay(100);
     rippleEl.classList.add('visible');
 
-    await this.narrationBar.playLine(null, '「……知我者，唯有此园。」', { portrait: '/images/shennian_3.png' });
-    await this.narrationBar.playLine(null, '字迹停留了片刻，然后像墨滴溶入水中一样，缓缓消散了。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine(null, '「……知我者，唯有此园。」');
+    await this.narrationBar.playLine(null, '字迹停留了片刻，然后像墨滴溶入水中一样，缓缓消散了。');
 
     rippleEl.classList.add('dissolve');
     await this._delay(3000);
@@ -443,13 +443,13 @@ export default class Chapter2PaintScene {
     this._isNarrating = true;
     this._clearIdleTimer();
 
-    await this.narrationBar.playLine(null, '你注意到桥脚的石台边缘，有一个小小的暗色物件。被苔藓半遮着，不蹲下来几乎看不见。', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine(null, '蹲下身，你小心地把它取出来。是一方小砚——端砚，比掌心还小。砚池里残留着干涸的朱砂，暗红色，像很久以前的血迹。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine(null, '你注意到桥脚的石台边缘，有一个小小的暗色物件。被苔藓半遮着，不蹲下来几乎看不见。');
+    await this.narrationBar.playLine(null, '蹲下身，你小心地把它取出来。是一方小砚——端砚，比掌心还小。砚池里残留着干涸的朱砂，暗红色，像很久以前的血迹。');
 
     const overlay = this._showItemDisplay('/images/inkstone-front.png');
 
     await this.narrationBar.playLine('沈念', '朱砂……画底稿线、做标记用的。这方砚太小了，像是随身携带的私人工具。', { portrait: '/images/shennian_2.png' });
-    await this.narrationBar.playLine(null, '你翻过砚台，背面刻着一首小词，字迹纤细：', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你翻过砚台，背面刻着一首小词，字迹纤细：');
 
     await this._flipItemDisplay(overlay, '/images/inkstone-back.png');
 
@@ -480,9 +480,9 @@ export default class Chapter2PaintScene {
 
     if (this._inkstoneSpot) { this._inkstoneSpot.remove(); this._inkstoneSpot = null; }
 
-    await this.narrationBar.playLine(null, '你把残砚收起来。手指上沾了一点朱砂的粉末，暗红色的，像五百年前的温度还没有完全散尽。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine(null, '你把残砚收起来。手指上沾了一点朱砂的粉末，暗红色的，像五百年前的温度还没有完全散尽。');
     await this.narrationBar.playLine('沈念', '断簪上有她的名字。题诗里藏着"画非一人"。这方砚是私人的作画工具，砚背的词又带着深重的寄托……如果这些都指向同一个人，她可能也参与了这套画。', { portrait: '/images/shennian_2.png' });
-    await this.narrationBar.playLine(null, '你站起身。周围的光线忽然变得不对——色彩在一层一层剥落，像有人正在把这幅画从你脚下抽走。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine(null, '你站起身。周围的光线忽然变得不对——色彩在一层一层剥落，像有人正在把这幅画从你脚下抽走。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 

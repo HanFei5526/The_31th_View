@@ -232,59 +232,114 @@
 }
 
 /* --- 场景2 · 四问复原 (FOUR_QUESTIONS) --- */
-/* 复用 truth-space 背景，画面逐渐着色 */
 .finale-questions {
-  background-image: url('/images/finale-truth-space.png');
-  background-size: cover;
-  background-position: center;
   background-color: #f5f0e8;
   flex-direction: column;
 }
 
-/* 画布容器（居中，底层为俯瞰线图，答对后叠加着色层） */
-.finale-canvas-container {
-  position: relative;
-  width: 50vmin;
-  height: 50vmin;
-  max-width: 480px;
-  max-height: 480px;
-  margin: 0 auto;
-  border: 1px solid rgba(44, 36, 22, 0.1);
+.finale-questions::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   background-image: url('/images/finale-truth-space.png');
   background-size: cover;
   background-position: center;
-  overflow: hidden;
-  flex-shrink: 0;
+  opacity: 1;
+  filter: none;
+  transition: opacity 1.2s ease, filter 1.2s ease;
+  pointer-events: none;
 }
 
-/* 四问着色层：从线稿渐变为水墨着色（复用truth-space底图 + 暖色滤镜叠加模拟着色） */
+.finale-questions.low-view-active::before {
+  opacity: 0.12;
+  filter: blur(2px) sepia(0.15);
+}
+
+/* 画布容器：Q2后从俯瞰地图跌入第三十一景低视角线稿 */
+.finale-canvas-container {
+  position: absolute;
+  z-index: 2;
+  top: 44%;
+  left: 50%;
+  width: min(78vw, 118vh, 1120px);
+  max-width: calc(100vw - 3rem);
+  aspect-ratio: 1672 / 941;
+  transform: translate(-50%, -50%) scale(0.97);
+  opacity: 0;
+  pointer-events: none;
+  margin: 0 auto;
+  border: 1px solid rgba(69, 52, 32, 0.22);
+  background-color: #efe5cf;
+  background-image: url('/images/finale-view31-line.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow:
+    0 18px 45px rgba(34, 27, 17, 0.22),
+    inset 0 0 48px rgba(62, 46, 27, 0.12);
+  transition: opacity 1.4s ease, transform 1.4s ease;
+}
+
+.finale-canvas-container.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.finale-canvas-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 44%, transparent 55%, rgba(57, 42, 24, 0.11) 100%),
+    linear-gradient(to bottom, rgba(255, 252, 238, 0.14), rgba(99, 72, 37, 0.08));
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 四问着色层：与线稿同构图、同裁切、同尺寸叠加 */
 .finale-canvas-layer {
   position: absolute;
   inset: 0;
   background-image: url('/images/finale-view31-low.png');
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: 0;
-  filter: sepia(0.3) saturate(0.6);
-  transition: opacity 0.8s ease;
+  filter: saturate(0.86) contrast(0.98);
+  transition: opacity 1.1s ease, filter 1.1s ease, clip-path 1.4s ease;
   pointer-events: none;
 }
 
 .finale-canvas-layer.revealed {
-  opacity: 0.7;
+  opacity: 0.82;
 }
 
-.finale-canvas-layer--1 { clip-path: inset(0 50% 50% 0); }
-.finale-canvas-layer--2 { clip-path: inset(0 0 50% 50%); }
-.finale-canvas-layer--3 { clip-path: inset(50% 50% 0 0); }
-.finale-canvas-layer--4 { clip-path: inset(50% 0 0 50%); }
+.finale-canvas-layer--1 {
+  clip-path: polygon(5% 23%, 54% 22%, 58% 77%, 5% 78%);
+}
+
+.finale-canvas-layer--2 {
+  clip-path: polygon(37% 38%, 82% 34%, 84% 72%, 35% 76%);
+}
+
+.finale-canvas-layer--3 {
+  clip-path: polygon(64% 0, 100% 0, 100% 88%, 66% 88%);
+}
+
+.finale-canvas-layer--4 {
+  clip-path: inset(0);
+  z-index: 4;
+}
 
 /* 四问全部答对后：着色层合并为完整画面，2s动画过渡 */
 .finale-canvas-layer.full {
   clip-path: inset(0);
   opacity: 1;
-  filter: sepia(0.05) saturate(0.9);
-  transition: clip-path 1.2s ease, opacity 2s ease, filter 2s ease;
+  filter: saturate(0.92) contrast(1);
+  transition: clip-path 1.2s ease, opacity 1.6s ease, filter 1.6s ease;
 }
 
 /* 画布进度指示 */
@@ -316,6 +371,12 @@
   inset: 0;
   pointer-events: none;
   z-index: 1;
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+
+.finale-questions.low-view-active .finale-highlight-layer {
+  opacity: 0;
 }
 
 .finale-highlight-spot {
@@ -346,11 +407,16 @@
   pointer-events: none;
   z-index: 3;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease, filter 0.8s ease;
 }
 
 .finale-location-labels.visible {
   opacity: 1;
+}
+
+.finale-location-labels.fade-out {
+  opacity: 0;
+  filter: blur(4px);
 }
 
 .finale-location-label {
@@ -411,7 +477,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 2;
+  z-index: 4;
   padding: 2rem 3rem 2.5rem;
   background: linear-gradient(to top, rgba(245, 240, 232, 0.95) 50%, transparent);
   display: flex;
@@ -1081,8 +1147,9 @@
   }
 
   .finale-canvas-container {
-    width: 75vmin;
-    height: 75vmin;
+    top: 42%;
+    width: calc(100vw - 1.5rem);
+    max-width: 100%;
   }
 
   .finale-painting-full {
