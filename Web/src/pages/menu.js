@@ -18,7 +18,7 @@ const CHAPTERS = [
     scene: 'prologue',
     name: '序章',
     subtitle: '残页',
-    tagline: '一次例行的修复工作，发现被装裱压住的来源痕迹',
+    tagline: '画心完美，边缘却在讲另一件事。',
     unlockKey: 'prologue',
     alwaysUnlocked: true,
   },
@@ -27,7 +27,7 @@ const CHAPTERS = [
     scene: 'chapter1',
     name: '第一章',
     subtitle: '东园 · 兰雪堂至芙蓉榭',
-    tagline: '水面倒影里，第一次看见她留下的痕迹',
+    tagline: '虚处，有时比实处藏着更多。',
     unlockKey: 'chapter1',
     alwaysUnlocked: false,
   },
@@ -36,7 +36,7 @@ const CHAPTERS = [
     scene: 'chapter2',
     name: '第二章',
     subtitle: '中园 · 远香堂至小飞虹',
-    tagline: '题诗异文之间，浮现”画非一人”的疑问',
+    tagline: '读过的字，未必是最初写下的那个。',
     unlockKey: 'chapter2',
     alwaysUnlocked: false,
   },
@@ -45,7 +45,7 @@ const CHAPTERS = [
     scene: 'chapter3',
     name: '第三章',
     subtitle: '西园 · 卅六鸳鸯馆至留听阁',
-    tagline: '墙上草图指向一个低而偏的观看位置',
+    tagline: '不是消失了。是被封住了。',
     unlockKey: 'chapter3',
     alwaysUnlocked: false,
   },
@@ -54,7 +54,7 @@ const CHAPTERS = [
     scene: 'finale',
     name: '终章',
     subtitle: '第三十一景',
-    tagline: '不为她正名，只让她的所见重新被看见',
+    tagline: '还差最后一笔。怎么落，由你决定。',
     unlockKey: 'finale',
     alwaysUnlocked: false,
   },
@@ -142,7 +142,6 @@ export default class MenuScene {
               const completed = progress[ch.unlockKey + '_completed'] || progress[ch.unlockKey + 'Complete'];
               const parts = ch.subtitle.split(' · ');
               const mainSubtitle = parts[0];
-              const detailSubtitle = parts[1] || '';
               return `
               <div class="chapter-item ${unlocked ? 'chapter-item--unlocked' : 'chapter-item--locked'}"
                    data-scene="${ch.scene}"
@@ -154,7 +153,7 @@ export default class MenuScene {
                     <span class="chapter-sep">·</span>
                     <span class="chapter-subtitle">${mainSubtitle}</span>
                   </div>
-                  ${detailSubtitle ? `<p class="chapter-desc">${detailSubtitle}</p>` : ''}
+                  <p class="chapter-tagline">${ch.tagline}</p>
                 </div>
                 <div class="chapter-side">
                   <div class="chapter-marker">
@@ -1396,6 +1395,23 @@ export default class MenuScene {
 
     .chapter-item--unlocked:hover .chapter-desc {
       color: rgba(70, 55, 34, 0.8);
+    }
+
+    .chapter-tagline {
+      font-family: var(--font-serif);
+      font-size: 0.78rem;
+      color: rgba(83, 67, 45, 0.6);
+      letter-spacing: 0.03em;
+      margin: 0.3rem 0 0;
+      line-height: 1.4;
+    }
+
+    .chapter-item--unlocked:hover .chapter-tagline {
+      color: rgba(70, 55, 34, 0.85);
+    }
+
+    .chapter-item--locked .chapter-tagline {
+      opacity: 0.5;
     }
 
     /* ===========================
