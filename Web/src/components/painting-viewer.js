@@ -657,21 +657,41 @@ export default class PaintingViewer {
     if (this._convergenceShown) return;
     this._convergenceShown = true;
 
-    // 交会点坐标（三个线索的几何中心）
-    const cx = 50, cy = 56;
+    // 隐藏底部线索状态栏横条
+    if (this._statusEl) {
+      this._statusEl.style.display = 'none';
+    }
 
-    // ── 三个光点向中心飞去 ──
+    // 交会点坐标：改为“所见残字”光点位置，如果不存则兜底为 cx=6.5, cy=75.5
+    const targetClue = this._clues.clue_text || { x: 6.5, y: 75.5 };
+    const cx = targetClue.x;
+    const cy = targetClue.y;
+
+    // ── 三个光点向“所见残字”处飞去或在此处等待 ──
     const clueEntries = Object.values(this._clues);
     clueEntries.forEach((clue) => {
       const dot = document.createElement('div');
       dot.className = 'pv-convergence-dot';
       dot.style.left = `${clue.x}%`;
       dot.style.top = `${clue.y}%`;
+
+      const isTarget = (clue.x === cx && clue.y === cy);
+
       // 触发 reflow 后设置终点，让 CSS transition 驱动动画
       requestAnimationFrame(() => {
-        dot.style.left = `${cx}%`;
-        dot.style.top = `${cy}%`;
-        dot.style.opacity = '0';
+        if (isTarget) {
+          // “所见”残字光点不动，等其他两个飞过来汇聚
+          // 在其他光点到达前夕（1.1秒时）再淡出，以便无缝交接给汇聚脉冲点
+          setTimeout(() => {
+            dot.style.transition = 'opacity 0.4s ease-out';
+            dot.style.opacity = '0';
+          }, 1100);
+        } else {
+          // 其他两个光点，向所见残字飞过来，同时淡出
+          dot.style.left = `${cx}%`;
+          dot.style.top = `${cy}%`;
+          dot.style.opacity = '0';
+        }
       });
       this._markersLayer.appendChild(dot);
     });
@@ -697,7 +717,7 @@ export default class PaintingViewer {
       });
 
       this._markersLayer.appendChild(point);
-    }, 1500); // 等光点飞到中心后出现
+    }, 1500); // 等光点飞到“所见残字”后出现
   }
 
   // ══════════════════════════════════════════════

@@ -68,14 +68,15 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
+  width: 24px; /* 统一尺寸 */
+  height: 24px;
+  margin: -12px 0 0 -12px; /* 统一偏置 */
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 210, 96, 0.88) 0%, rgba(210, 168, 48, 0.55) 44%, transparent 72%);
+  background: radial-gradient(circle, rgba(255, 223, 112, 0.95) 0%, rgba(224, 181, 44, 0.6) 40%, rgba(212, 175, 55, 0.15) 70%, transparent 100%); /* 统一渐变 */
+  box-shadow: 0 0 10px rgba(224, 181, 44, 0.35); /* 统一阴影 */
   filter: blur(0.4px);
   pointer-events: none;
-  animation: ch3HotspotPulse 2.8s infinite ease-in-out;
+  animation: ch3HotspotPulse 2.4s infinite ease-in-out; /* 统一动画与频率 */
 }
 
 .ch3-hotspot:hover::after {
@@ -99,8 +100,8 @@
 }
 
 @keyframes ch3HotspotPulse {
-  0%, 100% { opacity: 0.55; transform: scale(0.88); }
-  50% { opacity: 0.92; transform: scale(1.06); }
+  0%, 100% { opacity: 0.65; transform: scale(0.9); box-shadow: 0 0 8px rgba(224, 181, 44, 0.25); }
+  50% { opacity: 1; transform: scale(1.08); box-shadow: 0 0 14px rgba(224, 181, 44, 0.5); }
 }
 
 /* --- 前进箭头/场景切换光点 --- */
@@ -121,14 +122,15 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
+  width: 28px; /* 导航点稍大一圈以示功能区别 */
+  height: 28px;
+  margin: -14px 0 0 -14px; /* 对齐偏置 */
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 218, 112, 0.92) 0%, rgba(220, 180, 48, 0.65) 44%, transparent 74%);
+  background: radial-gradient(circle, rgba(255, 223, 112, 0.95) 0%, rgba(224, 181, 44, 0.6) 40%, rgba(212, 175, 55, 0.15) 70%, transparent 100%); /* 统一渐变 */
+  box-shadow: 0 0 10px rgba(224, 181, 44, 0.35); /* 统一阴影 */
   filter: blur(0.3px);
   pointer-events: none;
-  animation: ch3NavPulse 2.6s infinite ease-in-out;
+  animation: ch3HotspotPulse 2.4s infinite ease-in-out; /* 统一动画与频率 */
 }
 
 .ch3-nav-arrow:hover::after {
@@ -143,11 +145,6 @@
 .ch3-nav-arrow:focus-visible::after {
   opacity: 1;
   transform: scale(1.15);
-}
-
-@keyframes ch3NavPulse {
-  0%, 100% { opacity: 0.6; transform: scale(0.88); }
-  50% { opacity: 1; transform: scale(1.08); }
 }
 
 /* --- 渗字效果（UI组件卡片） --- */

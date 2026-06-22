@@ -1221,14 +1221,15 @@ a {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
+  width: 24px; /* 统一尺寸 */
+  height: 24px;
+  margin: -12px 0 0 -12px; /* 统一偏置 */
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 223, 112, 0.92) 0%, rgba(229, 183, 52, 0.62) 42%, transparent 72%);
+  background: radial-gradient(circle, rgba(255, 223, 112, 0.95) 0%, rgba(224, 181, 44, 0.6) 40%, rgba(212, 175, 55, 0.15) 70%, transparent 100%); /* 统一渐变 */
+  box-shadow: 0 0 10px rgba(224, 181, 44, 0.35); /* 统一阴影 */
   filter: blur(0.3px);
   pointer-events: none;
-  animation: hotspotPulse 2.4s infinite ease-in-out;
+  animation: unifiedHotspotPulse 2.4s infinite ease-in-out; /* 统一动画与频率 */
 }
 
 .ch1-hotspot:hover::before {
@@ -1255,9 +1256,9 @@ a {
   transform: scale(1.15);
 }
 
-@keyframes hotspotPulse {
-  0%, 100% { opacity: 0.64; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.08); }
+@keyframes unifiedHotspotPulse {
+  0%, 100% { opacity: 0.65; transform: scale(0.9); box-shadow: 0 0 8px rgba(224, 181, 44, 0.25); }
+  50% { opacity: 1; transform: scale(1.08); box-shadow: 0 0 14px rgba(224, 181, 44, 0.5); }
 }
 
 /* 前进箭头 */
@@ -1278,14 +1279,15 @@ a {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
+  width: 28px; /* 导航点稍大一圈以示功能区别 */
+  height: 28px;
+  margin: -14px 0 0 -14px; /* 对齐偏置 */
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 231, 132, 0.96) 0%, rgba(236, 190, 52, 0.7) 42%, transparent 74%);
+  background: radial-gradient(circle, rgba(255, 223, 112, 0.95) 0%, rgba(224, 181, 44, 0.6) 40%, rgba(212, 175, 55, 0.15) 70%, transparent 100%); /* 统一渐变 */
+  box-shadow: 0 0 10px rgba(224, 181, 44, 0.35); /* 统一阴影 */
   filter: blur(0.3px);
   pointer-events: none;
-  animation: navHotspotPulse 2.4s infinite ease-in-out;
+  animation: unifiedHotspotPulse 2.4s infinite ease-in-out; /* 统一动画与频率 */
 }
 
 .nav-arrow-icon {
@@ -1308,11 +1310,6 @@ a {
 .ch1-nav-arrow:focus-visible::after {
   opacity: 1;
   transform: scale(1.15);
-}
-
-@keyframes navHotspotPulse {
-  0%, 100% { opacity: 0.68; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.08); }
 }
 
 /* 涟漪动画 */
@@ -1599,26 +1596,26 @@ a {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 28px;
-  height: 28px;
+  width: 24px; /* 统一尺寸 */
+  height: 24px;
   border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(255, 225, 80, 0.9) 10%, rgba(230, 180, 60, 0.7) 40%, rgba(210, 150, 40, 0.2) 65%, transparent 85%);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  animation: ch2HotspotPulse 2s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(255, 223, 112, 0.95) 0%, rgba(224, 181, 44, 0.6) 40%, rgba(212, 175, 55, 0.15) 70%, transparent 100%); /* 统一渐变 */
+  box-shadow: 0 0 10px rgba(224, 181, 44, 0.35); /* 统一阴影 */
+  animation: unifiedHotspotPulseCh2 2.4s infinite ease-in-out; /* 统一动画与频率 */
 }
 
 .ch2-hotspot-strong .ch2-hotspot-glow {
-  animation: ch2HotspotStrong 1.5s ease-in-out infinite;
+  animation: unifiedHotspotStrongCh2 1.8s infinite ease-in-out; /* 稍微加强闪烁 */
 }
 
-@keyframes ch2HotspotPulse {
-  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 18px rgba(255, 215, 0, 0.6); }
+@keyframes unifiedHotspotPulseCh2 {
+  0%, 100% { opacity: 0.65; transform: translate(-50%, -50%) scale(0.9); box-shadow: 0 0 8px rgba(224, 181, 44, 0.25); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); box-shadow: 0 0 14px rgba(224, 181, 44, 0.5); }
 }
 
-@keyframes ch2HotspotStrong {
-  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); box-shadow: 0 0 24px rgba(255, 215, 0, 0.8); }
+@keyframes unifiedHotspotStrongCh2 {
+  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 12px rgba(224, 181, 44, 0.4); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); box-shadow: 0 0 22px rgba(224, 181, 44, 0.75); }
 }
 
 /* "画非一人"揭示 */

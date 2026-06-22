@@ -769,7 +769,7 @@ body.fall-active .hud-bar {
 .fall-transition-line {
   font-family: var(--font-serif, 'Noto Serif SC', serif);
   font-size: 1.22rem;
-  color: rgba(62, 91, 101, 0.94);
+  color: #5c4f42; /* 画中世界旁白色 */
   letter-spacing: 0.12em;
   line-height: 1.8;
   text-align: center;
@@ -780,7 +780,7 @@ body.fall-active .hud-bar {
 }
 
 .fall-transition-line.visible {
-  opacity: 1;
+  opacity: 0.8; /* 限制旁白最大可见不透明度为 0.8，拉开虚实差距 */
   filter: blur(0);
   transform: translateY(0);
 }
@@ -795,8 +795,13 @@ body.fall-active .hud-bar {
   font-family: var(--font-handwrite, 'LXGW WenKai', serif);
   font-size: 1.22rem;
   font-style: normal;
-  color: rgba(62, 52, 38, 0.88) !important;
+  color: #2b231d !important; /* 画中世界角色正文色 */
   letter-spacing: 0.14em;
+}
+
+/* 确保内心独白可见时是不透明度 0.95 */
+.fall-transition-line.inner-voice.visible {
+  opacity: 0.95;
 }
 
 /* Phase 4: Zhou Henian echo & narration lines (场景6 · 墨迹扩散转场) */
@@ -825,7 +830,7 @@ body.fall-active .hud-bar {
 .fall-transition-echo-line--zhou {
   font-family: var(--font-handwrite, 'LXGW WenKai', serif);
   font-size: 1.22rem;
-  color: rgba(62, 52, 38, 0.88) !important;
+  color: #2b231d !important; /* 画中世界角色正文色 */
   letter-spacing: 0.14em;
   margin: 0.9rem 0 0.9rem 0; /* 调密上下间距，避免过大的物理空洞 */
   transition-duration: 2.0s;
@@ -838,7 +843,7 @@ body.fall-active .hud-bar {
 .fall-transition-echo-line--narration {
   font-family: var(--font-serif, 'Noto Serif SC', serif);
   font-size: 1.16rem;
-  color: rgba(62, 91, 101, 0.68) !important;
+  color: #5c4f42 !important; /* 画中世界旁白色 */
   letter-spacing: 0.1em;
 }
 
