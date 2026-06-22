@@ -11,8 +11,8 @@
   bottom: 5.5rem;
   width: 360px;
   max-width: calc(100vw - 24px);
-  background: rgba(28, 26, 24, 0.95);
-  border: 1px solid rgba(212, 168, 83, 0.2);
+  background: rgba(28, 25, 23, 0.95); /* 对齐 NarrationBar 背景色 */
+  border: 1px solid rgba(212, 168, 83, 0.3); /* 对齐 NarrationBar 边框色及不透明度 */
   border-radius: 12px;
   z-index: 200;
   transform: translateX(calc(100% + 2.5rem));
@@ -34,7 +34,7 @@
 
 /* 综合研讨态 */
 .notebook-floating.synthesis-mode {
-  border: 1px solid rgba(212, 168, 83, 0.2);
+  border: 1px solid rgba(212, 168, 83, 0.3); /* 对齐不透明度 0.3 */
   border-left: 3px solid rgba(212, 168, 83, 0.6);
 }
 
