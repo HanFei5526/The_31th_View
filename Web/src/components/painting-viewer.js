@@ -16,7 +16,7 @@
 // ── 线索定义 ──────────────────────────────────────────
 const CLUE_DEFS = {
   clue_margin: { x: 92.5, y: 6.0,  r: 8,  title: '装裱接缝残角' },
-  clue_text:   { x: 8.0,  y: 63.0, r: 8,  title: '"……所见"残字' },
+  clue_text:   { x: 5.0,  y: 73.0, r: 8,  title: '"……所见"残字' },
   clue_line:   { x: 55.0, y: 70.0, r: 10, title: '底层细线' },
 };
 
@@ -40,7 +40,7 @@ const TOOL_FEEDBACK = {
 const TOOL_FILTERS = {
   magnifier:  { transform: 'translate(-42.5%, 44%) scale(1.65)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
   fiber:      { transform: 'scale(1)',                            filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
-  sidelight:  { transform: 'translate(42%, -13%) scale(1.25)',     filter: 'brightness(0.70) contrast(1.65) sepia(0.35) saturate(0.8)' },
+  sidelight:  { transform: 'translate(45%, -23%) scale(1.25)',     filter: 'brightness(0.70) contrast(1.65) sepia(0.35) saturate(0.8)' },
 };
 
 
