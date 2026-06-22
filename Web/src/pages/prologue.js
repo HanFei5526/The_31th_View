@@ -22,8 +22,8 @@ import { NotebookFloating } from '../components/notebook-floating.js';
 import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 
-const prologueBg = '/images/prologue-workshop.png';
-const paintingImg = '/images/scan-painting.png';
+const prologueBg = '/images/prologue/prologue-workshop.png';
+const paintingImg = '/images/prologue/scan-painting.png';
 
 /* ==================== 叙事文本 ==================== */
 
@@ -36,15 +36,15 @@ const PROLOGUE_SCRIPT = [
   { speaker: null, text: '屏幕上，一页泛黄的册页被放大到纤维可辨的程度。这是《拙政园三十一景图》体系中编号为第三十一景的一页数字化扫描件。' },
   { speaker: null, text: '导师周鹤年站在你身后，双手背在身后，什么都没说。但你注意到他的目光，一直没有离开过这页画。' },
   { speaker: null, text: '操作台旁边摞着几本旧笔记，封面上的字迹是周老师的，年份标注是九十年代。书脊磨得很旧。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '三十一景图你应该熟悉。本科课上讲过。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '三十一景图你应该熟悉。本科课上讲过。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '这套册页一直保存得不错，三十一页都在，学界也没人觉得内容上有什么缺漏。数据库里，这一页就是正常的最后一景。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '但这次高精度扫描出来，边缘和装裱层底下有几个地方不太对。表面看着没问题，放大到纤维层才发现的。' },
   { speaker: null, text: '太完整反而是异常——这个判断你在修复课上听过。五百年的册页没有任何修补痕迹，说明有人刻意处理过表面。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '不是画面本身有问题。是有些东西被压在了下面。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '你自己看。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '不是画面本身有问题。是有些东西被压在了下面。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '你自己看。' },
   { speaker: null, text: '他顿了一下，目光从屏幕上移开。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
-  { speaker: '周鹤年', portrait: '/images/zhou_henian_2.png', text: '不用急着下结论。先把你观察到的东西记下来。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '明天中午之前，我们要提交初版修复报告。如果没有足够证据，这一页会按"无异常"归档。' },
+  { speaker: '周鹤年', portrait: '/images/common/zhou_henian_2.png', text: '不用急着下结论。先把你观察到的东西记下来。' },
   { speaker: null, text: '你坐到扫描仪前。屏幕上是第三十一景的高精度扫描件。' }
 ];
 
@@ -404,7 +404,7 @@ export default class PrologueScene extends GameSceneBase {
     this._phase = PHASE.PAINTING;
 
     // 显示沈念立绘（思考态），并向左偏移避免挡住古画
-    this._narrationBar.setPortrait('/images/shennian_1.png');
+    this._narrationBar.setPortrait('/images/common/shennian_1.png');
     this._narrationBar.lockPortrait();
 
 
@@ -732,9 +732,9 @@ export default class PrologueScene extends GameSceneBase {
     this.engine.gameProgress.foundMarginTrace = true;
 
     await this._narrationBar.playLine(null, '你的手指在交会处停了一下。');
-    await this._narrationBar.playLine('沈念', '「所见」……什么意思？', { portrait: '/images/shennian_3.png' });
+    await this._narrationBar.playLine('沈念', '「所见」……什么意思？', { portrait: '/images/common/shennian_3.png' });
     await this._narrationBar.playLine(null, '屏幕上的墨迹好像动了一下。');
-    await this._narrationBar.playLine('沈念', '……是动了吗？不对，扫描件不会动。', { portrait: '/images/shennian_3.png' });
+    await this._narrationBar.playLine('沈念', '……是动了吗？不对，扫描件不会动。', { portrait: '/images/common/shennian_3.png' });
     await this._narrationBar.playLine(null, '你下意识想把手移开，但画面已经变了。');
     this._narrationBar.dismiss();
 
@@ -830,7 +830,7 @@ export default class PrologueScene extends GameSceneBase {
           line.style.transform = 'translateY(0)';
         });
 
-        await this._preloadImage('/images/chapter1-lanxuetang.png');
+        await this._preloadImage('/images/chapter1/chapter1-lanxuetang.png');
         await onReveal?.();
 
         overlay.style.transition = fast ? 'opacity 0.4s ease' : 'opacity 1s ease';

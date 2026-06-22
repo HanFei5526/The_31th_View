@@ -376,7 +376,7 @@
   left: 0;
   width: 130%;
   z-index: -1;
-  background-image: url('/images/过渡页0.png');
+  background-image: url('/images/prologue/过渡页0.png');
   background-size: cover;
   background-position: left center;
   opacity: 0.65;
@@ -398,7 +398,7 @@
   left: 0;
   width: 130%;
   z-index: -1;
-  background-image: url('/images/transition-chapter1.png');
+  background-image: url('/images/chapter1/transition-chapter1.png');
   background-size: cover;
   background-position: left center;
   opacity: 0.65;
@@ -420,7 +420,7 @@
   left: 0;
   width: 130%;
   z-index: -1;
-  background-image: url('/images/transition-chapter2.png');
+  background-image: url('/images/chapter2/transition-chapter2.png');
   background-size: cover;
   background-position: left center;
   opacity: 0.65;
@@ -550,7 +550,7 @@
   inset: -4% 0;
   width: 130%;
   z-index: 0;
-  background-image: url('/images/chapter3-transition-bg.png');
+  background-image: url('/images/chapter3/chapter3-transition-bg.png');
   background-size: cover;
   background-position: center;
   opacity: 0.85;
@@ -587,7 +587,7 @@
   inset: -4% 0;
   width: 130%;
   z-index: 0;
-  background-image: url('/images/过渡页0.png');
+  background-image: url('/images/prologue/过渡页0.png');
   background-size: cover;
   background-position: center;
   opacity: 0;

@@ -37,11 +37,11 @@ export default class Chapter3PaintScene {
     this.state = SCENE_STATES.YUANYANG_SOUTH;
 
     // 背景图
-    this._bgSouth = '/images/chapter3-yuanyang-south.png';
-    this._bgNorth = '/images/chapter3-yuanyang-north.png';
-    this._bgLiuting = '/images/chapter3-liutingge.png';
-    this._bgSketchRevealed = '/images/chapter3-sketch-revealed.png';
-    this._bgPlaque = '/images/chapter1-lanxuetang-plaque.png';
+    this._bgSouth = '/images/chapter3/chapter3-yuanyang-south.png';
+    this._bgNorth = '/images/chapter3/chapter3-yuanyang-north.png';
+    this._bgLiuting = '/images/chapter3/chapter3-liutingge.png';
+    this._bgSketchRevealed = '/images/chapter3/chapter3-sketch-revealed.png';
+    this._bgPlaque = '/images/chapter1/chapter1-lanxuetang-plaque.png';
 
     // 存档状态
     const p = this.engine.gameProgress;
@@ -305,8 +305,8 @@ export default class Chapter3PaintScene {
     this._isNarrating = true;
     await this.narrationBar.playLine(null, '你顺着声音走。研墨声和翻纸声从前方传来，忽近忽远，像有人在某间屋子里反复忙碌。');
     await this.narrationBar.playLine(null, '推开一扇门，声音停了。你站在一间宽敞的厅堂里。四壁挂着字画，桌椅端正——一切都很齐整，像被人刻意维护过。');
-    await this.narrationBar.playLine('沈念', '鸳鸯馆。南厅。看起来和其他地方没什么不同……但刚才的声音是从哪里来的？', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine('沈念', '隔扇后面——北厅那边，好像还有动静。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '鸳鸯馆。南厅。看起来和其他地方没什么不同……但刚才的声音是从哪里来的？', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '隔扇后面——北厅那边，好像还有动静。', { portrait: '/images/common/shennian_1.png' });
     this.narrationBar.dismiss();
 
     // 探索态
@@ -348,8 +348,8 @@ export default class Chapter3PaintScene {
     await this.narrationBar.playLine(null, '北厅和南厅完全是两个世界。');
     await this.narrationBar.playLine(null, '地上散落着画纸——到处都是。有的画了一半被撕碎，有的被水浸透皱在角落，有的只落了一笔就被揉成一团。');
     await this.narrationBar.playLine(null, '你蹲下来捡起一张。画的是拙政园，能认出远香堂的轮廓。但比例不对——水面画得太重，桥线弯得太急，亭阁被压得很低，像是从一个不寻常的角度去看的。');
-    await this.narrationBar.playLine('沈念', '这不是文徵明的画。笔力太弱，线条太犹豫。', { portrait: '/images/shennian_1.png' });
-    await this.narrationBar.playLine('沈念', '断簪上的"蘅"，题诗里藏着的"画非一人"……如果那些痕迹指向的人确实参与过这套画——她画出来的，就是这样的东西？', { portrait: '/images/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '这不是文徵明的画。笔力太弱，线条太犹豫。', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '断簪上的"蘅"，题诗里藏着的"画非一人"……如果那些痕迹指向的人确实参与过这套画——她画出来的，就是这样的东西？', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.seenScatteredSketches = true;
@@ -386,7 +386,7 @@ export default class Chapter3PaintScene {
     await this._delay(600);
     await this.narrationBar.playLine(null, '三个字没有问号。像不敢用太大的力气去问。');
     await this._dismissSeepPanel(seep2);
-    await this.narrationBar.playLine('沈念', '……谁在问？是问我吗？', { portrait: '/images/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '……谁在问？是问我吗？', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('系统提示', '留听阁的方向传来微弱的声响。');
 
     this.engine.gameProgress.seenBleedingText = true;
@@ -430,7 +430,7 @@ export default class Chapter3PaintScene {
     await this.narrationBar.playLine(null, '你循着声响走出北厅。穿过一段短廊，又推开一扇半掩的门。');
     await this.narrationBar.playLine(null, '屋里很暗。窗格透进来的光只够照亮地面的一小片。但你一眼就看见了——对面那面墙，和四周不一样。');
     await this.narrationBar.playLine(null, '它的颜色比旁边深了一层，灰泥表面也不平整，像是比其余三面墙多涂了一道。');
-    await this.narrationBar.playLine('沈念', '这面墙……被重新抹过？为什么只有这一面？', { portrait: '/images/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '这面墙……被重新抹过？为什么只有这一面？', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -458,8 +458,8 @@ export default class Chapter3PaintScene {
       // 首次点击：观察
       this._isNarrating = true;
       await this.narrationBar.playLine(null, '你走近，伸手按了按墙面。灰泥微微粉化，指尖摸到了凹凸——不是粗糙，是线。一条弧线，从左上方向右下方弯过去，然后断了。');
-      await this.narrationBar.playLine('沈念', '有方向，有弧度……不像随手划的。灰泥底下有东西。有人把什么封在了里面。', { portrait: '/images/shennian_1.png' });
-      await this.narrationBar.playLine('沈念', '只摸到一条线不够。我得再仔细感受一下这面墙。', { portrait: '/images/shennian_1.png' });
+      await this.narrationBar.playLine('沈念', '有方向，有弧度……不像随手划的。灰泥底下有东西。有人把什么封在了里面。', { portrait: '/images/common/shennian_1.png' });
+      await this.narrationBar.playLine('沈念', '只摸到一条线不够。我得再仔细感受一下这面墙。', { portrait: '/images/common/shennian_1.png' });
       this.notebook.addClueRecord('[线索] 封墙下的隐藏线条 — 灰泥表面下有弧线刻痕，非随手划痕，疑似被封住的图案');
       await this.narrationBar.playLine('系统提示', '已记录线索：封墙下的隐藏线条。再次点击封墙，继续探查墙面下的痕迹。');
       this.narrationBar.dismiss();
@@ -578,7 +578,7 @@ export default class Chapter3PaintScene {
 
     await this.narrationBar.playLine(null, '灰泥一片片落下。墙面露出一幅画——不，与其说是画，不如说是草图。');
     await this.narrationBar.playLine(null, '它很拙。远香堂画得太低，小飞虹弯得太急，竹影几乎压到画面边缘。线条有几处犹豫的地方，像画的人反复擦掉，又重新落笔。');
-    await this.narrationBar.playLine('沈念', '这笔触……和北厅地上那些散落的草图太像了。同样的犹豫，同样的比例失调。但这一张没有被撕碎，没有被放弃——它被留在了墙上。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '这笔触……和北厅地上那些散落的草图太像了。同样的犹豫，同样的比例失调。但这一张没有被撕碎，没有被放弃——它被留在了墙上。', { portrait: '/images/common/shennian_1.png' });
 
     this.engine.gameProgress.sketchRevealed = true;
 
@@ -607,7 +607,7 @@ export default class Chapter3PaintScene {
     await this.narrationBar.playLine(null, '你后退两步，蹲下来。视线降到墙上标出的那条低位线的高度。');
     await this.narrationBar.playLine(null, '忽然，所有"不对"都对了。');
     await this.narrationBar.playLine(null, '你想起刚才捡起的那张画——水面太重，桥线太弯，亭阁压得太低。那张画和眼前这幅草图的视角几乎一样。从这个高度看过去，远香堂的倒影、小飞虹的弧线、梧竹幽居的竹影，真的会同时出现在一个画面里。');
-    await this.narrationBar.playLine('沈念', '她画得不好。但她看得很准。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '她画得不好。但她看得很准。', { portrait: '/images/common/shennian_3.png' });
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.understoodNotPainter = true;
@@ -625,7 +625,7 @@ export default class Chapter3PaintScene {
     this.narrationBar.dismiss();
 
     // 获取草图拓片
-    await this.narrationBar.playLine('沈念', '我应该把这张草图记录下来。做一份拓片。', { portrait: '/images/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '我应该把这张草图记录下来。做一份拓片。', { portrait: '/images/common/shennian_1.png' });
     await this._dismissSeepPanel(seepInscription);
     this.engine.collectItem({
       id: 'rubbing',
@@ -670,7 +670,7 @@ export default class Chapter3PaintScene {
     await this._showLetterOverlay();
     if (this._sketchOverlay) this._sketchOverlay.classList.add('visible');
 
-    await this.narrationBar.playLine('沈念', '"不必有名，不必有形。只要有痕迹。"', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '"不必有名，不必有形。只要有痕迹。"', { portrait: '/images/common/shennian_3.png' });
 
     this.engine.collectItem({
       id: 'letter',
@@ -780,7 +780,7 @@ export default class Chapter3PaintScene {
     this.state = SCENE_STATES.PLAQUE_RECALL;
     this._isNarrating = true;
 
-    await this.narrationBar.playLine('沈念', '等等。匾额上那一笔——', { portrait: '/images/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '等等。匾额上那一笔——', { portrait: '/images/common/shennian_2.png' });
 
     // 草图淡出
     if (this._sketchOverlay) {
@@ -800,9 +800,9 @@ export default class Chapter3PaintScene {
 
     await this._delay(800);
 
-    await this.narrationBar.playLine('沈念', '墙上的题字，断簪背面的「蘅」，还有匾额上那道多余的笔画。现在我几乎可以确定：它们出自同一只手，同一种心思。', { portrait: '/images/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '她不是要署名，也不是要我破解什么。只是在一块连她名字都放不下的匾额上，悄悄留了一道「我也在这里看过」。', { portrait: '/images/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '它从来不是一个待解的字。它是一个人留给五百年后的记号。', { portrait: '/images/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '墙上的题字，断簪背面的「蘅」，还有匾额上那道多余的笔画。现在我几乎可以确定：它们出自同一只手，同一种心思。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '她不是要署名，也不是要我破解什么。只是在一块连她名字都放不下的匾额上，悄悄留了一道「我也在这里看过」。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '它从来不是一个待解的字。它是一个人留给五百年后的记号。', { portrait: '/images/common/shennian_3.png' });
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.plaqueRecognized = true;

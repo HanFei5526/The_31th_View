@@ -1,4 +1,4 @@
-const bgImage = '/images/landing_bg.png';
+const bgImage = '/images/common/landing_bg.png';
 
 /**
  * 《卅一景》 — 着陆页 / Landing Page

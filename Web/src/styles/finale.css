@@ -30,7 +30,7 @@
 /* --- 场景1 · 真相空间 (TRUTH_SPACE) --- */
 /* 宣纸白底 + 纸纹肌理，无天空无地面 */
 .finale-truth-space {
-  background-image: url('/images/finale-truth-space.png');
+  background-image: url('/images/finale/finale-truth-space.png');
   background-size: cover;
   background-position: center;
   background-color: #f5f0e8;
@@ -242,7 +242,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url('/images/finale-truth-space.png');
+  background-image: url('/images/finale/finale-truth-space.png');
   background-size: cover;
   background-position: center;
   opacity: 1;
@@ -271,7 +271,7 @@
   margin: 0 auto;
   border: 1px solid rgba(69, 52, 32, 0.22);
   background-color: #efe5cf;
-  background-image: url('/images/finale-view31-line.png');
+  background-image: url('/images/finale/finale-view31-line.png');
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -303,7 +303,7 @@
 .finale-canvas-layer {
   position: absolute;
   inset: 0;
-  background-image: url('/images/finale-view31-low.png');
+  background-image: url('/images/finale/finale-view31-low.png');
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -646,7 +646,7 @@
 
 /* --- 场景3 · 第三十一景完成 + 回声 (PAINTING_COMPLETE / ECHO) --- */
 .finale-painting-complete {
-  background-image: url('/images/finale-painting-complete.png');
+  background-image: url('/images/finale/finale-painting-complete.png');
   background-size: cover;
   background-position: center;
   background-color: #1a1714;
@@ -730,7 +730,7 @@
 .finale-endings-backdrop {
   position: absolute;
   inset: 0;
-  background-image: url('/images/finale-painting-complete.png');
+  background-image: url('/images/finale/finale-painting-complete.png');
   background-size: cover;
   background-position: center;
   opacity: 0.35;

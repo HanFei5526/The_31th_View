@@ -21,8 +21,8 @@ const CHECKPOINTS = {
 };
 
 const PORTRAITS = {
-  zhou: '/images/zhou_henian_1.png',
-  shennian: '/images/shennian_1.png',
+  zhou: '/images/common/zhou_henian_1.png',
+  shennian: '/images/common/shennian_1.png',
 };
 
 export default class FinaleScene {
@@ -816,7 +816,7 @@ export default class FinaleScene {
 
   async _playEndingArchive() {
     const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-    bg.style.backgroundImage = `url('/images/prologue-workshop.png')`;
+    bg.style.backgroundImage = `url('/images/prologue/prologue-workshop.png')`;
     await this._delay(400);
     bg.classList.add('visible');
 
@@ -836,7 +836,7 @@ export default class FinaleScene {
 
   async _playEndingSecret() {
     const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-    bg.style.backgroundImage = `url('/images/prologue-workshop.png')`;
+    bg.style.backgroundImage = `url('/images/prologue/prologue-workshop.png')`;
     await this._delay(400);
     bg.classList.add('visible');
 
@@ -860,7 +860,7 @@ export default class FinaleScene {
 
   async _playEndingContinue() {
     const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-    bg.style.backgroundImage = `url('/images/finale-ending3-garden.png')`;
+    bg.style.backgroundImage = `url('/images/finale/finale-ending3-garden.png')`;
     await this._delay(400);
     bg.classList.add('visible');
 

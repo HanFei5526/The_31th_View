@@ -73,7 +73,7 @@ export class PoemCompare {
 
     // 独立挂载立绘，避免被后续 innerHTML 覆写而重复触发动画
     this._portrait = document.createElement('img');
-    this._portrait.src = '/images/shennian_1.png';
+    this._portrait.src = '/images/common/shennian_1.png';
     this._portrait.className = 'poem-compare-portrait';
     this._portrait.alt = '沈念';
     this._root.appendChild(this._portrait);

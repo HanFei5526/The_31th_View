@@ -4,7 +4,7 @@ import { NotebookFloating } from '../components/notebook-floating.js';
 import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 
-const prologueBg = '/images/prologue-workshop.png';
+const prologueBg = '/images/prologue/prologue-workshop.png';
 const CHAPTER1_WORKSHOP_CHECKPOINT = 'chapter1_workshop_start';
 
 export default class Chapter1WorkshopScene extends GameSceneBase {
@@ -131,7 +131,7 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     
     await this.narrationBar.playLine(null, '一阵白光刺进眼睛。你眨了眨眼，熟悉的冷白色灯管重新出现在视野里。');
     await this.narrationBar.playLine(null, '你回到了工作室。屏幕上仍然是第三十一景的扫描件，光标在那里一闪一闪。你低头看修复日志——上面多出了几处标注，是你不记得写过的。');
-    await this.narrationBar.playLine('周鹤年', '你刚才盯着屏幕看了很久。发现什么了？', { portrait: '/images/zhou_henian_2.png' });
+    await this.narrationBar.playLine('周鹤年', '你刚才盯着屏幕看了很久。发现什么了？', { portrait: '/images/common/zhou_henian_2.png' });
     
     const choice = await this.narrationBar.showOptions([
       { label: '这页画底下藏着另一套说明。', value: 'A' },
@@ -140,14 +140,14 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     
     this.engine.gameProgress.chapter1Choice = choice;
 
-    await this.narrationBar.playLine('周鹤年', '继续。', { portrait: '/images/zhou_henian_2.png' });
+    await this.narrationBar.playLine('周鹤年', '继续。', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine(null, '你翻开笔记本，把断簪上那个字指给他看。');
     await this.narrationBar.playLine(null, '他看着那个字，沉默了几秒。');
-    await this.narrationBar.playLine('周鹤年', '蘅。你知道这个字的意思？', { portrait: '/images/zhou_henian_2.png' });
+    await this.narrationBar.playLine('周鹤年', '蘅。你知道这个字的意思？', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine(null, '你点了点头。笔记本里的批注已经解释过——杜衡，香草，古人用来比喻品性高洁的女子。');
-    await this.narrationBar.playLine('周鹤年', '但一个字不能说明什么。它可能是名字，也可能只是巧合。你要找到更多相关的证据。', { portrait: '/images/zhou_henian_2.png' });
+    await this.narrationBar.playLine('周鹤年', '但一个字不能说明什么。它可能是名字，也可能只是巧合。你要找到更多相关的证据。', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine(null, '他把笔记本推回你面前，手指点了点扉页上自己写的那行字。');
-    await this.narrationBar.playLine('周鹤年', '你继续查的时候，多留意参考文献。题跋、匾额、边注——这些地方最容易留下不够正式、却最诚实的东西。', { portrait: '/images/zhou_henian_2.png' });
+    await this.narrationBar.playLine('周鹤年', '你继续查的时候，多留意参考文献。题跋、匾额、边注——这些地方最容易留下不够正式、却最诚实的东西。', { portrait: '/images/common/zhou_henian_2.png' });
 
     if (choice === 'A') {
       this.notebook.addClueRecord('[沈念的判断] 这页画底下藏着另一套说明——画面结构可能有隐藏的辅助标注层。');
@@ -165,7 +165,7 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     await this.narrationBar.playLine('系统提示', '笔记本记录更新：周老师建议——关注题跋、匾额与边注。你可以在修复笔记本的「记录」页查看刚更新的判断和线索；如果想继续梳理，也可以回到「对话」页，用新的快捷问题或自己的话继续讨论。');
 
     await this.narrationBar.playLine(null, '窗外的梧桐树在晚风里轻轻摇动。你合上笔记本，但脑海中仍然浮着那个字。');
-    await this.narrationBar.playLine('沈念', '蘅。是谁？', { portrait: '/images/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '蘅。是谁？', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
 
     // 画面短暂停留 2s 后显示章节结束卡

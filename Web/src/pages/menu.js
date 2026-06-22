@@ -1,4 +1,4 @@
-const bgImage = '/images/menu-bg.png';
+const bgImage = '/images/common/menu-bg.png';
 
 /**
  * 《卅一景》 — 主菜单 / Main Menu
@@ -431,7 +431,7 @@ export default class MenuScene {
       document.body.appendChild(overlay);
 
       const textContainer = overlay.querySelector('#intro-chapter1-text');
-      const chapter1Ready = this._preloadImage('/images/chapter1-lanxuetang.png');
+      const chapter1Ready = this._preloadImage('/images/chapter1/chapter1-lanxuetang.png');
       let finished = false;
 
       const finish = async (fast = false) => {
@@ -530,7 +530,7 @@ export default class MenuScene {
       document.body.appendChild(overlay);
 
       const textContainer = overlay.querySelector('#intro-chapter2-text');
-      const chapter2Ready = this._preloadImage('/images/chapter2-yuanxiangtang.png');
+      const chapter2Ready = this._preloadImage('/images/chapter2/chapter2-yuanxiangtang.png');
       let finished = false;
 
       const finish = async (fast = false) => {
@@ -619,7 +619,7 @@ export default class MenuScene {
         "空气变得潮湿。竹叶上凝着水珠。",
         "有人在画画。或者，曾经有人在这里画画。"
       ];
-      const preloadImg = '/images/chapter3-yuanyang-south.png';
+      const preloadImg = '/images/chapter3/chapter3-yuanyang-south.png';
 
       overlay.innerHTML = `
         <div class="ch3-transition-bg"></div>
@@ -722,7 +722,7 @@ export default class MenuScene {
         "断簪，残砚，一幅从墙上拓下来的草图。",
         "第三十一景还差最后一笔。这一笔该怎么落，由你决定。"
       ];
-      const preloadImg = '/images/finale-truth-space.png';
+      const preloadImg = '/images/finale/finale-truth-space.png';
 
       overlay.innerHTML = `
         <div class="finale-transition-bg"></div>

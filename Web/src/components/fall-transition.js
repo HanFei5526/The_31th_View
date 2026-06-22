@@ -24,7 +24,7 @@ const ECHO_LINES = [
   '然后，所有声音都消失了。'
 ];
 
-const PAINTING_BACKDROP_SRC = '/images/scan-painting.png';
+const PAINTING_BACKDROP_SRC = '/images/prologue/scan-painting.png';
 
 export default class FallTransition {
   constructor() {

@@ -104,7 +104,7 @@
 /* 左侧画轴 UI (使用真实的背景图) */
 .poem-compare-left {
   position: relative;
-  background-image: url('/images/scroll-ui.png');
+  background-image: url('/images/common/scroll-ui.png');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
