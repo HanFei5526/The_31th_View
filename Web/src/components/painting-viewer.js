@@ -15,9 +15,9 @@
 
 // ── 线索定义 ──────────────────────────────────────────
 const CLUE_DEFS = {
-  clue_margin: { x: 85, y: 12, r: 8,  title: '装裱接缝残角' },
-  clue_text:   { x: 14, y: 80, r: 8,  title: '"……所见"残字' },
-  clue_line:   { x: 50, y: 75, r: 10, title: '底层细线' },
+  clue_margin: { x: 92.5, y: 6.0,  r: 8,  title: '装裱接缝残角' },
+  clue_text:   { x: 8.0,  y: 63.0, r: 8,  title: '"……所见"残字' },
+  clue_line:   { x: 55.0, y: 70.0, r: 10, title: '底层细线' },
 };
 
 // ── 工具定义 ──────────────────────────────────────────
@@ -38,9 +38,9 @@ const TOOL_FEEDBACK = {
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
 const TOOL_FILTERS = {
-  magnifier:  { transform: 'translate(-42%, 28%) scale(1.65)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
-  fiber:      { transform: 'scale(1)',                          filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
-  sidelight:  { transform: 'translate(24%, -14%) scale(1.25)',   filter: 'brightness(0.70) contrast(1.65) sepia(0.35) saturate(0.8)' },
+  magnifier:  { transform: 'translate(-42.5%, 44%) scale(1.65)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
+  fiber:      { transform: 'scale(1)',                            filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
+  sidelight:  { transform: 'translate(42%, -13%) scale(1.25)',     filter: 'brightness(0.70) contrast(1.65) sepia(0.35) saturate(0.8)' },
 };
 
 
