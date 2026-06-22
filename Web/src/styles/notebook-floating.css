@@ -169,21 +169,21 @@
 .chat-bubble.npc {
   align-self: flex-start;
   background: rgba(45, 42, 38, 0.8);
-  color: #efe7d8;
+  color: #f1f0ea; /* 对齐对话框人物正文色 */
   border-left: 2px solid #d4a853;
 }
 
 .chat-bubble.player {
   align-self: flex-end;
   background: rgba(212, 168, 83, 0.15);
-  color: #e8dcc4;
+  color: #f1f0ea; /* 对齐对话框人物正文色 */
   border-right: 2px solid #d4a853;
 }
 
 .chat-bubble.system {
   align-self: center;
   background: transparent;
-  color: #8c8375;
+  color: #a89878; /* 对齐对话框旁白色 */
   font-style: italic;
   font-size: 0.85rem;
   text-align: center;
@@ -191,7 +191,7 @@
 
 .notebook-empty-guide {
   text-align: center;
-  color: #8c8375;
+  color: #a89878; /* 对齐对话框旁白色 */
   font-family: var(--font-serif);
   margin-top: 2rem;
   padding: 0 1rem;
@@ -331,7 +331,7 @@
   flex: 1;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(212, 168, 83, 0.25);
-  color: #e8dcc4;
+  color: #f1f0ea; /* 对齐对话框人物正文色 */
   padding: 10px 34px 10px 12px; /* 右侧留出 34px 空间放置发送小三角，防止遮挡文字 */
   border-radius: 4px;
   font-size: 0.95rem;
@@ -512,4 +512,194 @@
   .notebook-pane {
     padding: 0.85rem;
   }
+}
+
+/* =========================================================
+   画中世界主题 (Paint World Theme) - 宣纸、水墨、浅底暗字
+   与 narration-bar.css 中画中世界对话框色系完全对齐
+   ========================================================= */
+
+/* --- 主容器 --- */
+.paint-world .notebook-floating {
+  background: rgba(230, 222, 205, 0.65); /* 对齐对话框宣纸底色 */
+  backdrop-filter: blur(3px) sepia(10%);
+  -webkit-backdrop-filter: blur(3px) sepia(10%);
+  border: 1px solid rgba(180, 155, 115, 0.25); /* 对齐对话框茶线边框 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* 综合研讨态 */
+.paint-world .notebook-floating.synthesis-mode {
+  border: 1px solid rgba(180, 155, 115, 0.3);
+  border-left: 3px solid rgba(168, 148, 104, 0.6);
+}
+
+.paint-world .notebook-floating.synthesis-mode .notebook-header {
+  border-bottom-color: rgba(180, 155, 115, 0.4);
+}
+
+/* --- Tab 头部 --- */
+.paint-world .notebook-header {
+  border-bottom: 1px solid rgba(180, 155, 115, 0.15);
+}
+
+.paint-world .notebook-tab {
+  color: #8c8375; /* 非活跃 Tab，浅底上灰度适中 */
+}
+
+.paint-world .notebook-tab:hover {
+  color: #a89468; /* 暗赭金，对标现实世界 #d4a853 */
+}
+
+.paint-world .notebook-tab.active {
+  color: #a89468;
+}
+
+.paint-world .notebook-tab.active::after {
+  background-color: #a89468;
+}
+
+.paint-world .notebook-close-btn {
+  color: #8c8375;
+}
+
+.paint-world .notebook-close-btn:hover {
+  color: #a89468;
+  background: rgba(168, 148, 104, 0.1);
+}
+
+/* --- 聊天气泡 --- */
+.paint-world .chat-bubble.npc {
+  background: rgba(255, 255, 255, 0.5);
+  color: #2b231d; /* 对齐对话框人物正文色 */
+  border-left: 2px solid #a89468;
+}
+
+.paint-world .chat-bubble.player {
+  background: rgba(180, 155, 115, 0.15);
+  color: #2b231d; /* 对齐对话框人物正文色 */
+  border-right: 2px solid #a89468;
+}
+
+.paint-world .chat-bubble.system {
+  color: #5c4f42; /* 对齐对话框旁白色 */
+}
+
+/* 空白引导语 */
+.paint-world .notebook-empty-guide {
+  color: #5c4f42; /* 对齐对话框旁白色 */
+}
+
+/* --- 快捷问题区 --- */
+.paint-world .quick-thought-btn {
+  background: rgba(168, 148, 104, 0.06);
+  border: 1px solid rgba(180, 155, 115, 0.3);
+  color: #a89468;
+}
+
+.paint-world .quick-thought-btn:hover:not(:disabled) {
+  background: rgba(168, 148, 104, 0.15);
+}
+
+/* --- 输入框区 --- */
+.paint-world .notebook-input-area {
+  border-top: 1px solid rgba(180, 155, 115, 0.15);
+}
+
+.paint-world .notebook-input {
+  background: rgba(0, 0, 0, 0.06); /* 极浅底，宣纸上的微灰 */
+  border: 1px solid rgba(180, 155, 115, 0.25);
+  color: #2b231d; /* 对齐对话框人物正文色 */
+}
+
+.paint-world .notebook-input:focus {
+  border-color: rgba(180, 155, 115, 0.5);
+}
+
+.paint-world .notebook-input::placeholder {
+  color: #8c8375;
+}
+
+/* 发送按钮 */
+.paint-world .notebook-send-btn {
+  color: #a89468;
+}
+
+.paint-world .notebook-send-btn:hover {
+  color: #7a6d4a;
+}
+
+.paint-world .notebook-send-btn:disabled {
+  color: #b5ad9e;
+}
+
+/* --- 加载态 --- */
+.paint-world .notebook-floating.is-loading .notebook-chat-history::after {
+  background: rgba(255, 255, 255, 0.5);
+  color: #5c4f42;
+}
+
+/* --- 滚动条 --- */
+.paint-world .notebook-chat-history {
+  scrollbar-color: rgba(180, 155, 115, 0.3) transparent;
+}
+
+.paint-world .notebook-chat-history::-webkit-scrollbar-thumb {
+  background-color: rgba(180, 155, 115, 0.3);
+}
+
+/* --- 记录 Tab --- */
+.paint-world .clue-card {
+  background: rgba(168, 148, 104, 0.06);
+  border-left: 3px solid #a89468;
+  color: #2b231d;
+}
+
+/* --- 工具区 --- */
+.paint-world .notebook-tool-section {
+  border-top: 1px solid rgba(180, 155, 115, 0.2);
+}
+
+.paint-world .notebook-tool-title {
+  color: #a89468;
+}
+
+.paint-world .notebook-tool-btn {
+  border: 1px solid rgba(168, 148, 104, 0.5) !important;
+  color: #a89468 !important;
+  box-shadow: 0 0 6px rgba(168, 148, 104, 0.08), inset 0 0 6px rgba(168, 148, 104, 0.08) !important;
+}
+
+.paint-world .notebook-tool-btn:hover {
+  background: rgba(168, 148, 104, 0.08) !important;
+  border-color: #8a7c5a !important;
+  color: #7a6d4a !important;
+  box-shadow: 0 4px 12px rgba(168, 148, 104, 0.2), inset 0 0 12px rgba(168, 148, 104, 0.15) !important;
+}
+
+.paint-world .notebook-tool-btn.used::after {
+  color: #a89468;
+  text-shadow: 0 0 8px rgba(168, 148, 104, 0.6);
+}
+
+.paint-world .notebook-tool-icon {
+  filter: sepia(0.6) hue-rotate(-5deg) saturate(1.2) drop-shadow(0 0 3px rgba(168, 148, 104, 0.4));
+}
+
+/* --- 研讨确认按钮 --- */
+.paint-world .notebook-confirm-btn {
+  color: #f5efe0;
+  background: rgba(120, 90, 50, 0.75);
+  border: 2px solid rgba(90, 70, 40, 0.6);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 4px 4px 0px rgba(90, 70, 40, 0.4);
+}
+
+.paint-world .notebook-confirm-btn:hover:not(:disabled) {
+  background: rgba(100, 75, 40, 0.8);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.15), 2px 2px 0px rgba(90, 70, 40, 0.4);
+}
+
+.paint-world .notebook-confirm-btn.confirmed {
+  background: rgba(100, 75, 40, 0.8);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.15), 2px 2px 0px rgba(90, 70, 40, 0.4);
 }
