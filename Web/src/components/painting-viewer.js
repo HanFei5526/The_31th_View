@@ -38,9 +38,9 @@ const TOOL_FEEDBACK = {
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
 const TOOL_FILTERS = {
-  magnifier:  { transform: 'scale(1.65) translate(-25%, 18%)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
+  magnifier:  { transform: 'translate(-18%, 12%) scale(1.65)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
   fiber:      { transform: 'scale(1)',                          filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
-  sidelight:  { transform: 'scale(1.3) translate(25%, -18%)',   filter: 'brightness(0.72) contrast(1.6) sepia(0.3) saturate(0.8)' },
+  sidelight:  { transform: 'translate(24%, -14%) scale(1.25)',   filter: 'brightness(0.70) contrast(1.65) sepia(0.35) saturate(0.8)' },
 };
 
 
@@ -259,34 +259,38 @@ export default class PaintingViewer {
       this._opt.onToolUsed?.(toolId);
     }
 
-    // 2. 检查是否解锁自由探索（集齐三件工具）
-    if (!this._explorable && this._hasUsedAllRequiredTools()) {
-      this._explorable = true;
-      console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
-      if (this._statusEl) this._statusEl.style.display = 'block';
-
-      // 自动切换并永久锁定在放大镜效果
-      this._currentTool = 'magnifier';
-      this._applyImageEffect('magnifier');
-
-      window.dispatchEvent(new CustomEvent('all-tools-used'));
-
-      setTimeout(() => {
-        this._showFeedback('三项基础检测已经全部做完了。现在可以用放大镜在古画里仔细找找看，应该有隐藏的异常痕迹。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
-      }, 6000);
-      
-      return; // 解锁后直接返回，避免应用已用完的单项工具滤镜
-    }
-
-    // 3. 基础检查阶段的单项检测反馈（仅持续 2 秒）
+    // 2. 首先应用当前点击工具的图像效果与滤镜
     this._applyImageEffect(toolId);
 
+    // 3. 基础检查阶段的延迟处理（仅在尚未解锁自由探索时生效）
     if (!this._explorable) {
-      this._toolResetTimer = setTimeout(() => {
-        this._applyImageEffect(null);
-        this._currentTool = null;
-        this._toolResetTimer = null;
-      }, 2000);
+      if (this._hasUsedAllRequiredTools()) {
+        // 如果集齐了三件工具，让这最后一个工具的检测特效完整展示 2 秒钟，然后自动切入放大镜自由探索
+        this._toolResetTimer = setTimeout(() => {
+          this._explorable = true;
+          console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
+          if (this._statusEl) this._statusEl.style.display = 'block';
+
+          // 自动切换并永久锁定在放大镜效果
+          this._currentTool = 'magnifier';
+          this._applyImageEffect('magnifier');
+
+          window.dispatchEvent(new CustomEvent('all-tools-used'));
+
+          setTimeout(() => {
+            this._showFeedback('三项基础检测已经全部做完了。现在可以用放大镜在古画里仔细找找看，应该有隐藏的异常痕迹。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
+          }, 6000);
+
+          this._toolResetTimer = null;
+        }, 2000);
+      } else {
+        // 如果还没有集齐三件工具，展示当前滤镜 2 秒后画面复原
+        this._toolResetTimer = setTimeout(() => {
+          this._applyImageEffect(null);
+          this._currentTool = null;
+          this._toolResetTimer = null;
+        }, 2000);
+      }
     }
   }
 
