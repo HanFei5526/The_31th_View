@@ -1105,14 +1105,15 @@ export default class MenuScene {
     .menu-panel {
       position: relative;
       z-index: 10;
-      width: 500px;
+      width: 400px; /* 宽度降至 400px，视觉占比更轻巧 */
       max-width: calc(100vw - 4rem);
-      max-height: calc(100vh - 6rem);
+      /* 限制高度上限在 440px，在各类屏幕上均具备优秀的小卡片纸笺感 */
+      max-height: min(440px, calc(100vh - 14rem)); 
       display: flex;
       flex-direction: column;
-      overflow: visible; /* Allows the ragged edges to show */
+      overflow: visible;
       background: transparent;
-      padding: 1.5rem; /* Inner padding to keep content off the ragged edges */
+      padding: 0.9rem 1.2rem 1.0rem; /* 内边距微降 */
       animation: panelSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
@@ -1177,18 +1178,18 @@ export default class MenuScene {
     }
 
     .menu-title {
-      font-family: 'Noto Serif SC', var(--font-serif); /* 使用传统端庄的思源宋体衬线字，骨架清奇，撇捺挺拔 */
-      font-size: clamp(2.25rem, 4.2vw, 3.0rem);
-      font-weight: 600; /* 加粗展现宋体字横细竖粗的雕版美感，参考图二字形 */
-      color: rgba(92, 59, 36, 0.94); /* 温暖端庄的深古铜褐色，完美贴合图二色调 */
+      font-family: 'Noto Serif SC', var(--font-serif);
+      font-size: clamp(1.6rem, 3.1vw, 2.05rem); /* 字号降至 1.6rem ~ 2.05rem */
+      font-weight: 600;
+      color: rgba(92, 59, 36, 0.94);
       letter-spacing: 0.12em;
-      margin: 0 0 0.5rem;
+      margin: 0 0 0.25rem;
       text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
     }
 
     .menu-subtitle {
       font-family: var(--font-handwrite);
-      font-size: 0.9rem;
+      font-size: 0.75rem; /* 降至 0.75rem */
       color: rgba(83, 67, 45, 0.72);
       letter-spacing: 0.15em;
       margin: 0;
@@ -1200,8 +1201,8 @@ export default class MenuScene {
     .chapter-list {
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
-      padding: 0.5rem;
+      gap: 0.35rem; /* 间隙保持 0.35rem，或者根据实际列表压缩为 0.3rem */
+      padding: 0.15rem 0.3rem;
       overflow: hidden auto;
       flex: 0 0 auto;
     }
@@ -1211,14 +1212,14 @@ export default class MenuScene {
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px; /* 增加细微的圆角，更柔和 */
-      border: none; /* 去除一切边框与底部虚线，彻底解决小锯齿问题 */
+      padding: 0.15rem 0.5rem; /* 继续微压缩内边距 */
+      border-radius: 3px;
+      border: none;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       cursor: pointer;
       overflow: hidden;
-      min-height: 60px;
-      background: rgba(255, 255, 255, 0.35); /* 略微提高对比度，让选项更清晰白净 */
+      min-height: 42px; /* 最小高度降至 42px，使整个卡片非常清秀小巧 */
+      background: rgba(255, 255, 255, 0.35);
     }
 
     .chapter-item:nth-child(odd) {
@@ -1298,7 +1299,7 @@ export default class MenuScene {
       align-items: center;
       justify-content: center;
       font-family: var(--font-handwrite);
-      font-size: 1.1rem;
+      font-size: 0.82rem; /* 降至 0.82rem */
       color: rgba(63, 49, 31, 0.75);
       background: transparent;
       border: none;
@@ -1311,20 +1312,19 @@ export default class MenuScene {
       border: none;
     }
 
-    /* 朱砂印章 — 使用低饱和朱红色，整体调淡，低调且精细 */
     .seal {
-      width: 32px;
-      height: 32px;
+      width: 25px; /* 印章调至 25px * 25px */
+      height: 25px;
       border-radius: 1px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-serif);
-      font-size: 0.68rem;
+      font-size: 0.58rem; /* 字号下调至 0.58rem，精致迷你 */
       font-weight: normal;
-      color: rgba(179, 62, 45, 0.68); /* 使用饱和度不太高、更纯正的朱红色，配合 0.68 不透明度使其极度温和 */
+      color: rgba(179, 62, 45, 0.68);
       background: transparent;
-      border: 1.2px solid rgba(179, 62, 45, 0.52); /* 采用极细实线框，还原戳记印文边缘的精细感 */
+      border: 1px solid rgba(179, 62, 45, 0.52);
       letter-spacing: 0.05em;
       transform: rotate(-3deg);
       box-sizing: border-box;
@@ -1345,25 +1345,25 @@ export default class MenuScene {
       position: relative;
       z-index: 1;
       display: flex;
-      flex-direction: column; /* 改为纵向列排，使长副标题另起一行，形成错落感 */
+      flex-direction: column;
       justify-content: center;
       align-items: flex-start;
-      gap: 3px;
-      padding: 0.1rem 0.5rem;
+      gap: 3px; /* 间隙调为 3px，梳理层级，防止挤在一块 */
+      padding: 0 0.3rem;
     }
 
     .chapter-header {
       display: flex;
       flex-direction: row;
-      align-items: baseline; /* 以基准线对齐 */
-      gap: 0.4rem;
+      align-items: baseline;
+      gap: 0.25rem;
       width: auto;
     }
 
     .chapter-name {
       font-family: var(--font-serif);
-      font-size: 0.98rem;
-      font-weight: 500; /* 调细字重，使其更具宋体钢笔字清秀感 */
+      font-size: 0.84rem; /* 降至 0.84rem */
+      font-weight: 500;
       color: rgba(46, 35, 21, 0.92);
       letter-spacing: 0.05em;
     }
@@ -1371,26 +1371,25 @@ export default class MenuScene {
     .chapter-sep {
       display: inline-block;
       color: rgba(94, 76, 50, 0.3);
-      font-size: 0.9rem;
+      font-size: 0.75rem;
     }
 
     .chapter-subtitle {
-      font-family: var(--font-serif); /* 统一为主标题行使用衬线体，清爽整洁 */
-      font-size: 0.92rem;
+      font-family: var(--font-serif);
+      font-size: 0.8rem; /* 降至 0.8rem */
       font-weight: 500;
       color: rgba(62, 48, 30, 0.85);
       letter-spacing: 0.05em;
     }
 
-    /* 详细定位副标题 — 类似书籍旁注，采用草书手写体，淡雅错落 */
     .chapter-desc {
       font-family: var(--font-handwrite);
-      font-size: 0.78rem;
+      font-size: 0.68rem; /* 细节旁注降至极其隽雅秀丽的 0.68rem */
       color: rgba(94, 76, 50, 0.62);
       margin: 0;
       letter-spacing: 0.05em;
       text-align: left;
-      line-height: 1.2;
+      line-height: 1.05;
     }
 
     .chapter-item--unlocked:hover .chapter-desc {
@@ -1398,12 +1397,12 @@ export default class MenuScene {
     }
 
     .chapter-tagline {
-      font-family: var(--font-serif);
-      font-size: 0.78rem;
-      color: rgba(83, 67, 45, 0.6);
+      font-family: var(--font-handwrite); /* 明确改用霞鹜文楷手写体，使菜单字体严格控制在思源宋体和霞鹜文楷两种以内 */
+      font-size: 0.7rem; /* 字号微降，衬托第一级标题 */
+      color: rgba(83, 67, 45, 0.62);
       letter-spacing: 0.03em;
-      margin: 0.3rem 0 0;
-      line-height: 1.4;
+      margin: 0; /* 统一由 flex 的 gap 间隙控制 */
+      line-height: 1.3;
     }
 
     .chapter-item--unlocked:hover .chapter-tagline {
@@ -1449,7 +1448,7 @@ export default class MenuScene {
        =========================== */
     .menu-footer-global {
       position: absolute;
-      bottom: 2.5rem;
+      bottom: 6.2rem; /* 再往上移 16px（升至 6.2rem），使其充分踩在画心地面，拉开与底轴木棍的距离 */
       left: 50%;
       transform: translateX(-50%);
       display: flex;
