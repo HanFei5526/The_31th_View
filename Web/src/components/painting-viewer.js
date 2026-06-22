@@ -265,20 +265,20 @@ export default class PaintingViewer {
     // 3. 基础检查阶段的延迟处理（仅在尚未解锁自由探索时生效）
     if (!this._explorable) {
       if (this._hasUsedAllRequiredTools()) {
-        // 如果集齐了三件工具，让这最后一个工具的检测特效完整展示 2 秒钟，然后自动切入放大镜自由探索
+        // 如果集齐了三件工具，让这最后一个工具的检测特效完整展示 2 秒钟，然后自动切入自动探索模式
         this._toolResetTimer = setTimeout(() => {
           this._explorable = true;
           console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
           if (this._statusEl) this._statusEl.style.display = 'block';
 
-          // 自动切换并永久锁定在放大镜效果
-          this._currentTool = 'magnifier';
-          this._applyImageEffect('magnifier');
+          // 基础检查完成，进入探索阶段：不再强制切换为放大镜，清空当前工具，保持原图展示
+          this._currentTool = null;
+          this._applyImageEffect(null);
 
           window.dispatchEvent(new CustomEvent('all-tools-used'));
 
           setTimeout(() => {
-            this._showFeedback('三项基础检测已经全部做完了。现在可以用放大镜在古画里仔细找找看，应该有隐藏的异常痕迹。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
+            this._showFeedback('三项基础检测已经全部做完了。现在你可以直接在古画画面中仔细寻找并点击异常线索。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
           }, 6000);
 
           this._toolResetTimer = null;
@@ -474,12 +474,7 @@ export default class PaintingViewer {
       return;
     }
 
-    // 探索阶段必须切回放大镜
-    if (this._currentTool !== 'magnifier') {
-      console.log('[PaintingViewer] 点击被忽略：当前不是放大镜工具');
-      this._showFeedback('找寻暗藏的痕迹需要借用放大镜，去右侧工具栏换一下吧。');
-      return;
-    }
+
 
     // 计算点击在包装层上的百分比坐标（自动适配 scale 缩放）
     const rect = this._wrapperEl.getBoundingClientRect();
