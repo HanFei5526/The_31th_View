@@ -680,7 +680,8 @@ export default class PaintingViewer {
   }
 
   /**
-   * 动态计算并适配古画与外卡片容器的尺寸，使其黑边几乎为零（画布仅比图片大 16px 边距）
+   * 动态计算并精确定位古画组件，使其去除外框，纯画心完整展现，
+   * 且顶部与笔记本对齐，左侧与下方叙事对话框左边缘对齐。
    * @private
    */
   _resizeContainerToFitImage() {
@@ -689,38 +690,55 @@ export default class PaintingViewer {
     const imgH = this._imgEl.naturalHeight;
     if (!imgW || !imgH) return;
 
-    // 理想尺寸：外框宽度贴近底部叙事对话框宽度，并预留右侧笔记本空间
-    const borderPadding = 16;
-    const maxH = Math.min(window.innerHeight * 0.70, 780);
-    const preferredContainerW = window.innerWidth * 0.55;
-    const maxContainerW = window.innerWidth * 0.76;
+    // 1. 获取定位参照元素
+    const narrationContainer = document.querySelector('.narration-container');
+    const notebookEl = document.querySelector('.notebook-floating.expanded:not(.hidden)');
 
-    // 计算缩放比例
-    let targetW = Math.min(preferredContainerW, maxContainerW) - borderPadding;
+    // 2. 计算左边界 (对齐对话框左侧)
+    let leftBoundary = window.innerWidth * 0.225; // 兜底: 居中 55% 宽度的左边缘
+    let dialogTop = window.innerHeight - 196;     // 兜底: 对话框顶部高度
+    if (narrationContainer) {
+      const narrRect = narrationContainer.getBoundingClientRect();
+      if (narrRect.width > 0) {
+        leftBoundary = narrRect.left;
+        dialogTop = narrRect.top;
+      }
+    }
+
+    // 3. 计算右边界 (避开右侧笔记本，留出边距)
+    let rightBoundary = window.innerWidth - 392; // 兜底: 360px宽笔记本 + 2rem(32px)边距
+    if (notebookEl) {
+      const notebookRect = notebookEl.getBoundingClientRect();
+      if (notebookRect.width > 0) {
+        rightBoundary = notebookRect.left;
+      }
+    }
+    const edgeGap = 24; // 与笔记本的右边距
+    const maxAvailableW = rightBoundary - leftBoundary - edgeGap;
+
+    // 4. 计算上下限 (顶部对齐笔记本的 top: 1.5rem = 24px，底限留出 16px 呼吸感间隙)
+    const topBoundary = 24;
+    const bottomGap = 16;
+    const maxAvailableH = dialogTop - topBoundary - bottomGap;
+
+    // 5. 按照古画原始比例等比缩放
+    let targetW = maxAvailableW;
     let targetH = targetW * (imgH / imgW);
 
-    if (targetH > maxH) {
-      targetH = maxH;
+    if (targetH > maxAvailableH) {
+      targetH = maxAvailableH;
       targetW = targetH * (imgW / imgH);
     }
 
-    // 容器比图片只大一点点（四周加 padding: 0.5rem = 8px，一共 16px）
-    const containerW = targetW + borderPadding;
-    const containerH = targetH + borderPadding;
-
+    // 6. 应用尺寸和绝对定位到容器
     const container = this._el.querySelector('.pv-card-container');
     if (container) {
-      container.style.width = `${containerW}px`;
-      container.style.height = `${containerH}px`;
-
-      const edgeGap = 24;
-      const notebookEl = document.querySelector('.notebook-floating.expanded:not(.hidden)');
-      const notebookRect = notebookEl?.getBoundingClientRect();
-      const availableRight = notebookRect ? notebookRect.left - edgeGap : window.innerWidth - edgeGap;
-      const centeredLeft = (window.innerWidth - containerW) / 2;
-      const maxSafeLeft = availableRight - containerW;
-      const targetLeft = Math.max(edgeGap, Math.min(centeredLeft, maxSafeLeft));
-      container.style.marginLeft = `${targetLeft}px`;
+      container.style.position = 'absolute';
+      container.style.top = `${topBoundary}px`;
+      container.style.left = `${leftBoundary}px`;
+      container.style.width = `${targetW}px`;
+      container.style.height = `${targetH}px`;
+      container.style.margin = '0';
     }
 
     if (this._cardEl) {

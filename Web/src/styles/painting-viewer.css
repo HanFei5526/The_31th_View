@@ -56,13 +56,11 @@
 .pv-card-container {
   display: flex;
   flex-direction: row;
-  /* 由 JS 动态设置宽高，不在此硬编码 */
-  margin-top: 1.5rem;
-  margin-bottom: 13.5rem;
-  background: rgba(28, 26, 24, 0.95);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 4px;
-  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.7);
+  position: absolute; /* 由 JS 动态设置位置与宽高 */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
   transition: margin-bottom 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -75,7 +73,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
+  padding: 0;
   overflow: hidden;
   border-right: none;
 }
