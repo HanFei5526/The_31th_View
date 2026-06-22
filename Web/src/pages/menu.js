@@ -1123,15 +1123,14 @@ export default class MenuScene {
       position: absolute;
       inset: 0;
       z-index: -1;
-      background-color: rgba(244, 230, 208, 0.62);
+      background-color: rgba(226, 214, 192, 0.68); /* 吸收背景图片的古典熟宣茶黄色，使面板与画卷浑然一体 */
       background-image: 
         repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.01) 1px, rgba(100, 70, 40, 0.01) 2px),
         repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(100, 70, 40, 0.01) 1px, rgba(100, 70, 40, 0.01) 2px),
-        radial-gradient(circle at 50% 50%, transparent 60%, rgba(101, 60, 20, 0.015) 120%), /* 泛黄晕染再次调淡 */
+        radial-gradient(circle at 50% 50%, transparent 60%, rgba(101, 60, 20, 0.015) 120%),
         radial-gradient(circle at 15% 85%, rgba(120, 80, 40, 0.005) 0%, transparent 20%),
         radial-gradient(circle at 85% 15%, rgba(120, 80, 40, 0.003) 0%, transparent 20%);
       filter: url(#paper-tear);
-      /* 外阴影做极微弱的羽化（不透明度降至0.015），几乎无重力感，彻底解决硬边问题 */
       box-shadow: 0 10px 40px rgba(90, 55, 30, 0.015);
       backdrop-filter: blur(8px);
     }
@@ -1212,14 +1211,14 @@ export default class MenuScene {
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 0.15rem 0.5rem; /* 继续微压缩内边距 */
+      padding: 0.15rem 0.5rem;
       border-radius: 3px;
       border: none;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       cursor: pointer;
       overflow: hidden;
-      min-height: 42px; /* 最小高度降至 42px，使整个卡片非常清秀小巧 */
-      background: rgba(255, 255, 255, 0.35);
+      min-height: 42px;
+      background: rgba(255, 253, 248, 0.35); /* 微带暖黄本白，与茶黄色熟宣纸面更协调 */
     }
 
     .chapter-item:nth-child(odd) {
