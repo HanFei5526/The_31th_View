@@ -38,9 +38,9 @@ const TOOL_FEEDBACK = {
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
 const TOOL_FILTERS = {
-  magnifier:  { transform: 'scale(1.65) translate(-15%, -10%)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
+  magnifier:  { transform: 'scale(1.65) translate(-25%, 18%)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
   fiber:      { transform: 'scale(1)',                          filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
-  sidelight:  { transform: 'scale(1.08)',                       filter: 'brightness(0.72) contrast(1.6) sepia(0.3) saturate(0.8)' },
+  sidelight:  { transform: 'scale(1.3) translate(25%, -18%)',   filter: 'brightness(0.72) contrast(1.6) sepia(0.3) saturate(0.8)' },
 };
 
 
@@ -97,6 +97,7 @@ export default class PaintingViewer {
     this._wrongClicks = 0;     // 连续错误计数
     this._allRecorded = false; // 三条线索是否全部记录
     this._convergenceShown = false;
+    this._toolResetTimer = null; // 工具检测效果2秒复位定时器
 
     // ── 绑定函数引用（用于 window 事件清理） ──
     this._boundOnResize = this._onResize.bind(this);
@@ -181,6 +182,7 @@ export default class PaintingViewer {
   destroy() {
     window.removeEventListener('resize', this._boundOnResize);
     if (this._feedbackTimer) clearTimeout(this._feedbackTimer);
+    if (this._toolResetTimer) clearTimeout(this._toolResetTimer);
     
     if (this._el) {
       this._el.remove();
@@ -239,42 +241,53 @@ export default class PaintingViewer {
 
   /** 由外部调用：应用指定的工具滤镜 */
   applyTool(toolId) {
+    // 1. 清理已有的恢复定时器
+    if (this._toolResetTimer) {
+      clearTimeout(this._toolResetTimer);
+      this._toolResetTimer = null;
+    }
+
     this._currentTool = toolId;
 
-    // 首次使用
+    // 首次使用记录
     const isFirstUse = !this._toolsUsed[toolId];
     if (isFirstUse) {
       this._toolsUsed[toolId] = true;
-
-      // 显示工具检测反馈
       if (TOOL_FEEDBACK[toolId]) {
         this._showFeedback(TOOL_FEEDBACK[toolId]);
       }
-
-      // 回调
       this._opt.onToolUsed?.(toolId);
     }
 
+    // 2. 检查是否解锁自由探索（集齐三件工具）
     if (!this._explorable && this._hasUsedAllRequiredTools()) {
       this._explorable = true;
       console.log('[PaintingViewer] 三项基础检查已完成，探索已解锁');
       if (this._statusEl) this._statusEl.style.display = 'block';
 
-      // 自动切换到放大镜
+      // 自动切换并永久锁定在放大镜效果
       this._currentTool = 'magnifier';
       this._applyImageEffect('magnifier');
 
-      // 派发事件通知外部锁定工具区
       window.dispatchEvent(new CustomEvent('all-tools-used'));
 
-      // 延迟显示，避免和工具反馈重叠
       setTimeout(() => {
         this._showFeedback('三项基础检测已经全部做完了。现在可以用放大镜在古画里仔细找找看，应该有隐藏的异常痕迹。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
       }, 6000);
+      
+      return; // 解锁后直接返回，避免应用已用完的单项工具滤镜
     }
 
-    // 应用图像滤镜
+    // 3. 基础检查阶段的单项检测反馈（仅持续 2 秒）
     this._applyImageEffect(toolId);
+
+    if (!this._explorable) {
+      this._toolResetTimer = setTimeout(() => {
+        this._applyImageEffect(null);
+        this._currentTool = null;
+        this._toolResetTimer = null;
+      }, 2000);
+    }
   }
 
   /** 由外部调用：清除当前工具滤镜 */
