@@ -38,9 +38,9 @@ const TOOL_FEEDBACK = {
 
 // ── 工具对应的滤镜效果 ──────────────────────────────
 const TOOL_FILTERS = {
-  magnifier:  { transform: 'scale(1.35) translate(-12%, -8%)',  filter: 'contrast(1.1) brightness(1.05)' },
-  fiber:      { transform: 'scale(1)',                          filter: 'contrast(1.3) saturate(0.3) brightness(1.1)' },
-  sidelight:  { transform: 'scale(1.05)',                       filter: 'contrast(1.15) brightness(0.95)' },
+  magnifier:  { transform: 'scale(1.65) translate(-15%, -10%)',  filter: 'brightness(1.15) contrast(1.25) saturate(1.2)' },
+  fiber:      { transform: 'scale(1)',                          filter: 'contrast(1.4) saturate(0.2) brightness(1.1)' },
+  sidelight:  { transform: 'scale(1.08)',                       filter: 'brightness(0.72) contrast(1.6) sepia(0.3) saturate(0.8)' },
 };
 
 
@@ -292,13 +292,22 @@ export default class PaintingViewer {
     let transform = '';
     let filter = '';
 
-    if (toolId === 'magnifier') {
-      transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoomLevel})`;
-      filter = 'contrast(1.1) brightness(1.05)';
-    } else if (toolId === 'fiber') {
-      filter = 'contrast(1.3) saturate(0.3) brightness(1.1)';
-    } else if (toolId === 'sidelight') {
-      filter = 'contrast(1.15) brightness(0.95)';
+    if (toolId) {
+      const cfg = TOOL_FILTERS[toolId];
+      if (cfg) {
+        filter = cfg.filter || '';
+        if (toolId === 'magnifier') {
+          // 如果已解锁自由缩放平移，且当前缩放倍数大于 1.0 或有平移，则使用动态值
+          if (this._explorable && (this._zoomLevel > 1.0 || this._panX !== 0 || this._panY !== 0)) {
+            transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoomLevel})`;
+          } else {
+            // 基础检查阶段或未缩放时，使用预设的缩放聚焦效果
+            transform = cfg.transform || '';
+          }
+        } else {
+          transform = cfg.transform || '';
+        }
+      }
     }
 
     this._wrapperEl.style.transform = transform;
