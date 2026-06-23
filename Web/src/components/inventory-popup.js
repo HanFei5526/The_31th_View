@@ -93,15 +93,10 @@ export class InventoryPopup {
       } else if (item.id === 'hairpin') {
         icon.innerHTML = `
           <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <!-- 簪头芙蓉轮廓 -->
-            <path d="M18 22 C18 16, 26 16, 26 22 C26 16, 34 16, 34 22 C34 26, 29 32, 26 34 C23 32, 18 26, 18 22 Z" opacity="0.9" />
-            <path d="M22 23 C23 21, 25 21, 26 23" opacity="0.6" />
-            <!-- 簪身折断线 -->
-            <line x1="26" y1="34" x2="39" y2="47" />
-            <!-- 簪断口斜线提示 -->
-            <line x1="38" y1="45" x2="41" y2="48" stroke-width="2.5" />
-            <!-- 散落的断尾 -->
-            <line x1="43" y1="51" x2="47" y2="55" opacity="0.5" stroke-dasharray="2 2" />
+            <line x1="23" y1="49" x2="41" y2="15" />
+            <line x1="38" y1="14" x2="47" y2="17" />
+            <line x1="18" y1="39" x2="27" y2="44" />
+            <circle cx="41" cy="15" r="1.8" fill="#d4a853" stroke="none" opacity="0.7" />
           </svg>
         `;
       } else {

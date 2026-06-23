@@ -1143,6 +1143,33 @@ a {
   box-shadow: 0 0 0 transparent;
 }
 
+.real-world .narration-options {
+  position: fixed;
+  left: 50%;
+  top: 43%;
+  transform: translate(-50%, -50%);
+  width: min(46vw, 760px);
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 1.35rem;
+  margin: 0;
+  padding: 0;
+  z-index: 112;
+  pointer-events: auto;
+}
+
+.real-world .narration-option-btn {
+  width: 100%;
+  max-width: none;
+  min-height: 54px;
+  padding: 0.55rem 1.4rem;
+  font-size: 1.3rem;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  text-overflow: clip;
+}
+
 @media (max-width: 900px) {
   .narration-options {
     flex-direction: column;
@@ -1153,6 +1180,16 @@ a {
     width: min(100%, 18rem);
     min-height: 40px;
     font-size: 0.9rem;
+  }
+
+  .real-world .narration-options {
+    width: min(82vw, 680px);
+    gap: 0.85rem;
+  }
+
+  .real-world .narration-option-btn {
+    min-height: 48px;
+    font-size: 1.15rem;
   }
 }
 
@@ -1362,19 +1399,62 @@ a {
 
 .furong-waterline {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 48px;              /* 触摸目标 ≥48px */
-  transform: translateY(-50%);
-  cursor: pointer;
+  inset: 0;
   z-index: 5;
   border: 0;
   outline: none;
   box-shadow: none;
-  background:
-    linear-gradient(to bottom, transparent, rgba(226, 183, 72, 0.08) 38%, rgba(226, 183, 72, 0.26) 50%, rgba(226, 183, 72, 0.08) 62%, transparent),
-    radial-gradient(ellipse at center, rgba(237, 205, 112, 0.22) 0%, rgba(237, 205, 112, 0) 55%);
+  background: transparent;
+  pointer-events: none;
   animation: waterGleam 4s infinite ease-in-out;
+}
+
+.furong-waterline-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.furong-waterline-glow-path,
+.furong-waterline-path,
+.furong-waterline-hit {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.furong-waterline-glow-path {
+  stroke: rgba(224, 181, 44, 0.36);
+  stroke-width: 1.22;
+  opacity: 0.52;
+  filter:
+    blur(0.55px)
+    drop-shadow(0 0 8px rgba(224, 181, 44, 0.35))
+    drop-shadow(0 0 14px rgba(224, 181, 44, 0.5));
+}
+
+.furong-waterline-path {
+  stroke: rgba(255, 223, 112, 0.28);
+  stroke-width: 0.32;
+  opacity: 0.72;
+  filter:
+    blur(0.18px)
+    drop-shadow(0 0 10px rgba(224, 181, 44, 0.35));
+}
+
+.furong-waterline-path:nth-child(2),
+.furong-waterline-path:nth-child(4) {
+  stroke-opacity: 0.34;
+}
+
+.furong-waterline-hit {
+  cursor: pointer;
+  pointer-events: stroke;
+  stroke: transparent;
+  stroke-width: 5.2;
 }
 
 .furong-waterline:focus,
@@ -1384,8 +1464,14 @@ a {
 }
 
 @keyframes waterGleam {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.85; }
+  0%, 100% {
+    opacity: 0.36;
+    filter: saturate(0.95) brightness(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    filter: saturate(1.18) brightness(1.18);
+  }
 }
 
 .furong-hairpin {
@@ -1415,8 +1501,8 @@ a {
 }
 
 .furong-hairpin .hairpin-svg {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   overflow: visible;
 }
 
@@ -1427,18 +1513,18 @@ a {
 }
 
 .furong-hairpin .hairpin-stem {
-  stroke: rgba(104, 82, 52, 0.82);
-  stroke-width: 2.1;
+  stroke: rgba(95, 78, 54, 0.84);
+  stroke-width: 2;
+}
+
+.furong-hairpin .hairpin-tip {
+  stroke: rgba(212, 168, 83, 0.86);
+  stroke-width: 1.8;
 }
 
 .furong-hairpin .hairpin-break {
   stroke: rgba(226, 183, 72, 0.9);
-  stroke-width: 1.7;
-}
-
-.furong-hairpin .hairpin-flower {
-  stroke: rgba(212, 168, 83, 0.92);
-  stroke-width: 1.5;
+  stroke-width: 1.6;
 }
 
 /* 翻转后让图标重新正立（抵消容器的 scaleY(-1)） */

@@ -355,7 +355,37 @@ export default class Chapter1PaintScene {
     // 水面线
     this._waterline = document.createElement('div');
     this._waterline.className = 'furong-waterline';
-    this._waterline.style.top = '66%';
+    this._waterline.innerHTML = `
+      <svg class="furong-waterline-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <g class="furong-waterline-glow">
+          <path class="furong-waterline-glow-path" d="M0.0 60.4 C2.0 60.9 3.8 61.1 4.8 60.2 C5.7 59.4 4.9 58.4 6.0 58.1 C8.4 58.1 10.7 58.5 13.0 59.1 C14.0 59.4 14.9 59.6 15.8 59.5" />
+          <path class="furong-waterline-glow-path" d="M13.5 59.5 C14.7 59.5 16.0 59.6 17.2 59.8" />
+          <path class="furong-waterline-glow-path" d="M19.2 58.8 C20.8 58.8 22.0 58.6 22.6 58.3 C23.5 57.8 24.3 59.6 25.4 59.8 C26.7 60.1 27.1 58.9 28.2 58.5 C29.2 58.1 30.2 58.5 31.3 58.1" />
+          <path class="furong-waterline-glow-path" d="M31.3 58.1 C33.2 57.2 33.6 56.8 35.7 56.5 C37.0 56.3 38.0 56.0 39.4 54.9" />
+          <path class="furong-waterline-glow-path" d="M32.6 66.2 C35.3 65.8 37.2 65.8 39.5 65.8 C41.1 65.8 41.7 65.3 43.2 65.1 C45.3 64.9 47.0 65.6 49.1 65.3 C50.1 65.2 50.8 65.2 51.8 65.0" />
+          <path class="furong-waterline-glow-path" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
+          <path class="furong-waterline-glow-path" d="M96.1 60.7 C97.8 60.0 98.9 60.5 100.0 60.5" />
+        </g>
+        <g class="furong-waterline-visible">
+          <path class="furong-waterline-path" d="M0.0 60.4 C2.0 60.9 3.8 61.1 4.8 60.2 C5.7 59.4 4.9 58.4 6.0 58.1 C8.4 58.1 10.7 58.5 13.0 59.1 C14.0 59.4 14.9 59.6 15.8 59.5" />
+          <path class="furong-waterline-path" d="M13.5 59.5 C14.7 59.5 16.0 59.6 17.2 59.8" />
+          <path class="furong-waterline-path" d="M19.2 58.8 C20.8 58.8 22.0 58.6 22.6 58.3 C23.5 57.8 24.3 59.6 25.4 59.8 C26.7 60.1 27.1 58.9 28.2 58.5 C29.2 58.1 30.2 58.5 31.3 58.1" />
+          <path class="furong-waterline-path" d="M31.3 58.1 C33.2 57.2 33.6 56.8 35.7 56.5 C37.0 56.3 38.0 56.0 39.4 54.9" />
+          <path class="furong-waterline-path" d="M32.6 66.2 C35.3 65.8 37.2 65.8 39.5 65.8 C41.1 65.8 41.7 65.3 43.2 65.1 C45.3 64.9 47.0 65.6 49.1 65.3 C50.1 65.2 50.8 65.2 51.8 65.0" />
+          <path class="furong-waterline-path" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
+          <path class="furong-waterline-path" d="M96.1 60.7 C97.8 60.0 98.9 60.5 100.0 60.5" />
+        </g>
+        <g class="furong-waterline-hits">
+          <path class="furong-waterline-hit" d="M0.0 60.4 C2.0 60.9 3.8 61.1 4.8 60.2 C5.7 59.4 4.9 58.4 6.0 58.1 C8.4 58.1 10.7 58.5 13.0 59.1 C14.0 59.4 14.9 59.6 15.8 59.5" />
+          <path class="furong-waterline-hit" d="M13.5 59.5 C14.7 59.5 16.0 59.6 17.2 59.8" />
+          <path class="furong-waterline-hit" d="M19.2 58.8 C20.8 58.8 22.0 58.6 22.6 58.3 C23.5 57.8 24.3 59.6 25.4 59.8 C26.7 60.1 27.1 58.9 28.2 58.5 C29.2 58.1 30.2 58.5 31.3 58.1" />
+          <path class="furong-waterline-hit" d="M31.3 58.1 C33.2 57.2 33.6 56.8 35.7 56.5 C37.0 56.3 38.0 56.0 39.4 54.9" />
+          <path class="furong-waterline-hit" d="M32.6 66.2 C35.3 65.8 37.2 65.8 39.5 65.8 C41.1 65.8 41.7 65.3 43.2 65.1 C45.3 64.9 47.0 65.6 49.1 65.3 C50.1 65.2 50.8 65.2 51.8 65.0" />
+          <path class="furong-waterline-hit" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
+          <path class="furong-waterline-hit" d="M96.1 60.7 C97.8 60.0 98.9 60.5 100.0 60.5" />
+        </g>
+      </svg>
+    `;
     this._waterline.tabIndex = 0;
     this._waterline.setAttribute('role', 'button');
     this._waterline.setAttribute('aria-label', '水面分界线');
@@ -444,7 +474,7 @@ export default class Chapter1PaintScene {
     this._furongWrap.appendChild(this._waterline);
 
     // 真实栏杆（第一个可点击元素）— 3-6
-    this._realRailing = this._createHotspot(50, 35, 12, () => {
+    this._realRailing = this._createHotspot(44.8, 56.5, 12, () => {
       if (this._isNarrating) return;
       this._furongRailingClicks += 1;
       let msg = '你摸了摸栏杆。什么都没有。';
@@ -470,9 +500,9 @@ export default class Chapter1PaintScene {
       <div class="hairpin-gleam visible"></div>
       <span class="hairpin-icon" aria-hidden="true">
         <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
-          <path class="hairpin-stem" d="M18 36 C20 28 23 18 27 8" />
-          <path class="hairpin-break" d="M15 29 L22 24" />
-          <path class="hairpin-flower" d="M27 9 C20 10 17 15 20 21 C25 19 29 15 27 9" />
+          <path class="hairpin-stem" d="M18 35 L29 8" />
+          <path class="hairpin-tip" d="M27 8 L33 10" />
+          <path class="hairpin-break" d="M15 29 L21 32" />
         </svg>
       </span>
     `;
@@ -521,9 +551,9 @@ export default class Chapter1PaintScene {
       <div class="hairpin-gleam visible"></div>
       <span class="hairpin-icon" aria-hidden="true">
         <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
-          <path class="hairpin-stem" d="M18 36 C20 28 23 18 27 8" />
-          <path class="hairpin-break" d="M15 29 L22 24" />
-          <path class="hairpin-flower" d="M27 9 C20 10 17 15 20 21 C25 19 29 15 27 9" />
+          <path class="hairpin-stem" d="M18 35 L29 8" />
+          <path class="hairpin-tip" d="M27 8 L33 10" />
+          <path class="hairpin-break" d="M15 29 L21 32" />
         </svg>
       </span>
     `;
