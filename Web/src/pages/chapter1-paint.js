@@ -499,11 +499,12 @@ export default class Chapter1PaintScene {
     this._hairpinReflection.innerHTML = `
       <div class="hairpin-gleam visible"></div>
       <span class="hairpin-icon" aria-hidden="true">
-        <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
-          <path class="hairpin-stem" d="M18 35 L29 8" />
-          <path class="hairpin-tip" d="M27 8 L33 10" />
-          <path class="hairpin-break" d="M15 29 L21 32" />
-        </svg>
+        <span class="css-hairpin css-hairpin--scene" aria-hidden="true">
+          <span class="css-hairpin__shaft"></span>
+          <span class="css-hairpin__coil css-hairpin__coil--main"></span>
+          <span class="css-hairpin__coil css-hairpin__coil--upper"></span>
+          <span class="css-hairpin__coil css-hairpin__coil--lower"></span>
+        </span>
       </span>
     `;
     const onHairpinReflectionInteract = async () => {
@@ -550,11 +551,12 @@ export default class Chapter1PaintScene {
     this._hairpinReal.innerHTML = `
       <div class="hairpin-gleam visible"></div>
       <span class="hairpin-icon" aria-hidden="true">
-        <svg class="hairpin-svg" viewBox="0 0 44 44" focusable="false">
-          <path class="hairpin-stem" d="M18 35 L29 8" />
-          <path class="hairpin-tip" d="M27 8 L33 10" />
-          <path class="hairpin-break" d="M15 29 L21 32" />
-        </svg>
+        <span class="css-hairpin css-hairpin--scene" aria-hidden="true">
+          <span class="css-hairpin__shaft"></span>
+          <span class="css-hairpin__coil css-hairpin__coil--main"></span>
+          <span class="css-hairpin__coil css-hairpin__coil--upper"></span>
+          <span class="css-hairpin__coil css-hairpin__coil--lower"></span>
+        </span>
       </span>
     `;
     const onHairpinRealInteract = async () => {

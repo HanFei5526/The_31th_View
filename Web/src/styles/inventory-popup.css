@@ -97,6 +97,65 @@
   padding: 6px;
 }
 
+.inventory-item-icon .css-hairpin {
+  color: #d4a853;
+  position: relative;
+  display: block;
+  width: 66px;
+  height: 66px;
+  transform: rotate(-31deg);
+}
+
+.inventory-item-icon .css-hairpin__shaft {
+  position: absolute;
+  left: 5px;
+  top: 38px;
+  width: 39px;
+  height: 0;
+  border-top: 2px solid currentColor;
+  border-radius: 999px;
+  transform: none;
+  transform-origin: right center;
+  z-index: 0;
+}
+
+.inventory-item-icon .css-hairpin__shaft::before {
+  display: none;
+}
+
+.inventory-item-icon .css-hairpin__coil {
+  position: absolute;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  z-index: 1;
+}
+
+.inventory-item-icon .css-hairpin__coil::after {
+  display: none;
+}
+
+.inventory-item-icon .css-hairpin__coil--main {
+  left: 41.2px;
+  top: 31px;
+  transform: rotate(-18deg);
+}
+
+.inventory-item-icon .css-hairpin__coil--upper {
+  left: 45.2px;
+  top: 23.4px;
+  transform: rotate(24deg);
+}
+
+.inventory-item-icon .css-hairpin__coil--lower {
+  left: 48px;
+  top: 34px;
+  transform: rotate(-20deg);
+}
+
 .inventory-item-info {
   flex: 1;
 }
@@ -156,6 +215,10 @@
 .paint-world .inventory-item-icon {
   background: rgba(245, 238, 220, 0.6);
   border: 1px dashed rgba(142, 112, 74, 0.35);
+}
+
+.paint-world .inventory-item-icon .css-hairpin {
+  color: #d4a853;
 }
 
 .paint-world .inventory-item-name {

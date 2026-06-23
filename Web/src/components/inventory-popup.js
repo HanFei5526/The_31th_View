@@ -92,12 +92,12 @@ export class InventoryPopup {
         `;
       } else if (item.id === 'hairpin') {
         icon.innerHTML = `
-          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="23" y1="49" x2="41" y2="15" />
-            <line x1="38" y1="14" x2="47" y2="17" />
-            <line x1="18" y1="39" x2="27" y2="44" />
-            <circle cx="41" cy="15" r="1.8" fill="#d4a853" stroke="none" opacity="0.7" />
-          </svg>
+          <span class="css-hairpin css-hairpin--inventory" aria-hidden="true">
+            <span class="css-hairpin__shaft"></span>
+            <span class="css-hairpin__coil css-hairpin__coil--main"></span>
+            <span class="css-hairpin__coil css-hairpin__coil--upper"></span>
+            <span class="css-hairpin__coil css-hairpin__coil--lower"></span>
+          </span>
         `;
       } else {
         icon.innerHTML = `

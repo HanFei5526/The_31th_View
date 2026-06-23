@@ -1500,31 +1500,63 @@ a {
   filter: drop-shadow(0 0 5px rgba(212, 168, 83, 0.48));
 }
 
-.furong-hairpin .hairpin-svg {
-  width: 34px;
-  height: 34px;
-  overflow: visible;
+.furong-hairpin .css-hairpin {
+  color: #d4a853;
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 48px;
+  transform: rotate(-31deg);
 }
 
-.furong-hairpin .hairpin-svg path {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.furong-hairpin .css-hairpin__shaft {
+  position: absolute;
+  left: 3px;
+  top: 28px;
+  width: 29.4px;
+  height: 0;
+  border-top: 1.6px solid currentColor;
+  border-radius: 999px;
+  transform: none;
+  transform-origin: right center;
+  z-index: 0;
 }
 
-.furong-hairpin .hairpin-stem {
-  stroke: rgba(95, 78, 54, 0.84);
-  stroke-width: 2;
+.furong-hairpin .css-hairpin__shaft::before {
+  display: none;
 }
 
-.furong-hairpin .hairpin-tip {
-  stroke: rgba(212, 168, 83, 0.86);
-  stroke-width: 1.8;
+.furong-hairpin .css-hairpin__coil {
+  position: absolute;
+  box-sizing: border-box;
+  width: 7.4px;
+  height: 7.4px;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  z-index: 1;
 }
 
-.furong-hairpin .hairpin-break {
-  stroke: rgba(226, 183, 72, 0.9);
-  stroke-width: 1.6;
+.furong-hairpin .css-hairpin__coil::after {
+  display: none;
+}
+
+.furong-hairpin .css-hairpin__coil--main {
+  left: 30.8px;
+  top: 24.3px;
+  transform: rotate(-18deg);
+}
+
+.furong-hairpin .css-hairpin__coil--upper {
+  left: 34.1px;
+  top: 18.6px;
+  transform: rotate(24deg);
+}
+
+.furong-hairpin .css-hairpin__coil--lower {
+  left: 36.8px;
+  top: 26.5px;
+  transform: rotate(-20deg);
 }
 
 /* 翻转后让图标重新正立（抵消容器的 scaleY(-1)） */
