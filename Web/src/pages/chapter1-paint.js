@@ -186,28 +186,28 @@ export default class Chapter1PaintScene {
     this._lanxueExplorationComplete = false;
 
     // 氛围热点：翠竹（左侧竹林区域）— 1-7b
-    const bambooSpot = this._createHotspot(15, 50, 12, async () => {
+    const bambooSpot = this._createHotspot(16, 60, 12, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你拨开竹叶。沙沙作响，但手上没有感到风。');
       await this._markLanxueSpotVisited('bamboo', { delayBeforeCompletion: 900 });
     }, '翠竹');
 
     // 氛围热点：青石板路（底部路面）— 1-7a
-    const stonePath = this._createHotspot(50, 85, 10, async () => {
+    const stonePath = this._createHotspot(42, 93, 10, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你踩了踩脚下的石板。有些温热，纹理清晰得像刚刻上去的。');
       await this._markLanxueSpotVisited('stonePath', { delayBeforeCompletion: 900 });
     }, '青石板路');
 
     // 氛围热点：廊柱（建筑右侧）— 1-7c
-    const pillarSpot = this._createHotspot(70, 55, 6, async () => {
+    const pillarSpot = this._createHotspot(60.5, 63, 6, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('你走到廊柱边，伸手碰了碰。木纹里藏着细密的墨线——这不是一根真正的柱子，它是一笔画出来的。');
       await this._markLanxueSpotVisited('pillar', { delayBeforeCompletion: 900 });
     }, '廊柱');
 
     // 叙事触发：匾额（建筑区域，必须点击才能推进）— 1-8~1-14
-    const plaqueSpot = this._createHotspot(50, 22, 8, async () => {
+    const plaqueSpot = this._createHotspot(50, 38, 8, async () => {
       if (this._isNarrating) return;
       if (this.engine.gameProgress.plaqueNoted) {
         this.narrationBar.showFloating('兰雪堂匾额上，那道极细的横笔已经记在笔记本里。');
@@ -296,7 +296,7 @@ export default class Chapter1PaintScene {
     this._zhuiyunEl.style.backgroundImage = `url('${this._bgZhuiyun}')`;
 
     // 可选互动：石缝（峰石左下方）— 2-3~2-7
-    const crackSpot = this._createHotspot(30, 72, 8, async () => {
+    const crackSpot = this._createHotspot(41, 75, 8, async () => {
       if (this._isNarrating) return;
       if (this.engine.gameProgress.zhuiyunExplored) {
         this._isNarrating = true;
@@ -321,7 +321,7 @@ export default class Chapter1PaintScene {
     }, '石缝');
 
     // 前进箭头 — 2-8（石缝为可选互动，不阻塞主线）
-    this._zhuiyunArrow = this._createNavArrow(75, 65, 10, async () => {
+    this._zhuiyunArrow = this._createNavArrow(77.5, 65, 10, async () => {
       if (this._isNarrating) return;
       this._isNarrating = true;
       await this.narrationBar.playLine('沈念', '前面有水声。像是快到什么水边的建筑了。', { portrait: '/images/common/shennian_1.png' });

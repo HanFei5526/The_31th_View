@@ -121,3 +121,51 @@
   padding: 2rem;
   font-style: italic;
 }
+
+/* =========================================================
+   画中世界主题 — 宣纸暖底、深墨文字
+   ========================================================= */
+
+.paint-world .inventory-popup {
+  background: rgba(235, 225, 205, 0.95);
+  border: 1.5px solid rgba(142, 112, 74, 0.5);
+  box-shadow: 0 15px 40px rgba(60, 40, 20, 0.2);
+}
+
+.paint-world .inventory-header {
+  border-bottom: 1px solid rgba(142, 112, 74, 0.25);
+}
+
+.paint-world .inventory-title {
+  color: #5c4020;
+}
+
+.paint-world .inventory-close {
+  color: #8c7a60;
+}
+
+.paint-world .inventory-close:hover {
+  color: #3b2a1a;
+}
+
+.paint-world .inventory-item {
+  background: rgba(255, 252, 245, 0.5);
+  border: 1px solid rgba(142, 112, 74, 0.2);
+}
+
+.paint-world .inventory-item-icon {
+  background: rgba(245, 238, 220, 0.6);
+  border: 1px dashed rgba(142, 112, 74, 0.35);
+}
+
+.paint-world .inventory-item-name {
+  color: #2b231d;
+}
+
+.paint-world .inventory-item-desc {
+  color: #5c4f42;
+}
+
+.paint-world .inventory-empty {
+  color: #8c7a60;
+}

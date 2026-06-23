@@ -521,11 +521,11 @@
 
 /* --- 主容器 --- */
 .paint-world .notebook-floating {
-  background: rgba(230, 222, 205, 0.65); /* 对齐对话框宣纸底色 */
-  backdrop-filter: blur(3px) sepia(10%);
-  -webkit-backdrop-filter: blur(3px) sepia(10%);
-  border: 1px solid rgba(180, 155, 115, 0.25); /* 对齐对话框茶线边框 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.15);
+  background: rgba(232, 224, 208, 0.82); /* 比对话框略高遮盖，保证内部层次可读 */
+  backdrop-filter: blur(4px) sepia(10%);
+  -webkit-backdrop-filter: blur(4px) sepia(10%);
+  border: 1px solid rgba(180, 155, 115, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), inset 0 0 20px rgba(255, 255, 255, 0.12);
 }
 
 /* 综合研讨态 */
@@ -540,7 +540,7 @@
 
 /* --- Tab 头部 --- */
 .paint-world .notebook-header {
-  border-bottom: 1px solid rgba(180, 155, 115, 0.15);
+  border-bottom: 1px solid rgba(180, 155, 115, 0.22);
 }
 
 .paint-world .notebook-tab {
@@ -570,14 +570,14 @@
 
 /* --- 聊天气泡 --- */
 .paint-world .chat-bubble.npc {
-  background: rgba(255, 255, 255, 0.5);
-  color: #2b231d; /* 对齐对话框人物正文色 */
+  background: rgba(255, 252, 245, 0.72);
+  color: #2b231d;
   border-left: 2px solid #a89468;
 }
 
 .paint-world .chat-bubble.player {
-  background: rgba(180, 155, 115, 0.15);
-  color: #2b231d; /* 对齐对话框人物正文色 */
+  background: rgba(180, 155, 115, 0.22);
+  color: #2b231d;
   border-right: 2px solid #a89468;
 }
 
@@ -592,24 +592,24 @@
 
 /* --- 快捷问题区 --- */
 .paint-world .quick-thought-btn {
-  background: rgba(168, 148, 104, 0.06);
-  border: 1px solid rgba(180, 155, 115, 0.3);
-  color: #a89468;
+  background: rgba(168, 148, 104, 0.12);
+  border: 1px solid rgba(140, 112, 60, 0.45);
+  color: #7a6030;
 }
 
 .paint-world .quick-thought-btn:hover:not(:disabled) {
-  background: rgba(168, 148, 104, 0.15);
+  background: rgba(168, 148, 104, 0.22);
 }
 
 /* --- 输入框区 --- */
 .paint-world .notebook-input-area {
-  border-top: 1px solid rgba(180, 155, 115, 0.15);
+  border-top: 1px solid rgba(180, 155, 115, 0.22);
 }
 
 .paint-world .notebook-input {
-  background: rgba(0, 0, 0, 0.06); /* 极浅底，宣纸上的微灰 */
-  border: 1px solid rgba(180, 155, 115, 0.25);
-  color: #2b231d; /* 对齐对话框人物正文色 */
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(180, 155, 115, 0.32);
+  color: #2b231d;
 }
 
 .paint-world .notebook-input:focus {
@@ -635,7 +635,7 @@
 
 /* --- 加载态 --- */
 .paint-world .notebook-floating.is-loading .notebook-chat-history::after {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 252, 245, 0.7);
   color: #5c4f42;
 }
 
@@ -650,14 +650,14 @@
 
 /* --- 记录 Tab --- */
 .paint-world .clue-card {
-  background: rgba(168, 148, 104, 0.06);
+  background: rgba(168, 148, 104, 0.09);
   border-left: 3px solid #a89468;
   color: #2b231d;
 }
 
 /* --- 工具区 --- */
 .paint-world .notebook-tool-section {
-  border-top: 1px solid rgba(180, 155, 115, 0.2);
+  border-top: 1px solid rgba(180, 155, 115, 0.25);
 }
 
 .paint-world .notebook-tool-title {
@@ -665,9 +665,9 @@
 }
 
 .paint-world .notebook-tool-btn {
-  border: 1px solid rgba(168, 148, 104, 0.5) !important;
+  border: 1px solid rgba(168, 148, 104, 0.55) !important;
   color: #a89468 !important;
-  box-shadow: 0 0 6px rgba(168, 148, 104, 0.08), inset 0 0 6px rgba(168, 148, 104, 0.08) !important;
+  box-shadow: 0 0 6px rgba(168, 148, 104, 0.1), inset 0 0 6px rgba(168, 148, 104, 0.1) !important;
 }
 
 .paint-world .notebook-tool-btn:hover {
