@@ -313,9 +313,20 @@
   animation: confirmPulse 1.2s ease-in-out infinite;
 }
 
+.poem-compare-confirm-btn-wrong {
+  animation: confirmWrong 0.34s ease;
+  border-color: rgba(190, 50, 38, 0.75);
+}
+
 @keyframes confirmPulse {
   0%, 100% { transform: scale(1); box-shadow: 2px 2px 0px rgba(88, 72, 48, 0.3); }
   50% { transform: scale(1.03); box-shadow: 0 0 12px rgba(180, 140, 60, 0.35); }
+}
+
+@keyframes confirmWrong {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 /* 响应式 */

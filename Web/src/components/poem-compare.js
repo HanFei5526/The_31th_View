@@ -57,12 +57,14 @@ export class PoemCompare {
     this._onDiffFound = null;
     this._onWrongClick = null;
     this._onDecoyConfirm = null;
+    this._onNoDiffReject = null;
   }
 
   onComplete(cb) { this._onComplete = cb; }
   onDiffFound(cb) { this._onDiffFound = cb; }
   onWrongClick(cb) { this._onWrongClick = cb; }
   onDecoyConfirm(cb) { this._onDecoyConfirm = cb; }
+  onNoDiffReject(cb) { this._onNoDiffReject = cb; }
 
   mount(container) {
     this._container = container;
@@ -99,7 +101,6 @@ export class PoemCompare {
   _renderCurrentPoem() {
     if (!this._contentContainer) return;
     const poem = POEMS[this._currentPoem];
-    const isDecoy = poem.diffIndex === -1;
 
     this._contentContainer.innerHTML = `
       <div class="poem-compare-header">
@@ -124,11 +125,11 @@ export class PoemCompare {
       <div class="poem-compare-progress">
         ${this._renderProgressSlots()}
       </div>
-      ${isDecoy ? '<button class="poem-compare-confirm-btn">确认无差异</button>' : ''}
+      <button class="poem-compare-confirm-btn">确认无差异</button>
     `;
 
     this._renderChars(poem);
-    this._bindEvents(poem, isDecoy);
+    this._bindEvents(poem);
     this._resetIdleTimer();
   }
 
@@ -155,17 +156,15 @@ export class PoemCompare {
     });
   }
 
-  _bindEvents(poem, isDecoy) {
+  _bindEvents(poem) {
     const leftChars = this._contentContainer.querySelectorAll('.poem-char-clickable');
     leftChars.forEach(span => {
       span.addEventListener('click', () => this._handleCharClick(span, poem));
     });
 
-    if (isDecoy) {
-      const btn = this._contentContainer.querySelector('.poem-compare-confirm-btn');
-      if (btn) {
-        btn.addEventListener('click', () => this._handleDecoyConfirm());
-      }
+    const btn = this._contentContainer.querySelector('.poem-compare-confirm-btn');
+    if (btn) {
+      btn.addEventListener('click', () => this._handleNoDiffConfirm(poem, btn));
     }
   }
 
@@ -187,10 +186,20 @@ export class PoemCompare {
     }
   }
 
-  _handleDecoyConfirm() {
-    this._clearIdleTimer();
-    if (this._onDecoyConfirm) this._onDecoyConfirm();
-    setTimeout(() => this._advancePoem(), 800);
+  _handleNoDiffConfirm(poem, btn) {
+    const isDecoy = poem.diffIndex === -1;
+    if (isDecoy) {
+      this._clearIdleTimer();
+      if (this._onDecoyConfirm) this._onDecoyConfirm();
+      setTimeout(() => this._advancePoem(), 800);
+      return;
+    }
+
+    btn.classList.remove('poem-compare-confirm-btn-wrong');
+    void btn.offsetWidth;
+    btn.classList.add('poem-compare-confirm-btn-wrong');
+    this._wrongClicks++;
+    if (this._onNoDiffReject) this._onNoDiffReject(this._wrongClicks);
   }
 
   _advancePoem() {

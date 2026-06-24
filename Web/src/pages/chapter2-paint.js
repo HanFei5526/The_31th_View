@@ -233,6 +233,10 @@ export default class Chapter2PaintScene {
       }
     });
 
+    this.poemCompare.onNoDiffReject(() => {
+      this.narrationBar.showFloating('还不能确认无差异，再逐字对照一遍。');
+    });
+
     this.poemCompare.onDecoyConfirm(() => {
       this.narrationBar.showFloating('这一首……每个字都对得上。看来不是每首诗都有差异。');
     });
