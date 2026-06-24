@@ -157,7 +157,7 @@ export default class Chapter2PaintScene {
     this._isNarrating = false;
 
     this.hudBar.show();
-    await this.narrationBar.playLine(null, '右下角可打开【修复笔记本】：【对话】页可写下疑问与周老师批注讨论，【记录】页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
+    await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【对话】页可写下疑问与周老师批注讨论，【记录】页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -195,7 +195,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '这些诗……我见过。文徵明为拙政园三十一景各写的题诗，存世版本一直在各种诗集里流传。', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine(null, '你从袖中取出随身携带的参考抄本，展开来与墙上的题诗对照。乍一看并无不同——但你是做文物修复的人，逐字对比是基本功。');
     await this.narrationBar.playLine('沈念', '等等。这里有一个字……和传世版本不一样。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine(null, '诗词比对已开始。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
+    await this.narrationBar.playLine('系统提示', '诗词比对已开始。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -279,7 +279,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '断簪上的"蘅"……会是同一个人吗？留下名字，又在诗里藏了一句话？', { portrait: '/images/common/shennian_1.png' });
 
     this.notebook.addClueRecord('[线索] 题诗异文 — 五首题诗中四处差异字组合为"画非一人"，似乎暗示这套画作并非一人完成');
-    await this.narrationBar.playLine(null, '已记录线索：题诗异文「画非一人」。可在【修复笔记本】的【记录】页查看，也可在【对话】页写下你的判断。');
+    await this.narrationBar.playLine('系统提示', '已记录线索：题诗异文「画非一人」。可在【修复笔记本】的【记录】页查看，也可在【对话】页写下你的判断。');
 
     revealEl.classList.add('fade-out');
     await this._delay(1000);
@@ -310,7 +310,7 @@ export default class Chapter2PaintScene {
     this.notebook.addClueRecord('[线索] 旧批注残片 — "此页视点卑近，似非成稿……宜配边压覆"。不是恶意的销毁，而是规范化的遮蔽');
     this.engine.gameProgress.foundOldComment = true;
 
-    await this.narrationBar.playLine(null, '已记录线索：「旧批注残片」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
+    await this.narrationBar.playLine('系统提示', '已记录线索：「旧批注残片」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
 
     commentEl.classList.remove('visible');
@@ -390,7 +390,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '你走到桥中央。四周很静，只有水面偶尔泛起的涟漪。');
     this._isNarrating = false;
 
-    await this.narrationBar.playLine(null, '小飞虹周围可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
+    await this.narrationBar.playLine('系统提示', '小飞虹周围可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -440,7 +440,7 @@ export default class Chapter2PaintScene {
     this.engine.gameProgress.heardVoice = true;
     this.notebook.addClueRecord('[线索] 水面回声 — 小飞虹桥下墨涟漪浮现文字"知我者，唯有此园"。像是某个人留在水里的声音');
 
-    await this.narrationBar.playLine(null, '线索「水面回声："知我者，唯有此园"」已写入【修复笔记本】。可在【记录】页查看，也可在【对话】页继续梳理它和此前线索的关系。');
+    await this.narrationBar.playLine('系统提示', '线索「水面回声："知我者，唯有此园"」已写入【修复笔记本】。可在【记录】页查看，也可在【对话】页继续梳理它和此前线索的关系。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
   }
@@ -475,7 +475,7 @@ export default class Chapter2PaintScene {
 
     this.notebook.addClueRecord('[物件] 残砚 — 小型端砚，砚池残留朱砂。砚背刻有小词："园深不知处，花落有谁怜。画里青山在，无人识旧年。"不是正式作画工具，更像一个人的私人用砚');
 
-    await this.narrationBar.playLine(null, '已记录线索：「残砚·砚背小词」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
+    await this.narrationBar.playLine('系统提示', '已记录线索：「残砚·砚背小词」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
 
     this._hideItemDisplay(overlay);
 

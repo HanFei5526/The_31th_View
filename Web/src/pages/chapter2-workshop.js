@@ -135,7 +135,7 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     this.notebook.addClueRecord('（周老师的方法）版本比对与异文判断：逐字对照不同版本的同一文本，找出差异字。一个字是巧合，一句话是线索，一条证据链才是判断的依据。下一步：找物质证据——朱砂底稿线。');
 
     this.hudBar.show();
-    await this.narrationBar.playLine(null, '【修复笔记本】记录更新：周老师方法——版本比对与异文判断');
+    await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师方法——版本比对与异文判断');
 
     this.notebook.showQuickThoughts([
       '异文判断还能用在什么地方？',
