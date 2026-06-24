@@ -107,19 +107,19 @@ export class PoemCompare {
         <span class="poem-compare-counter">第 ${this._currentPoem + 1}/5 首</span>
       </div>
       <div class="poem-compare-columns">
-        <div class="poem-compare-col-label label-outside-left">画上题诗</div>
         <div class="poem-compare-col">
-          <div class="poem-compare-left">
+          <div class="poem-compare-col-label">画上题诗</div>
+          <div class="poem-compare-scroll-container">
             <div class="poem-compare-chars" data-side="left"></div>
           </div>
         </div>
         <div class="poem-compare-divider"></div>
         <div class="poem-compare-col">
-          <div class="poem-compare-right">
+          <div class="poem-compare-col-label">参考版本</div>
+          <div class="poem-compare-paper-container">
             <div class="poem-compare-chars" data-side="right"></div>
           </div>
         </div>
-        <div class="poem-compare-col-label label-outside-right">参考版本</div>
       </div>
       <div class="poem-compare-progress">
         ${this._renderProgressSlots()}

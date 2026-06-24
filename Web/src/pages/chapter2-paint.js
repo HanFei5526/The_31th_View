@@ -171,9 +171,9 @@ export default class Chapter2PaintScene {
   }
 
   _addYuanxiangHotspots(scene) {
-    this._createHotspot(scene, 52, 64, 10, () => this._onClickLotus(), '荷塘水面');
+    this._createHotspot(scene, 60, 51, 10, () => this._onClickLotus(), '荷塘水面');
     this._createHotspot(scene, 66, 82, 10, () => this._onClickDesk(), '画案');
-    this._createHotspot(scene, 21, 46, 12, () => this._onClickPoemWall(), '题诗墙');
+    this._createHotspot(scene, 13, 51, 12, () => this._onClickPoemWall(), '题诗墙');
   }
 
   async _onClickLotus() {

@@ -602,6 +602,7 @@ export default class GameSceneBase {
       transform: translateY(0);
     }
 
+    .gs-hotspot:focus,
     .gs-hotspot:focus-visible {
       outline: none;
     }

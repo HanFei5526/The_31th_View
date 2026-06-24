@@ -89,6 +89,7 @@
   transition: transform 0.1s ease;
 }
 
+.ch3-hotspot:focus,
 .ch3-hotspot:focus-visible {
   outline: none;
   border-radius: 50%;

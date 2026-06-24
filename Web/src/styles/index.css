@@ -1283,6 +1283,7 @@ a {
   transition: transform 0.1s ease;
 }
 
+.ch1-hotspot:focus,
 .ch1-hotspot:focus-visible {
   outline: none;
   border-radius: 50%;
@@ -1661,6 +1662,17 @@ a {
   z-index: 1;
 }
 
+.ch2-subscene [role="button"] {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ch2-subscene [role="button"]:focus,
+.ch2-subscene [role="button"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .ch2-subscene.active {
   opacity: 1;
   z-index: 2;
@@ -1708,6 +1720,12 @@ a {
   pointer-events: all;
   border-radius: 50%;
   z-index: 5;
+}
+
+.ch2-hotspot:focus,
+.ch2-hotspot:focus-visible {
+  outline: none;
+  border-radius: 50%;
 }
 
 .ch2-hotspot-glow {
