@@ -404,8 +404,7 @@ export default class Chapter2PaintScene {
   }
 
   _addXiaofeihongHotspots(scene) {
-    this._createHotspot(scene, 30, 60, 15, () => this._onClickWater(), '水面');
-    this._createHotspot(scene, 70, 60, 15, () => this._onClickWater(), '水面');
+    this._createHotspot(scene, 55, 60, 16, () => this._onClickWater(), '水面');
     this._inkstoneSpot = this._createHotspot(scene, 22, 78, 8, () => this._onClickInkstone(), '桥脚石台');
   }
 
