@@ -1964,8 +1964,8 @@ a {
 }
 
 .item-display-image {
-  max-width: min(360px, 60vw);
-  max-height: min(360px, 50vh);
+  max-width: min(180px, 30vw);
+  max-height: min(180px, 25vh);
   /* 使用 drop-shadow 替代 box-shadow，让发光和阴影只贴合不透明像素的轮廓，避免出现长方形隐框 */
   filter: drop-shadow(0 8px 30px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 40px rgba(180, 140, 80, 0.2));
   object-fit: contain;
