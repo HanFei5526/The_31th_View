@@ -738,7 +738,7 @@ export default class Chapter3PaintScene {
     this.notebook.setLightweightMode?.(true);
 
     this.notebook.showSystemMessage?.('（周老师的批注浮现了）');
-    this.notebook.showNPCMessage('（周老师的方法）底层痕迹还原：同源材料在画中世界的呼应，本质上是修复学中"材料溯源"的游戏化表达。朱砂认朱砂，刻痕认刻痕——物与物之间的记忆，有时比文字更可靠。');
+    this.notebook.showNPCMessage('（周老师的批注）底层痕迹还原：同源材料在画中世界的呼应，本质上是修复学中"材料溯源"的游戏化表达。朱砂认朱砂，刻痕认刻痕——物与物之间的记忆，有时比文字更可靠。');
 
     await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师的批注。可在【对话】页继续讨论，或跳过继续。');
     this.narrationBar.dismiss();

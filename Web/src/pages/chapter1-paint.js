@@ -852,7 +852,7 @@ export default class Chapter1PaintScene {
     this.notebook.setLightweightMode(true);
 
     this.notebook.showSystemMessage('（轻量梳理开始，你可以随时跳过）');
-    this.notebook.showNPCMessage('周老师的批注："蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。刻在簪身背面，不是正面——如果是工匠标记，通常会在簪头或底座。这更像是物主自己留给自己的。那么，是谁把自己的名字藏在了一支断簪上？');
+    this.notebook.showNPCMessage('（周老师的批注）"蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。刻在簪身背面，不是正面——如果是工匠标记，通常会在簪头或底座。这更像是物主自己留给自己的。那么，是谁把自己的名字藏在了一支断簪上？');
 
     this.notebook.showQuickThoughts([
       '「蘅」字可能指什么？',

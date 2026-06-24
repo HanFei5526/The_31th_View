@@ -207,7 +207,7 @@ export default class PaintingViewer {
   triggerConvergence() {
     if (!this._allRecorded || this._convergenceShown) return;
 
-    this._showFeedback('已成功推理得出结论。你可以在右侧【修复笔记本】的【对话】页继续探讨，或在【记录】页查阅已写入的结论摘要。如不需进一步讨论，点击古画中央的闪烁光点，即可继续剧情。');
+    this._showFeedback('已成功推理得出结论。可在【记录】页查看，也可在【对话】页继续讨论。点击古画中央的闪烁光点，即可继续剧情。');
 
     setTimeout(() => {
       this._playConvergence();
@@ -229,7 +229,7 @@ export default class PaintingViewer {
     this._updateStatus();
 
     // 即时反馈
-    this._showFeedback(`发现了「${clue.title}」的相关线索。内容已经整理到了右侧【修复笔记本】的【记录】页，如果有疑问，随时可以到【对话】页发起讨论。`);
+    this._showFeedback(`发现了「${clue.title}」的相关线索。可在【记录】页查看，也可在【对话】页继续讨论。`);
 
     // 判断是否触发汇聚
     this._checkConvergence();
