@@ -317,7 +317,7 @@ export default class Chapter3PaintScene {
       '南厅和北厅有什么区别？'
     ]);
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。【修复笔记本】的【记录】页可查看已有线索，【对话】页可写下疑问与周老师批注讨论。点击场景中的光点查看可交互的位置。');
+    await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。【记录】页可查看已有线索，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -361,7 +361,7 @@ export default class Chapter3PaintScene {
       '画的比例为什么不对？',
       '"画非一人"和这些草图有关系吗？'
     ]);
-    await this.narrationBar.playLine('系统提示', '北厅散落着大量画纸，可以仔细看看。【修复笔记本】的【记录】页可查看已有线索，【对话】页可写下疑问与周老师批注讨论。');
+    await this.narrationBar.playLine('系统提示', '北厅散落着大量画纸，可以仔细看看。【记录】页可查看已有线索，【对话】页可继续讨论。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -740,7 +740,7 @@ export default class Chapter3PaintScene {
     this.notebook.showSystemMessage?.('（周老师的批注浮现了）');
     this.notebook.showNPCMessage('（周老师的方法）底层痕迹还原：同源材料在画中世界的呼应，本质上是修复学中"材料溯源"的游戏化表达。朱砂认朱砂，刻痕认刻痕——物与物之间的记忆，有时比文字更可靠。');
 
-    await this.narrationBar.playLine('系统提示', '【修复笔记本】已更新。你可以和周老师的批注讨论，或跳过继续。');
+    await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师的批注。可在【对话】页继续讨论，或跳过继续。');
     this.narrationBar.dismiss();
 
     // 跳过按钮

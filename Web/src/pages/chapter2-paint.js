@@ -157,7 +157,7 @@ export default class Chapter2PaintScene {
     this._isNarrating = false;
 
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【对话】页可写下疑问与周老师批注讨论，【记录】页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
+    await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【记录】页可查看已获得的线索，【对话】页可写下疑问与周老师批注讨论。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -195,7 +195,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '这些诗……我见过。文徵明为拙政园三十一景各写的题诗，存世版本一直在各种诗集里流传。', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine(null, '你从袖中取出随身携带的参考抄本，展开来与墙上的题诗对照。乍一看并无不同——但你是做文物修复的人，逐字对比是基本功。');
     await this.narrationBar.playLine('沈念', '等等。这里有一个字……和传世版本不一样。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('系统提示', '诗词比对已开始。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
+    await this.narrationBar.playLine('系统提示', '已进入诗词比对。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 

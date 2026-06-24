@@ -719,7 +719,7 @@ export default class Chapter1PaintScene {
       '为什么我看到的兰雪堂和照片里不一样？'
     ]);
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【对话】页可写下疑问与周老师批注讨论，【记录】页可查看已获得的线索。准备好后，点击场景中的景物即可开始探索。');
+    await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【记录】页可查看已获得的线索，【对话】页可写下疑问与周老师批注讨论。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
     this._showLanxueHotspots();
@@ -841,7 +841,7 @@ export default class Chapter1PaintScene {
 
     // 旁白已经暗示了倒影中有东西，给出不剧透顺序的谜题提示。
     this._isNarrating = true;
-    await this.narrationBar.playLine('系统提示', '倒影谜题已开始。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
+    await this.narrationBar.playLine('系统提示', '已进入倒影谜题。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
     this._resetIdleTimer('initial');

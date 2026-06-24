@@ -166,7 +166,7 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     ]);
 
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师建议——关注题跋、匾额与边注。你可以在【记录】页查看刚更新的判断和线索；如果想继续梳理，也可以回到【对话】页，用新的快捷问题或自己的话继续讨论。');
+    await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师建议——关注题跋、匾额与边注。可在【记录】页查看，也可在【对话】页继续讨论。');
 
     await this.narrationBar.playLine(null, '窗外的梧桐树在晚风里轻轻摇动。你合上笔记本，但脑海中仍然浮着那个字。');
     await this.narrationBar.playLine('沈念', '蘅。是谁？', { portrait: '/images/common/shennian_2.png' });
