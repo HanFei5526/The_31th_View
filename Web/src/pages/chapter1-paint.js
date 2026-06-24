@@ -210,7 +210,7 @@ export default class Chapter1PaintScene {
     const plaqueSpot = this._createHotspot(50, 38, 8, async () => {
       if (this._isNarrating) return;
       if (this.engine.gameProgress.plaqueNoted) {
-        this.narrationBar.showFloating('兰雪堂匾额上，那道极细的横笔已经记在修复笔记本里。');
+        this.narrationBar.showFloating('兰雪堂匾额上，那道极细的横笔已经记在【修复笔记本】里。');
         await this._markLanxueSpotVisited('plaque', { delayBeforeCompletion: 900 });
         return;
       }
@@ -803,7 +803,7 @@ export default class Chapter1PaintScene {
       '峰石背后低处那点微光是什么？',
       '这座峰石周围还藏着什么？'
     ]);
-    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。你可以打开【修复笔记本】查看线索或继续讨论，也可以点击场景中的光点探索。');
+    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。可在【记录】页查看，也可在【对话】页继续讨论。点击场景中的光点继续探索。');
   }
 
   async _switchToFurong() {
