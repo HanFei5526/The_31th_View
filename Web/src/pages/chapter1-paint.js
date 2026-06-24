@@ -224,7 +224,7 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.plaqueNoted = true;
       this.notebook.addClueRecord('[线索] 匾额多余笔画 — 兰雪堂匾额"兰"字草字头下多了一道极细横笔，笔力稳定，墨色一致，非败笔');
-      await this.narrationBar.playLine('系统提示', '这处异常已经写入【修复笔记本】。之后可以点击右下角【修复笔记本】，切到【记录】页查看已经获得的线索；如果想继续追问，也可以回到【对话】页，把你的判断写下来。');
+      await this.narrationBar.playLine('系统提示', '已记录线索：「匾额多余笔画」。可在【记录】页查看，也可在【对话】页继续讨论。');
 
       await this.narrationBar.playLine('沈念', '这座厅后面还有路。石径延伸过去，像是有什么在更深处等着。', { portrait: '/images/common/shennian_1.png' });
       this.narrationBar.dismiss();
@@ -301,7 +301,7 @@ export default class Chapter1PaintScene {
       if (this.engine.gameProgress.zhuiyunExplored) {
         this._isNarrating = true;
         await this.narrationBar.playLine(null, '你再次蹲低，看向峰石背后的缝隙。那一线光仍在那里，只有把视线压到足够低时才会出现。');
-        await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在【记录】页查看，也可到【对话】页继续梳理它和此前线索的关系。');
+        await this.narrationBar.playLine('系统提示', '已记录线索：「有些景，只从低处出现」。可在【记录】页查看，也可在【对话】页继续讨论。');
         this.narrationBar.dismiss();
         this._isNarrating = false;
         return;
@@ -314,7 +314,7 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.zhuiyunExplored = true;
       this.notebook.addClueRecord('有些景，只从低处出现。');
-      await this.narrationBar.playLine('系统提示', '线索「有些景，只从低处出现。」已写入修复笔记本。可在【记录】页查看，也可到【对话】页继续梳理它和此前线索的关系。');
+      await this.narrationBar.playLine('系统提示', '已记录线索：「有些景，只从低处出现」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
       this._isNarrating = false;
 
@@ -587,7 +587,7 @@ export default class Chapter1PaintScene {
       this.notebook.addClueRecord('[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明');
       this.notebook.expand();
       this.notebook.setLightweightMode(true);
-      await this.narrationBar.playLine('系统提示', '已获得物件：「断簪」。断簪与「蘅」字刻痕已写入修复笔记本；可在【记录】页查看，也可在【梳理】页轻量讨论；如果暂时不想讨论，也可以跳过。');
+      await this.narrationBar.playLine('系统提示', '已获得物件「断簪」。可在【记录】页查看，也可在【梳理】页轻量讨论。');
 
       this._isNarrating = false;
       this._startLightDiscussion();

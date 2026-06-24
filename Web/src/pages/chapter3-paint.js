@@ -392,7 +392,7 @@ export default class Chapter3PaintScene {
 
     this.engine.gameProgress.seenBleedingText = true;
     this.notebook.addClueRecord('[线索] 渗字"看得到吗" — 画纸上自行渗出的墨字，三个字没有问号，像不敢用太大的力气去问');
-    await this.narrationBar.playLine('系统提示', '已记录线索：渗字「看得到吗」。留听阁方向传来微弱声响，点击右侧光点前往。');
+    await this.narrationBar.playLine('系统提示', '已记录线索：「渗字"看得到吗"」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -462,7 +462,7 @@ export default class Chapter3PaintScene {
       await this.narrationBar.playLine('沈念', '有方向，有弧度……不像随手划的。灰泥底下有东西。有人把什么封在了里面。', { portrait: '/images/common/shennian_1.png' });
       await this.narrationBar.playLine('沈念', '只摸到一条线不够。我得再仔细感受一下这面墙。', { portrait: '/images/common/shennian_1.png' });
       this.notebook.addClueRecord('[线索] 封墙下的隐藏线条 — 灰泥表面下有弧线刻痕，非随手划痕，疑似被封住的图案');
-      await this.narrationBar.playLine('系统提示', '已记录线索：封墙下的隐藏线条。再次点击封墙，继续探查墙面下的痕迹。');
+      await this.narrationBar.playLine('系统提示', '已记录线索：「封墙下的隐藏线条」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
       this._isNarrating = false;
 
@@ -639,7 +639,7 @@ export default class Chapter3PaintScene {
     });
     this.engine.gameProgress.hasRubbing = true;
     this.notebook.addClueRecord('[物件] 草图拓片 — 留听阁墙面低位视角草图，证实王蘅的空间观看能力');
-    await this.narrationBar.playLine('系统提示', '获得物件「草图拓片」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
+    await this.narrationBar.playLine('系统提示', '已获得物件「草图拓片」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -684,7 +684,7 @@ export default class Chapter3PaintScene {
     });
     this.engine.gameProgress.hasLetter = true;
     this.notebook.addClueRecord('[物件] 王蘅的信 — "不必有名，不必有形。只要有痕迹。"');
-    await this.narrationBar.playLine('系统提示', '获得物件「王蘅的信」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
+    await this.narrationBar.playLine('系统提示', '已获得物件「王蘅的信」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
