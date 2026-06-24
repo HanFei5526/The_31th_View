@@ -119,12 +119,12 @@
   border-radius: 0;
 }
 
-/* 清理内部容器的特殊底色 */
+/* 清理内部容器的特殊底色，并让文字下移居中 */
 .poem-compare-scroll-container .poem-compare-chars,
 .poem-compare-paper-container .poem-compare-chars {
   background: transparent; 
   border: none;
-  padding: 0;
+  padding-top: 1.8rem; /* 只改字的位置，在容器中下移居中 */
   min-height: auto;
   width: 100%;
 }
@@ -222,27 +222,6 @@
   75% { transform: translateX(3px); }
 }
 
-/* 渐进提示 — 行高亮 */
-.poem-char-line-hint {
-  background: rgba(184, 134, 11, 0.06);
-  animation: lineHintPulse 2s ease-in-out infinite;
-}
-
-@keyframes lineHintPulse {
-  0%, 100% { background: rgba(184, 134, 11, 0.04); }
-  50% { background: rgba(184, 134, 11, 0.12); }
-}
-
-/* 渐进提示 — 字高亮 */
-.poem-char-direct-hint {
-  animation: directHintPulse 1.5s ease-in-out infinite;
-  border-color: rgba(184, 134, 11, 0.4);
-}
-
-@keyframes directHintPulse {
-  0%, 100% { background: rgba(184, 134, 11, 0.05); transform: scale(1); }
-  50% { background: rgba(184, 134, 11, 0.2); transform: scale(1.08); }
-}
 
 /* 进度槽 - 朱红印章格式 */
 .poem-compare-progress {
@@ -270,8 +249,8 @@
 }
 
 .poem-progress-slot.filled {
-  border: 1.5px solid rgba(180, 40, 30, 0.95); /* 盖印后变成朱红细实框 */
-  background: rgba(180, 40, 30, 0.9); /* 朱红印泥色 */
+  border: 1.5px solid rgba(115, 82, 55, 0.95); /* 盖印后变成中茶木褐细实框 */
+  background: rgba(145, 110, 80, 0.92); /* 中茶木褐色 */
   color: #fce7b2; /* 金黄色镌刻文字 */
   font-weight: bold;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.15); /* 阴阳文立体刻痕感 */

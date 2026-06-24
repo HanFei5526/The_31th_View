@@ -267,9 +267,11 @@ export class PoemCompare {
       if (level === 1) {
         this.engine.emit('poem-idle-hint', { text: '逐字对比，不要凭记忆。' });
       } else if (level === 2) {
-        this._highlightLine(poem);
+        // 去掉自动行高亮，保持画面干净
+        // this._highlightLine(poem);
       } else {
-        this._highlightChar(poem);
+        // 去掉自动字高亮，保持画面干净
+        // this._highlightChar(poem);
       }
     }
   }
