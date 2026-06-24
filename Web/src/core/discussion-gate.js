@@ -224,7 +224,7 @@ export class DiscussionGateManager {
       }
     } catch (err) {
       console.error('综合研讨处理错误:', err);
-      this.uiCallback.showNPCMessage('（网络似乎有些不稳定。先回到证据：三处痕迹都和来源说明有关。）');
+      this.uiCallback.showNPCMessage('（笔记本页边的墨迹暂时模糊了。先回到证据：三处痕迹都和来源说明有关。）');
     } finally {
       this.uiCallback.setLoading(false);
     }

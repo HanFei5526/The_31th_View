@@ -119,7 +119,7 @@ export default class FinaleScene {
     });
     this.hudBar.onInventoryClick?.(() => this.inventoryPopup.open());
     this.notebook.onSubmit?.(() => {
-      this.notebook.showSystemMessage?.('终章无对话功能。请回顾「记录」页中的线索。');
+      this.notebook.showSystemMessage?.('终章无对话功能。请回顾【记录】页中的线索。');
     });
   }
 
@@ -234,7 +234,7 @@ export default class FinaleScene {
     this.notebook.expand?.();
     this.notebook.switchTab?.('records');
     this.notebook.hideQuickThoughts?.();
-    this.notebook.showSystemMessage?.('终章只开放「记录」回顾。请根据已经获得的线索完成复原。');
+    this.notebook.showSystemMessage?.('终章只开放【记录】回顾。请根据已经获得的线索完成复原。');
 
     await this._delay(500);
     if (this._exited) return;

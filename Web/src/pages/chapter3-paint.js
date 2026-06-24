@@ -40,6 +40,7 @@ export default class Chapter3PaintScene {
     this._bgSouth = '/images/chapter3/chapter3-yuanyang-south.png';
     this._bgNorth = '/images/chapter3/chapter3-yuanyang-north.png';
     this._bgLiuting = '/images/chapter3/chapter3-liutingge.png';
+    this._bgLiutingRevealed = '/images/chapter3/chapter3-liutingge-revealed.png';
     this._bgSketchRevealed = '/images/chapter3/chapter3-sketch-revealed.png';
     this._bgPlaque = '/images/chapter1/chapter1-lanxuetang-plaque.png';
 
@@ -316,7 +317,7 @@ export default class Chapter3PaintScene {
       '南厅和北厅有什么区别？'
     ]);
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。笔记本「记录」页可查看已有线索，「对话」页可写下疑问与周老师批注讨论。点击场景中的光点查看可交互的位置。');
+    await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。【修复笔记本】的【记录】页可查看已有线索，【对话】页可写下疑问与周老师批注讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -360,7 +361,7 @@ export default class Chapter3PaintScene {
       '画的比例为什么不对？',
       '"画非一人"和这些草图有关系吗？'
     ]);
-    await this.narrationBar.playLine('系统提示', '北厅散落着大量画纸，可以仔细看看。笔记本「记录」页可查看已有线索，「对话」页可写下疑问与周老师批注讨论。');
+    await this.narrationBar.playLine('系统提示', '北厅散落着大量画纸，可以仔细看看。【修复笔记本】的【记录】页可查看已有线索，【对话】页可写下疑问与周老师批注讨论。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -391,7 +392,7 @@ export default class Chapter3PaintScene {
 
     this.engine.gameProgress.seenBleedingText = true;
     this.notebook.addClueRecord('[线索] 渗字"看得到吗" — 画纸上自行渗出的墨字，三个字没有问号，像不敢用太大的力气去问');
-    await this.narrationBar.playLine('系统提示', '已记录线索：渗字"看得到吗"。留听阁方向传来微弱声响，点击右侧光点前往。');
+    await this.narrationBar.playLine('系统提示', '已记录线索：渗字「看得到吗」。留听阁方向传来微弱声响，点击右侧光点前往。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -438,7 +439,7 @@ export default class Chapter3PaintScene {
       '封墙下面可能藏着什么？',
       '残砚和断簪在这里能派上什么用场？'
     ]);
-    await this.narrationBar.playLine('系统提示', '留听阁内可以继续探索。笔记本「记录」页已有之前的发现，「对话」页可继续讨论。点击场景中的光点查看可交互的位置。');
+    await this.narrationBar.playLine('系统提示', '留听阁内可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
@@ -553,9 +554,12 @@ export default class Chapter3PaintScene {
     await this.narrationBar.playLine(null, '灰泥沿旧刻痕簌簌剥落。簪尖的磨痕与墙上的旧线严丝合缝——她曾用这根簪，在未干的灰泥上划出这些定位线。');
     this.narrationBar.dismiss();
 
-    // 灰泥剥落动画 → 显示草图组件
+    await this._waitForImage(this._bgLiutingRevealed);
+
+    // 灰泥剥落动画 → 切换到墙面剥落态 → 显示草图组件
     this._plasterOverlay.classList.add('cracking');
     await this._delay(1200);
+    this._liutingEl.style.backgroundImage = `url('${this._bgLiutingRevealed}')`;
     this._plasterOverlay.style.display = 'none';
     this._redlinesOverlay.style.display = 'none';
 
@@ -635,7 +639,7 @@ export default class Chapter3PaintScene {
     });
     this.engine.gameProgress.hasRubbing = true;
     this.notebook.addClueRecord('[物件] 草图拓片 — 留听阁墙面低位视角草图，证实王蘅的空间观看能力');
-    await this.narrationBar.playLine('系统提示', '获得物件「草图拓片」。已写入笔记本「记录」页，可在「对话」页继续讨论。');
+    await this.narrationBar.playLine('系统提示', '获得物件「草图拓片」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -680,7 +684,7 @@ export default class Chapter3PaintScene {
     });
     this.engine.gameProgress.hasLetter = true;
     this.notebook.addClueRecord('[物件] 王蘅的信 — "不必有名，不必有形。只要有痕迹。"');
-    await this.narrationBar.playLine('系统提示', '获得物件「王蘅的信」。已写入笔记本「记录」页，可在「对话」页继续讨论。');
+    await this.narrationBar.playLine('系统提示', '获得物件「王蘅的信」。已写入【修复笔记本】的【记录】页，可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
@@ -736,7 +740,7 @@ export default class Chapter3PaintScene {
     this.notebook.showSystemMessage?.('（周老师的批注浮现了）');
     this.notebook.showNPCMessage('（周老师的方法）底层痕迹还原：同源材料在画中世界的呼应，本质上是修复学中"材料溯源"的游戏化表达。朱砂认朱砂，刻痕认刻痕——物与物之间的记忆，有时比文字更可靠。');
 
-    await this.narrationBar.playLine('系统提示', '笔记本已更新。你可以和周老师的批注讨论，或跳过继续。');
+    await this.narrationBar.playLine('系统提示', '【修复笔记本】已更新。你可以和周老师的批注讨论，或跳过继续。');
     this.narrationBar.dismiss();
 
     // 跳过按钮
