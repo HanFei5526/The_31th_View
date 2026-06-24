@@ -282,7 +282,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '已记录线索：题诗异文"画非一人"。可在笔记本「记录」页查看，也可在「对话」页写下你的判断。');
 
     revealEl.classList.add('fade-out');
-    await this._delay(600);
+    await this._delay(1000);
     revealEl.remove();
 
     await this._showOldComment();

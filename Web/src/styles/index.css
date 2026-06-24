@@ -1761,12 +1761,12 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(245, 230, 200, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(245, 230, 200, 0.4); /* 背景调透一点，隐约可见画卷 */
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   z-index: 6;
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 1.0s ease-in-out; /* 延长淡入淡出时间为 1.0s */
 }
 
 .ch2-reveal-overlay.active {
@@ -1775,34 +1775,42 @@ a {
 
 .ch2-reveal-overlay.fade-out {
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 1.0s ease-in-out;
 }
 
 .ch2-reveal-chars {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* 横排显示 */
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem; /* 收紧间距 */
 }
 
 .ch2-reveal-char {
-  font-family: var(--font-serif);
-  font-size: 3.5rem;
+  font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif; /* 考究的古典行楷字体 */
+  font-size: 2.4rem; /* 缩减字号 */
   color: var(--paint-ink, #2c1810);
   opacity: 0;
-  transform: translateY(20px);
-  animation: ch2RevealChar 0.8s ease forwards;
+  filter: blur(6px); /* 初始模糊，模拟水墨晕开效果 */
+  transform: scale(0.95);
+  animation: ch2RevealChar 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; /* 舒缓的水墨渐显动画 */
 }
 
 .ch2-reveal-char:nth-child(1) { animation-delay: 0s; }
-.ch2-reveal-char:nth-child(2) { animation-delay: 0.3s; }
-.ch2-reveal-char:nth-child(3) { animation-delay: 0.6s; }
-.ch2-reveal-char:nth-child(4) { animation-delay: 0.9s; }
+.ch2-reveal-char:nth-child(2) { animation-delay: 0.5s; }
+.ch2-reveal-char:nth-child(3) { animation-delay: 1.0s; }
+.ch2-reveal-char:nth-child(4) { animation-delay: 1.5s; }
 
 @keyframes ch2RevealChar {
-  0% { opacity: 0; transform: translateY(20px) scale(0.8); }
-  60% { opacity: 1; transform: translateY(-4px) scale(1.05); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% { 
+    opacity: 0; 
+    filter: blur(6px); 
+    transform: scale(0.95);
+  }
+  100% { 
+    opacity: 0.95; 
+    filter: blur(0px); 
+    transform: scale(1);
+  }
 }
 
 /* 旧批注 */
@@ -1829,7 +1837,7 @@ a {
   border: 1px solid rgba(120, 90, 50, 0.25);
   border-radius: 2px;
   box-shadow: 2px 3px 12px rgba(80, 60, 30, 0.15);
-  font-family: var(--font-serif);
+  font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif;
   font-size: 0.9rem;
   line-height: 1.9;
   color: rgba(60, 43, 31, 0.7);
