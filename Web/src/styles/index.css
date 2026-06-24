@@ -1844,7 +1844,6 @@ a {
   letter-spacing: 0.05em;
 }
 
-/* 小飞虹水面文字 */
 .ch2-water-text {
   position: absolute;
   bottom: 35%;
@@ -1856,8 +1855,8 @@ a {
   letter-spacing: 0.2em; /* 从 span 移到父级，方便动画控制 */
   
   /* 添加与旧批注纸张相同的 UI 组件背景 */
-  padding: 0.8rem 1.8rem;
-  background: rgba(245, 235, 210, 0.85);
+  padding: 1.2rem 1.5rem;
+  background: rgba(245, 235, 210, 0.92);
   border: 1px solid rgba(120, 90, 50, 0.25);
   border-radius: 2px;
   box-shadow: 2px 3px 12px rgba(80, 60, 30, 0.15);
@@ -1889,7 +1888,7 @@ a {
 }
 
 .ch2-water-text.dissolve {
-  animation: inkRippleDissolve 3s ease forwards;
+  animation: inkRippleDissolve 3.5s ease forwards;
 }
 
 @keyframes inkRippleDissolve {
@@ -1899,10 +1898,9 @@ a {
 
 .ch2-water-text span {
   display: inline-block;
-  font-family: var(--font-handwrite);
-  font-size: 1.6rem;
-  color: var(--paint-ink, #2c1810);
-  text-shadow: 0 0 8px rgba(44, 24, 16, 0.3);
+  font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif;
+  font-size: 1.1rem;
+  color: rgba(60, 43, 31, 0.7);
   animation: ch2WaterChars 2s ease-in-out infinite alternate;
 }
 
