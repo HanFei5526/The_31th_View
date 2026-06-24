@@ -269,7 +269,7 @@ export default class Chapter1PaintScene {
     this._showLanxueArrow();
 
     this._isNarrating = true;
-    await this.narrationBar.playLine('系统提示', '兰雪堂周围几处可疑细节已经看过了。你可以继续在【修复笔记本】里翻阅线索或讨论，也可以直接点击画面中央的光点，沿石径前往下一处场景。');
+    await this.narrationBar.playLine('系统提示', '兰雪堂周围几处可疑细节已经看过了。可在【记录】页查看，也可在【对话】页继续讨论。也可以直接点击画面中央的光点，沿石径前往下一处场景。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
   }

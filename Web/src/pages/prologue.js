@@ -572,7 +572,7 @@ export default class PrologueScene extends GameSceneBase {
     this._narrationBar.dismiss();
 
     // 播放较平滑的引导文本
-    await this._narrationBar.playLine('系统提示', '三处异常痕迹已找齐。你可以到【修复笔记本】的【记录】页查阅线索，或在【对话】页中进行讨论。准备就绪后，点击【开启推理研讨】即可继续。');
+    await this._narrationBar.playLine('系统提示', '三处异常痕迹已找齐。可在【记录】页查看，也可在【对话】页继续讨论。准备就绪后，点击【开启推理研讨】即可继续。');
   }
 
   /**
