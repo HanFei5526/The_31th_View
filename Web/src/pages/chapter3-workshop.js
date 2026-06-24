@@ -16,6 +16,9 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     this.notebook = null;
     this.hudBar = null;
     this.inventoryPopup = null;
+    this._chapterTransitionTimers = [];
+    this._chapterTransitionKeyHandler = null;
+    this._chapterTransitionOverlay = null;
   }
 
   async enter(container) {
@@ -93,11 +96,11 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
   }
 
   exit() {
+    this._clearChapterTransition();
     if (this.narrationBar) this.narrationBar.unmount();
     if (this.notebook) this.notebook.unmount();
     if (this.hudBar) this.hudBar.unmount();
     if (this.inventoryPopup) this.inventoryPopup.unmount();
-    if (this._endCard) this._endCard.remove();
     super.exit();
   }
 
@@ -124,10 +127,12 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     await this.narrationBar.playLine('沈念', '可此刻我第一次意识到——所谓谨慎，有时是在保护真相，有时，也是在保护沉默。', { portrait: '/images/common/shennian_3.png' });
     this.narrationBar.dismiss();
 
-    setTimeout(() => this._showChapterEnd(), 2000);
+    this._chapterTransitionTimers.push(setTimeout(() => {
+      this._startFinaleTransition();
+    }, 2000));
   }
 
-  _showChapterEnd() {
+  _startFinaleTransition() {
     this.engine.gameProgress.chapter3Complete = true;
     this.engine.gameProgress.chapter3_completed = true;
     this.engine.saveCheckpoint?.('finale_truth_start', {
@@ -136,27 +141,127 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
       world: 'paint'
     });
 
-    this._endCard = document.createElement('div');
-    this._endCard.className = 'chapter-end-card full-viewport flex-center flex-col';
-    this._endCard.style.position = 'absolute';
-    this._endCard.style.inset = '0';
-    this._endCard.style.background = 'rgba(245, 240, 232, 0.9)';
-    this._endCard.style.zIndex = '100';
-    this._endCard.style.opacity = '0';
-    this._endCard.style.transition = 'opacity 1s ease';
+    const overlay = document.createElement('div');
+    overlay.className = 'intro-transition-overlay intro-transition-overlay--finale';
+    this._chapterTransitionOverlay = overlay;
 
-    this._endCard.innerHTML = `
-      <h2 style="font-size: 2.5rem; margin-bottom: 2rem; color: var(--real-accent); letter-spacing: 0.1em;">第三章 · 西园 · 完</h2>
-      <button class="choice-btn" style="max-width: 200px; text-align: center;">返回菜单</button>
+    const lines = [
+      '这一次进入画中，没有出现在任何一处景点。',
+      '只有一片空白，像翻到一页还没有落墨的纸。',
+      '断簪，残砚，一幅从墙上拓下来的草图。',
+      '第三十一景还差最后一笔。这一笔该怎么落，由你决定。'
+    ];
+
+    overlay.innerHTML = `
+      <div class="finale-transition-bg"></div>
+      <div class="prologue-transition-layout">
+        <div class="intro-title-group">
+          <div class="intro-prologue-title">终章 · 第三十一景</div>
+        </div>
+        <div class="intro-prologue-text" id="intro-finale-from-workshop-text"></div>
+      </div>
     `;
+    document.body.appendChild(overlay);
 
-    this._root.appendChild(this._endCard);
+    const textContainer = overlay.querySelector('#intro-finale-from-workshop-text');
+    const sceneReady = this._preloadImage('/images/finale/finale-truth-space.png');
+    let finished = false;
 
-    const btn = this._endCard.querySelector('button');
-    btn.addEventListener('click', () => {
-      this.engine.switchScene('menu');
+    const finish = async (fast = false) => {
+      if (finished) return;
+      finished = true;
+      this._clearChapterTransition({ keepOverlay: true });
+
+      textContainer.querySelectorAll('span').forEach((line) => {
+        line.style.opacity = '1';
+        line.style.transform = 'translateY(0)';
+      });
+
+      await sceneReady;
+      this.engine.currentChapter = 4;
+      this.engine.currentWorld = 'paint';
+      this.engine._applyWorldTheme?.();
+      this._chapterTransitionOverlay = null;
+      await this.engine.switchScene('finale', true);
+
+      overlay.style.transition = fast ? 'opacity 0.4s ease' : 'opacity 1.2s ease';
+      overlay.classList.remove('active');
+      overlay.classList.add('fade-out');
+      setTimeout(() => overlay.remove(), fast ? 450 : 1300);
+    };
+
+    this._chapterTransitionKeyHandler = (e) => {
+      if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+      e.preventDefault();
+      finish(true);
+    };
+    document.addEventListener('keydown', this._chapterTransitionKeyHandler);
+
+    this._chapterTransitionTimers.push(setTimeout(() => {
+      overlay.classList.add('active');
+      const title = overlay.querySelector('.intro-prologue-title');
+      if (title) {
+        title.style.opacity = '1';
+        title.style.transform = 'translateY(0)';
+      }
+    }, 50));
+
+    this._chapterTransitionTimers.push(setTimeout(() => {
+      lines.forEach((line, index) => {
+        const p = document.createElement('span');
+        p.textContent = line;
+        p.style.opacity = '0';
+        p.style.transform = 'translateY(15px)';
+        p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+        p.style.display = 'block';
+        textContainer.appendChild(p);
+
+        this._chapterTransitionTimers.push(setTimeout(() => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        }, index * 1200));
+      });
+
+      const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+      this._chapterTransitionTimers.push(setTimeout(finish, totalDuration));
+    }, 1500));
+  }
+
+  _clearChapterTransition(options = {}) {
+    this._chapterTransitionTimers.forEach((timer) => clearTimeout(timer));
+    this._chapterTransitionTimers = [];
+
+    if (this._chapterTransitionKeyHandler) {
+      document.removeEventListener('keydown', this._chapterTransitionKeyHandler);
+      this._chapterTransitionKeyHandler = null;
+    }
+
+    if (!options.keepOverlay && this._chapterTransitionOverlay) {
+      this._chapterTransitionOverlay.remove();
+      this._chapterTransitionOverlay = null;
+    }
+  }
+
+  _preloadImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
     });
+  }
 
-    setTimeout(() => { this._endCard.style.opacity = '1'; }, 100);
+  _isFastForwardKey(e) {
+    return e.key === ' ' || e.key === 'Enter' || e.code === 'Space' || e.code === 'KeyZ' || e.key?.toLowerCase() === 'z';
+  }
+
+  _isTextInputActive() {
+    const activeEl = document.activeElement;
+    return activeEl && (
+      activeEl.tagName === 'INPUT' ||
+      activeEl.tagName === 'TEXTAREA' ||
+      activeEl.tagName === 'SELECT' ||
+      activeEl.isContentEditable
+    );
   }
 }

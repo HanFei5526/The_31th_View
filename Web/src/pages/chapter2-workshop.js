@@ -21,6 +21,9 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     this.hudBar = null;
     this.inventoryPopup = null;
     this._endCard = null;
+    this._chapterTransitionTimers = [];
+    this._chapterTransitionKeyHandler = null;
+    this._chapterTransitionOverlay = null;
   }
 
   async enter(container) {
@@ -90,6 +93,7 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
   }
 
   exit() {
+    this._clearChapterTransition();
     if (this.narrationBar) this.narrationBar.unmount();
     if (this.notebook) this.notebook.unmount();
     if (this.hudBar) this.hudBar.unmount();
@@ -145,10 +149,10 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     this.narrationBar.dismiss();
 
     await this._delay(2000);
-    this._showChapterEnd();
+    this._startChapter3Transition();
   }
 
-  _showChapterEnd() {
+  _startChapter3Transition() {
     this.engine.gameProgress.chapter2Complete = true;
     this.engine.gameProgress.chapter2_completed = true;
     this.engine.saveCheckpoint?.('chapter3_south_start', {
@@ -157,23 +161,128 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
       world: 'paint'
     });
 
-    this._endCard = document.createElement('div');
-    this._endCard.className = 'chapter-end-card full-viewport flex-center flex-col';
-    this._endCard.innerHTML = `
-      <h2 class="chapter-end-title">第二章 · 中园 · 完</h2>
-      <button class="chapter-end-btn">返回菜单</button>
+    const overlay = document.createElement('div');
+    overlay.className = 'intro-transition-overlay intro-transition-overlay--chapter3';
+    this._chapterTransitionOverlay = overlay;
+
+    const lines = [
+      '西园的光线不一样了。',
+      '天色暗了，像黄昏，又像一场雨要来之前。',
+      '空气变得潮湿。竹叶上凝着水珠。',
+      '有人在画画。或者，曾经有人在这里画画。'
+    ];
+
+    overlay.innerHTML = `
+      <div class="ch3-transition-bg"></div>
+      <div class="prologue-transition-layout">
+        <div class="intro-title-group">
+          <div class="intro-prologue-title">第三章 · 西园</div>
+        </div>
+        <div class="intro-prologue-text" id="intro-chapter3-from-workshop-text"></div>
+      </div>
     `;
-    this._endCard.style.opacity = '0';
-    this._root.appendChild(this._endCard);
+    document.body.appendChild(overlay);
 
-    requestAnimationFrame(() => {
-      this._endCard.style.transition = 'opacity 1.2s ease';
-      this._endCard.style.opacity = '1';
-    });
+    const textContainer = overlay.querySelector('#intro-chapter3-from-workshop-text');
+    const sceneReady = this._preloadImage('/images/chapter3/chapter3-yuanyang-south.png');
+    let finished = false;
 
-    this._endCard.querySelector('.chapter-end-btn').addEventListener('click', () => {
-      this.engine.switchScene('menu');
+    const finish = async (fast = false) => {
+      if (finished) return;
+      finished = true;
+      this._clearChapterTransition({ keepOverlay: true });
+
+      textContainer.querySelectorAll('span').forEach((line) => {
+        line.style.opacity = '1';
+        line.style.transform = 'translateY(0)';
+      });
+
+      await sceneReady;
+      this.engine.currentChapter = 3;
+      this.engine.currentWorld = 'paint';
+      this.engine._applyWorldTheme?.();
+      this._chapterTransitionOverlay = null;
+      await this.engine.switchScene('chapter3', true);
+
+      overlay.style.transition = fast ? 'opacity 0.4s ease' : 'opacity 1s ease';
+      overlay.classList.remove('active');
+      overlay.classList.add('fade-out');
+      setTimeout(() => overlay.remove(), fast ? 450 : 1100);
+    };
+
+    this._chapterTransitionKeyHandler = (e) => {
+      if (!this._isFastForwardKey(e) || this._isTextInputActive()) return;
+      e.preventDefault();
+      finish(true);
+    };
+    document.addEventListener('keydown', this._chapterTransitionKeyHandler);
+
+    this._chapterTransitionTimers.push(setTimeout(() => {
+      overlay.classList.add('active');
+      const title = overlay.querySelector('.intro-prologue-title');
+      if (title) {
+        title.style.opacity = '1';
+        title.style.transform = 'translateY(0)';
+      }
+    }, 50));
+
+    this._chapterTransitionTimers.push(setTimeout(() => {
+      lines.forEach((line, index) => {
+        const p = document.createElement('span');
+        p.textContent = line;
+        p.style.opacity = '0';
+        p.style.transform = 'translateY(15px)';
+        p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+        p.style.display = 'block';
+        textContainer.appendChild(p);
+
+        this._chapterTransitionTimers.push(setTimeout(() => {
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+        }, index * 1200));
+      });
+
+      const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
+      this._chapterTransitionTimers.push(setTimeout(finish, totalDuration));
+    }, 1500));
+  }
+
+  _clearChapterTransition(options = {}) {
+    this._chapterTransitionTimers.forEach((timer) => clearTimeout(timer));
+    this._chapterTransitionTimers = [];
+
+    if (this._chapterTransitionKeyHandler) {
+      document.removeEventListener('keydown', this._chapterTransitionKeyHandler);
+      this._chapterTransitionKeyHandler = null;
+    }
+
+    if (!options.keepOverlay && this._chapterTransitionOverlay) {
+      this._chapterTransitionOverlay.remove();
+      this._chapterTransitionOverlay = null;
+    }
+  }
+
+  _preloadImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
     });
+  }
+
+  _isFastForwardKey(e) {
+    return e.key === ' ' || e.key === 'Enter' || e.code === 'Space' || e.code === 'KeyZ' || e.key?.toLowerCase() === 'z';
+  }
+
+  _isTextInputActive() {
+    const activeEl = document.activeElement;
+    return activeEl && (
+      activeEl.tagName === 'INPUT' ||
+      activeEl.tagName === 'TEXTAREA' ||
+      activeEl.tagName === 'SELECT' ||
+      activeEl.isContentEditable
+    );
   }
 
   _delay(ms) {
