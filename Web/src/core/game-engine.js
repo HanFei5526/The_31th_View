@@ -60,6 +60,61 @@ const PROLOGUE_CARRYOVER_RECORDS = [
   },
 ];
 
+const CHAPTER_CARRYOVER_ITEMS = [
+  {
+    minChapter: 2,
+    id: 'hairpin',
+    progressKey: 'hasHairpin',
+    item: ITEM_TEMPLATES.hairpin,
+    records: [
+      {
+        type: 'clue',
+        text: '[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字',
+      },
+      {
+        type: 'clue',
+        text: '[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明',
+      },
+    ],
+  },
+  {
+    minChapter: 3,
+    id: 'inkstone',
+    progressKey: 'hasInkstone',
+    item: ITEM_TEMPLATES.inkstone,
+    records: [
+      {
+        type: 'clue',
+        text: '[物件] 残砚 — 小型端砚，砚池残留朱砂。砚背刻有小词："园深不知处，花落有谁怜。画里青山在，无人识旧年。"不是正式作画工具，更像一个人的私人用砚',
+      },
+    ],
+  },
+  {
+    minChapter: 4,
+    id: 'rubbing',
+    progressKey: 'hasRubbing',
+    item: ITEM_TEMPLATES.rubbing,
+    records: [
+      {
+        type: 'clue',
+        text: '[物件] 草图拓片 — 留听阁墙面低位视角草图，证实王蘅的空间观看能力',
+      },
+    ],
+  },
+  {
+    minChapter: 4,
+    id: 'letter',
+    progressKey: 'hasLetter',
+    item: ITEM_TEMPLATES.letter,
+    records: [
+      {
+        type: 'clue',
+        text: '[物件] 王蘅的信 — "不必有名，不必有形。只要有痕迹。"',
+      },
+    ],
+  },
+];
+
 export class GameEngine {
   constructor() {
     /* ---- 游戏状态 ---- */
@@ -260,7 +315,25 @@ export class GameEngine {
       changed = true;
     }
 
-    if (this._prioritizeNotebookRecords(PROLOGUE_CARRYOVER_RECORDS)) {
+    const carryoverRecords = [...PROLOGUE_CARRYOVER_RECORDS];
+
+    CHAPTER_CARRYOVER_ITEMS.forEach((entry) => {
+      if (chapter < entry.minChapter) return;
+
+      if (!progress[entry.progressKey]) {
+        progress[entry.progressKey] = true;
+        changed = true;
+      }
+
+      if (!this.inventory.hasItem(entry.id)) {
+        this.inventory.addItem(entry.item, { silent: true });
+        changed = true;
+      }
+
+      carryoverRecords.push(...entry.records);
+    });
+
+    if (this._prioritizeNotebookRecords(carryoverRecords)) {
       changed = true;
     }
 

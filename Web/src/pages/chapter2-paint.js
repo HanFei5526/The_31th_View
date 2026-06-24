@@ -314,7 +314,7 @@ export default class Chapter2PaintScene {
     this.narrationBar.dismiss();
 
     commentEl.classList.remove('visible');
-    await this._delay(400);
+    await this._delay(1000);
     commentEl.remove();
 
     this._enterLightDiscussion();
@@ -419,7 +419,11 @@ export default class Chapter2PaintScene {
 
     const rippleEl = document.createElement('div');
     rippleEl.className = 'ch2-water-text';
-    rippleEl.innerHTML = '<span>……知我者，唯有此园。</span>';
+    rippleEl.innerHTML = `
+      <div class="ch2-old-comment-paper">
+        <p>……知我者，唯有此园。</p>
+      </div>
+    `;
     this._xiaofeihongEl.appendChild(rippleEl);
     await this._delay(100);
     rippleEl.classList.add('visible');
@@ -428,7 +432,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '字迹停留了片刻，然后像墨滴溶入水中一样，缓缓消散了。');
 
     rippleEl.classList.add('dissolve');
-    await this._delay(3000);
+    await this._delay(1000);
     rippleEl.remove();
 
     await this.narrationBar.playLine('沈念', '"知我者，唯有此园"……谁会对一座园林说这样的话？这个人把什么寄托在了这里？', { portrait: '/images/common/shennian_1.png' });
