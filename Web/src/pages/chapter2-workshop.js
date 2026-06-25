@@ -132,7 +132,7 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     await this.narrationBar.playLine('周鹤年', '你现在有四个字，一支断簪，一方残砚。这些不是巧合。但它们也还不够——它们告诉你有人存在过，但不能告诉你她做了什么。', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine('周鹤年', '下次进去，找物质证据。朱砂是颜料——如果她用过这方砚来画画，那么画面上应该有朱砂留下的痕迹。旧的底稿线、辅助线，那些在最终成品里被覆盖的东西。', { portrait: '/images/common/zhou_henian_1.png' });
 
-    this.notebook.addClueRecord('（周老师的方法）版本比对与异文判断：逐字对照不同版本的同一文本，找出差异字。一个字是巧合，一句话是线索，一条证据链才是判断的依据。下一步：找物质证据——朱砂底稿线。');
+    this.notebook.addClueRecord('[周老师的方法] 版本比对与异文判断：逐字对照不同版本的同一文本，找出差异字。一个字是巧合，一句话是线索，一条证据链才是判断的依据。下一步：找物质证据——朱砂底稿线。');
 
     this.hudBar.show();
     await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师方法——版本比对与异文判断。可在【记录】页查看，也可在【对话】页继续讨论。');

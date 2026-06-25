@@ -217,9 +217,7 @@ export default class FinaleScene {
     if (this._exited) return;
     await this.narrationBar.playLine('周鹤年', '你手里的东西，足够让人相信有另一个观看者。但未必足够让所有人承认她。', { portrait: PORTRAITS.zhou });
     if (this._exited) return;
-    await this.narrationBar.playLine('周鹤年', '修复报告不是小说。你写下的每一个字，都要负责。', { portrait: PORTRAITS.zhou });
-    if (this._exited) return;
-    await this.narrationBar.playLine('周鹤年', '但你不写，也是一种判断。', { portrait: PORTRAITS.zhou });
+    await this.narrationBar.playLine(null, '你想起他说过的话——"修复报告不是小说。你写下的每一个字，都要负责。但你不写，也是一种判断。"');
     if (this._exited) return;
     await this.narrationBar.playLine('周鹤年', '其实，三十年前我第一次见到那个"蘅"字，也没有写进报告。我告诉自己是谨慎。现在回头看，谨慎和回避长得太像了。', { portrait: PORTRAITS.zhou });
     if (this._exited) return;
