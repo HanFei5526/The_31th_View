@@ -109,21 +109,21 @@ export const KNOWLEDGE_SNIPPETS = [
     chapter: 2,
     unlockCondition: ({ progress }) => Boolean(progress.heardVoice),
     content: `【水面回声】
-小飞虹桥下浮现文字"知我者，唯有此园"。这句话暗示留下痕迹的人将园林本身视为唯一的理解者——她的观看不被他人所知，但园林的空间结构保存了她的视角。`,
+小飞虹桥下浮现文字"知我者，唯有此园"。这句话暗示留下痕迹的人将园林本身视为唯一的理解者——此人的观看不被他人所知，但园林的空间结构保存了这个视角。`,
   },
   {
     id: 'ch3_scattered_sketches',
     chapter: 3,
     unlockCondition: ({ progress }) => Boolean(progress.seenScatteredSketches),
     content: `【北厅散落草图】
-鸳鸯馆北厅的散落草图笔力弱、比例失准，水面过重，桥线过弯，亭阁被压得很低。它们说明留下痕迹的人曾反复尝试画园中景物，但这些草图还不能证明她完成了正式画心，也不能直接说明第三十一景的来源。`,
+鸳鸯馆北厅的散落草图笔力弱、比例失准，水面过重，桥线过弯，亭阁被压得很低。它们说明留下痕迹的人曾反复尝试画园中景物，但这些草图还不能证明此人完成了正式画心，也不能直接说明第三十一景的来源。`,
   },
   {
     id: 'ch3_bleeding_text',
     chapter: 3,
     unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText),
     content: `【“看得到吗”】
-画纸上渗出的“看得到吗”不是对当下某个人的直接指认，而像一句长期悬置的询问：她希望有人确认这些痕迹确实存在。这里的重点是“被见证”，不是被召唤或被正名。`,
+画纸上渗出的”看得到吗”不是对当下某个人的直接指认，而像一句长期悬置的询问：留下这句话的人希望有人确认这些痕迹确实存在。这里的重点是”被见证”，不是被召唤或被正名。`,
   },
   {
     id: 'ch3_red_lines',
@@ -143,8 +143,8 @@ export const KNOWLEDGE_SNIPPETS = [
     id: 'ch3_low_viewpoint_confirmed',
     chapter: 3,
     unlockCondition: ({ progress }) => Boolean(progress.understoodNotPainter || progress.hasRubbing),
-    content: `【她画得不好，但看得很准】
-蹲下到墙面低位线的高度后，草图中原本“不对”的比例关系变得合理：远香堂倒影、小飞虹弧线、梧竹幽居竹影可以同入一眼。她的贡献不是成熟笔墨，也不是正式构图方案，而是发现并留下了一个观看位置。`,
+    content: `【画得不好，但看得很准】
+蹲下到墙面低位线的高度后，草图中原本”不对”的比例关系变得合理：远香堂倒影、小飞虹弧线、梧竹幽居竹影可以同入一眼。留下草图的人的贡献不是成熟笔墨，也不是正式构图方案，而是发现并留下了一个观看位置。`,
   },
   {
     id: 'ch3_letter',

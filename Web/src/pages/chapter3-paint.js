@@ -545,7 +545,7 @@ export default class Chapter3PaintScene {
     this._isNarrating = false;
 
     this._startIdleTimer('afterInkstone', 30000, () => {
-      this.narrationBar.showFloating('红线已经出现了。沿着线剥离灰泥，用她曾经划线的东西。');
+      this.narrationBar.showFloating('红线已经出现了。沿着线剥离灰泥，用曾经划出这些线的东西。');
     });
   }
 
