@@ -834,7 +834,7 @@ export default class Chapter1PaintScene {
     this._isNarrating = false;
 
     this.notebook.showQuickThoughts([
-      '栏杆上明明什么都没有，为什么水面的倒影里会多出一件东西？',
+      '栏杆上没有东西，倒影里为什么多了一件？',
       '水面上有一条光线在闪，我该点它看看吗？',
       '倒影里挂着的那件东西，有办法看得更清楚吗？'
     ]);

@@ -357,7 +357,7 @@ export default class Chapter3PaintScene {
 
     // 探索态
     this.notebook.showQuickThoughts([
-      '这些画纸是谁留下的？',
+      '这些画纸上的视角为什么和正常的不一样？',
       '画的比例为什么不对？',
       '"画非一人"和这些草图有关系吗？'
     ]);
@@ -401,7 +401,7 @@ export default class Chapter3PaintScene {
 
     this.notebook.showQuickThoughts([
       '纸上渗出的字是谁写的？',
-      '"看得到吗"——她在问谁？',
+      '"看得到吗"——这是在问谁？',
       '这些草图和断簪上的"蘅"有关系吗？'
     ]);
 
@@ -643,7 +643,7 @@ export default class Chapter3PaintScene {
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
-      '她为什么把草图留在墙上而不是撕掉？',
+      '这幅草图为什么留在墙上而不是撕掉？',
       '题字说"三景同入一眼"，是什么意思？',
       '这个低位视角和第三十一景有什么关系？'
     ]);

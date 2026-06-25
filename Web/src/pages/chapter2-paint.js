@@ -329,8 +329,8 @@ export default class Chapter2PaintScene {
 
     this.notebook.showNPCMessage('（周老师的批注）"画非一人"——你是第一个这么读的人。大多数研究者把这些差异当作传抄讹误，但你把它们并在一起读出了一个句子。这个方法叫"异文串读"。现在的问题是：这句话是谁留下的？它在对谁说？');
     this.notebook.showQuickThoughts([
-      '四个差异字连起来读，像是有人故意留的',
-      '旧批注说"视点卑近"，这和低处视角有关系吗？',
+      '四个差异字是有人故意留下的吗？',
+      '"视点卑近"和低处视角有关系吗？',
       '留下"蘅"字的人，和这四个字有关吗？'
     ]);
 
@@ -396,7 +396,7 @@ export default class Chapter2PaintScene {
     this.notebook.showQuickThoughts([
       '桥两侧水面好像有什么不对劲？',
       '桥脚底下那个暗色的东西是什么？',
-      '"画非一人"——谁留下了这四个字？'
+      '"画非一人"这四个字说明什么？'
     ]);
 
     this._addXiaofeihongHotspots(newScene);
@@ -481,8 +481,8 @@ export default class Chapter2PaintScene {
 
     this.notebook.showQuickThoughts([
       '砚池里的朱砂是用来做什么的？',
-      '砚背的词是谁写的？',
-      '断簪、异文、残砚……这些痕迹指向同一个人吗？'
+      '砚背的词透露了什么？',
+      '断簪、异文、残砚指向同一个人吗？'
     ]);
 
     if (this._inkstoneSpot) { this._inkstoneSpot.remove(); this._inkstoneSpot = null; }

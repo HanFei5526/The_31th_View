@@ -161,7 +161,7 @@ export default class Chapter1WorkshopScene extends GameSceneBase {
     this.notebook.addClueRecord('[周老师的建议] 关注题跋、匾额与边注——这些地方最容易留下不够正式、却最诚实的东西。');
     this.notebook.showQuickThoughts([
       '”蘅”字现在能说明到哪一步？',
-      '断簪为什么要把字刻在背面？',
+      '断簪能否证明画里有人留下了私人痕迹？',
       '接下来为什么要看题跋、匾额和边注？'
     ]);
 
