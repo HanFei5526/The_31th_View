@@ -193,26 +193,26 @@ export default class Chapter3PaintScene {
     this._northEl.style.backgroundImage = `url('${this._bgNorth}')`;
 
     // 氛围热点：画纸A
-    const paperA = this._createHotspot(25, 72, 8, async () => {
+    const paperA = this._createHotspot(31.5, 82, 8, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('这张画里水面占了大半。桥被压到了画面底部。');
     }, '画纸A');
 
     // 氛围热点：画纸B
-    const paperB = this._createHotspot(50, 78, 8, async () => {
+    const paperB = this._createHotspot(58, 81.5, 8, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('只画了一笔就放弃了。墨迹还是湿的——像刚才还有人在这里。');
     }, '画纸B');
 
     // 叙事触发：画纸C（渗字事件）
-    const paperC = this._createHotspot(68, 70, 9, async () => {
+    const paperC = this._createHotspot(80, 91.5, 9, async () => {
       if (this._isNarrating) return;
       this._clearAllIdleTimers();
       await this._playBleedingTextEvent();
     }, '画纸C');
 
     // 出口（渗字后解锁）
-    this._northExit = this._createNavArrow(17, 54, 8, async () => {
+    this._northExit = this._createNavArrow(14.5, 48, 8, async () => {
       if (this._isNarrating) return;
       this._switchToLiuting();
     }, '前往留听阁');
@@ -245,7 +245,7 @@ export default class Chapter3PaintScene {
     this._liutingEl.appendChild(this._redlinesOverlay);
 
     // 叙事触发：封墙
-    const wallSpot = this._createHotspot(50, 45, 18, async () => {
+    const wallSpot = this._createHotspot(48.5, 56.5, 18, async () => {
       if (this._isNarrating) return;
       await this._handleWallClick();
     }, '封墙');
@@ -477,31 +477,41 @@ export default class Chapter3PaintScene {
 
   async _showItemSelectOverlay() {
     this._isNarrating = true;
-    await this.narrationBar.playLine('系统提示', '也许物件匣中有能帮上忙的东西。');
-    this.narrationBar.dismiss();
+    const playPromise = this.narrationBar.playLine('系统提示', '选择要使用的物件：');
 
     const overlay = document.createElement('div');
     overlay.className = 'ch3-item-select-overlay';
     overlay.innerHTML = `
-      <div class="ch3-item-select-title">选择要使用的物件：</div>
-      <div class="ch3-item-select-buttons">
+      <div class="ch3-item-select-options">
         <button class="ch3-item-btn" data-item="inkstone">残砚</button>
         <button class="ch3-item-btn" data-item="hairpin">断簪</button>
-        <button class="ch3-item-btn ch3-item-btn--cancel" data-item="cancel">取消</button>
       </div>
     `;
     this._liutingEl.appendChild(overlay);
     await this._nextFrame();
     overlay.classList.add('active');
 
-    const choice = await new Promise(resolve => {
-      overlay.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-item]');
-        if (btn) resolve(btn.dataset.item);
-      });
+    let resolveSelection;
+    const selectPromise = new Promise(resolve => {
+      resolveSelection = resolve;
     });
 
+    const handleButtonClick = (e) => {
+      const btn = e.target.closest('[data-item]');
+      if (btn) {
+        resolveSelection(btn.dataset.item);
+      }
+    };
+    overlay.addEventListener('click', handleButtonClick);
+
+    const choice = await Promise.race([
+      selectPromise,
+      playPromise.then(() => 'cancel')
+    ]);
+
+    overlay.removeEventListener('click', handleButtonClick);
     overlay.classList.remove('active');
+    this.narrationBar.dismiss();
     await this._delay(400);
     overlay.remove();
 
@@ -891,7 +901,7 @@ export default class Chapter3PaintScene {
     panel.className = `ch3-seep-panel ch3-seep-panel--${position}${emphasis ? ' ch3-seep-panel--emphasis' : ''}`;
 
     const textEl = document.createElement('div');
-    textEl.className = 'ch3-seep-panel-text';
+    textEl.className = 'ch2-old-comment-paper ch3-seep-panel-text';
 
     const chars = text.split('');
     chars.forEach(ch => {

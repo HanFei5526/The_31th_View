@@ -151,54 +151,40 @@
 /* --- 渗字效果（UI组件卡片） --- */
 .ch3-seep-panel {
   position: absolute;
-  z-index: 8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1.6rem 2rem;
-  background: rgba(42, 36, 28, 0.06);
-  border: 1px solid rgba(120, 100, 70, 0.2);
-  border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), inset 0 0 30px rgba(60, 45, 25, 0.05);
-  backdrop-filter: blur(2px);
+  z-index: 200;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition: opacity 2.5s ease, transform 2.5s ease;
   pointer-events: none;
 }
 
 .ch3-seep-panel.visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .ch3-seep-panel.ch3-seep-panel--center {
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translateY(8px);
+  transform: translate(-50%, -50%) scale(0.95);
 }
 
 .ch3-seep-panel--center.visible {
-  transform: translate(-50%, -50%) translateY(0);
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .ch3-seep-panel.ch3-seep-panel--left {
   top: 50%;
   right: 58%;
-  transform: translateY(-50%) translateX(8px);
+  transform: translateY(-50%) translateX(8px) scale(0.95);
 }
 
 .ch3-seep-panel--left.visible {
-  transform: translateY(-50%) translateX(0);
+  transform: translateY(-50%) translateX(0) scale(1);
 }
 
 .ch3-seep-panel-text {
-  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
-  color: rgba(42, 36, 28, 0.88);
-  font-size: 1.2rem;
-  letter-spacing: 0.18em;
-  line-height: 2.2;
+  width: max-content;
+  max-width: min(680px, 72vw);
+  box-sizing: border-box;
   text-align: center;
   white-space: pre-wrap;
 }
@@ -206,22 +192,15 @@
 .ch3-seep-panel-text .ch3-seep-char {
   display: inline-block;
   opacity: 0;
-  filter: blur(5px);
-  transform: scale(1.1);
+  filter: blur(4px);
+  transform: scale(1.04);
   transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease;
 }
 
 .ch3-seep-panel-text .ch3-seep-char.visible {
-  opacity: 0.88;
+  opacity: 1;
   filter: blur(0);
   transform: scale(1);
-}
-
-.ch3-seep-panel--emphasis .ch3-seep-panel-text {
-  font-size: 1.7rem;
-  color: rgba(62, 48, 32, 0.95);
-  font-weight: 600;
-  letter-spacing: 0.35em;
 }
 
 /* --- 渗字效果（场景内原位渐显 - 已废弃，保留兼容） --- */
@@ -259,67 +238,60 @@
 /* --- 物件选择浮层 --- */
 .ch3-item-select-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
   z-index: 20;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 1.5rem 1rem 2rem;
-  background: linear-gradient(to top, rgba(20, 16, 12, 0.92) 0%, rgba(20, 16, 12, 0.7) 70%, transparent 100%);
+  background: transparent;
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.4s ease;
   pointer-events: none;
 }
 
 .ch3-item-select-overlay.active {
   opacity: 1;
-  transform: translateY(0);
   pointer-events: auto;
 }
 
-.ch3-item-select-title {
-  font-family: var(--font-serif, 'Noto Serif SC', serif);
-  font-size: 0.9rem;
-  color: rgba(220, 208, 185, 0.7);
-  margin-bottom: 1rem;
-  letter-spacing: 0.1em;
-}
-
-.ch3-item-select-buttons {
+.ch3-item-select-options {
   display: flex;
-  gap: 1.2rem;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1.8rem;
+  pointer-events: auto;
 }
 
 .ch3-item-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 180px;
+  padding: 0.6rem 2.2rem;
   font-family: var(--font-serif, 'Noto Serif SC', serif);
-  font-size: 0.95rem;
-  color: rgba(232, 220, 200, 0.9);
-  background: rgba(60, 48, 32, 0.6);
-  border: 1px solid rgba(180, 160, 120, 0.3);
-  border-radius: 6px;
-  padding: 0.6rem 1.4rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-indent: 0.25em;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  border-radius: 0;
+  background: rgba(198, 178, 142, 0.88);
+  color: #3b2a1a;
+  border: 1.5px solid rgba(120, 90, 50, 0.6);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15), 2px 2px 0px rgba(88, 72, 48, 0.3);
+  transition: all 0.2s ease-out;
 }
 
 .ch3-item-btn:hover {
-  background: rgba(80, 62, 38, 0.75);
-  border-color: rgba(210, 185, 130, 0.5);
+  transform: translate(1px, 1px);
+  background: rgba(210, 192, 158, 0.95);
+  border-color: rgba(100, 75, 40, 0.75);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 1px 1px 0px rgba(88, 72, 48, 0.35);
 }
 
 .ch3-item-btn:active {
-  background: rgba(100, 78, 44, 0.8);
-}
-
-.ch3-item-btn--cancel {
-  color: rgba(180, 168, 150, 0.7);
-  background: rgba(40, 34, 26, 0.5);
-  border-color: rgba(120, 108, 88, 0.3);
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
 }
 
 /* --- 蒙太奇叠加层（回看匾额） --- */
