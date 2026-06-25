@@ -99,6 +99,36 @@ export class InventoryPopup {
             <span class="css-hairpin__coil css-hairpin__coil--lower"></span>
           </span>
         `;
+      } else if (item.id === 'inkstone') {
+        icon.innerHTML = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="32" cy="32" rx="20" ry="14" />
+            <ellipse cx="26" cy="30" rx="7" ry="5" stroke-width="1.4" />
+            <path d="M36 28 L42 26" stroke-width="1.2" opacity="0.5" />
+            <path d="M36 32 L40 31" stroke-width="1" opacity="0.4" />
+          </svg>
+        `;
+      } else if (item.id === 'rubbing') {
+        icon.innerHTML = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="14" y="12" width="36" height="40" rx="1" />
+            <rect x="18" y="16" width="28" height="32" rx="1" stroke-width="1.2" opacity="0.5" />
+            <path d="M22 24 Q26 20, 30 24 Q34 28, 38 24" stroke-width="1.3" opacity="0.6" />
+            <path d="M24 32 Q28 36, 34 32 Q38 28, 42 33" stroke-width="1.3" opacity="0.6" />
+            <path d="M26 40 Q30 38, 34 40" stroke-width="1" opacity="0.4" />
+          </svg>
+        `;
+      } else if (item.id === 'letter') {
+        icon.innerHTML = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 10 L46 10 L46 54 L18 54 Z" />
+            <path d="M18 10 Q22 14, 18 18" stroke-width="1.2" opacity="0.4" />
+            <line x1="26" y1="20" x2="26" y2="46" stroke-width="1.2" opacity="0.5" />
+            <line x1="30" y1="18" x2="30" y2="44" stroke-width="1.2" opacity="0.5" />
+            <line x1="34" y1="20" x2="34" y2="40" stroke-width="1.2" opacity="0.5" />
+            <line x1="38" y1="22" x2="38" y2="36" stroke-width="1" opacity="0.4" />
+          </svg>
+        `;
       } else {
         icon.innerHTML = `
           <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" stroke="#d4a853" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

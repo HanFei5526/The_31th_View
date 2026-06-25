@@ -150,21 +150,43 @@ export default class FinaleScene {
     el.className = 'finale-subscene finale-truth-space';
     el.innerHTML = `
       <div class="finale-clues-summary" id="finale-clues-summary">
-        <div class="finale-clues-text">
-          <span>「画非一人」</span>
-          <span>「此页视点卑近，似非成稿」</span>
+        <div class="finale-clues-phrases">
+          <span class="finale-clues-phrase">「画非一人」</span>
+          <span class="finale-clues-phrase">「此页视点卑近，似非成稿」</span>
         </div>
         <div class="finale-clues-items">
           <div class="finale-clue-item">
-            <div class="finale-clue-icon">🥢</div>
+            <div class="finale-clue-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="20" y1="52" x2="44" y2="12" />
+                <ellipse cx="42" cy="14" rx="4" ry="5" stroke-width="1.4" />
+                <ellipse cx="40" cy="12" rx="2.5" ry="3.2" stroke-width="1" opacity="0.6" />
+                <path d="M20 52 L18 54" stroke-width="1.2" opacity="0.5" />
+              </svg>
+            </div>
             <div class="finale-clue-name">断簪</div>
           </div>
           <div class="finale-clue-item">
-            <div class="finale-clue-icon">🪨</div>
+            <div class="finale-clue-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="32" cy="32" rx="20" ry="14" />
+                <ellipse cx="26" cy="30" rx="7" ry="5" stroke-width="1.4" />
+                <path d="M36 28 L42 26" stroke-width="1.2" opacity="0.5" />
+                <path d="M36 32 L40 31" stroke-width="1" opacity="0.4" />
+              </svg>
+            </div>
             <div class="finale-clue-name">残砚</div>
           </div>
           <div class="finale-clue-item">
-            <div class="finale-clue-icon">📜</div>
+            <div class="finale-clue-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="14" y="12" width="36" height="40" rx="1" />
+                <rect x="18" y="16" width="28" height="32" rx="1" stroke-width="1.2" opacity="0.5" />
+                <path d="M22 24 Q26 20, 30 24 Q34 28, 38 24" stroke-width="1.3" opacity="0.6" />
+                <path d="M24 32 Q28 36, 34 32 Q38 28, 42 33" stroke-width="1.3" opacity="0.6" />
+                <path d="M26 40 Q30 38, 34 40" stroke-width="1" opacity="0.4" />
+              </svg>
+            </div>
             <div class="finale-clue-name">草图拓片</div>
           </div>
         </div>
@@ -335,7 +357,7 @@ export default class FinaleScene {
       { label: 'B. 王蘅——画中痕迹指向的那个人', value: 'B' },
       { label: 'C. 文徵明——他是这套画的作者', value: 'C' },
       { label: 'D. 后世经手此画的人——他曾重新装裱这页画', value: 'D' },
-    ]);
+    ], { mountToBody: true });
     if (this._exited) return;
 
     if (choice === 'B') {
@@ -373,7 +395,7 @@ export default class FinaleScene {
       { label: 'A. 她是被遮蔽的观看者——她发现了这个视角，文徵明用自己的笔保存了它', value: 'A' },
       { label: 'B. 她是未署名的执笔者——第三十一景由她亲手绘制', value: 'B' },
       { label: 'C. 她是画作的构思者——构图与立意都源于她的设计', value: 'C' },
-    ]);
+    ], { mountToBody: true });
     if (this._exited) return;
 
     if (choice === 'A') {
@@ -556,7 +578,7 @@ export default class FinaleScene {
       { label: 'B. 画面本身没有变，但说明来源的边注、题签和辅助线被后人装裱时压覆遮蔽了', value: 'B' },
       { label: 'C. 画心被后人重画过，原本的视角信息被替换了', value: 'C' },
       { label: 'D. 她的痕迹太少，从来没有被任何人注意到过', value: 'D' },
-    ]);
+    ], { mountToBody: true });
     if (this._exited) return;
 
     if (choice === 'B') {
@@ -765,7 +787,7 @@ export default class FinaleScene {
       const confirm = await this.narrationBar.showOptions([
         { label: '确认选择', value: 'yes' },
         { label: '返回', value: 'no' },
-      ]);
+      ], { mountToBody: true });
       if (this._exited) return;
 
       if (confirm === 'yes') {

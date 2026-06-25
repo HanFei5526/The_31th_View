@@ -154,7 +154,7 @@ export class NarrationBar {
     this._portraitLocked = false;
   }
 
-  showOptions(options) {
+  showOptions(options, { mountToBody = false } = {}) {
     return new Promise((resolve) => {
       this._resolveOptions = resolve;
 
@@ -170,17 +170,19 @@ export class NarrationBar {
         btn.className = 'narration-option-btn';
         btn.textContent = opt.label;
         btn.onclick = (e) => {
-          e.stopPropagation(); // 防止触发底下的点击事件
+          e.stopPropagation();
           this._handleOptionClick(opt.value);
         };
         this._optionsEl.appendChild(btn);
       });
 
-      // 将选项插入到对话框上方
-      this._container.insertBefore(this._optionsEl, this._barEl);
+      if (mountToBody) {
+        document.body.appendChild(this._optionsEl);
+      } else {
+        this._container.insertBefore(this._optionsEl, this._barEl);
+      }
       this._hideContinue();
 
-      // 如果正在打字，直接显示全本
       if (this._isTyping) {
         if (this._typingTimer) clearTimeout(this._typingTimer);
         this._textEl.textContent = this._fullText;
@@ -241,6 +243,11 @@ export class NarrationBar {
   dismiss() {
     if (this._typingTimer) clearTimeout(this._typingTimer);
     if (this._floatingTimer) clearTimeout(this._floatingTimer);
+    if (this._resolvePlay) {
+      const resolve = this._resolvePlay;
+      this._resolvePlay = null;
+      resolve();
+    }
     this._floatingTimer = null;
     this._isTyping = false;
     this._isFloating = false;

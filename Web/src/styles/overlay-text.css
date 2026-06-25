@@ -80,9 +80,9 @@
 }
 
 .ot-char.emphasis {
-  font-size: 1.8rem;
+  font-size: 1.15em;
   color: rgba(62, 48, 32, 0.95);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 /* --- 动画预设 B: quiet-fade (逐行沉静浮现) --- */
@@ -113,14 +113,15 @@
 
 /* --- 纸张装饰 --- */
 .ot-paper-card {
-  max-width: 320px;
-  padding: 1.2rem 1.5rem;
+  max-width: 290px;
+  padding: 1rem 1.3rem;
   background: rgba(245, 235, 210, 0.92);
   border: 1px solid rgba(120, 90, 50, 0.25);
   border-radius: 2px;
   box-shadow: 2px 3px 12px rgba(80, 60, 30, 0.15);
   font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 300;
   line-height: 1.9;
   color: rgba(60, 43, 31, 0.7);
   letter-spacing: 0.05em;

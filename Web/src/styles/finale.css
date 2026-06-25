@@ -133,92 +133,100 @@
 /* 真相空间 - 中央线索总结面板 */
 .finale-clues-summary {
   position: absolute;
-  top: 40%;
+  top: 42%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 2rem;
-  background: rgba(245, 240, 232, 0.85); /* 宣纸底色微透 */
-  padding: 3rem 4rem;
-  border: 1px solid rgba(44, 36, 22, 0.2);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  border-radius: 4px;
+  gap: 4rem;
   z-index: 5;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1s ease;
-  backdrop-filter: blur(4px);
+  transition: opacity 1.5s ease;
 }
 
 .finale-clues-summary.visible {
   opacity: 1;
 }
 
-.finale-clues-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  color: #2c2416;
-  letter-spacing: 0.15em;
-}
-
-.finale-clues-items {
+/* 左侧：两行文字竖排渗出 */
+.finale-clues-phrases {
   display: flex;
   flex-direction: row;
-  gap: 3.5rem;
-  margin-top: 1rem;
+  gap: 1.8rem;
+}
+
+.finale-clues-phrase {
+  writing-mode: vertical-rl;
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  font-size: 1.15rem;
+  color: rgba(44, 36, 22, 0.82);
+  letter-spacing: 0.2em;
+  line-height: 1.6;
+}
+
+/* 右侧：三个物件图标 */
+.finale-clues-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
 }
 
 .finale-clue-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 0.8rem;
 }
 
 .finale-clue-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: rgba(44, 36, 22, 0.05);
-  border: 1px solid rgba(44, 36, 22, 0.2);
+  width: 42px;
+  height: 42px;
+  color: rgba(44, 36, 22, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+}
+
+.finale-clue-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .finale-clue-name {
   font-family: var(--font-serif);
-  font-size: 0.95rem;
-  color: rgba(44, 36, 22, 0.8);
+  font-size: 0.85rem;
+  color: rgba(44, 36, 22, 0.6);
   letter-spacing: 0.1em;
 }
 
 /* 开始复原按钮 */
 .finale-start-btn {
   position: absolute;
-  bottom: 12%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 180px;
+  padding: 0.6rem 2.2rem;
   font-family: var(--font-serif);
   font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.3em;
-  color: #e0c296;
-  background: #713824;
-  border: 2px solid #4a2417;
-  padding: 0.8rem 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-indent: 0.25em;
   cursor: pointer;
+  border-radius: 0;
+  background: rgba(198, 178, 142, 0.88);
+  color: #3b2a1a;
+  border: 1.5px solid rgba(120, 90, 50, 0.6);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15), 2px 2px 0px rgba(88, 72, 48, 0.3);
   opacity: 0;
-  transition: opacity 1.5s ease, background 0.3s ease, transform 0.2s ease;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 3px 3px 0px rgba(44, 36, 22, 0.7);
+  transition: opacity 1.5s ease, transform 0.2s ease-out, background 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .finale-start-btn.visible {
@@ -226,9 +234,15 @@
 }
 
 .finale-start-btn:hover {
-  background: #5c2d1b;
-  transform: translateX(-50%) translate(2px, 2px);
-  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3), 1px 1px 0px rgba(44, 36, 22, 0.7);
+  transform: translate(calc(-50% + 1px), calc(-50% + 1px));
+  background: rgba(210, 192, 158, 0.95);
+  border-color: rgba(100, 75, 40, 0.75);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 1px 1px 0px rgba(88, 72, 48, 0.35);
+}
+
+.finale-start-btn:active {
+  transform: translate(calc(-50% + 2px), calc(-50% + 2px));
+  box-shadow: 0 0 0 transparent;
 }
 
 /* --- 场景2 · 四问复原 (FOUR_QUESTIONS) --- */
@@ -1066,39 +1080,48 @@
 }
 
 /* --- 终章选项覆盖：竖排依次排列，浅色宣纸风格，置于最上层 --- */
-.finale-active .narration-options {
+body > .narration-options {
+  position: fixed;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 0.6rem;
-  z-index: 100;
-  position: relative;
+  gap: 1rem;
+  z-index: 10000;
+  pointer-events: auto;
 }
 
-.finale-active .narration-option-btn {
+body > .narration-options .narration-option-btn {
   width: min(100%, 28rem);
-  text-align: left;
-  justify-content: flex-start;
-  padding: 0.65rem 1.2rem;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: rgba(44, 36, 22, 0.88);
-  background: rgba(245, 240, 232, 0.92);
-  border: 1px solid rgba(44, 36, 22, 0.2);
-  box-shadow: 0 2px 6px rgba(44, 36, 22, 0.1);
-  letter-spacing: 0.06em;
+  min-height: 42px;
+  padding: 0.6rem 2.2rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-indent: 0.25em;
+  text-align: center;
+  justify-content: center;
+  color: #3b2a1a;
+  background: rgba(198, 178, 142, 0.88);
+  border: 1.5px solid rgba(120, 90, 50, 0.6);
+  border-radius: 0;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15), 2px 2px 0px rgba(88, 72, 48, 0.3);
 }
 
-.finale-active .narration-option-btn:hover {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(44, 36, 22, 0.35);
-  box-shadow: 0 3px 10px rgba(44, 36, 22, 0.15);
-  transform: translateY(-1px);
+body > .narration-options .narration-option-btn:hover {
+  transform: translate(1px, 1px);
+  background: rgba(210, 192, 158, 0.95);
+  border-color: rgba(100, 75, 40, 0.75);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 1px 1px 0px rgba(88, 72, 48, 0.35);
 }
 
-.finale-active .narration-option-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(44, 36, 22, 0.1);
+body > .narration-options .narration-option-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
 }
 
 /* --- Reduced Motion --- */

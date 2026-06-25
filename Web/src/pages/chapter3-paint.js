@@ -274,7 +274,7 @@ export default class Chapter3PaintScene {
     this._liutingEl.appendChild(this._crouchBtn);
 
     // 凹槽热点（题字后出现）
-    this._slotSpot = this._createHotspot(72, 75, 6, async () => {
+    this._slotSpot = this._createHotspot(75, 63, 6, async () => {
       if (this._isNarrating) return;
       await this._handleSlotClick();
     }, '凹槽');
@@ -582,10 +582,18 @@ export default class Chapter3PaintScene {
 
     await this._waitForImage(this._bgLiutingRevealed);
 
-    // 灰泥剥落动画 → 切换到墙面剥落态。草图近景留到蹲下观察时再出现。
+    // 1. 在动画开始前，将底层背景悄悄替换为 Revealed 背景图。
+    // 因为上方有不透明的 _plasterOverlay 挡着，所以用户看不到这一瞬间的变化。
+    this._liutingEl.style.backgroundImage = `url('${this._bgLiutingRevealed}')`;
+
+    // 2. 同时让红线开始平滑淡出（移除 visible，过渡由 CSS transition 控制）
+    this._redlinesOverlay.classList.remove('visible');
+
+    // 3. 播放灰泥剥落（淡出）动画
     this._plasterOverlay.classList.add('cracking');
     await this._delay(1200);
-    this._liutingEl.style.backgroundImage = `url('${this._bgLiutingRevealed}')`;
+
+    // 4. 动画结束后，彻底隐藏覆盖层
     this._plasterOverlay.style.display = 'none';
     this._redlinesOverlay.style.display = 'none';
 
@@ -625,10 +633,6 @@ export default class Chapter3PaintScene {
     // 蹲下观察时再进入草图近景，避免剥墙瞬间把答案全部抛出。
     await this._showSketchCloseup();
 
-    // 蹲下视角动画：草图近景上移，背景不动
-    this._sketchOverlay.classList.add('crouching');
-    await this._delay(600);
-
     await this.narrationBar.playLine(null, '你后退两步，蹲下来。视线降到墙上标出的那条低位线的高度。');
     await this.narrationBar.playLine(null, '忽然，所有"不对"都对了。');
     await this.narrationBar.playLine(null, '你想起刚才捡起的那张画——水面太重，桥线太弯，亭阁压得太低。那张画和眼前这幅草图的视角几乎一样。从这个高度看过去，远香堂的倒影、小飞虹的弧线、梧竹幽居的竹影，真的会同时出现在一个画面里。');
@@ -636,12 +640,6 @@ export default class Chapter3PaintScene {
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.understoodNotPainter = true;
-
-    // 视角恢复：草图回到原位
-    this._sketchOverlay.classList.remove('crouching');
-    this._sketchOverlay.classList.add('crouch-restore');
-    await this._delay(600);
-    this._sketchOverlay.classList.remove('crouch-restore');
 
     // 墙角题字（草图左侧出现）
     await this.narrationBar.playLine(null, '视线回到正常高度。你注意到草图最下方的墙角处，有一行小字，笔迹和草图一样拙：');
@@ -836,7 +834,7 @@ export default class Chapter3PaintScene {
     // 匾额作为半透明组件淡入（复用草图面板样式）
     const plaque = document.createElement('div');
     plaque.className = 'ch3-sketch-panel ch3-plaque-panel';
-    plaque.innerHTML = `<img src="${this._bgPlaque}" alt="兰雪堂匾额" class="ch3-sketch-img" />`;
+    plaque.innerHTML = `<img src="${this._bgPlaque}" alt="兰雪堂匾额" class="ch3-plaque-img" />`;
     this._liutingEl.appendChild(plaque);
     await this._nextFrame();
     plaque.classList.add('visible');

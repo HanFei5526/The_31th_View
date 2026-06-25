@@ -524,7 +524,7 @@
 
 /* --- 终章过渡页 --- */
 .intro-transition-overlay--finale {
-  background: transparent;
+  background: var(--wash-paper-mid);
 }
 
 .intro-transition-overlay--finale::before {
