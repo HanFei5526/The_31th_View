@@ -657,34 +657,18 @@
   display: none;
 }
 
-/* 回声渗字 */
+/* 回声渗字容器 */
 .finale-echo-text {
   position: absolute;
   bottom: 30%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  font-family: var(--font-handwrite);
   font-size: clamp(1.6rem, 3.5vmin, 2.4rem);
   color: rgba(44, 36, 22, 0.88);
   letter-spacing: 0.25em;
   text-align: center;
   white-space: nowrap;
-}
-
-.finale-echo-char {
-  display: inline-block;
-  opacity: 0;
-  filter: blur(6px);
-  transform: scale(1.15);
-  animation: finaleSeepChar 2.5s ease forwards;
-}
-
-@keyframes finaleSeepChar {
-  0% { opacity: 0; filter: blur(8px); transform: scale(1.2); }
-  40% { opacity: 0.4; filter: blur(3px); }
-  70% { opacity: 0.7; filter: blur(1px); transform: scale(1.02); }
-  100% { opacity: 0.85; filter: blur(0); transform: scale(1); }
 }
 
 /* "做出选择"按钮 */

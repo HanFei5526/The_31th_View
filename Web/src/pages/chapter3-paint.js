@@ -62,6 +62,7 @@ export default class Chapter3PaintScene {
     this._exited = false;
     this._wallClickCount = 0;
     this._resolveItemSelection = null;
+    this._sketchOverlay = null;
     this._idleTimers = [];
     this._container = null;
     this._sceneRoot = null;
@@ -581,20 +582,12 @@ export default class Chapter3PaintScene {
 
     await this._waitForImage(this._bgLiutingRevealed);
 
-    // 灰泥剥落动画 → 切换到墙面剥落态 → 显示草图组件
+    // 灰泥剥落动画 → 切换到墙面剥落态。草图近景留到蹲下观察时再出现。
     this._plasterOverlay.classList.add('cracking');
     await this._delay(1200);
     this._liutingEl.style.backgroundImage = `url('${this._bgLiutingRevealed}')`;
     this._plasterOverlay.style.display = 'none';
     this._redlinesOverlay.style.display = 'none';
-
-    // 草图作为墙面UI组件居中出现（不覆盖背景）
-    this._sketchOverlay = document.createElement('div');
-    this._sketchOverlay.className = 'ch3-sketch-panel';
-    this._sketchOverlay.innerHTML = `<img src="${this._bgSketchRevealed}" alt="墙面草图" class="ch3-sketch-img" />`;
-    this._liutingEl.appendChild(this._sketchOverlay);
-    await this._nextFrame();
-    this._sketchOverlay.classList.add('visible');
 
     // 隐藏封墙热点
     this._hideSpots(this._liutingSpots);
@@ -629,7 +622,10 @@ export default class Chapter3PaintScene {
     this._crouchBtn.classList.remove('visible');
     this._isNarrating = true;
 
-    // 蹲下视角动画：草图组件上移，背景不动
+    // 蹲下观察时再进入草图近景，避免剥墙瞬间把答案全部抛出。
+    await this._showSketchCloseup();
+
+    // 蹲下视角动画：草图近景上移，背景不动
     this._sketchOverlay.classList.add('crouching');
     await this._delay(600);
 
@@ -683,6 +679,24 @@ export default class Chapter3PaintScene {
     this._startIdleTimer('slot', 20000, () => {
       this.narrationBar.showFloating('草图右下角似乎有什么。');
     });
+  }
+
+  async _showSketchCloseup() {
+    if (this._sketchOverlay) {
+      this._sketchOverlay.classList.add('visible');
+      return;
+    }
+
+    await this._waitForImage(this._bgSketchRevealed);
+
+    this._sketchOverlay = document.createElement('div');
+    this._sketchOverlay.className = 'ch3-sketch-panel';
+    this._sketchOverlay.innerHTML = `<img src="${this._bgSketchRevealed}" alt="墙面草图近景" class="ch3-sketch-img" />`;
+    this._liutingEl.appendChild(this._sketchOverlay);
+
+    await this._nextFrame();
+    this._sketchOverlay.classList.add('visible');
+    await this._delay(650);
   }
 
   async _handleSlotClick() {

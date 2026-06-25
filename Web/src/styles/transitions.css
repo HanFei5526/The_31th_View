@@ -206,57 +206,6 @@
   to { opacity: 0; }
 }
 
-/* --- 墨迹文字显现 (渗字效果) --- */
-.seep-text {
-  position: relative;
-  display: inline-block;
-}
-
-.seep-text .seep-char {
-  display: inline-block;
-  opacity: 0;
-  filter: blur(8px);
-  transform: scale(1.2);
-  animation: seepReveal 2s ease forwards;
-}
-
-@keyframes seepReveal {
-  0% {
-    opacity: 0;
-    filter: blur(8px);
-    transform: scale(1.2);
-  }
-  30% {
-    opacity: 0.3;
-    filter: blur(4px);
-  }
-  60% {
-    opacity: 0.6;
-    filter: blur(2px);
-    transform: scale(1.05);
-  }
-  80% {
-    opacity: 0.8;
-    filter: blur(1px);
-  }
-  90% {
-    opacity: 0.9;
-    filter: blur(0);
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.7; /* 不完全显现，保持朦胧感 */
-    filter: blur(0);
-    transform: scale(1);
-  }
-}
-
-/* Stagger each character */
-.seep-char:nth-child(1) { animation-delay: 0s; }
-.seep-char:nth-child(2) { animation-delay: 0.8s; }
-.seep-char:nth-child(3) { animation-delay: 1.6s; }
-.seep-char:nth-child(4) { animation-delay: 2.4s; }
-.seep-char:nth-child(5) { animation-delay: 3.2s; }
 
 /* --- 朱砂发光效果 (第三章) --- */
 .vermillion-glow {
@@ -746,107 +695,6 @@ body.fall-active .hud-bar {
   opacity: 0.48;
 }
 
-/* Phase 3: Transition text on paper background */
-.fall-transition-text-layer {
-  position: fixed;
-  inset: 0;
-  z-index: calc(var(--z-transition) + 3);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.45rem; /* 间距优化，不要过大也不要太小 */
-  padding: 2rem;
-  pointer-events: none;
-}
-
-/* 针对以直角引号「开头的字行，向左负 text-indent 偏置 0.45em，抵消符号造成的左侧视觉凹陷空隙，实现真正视觉居中 */
-.fall-transition-line.quote-aligned,
-.fall-transition-echo-line.quote-aligned {
-  text-indent: -0.45em;
-}
-
-.fall-transition-line {
-  font-family: var(--font-serif, 'Noto Serif SC', serif);
-  font-size: 1.22rem;
-  color: #5c4f42; /* 画中世界旁白色 */
-  letter-spacing: 0.12em;
-  line-height: 1.8;
-  text-align: center;
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(10px);
-  transition: opacity 1.2s ease, filter 1.2s ease, transform 1.2s ease;
-}
-
-.fall-transition-line.visible {
-  opacity: 0.8; /* 限制旁白最大可见不透明度为 0.8，拉开虚实差距 */
-  filter: blur(0);
-  transform: translateY(0);
-}
-
-.fall-transition-line.fading {
-  opacity: 0;
-  filter: blur(3px);
-  transform: translateY(-8px);
-}
-
-.fall-transition-line.inner-voice {
-  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
-  font-size: 1.22rem;
-  font-style: normal;
-  color: #2b231d !important; /* 画中世界角色正文色 */
-  letter-spacing: 0.14em;
-}
-
-/* 确保内心独白可见时是不透明度 0.95 */
-.fall-transition-line.inner-voice.visible {
-  opacity: 0.95;
-}
-
-/* Phase 4: Zhou Henian echo & narration lines (场景6 · 墨迹扩散转场) */
-.fall-transition-echo-line {
-  opacity: 0;
-  filter: blur(4px);
-  transform: translateY(8px);
-  transition: opacity 1.5s ease, filter 1.5s ease, transform 1.5s ease;
-  text-align: center;
-  margin-bottom: 1.05rem; /* 精调行间距，确保连贯不松散 */
-  line-height: 1.8;
-}
-
-.fall-transition-echo-line.visible {
-  opacity: 0.8;
-  filter: blur(0);
-  transform: translateY(0);
-}
-
-.fall-transition-echo-line.fading {
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(-8px);
-}
-
-.fall-transition-echo-line--zhou {
-  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
-  font-size: 1.22rem;
-  color: #2b231d !important; /* 画中世界角色正文色 */
-  letter-spacing: 0.14em;
-  margin: 0.9rem 0 0.9rem 0; /* 调密上下间距，避免过大的物理空洞 */
-  transition-duration: 2.0s;
-}
-
-.fall-transition-echo-line--zhou.visible {
-  opacity: 0.95;
-}
-
-.fall-transition-echo-line--narration {
-  font-family: var(--font-serif, 'Noto Serif SC', serif);
-  font-size: 1.16rem;
-  color: #5c4f42 !important; /* 画中世界旁白色 */
-  letter-spacing: 0.1em;
-}
-
 /* Phase 5: Final fade to next scene */
 .fall-transition-final {
   position: fixed;
@@ -872,11 +720,7 @@ body.fall-active .hud-bar {
     transition-duration: 0.3s !important;
     filter: sepia(0.34) saturate(0.9) contrast(0.92);
   }
-  .fall-transition-line {
-    transition-duration: 0.3s;
-    filter: none;
-  }
-  .fall-transition-echo-line {
+  [data-fall-text] .ot-line {
     transition-duration: 0.3s;
     filter: none;
   }

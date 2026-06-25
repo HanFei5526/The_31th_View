@@ -16,6 +16,7 @@ import './styles/inventory-popup.css'
 import './styles/poem-compare.css'
 import './styles/chapter3.css'
 import './styles/finale.css'
+import './styles/overlay-text.css'
 
 // 游戏引擎
 import gameEngine from './core/game-engine.js'

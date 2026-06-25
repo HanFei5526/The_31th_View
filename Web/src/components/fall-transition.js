@@ -125,36 +125,37 @@ export default class FallTransition {
     return new Promise(resolve => {
       this._phaseResolve = resolve;
       const layer = document.createElement('div');
-      layer.className = 'fall-transition-text-layer';
+      layer.className = 'ot-fullscreen';
+      layer.dataset.fallText = '';
+      layer.style.position = 'fixed';
+      layer.style.zIndex = 'calc(var(--z-transition, 200) + 3)';
+      layer.style.setProperty('--ot-blur', '6px');
+      layer.style.setProperty('--ot-ty', '10px');
+      layer.style.setProperty('--ot-final-opacity', '0.8');
+      layer.style.setProperty('--ot-line-duration', '1200ms');
       document.body.appendChild(layer);
       this._elements.push(layer);
 
-      // Create text lines
       const lineEls = TRANSITION_LINES.map((text, idx) => {
         const el = document.createElement('div');
-        el.className = 'fall-transition-line';
-        // 第 4 句是沈念内心独白，使用“引号内声音”样式
+        el.className = 'ot-line ot-font-serif';
         if (idx === 3) {
-          el.classList.add('inner-voice');
+          el.classList.add('ot-inner-voice');
         }
-        // 检测开引号，注入视觉避让类
         if (text.startsWith('「')) {
-          el.classList.add('quote-aligned');
+          el.classList.add('ot-quote-aligned');
         }
         el.textContent = text;
         layer.appendChild(el);
         return el;
       });
 
-      // Stagger reveal
       lineEls.forEach((el, i) => {
         this._setTimer(() => el.classList.add('visible'), 600 + i * 1500);
       });
 
-      // Wait for all lines to be shown, then hold briefly
-      const totalTime = 600 + TRANSITION_LINES.length * 1500 + 2500; // 最后一句话延长停留 1 秒，增强可读性
+      const totalTime = 600 + TRANSITION_LINES.length * 1500 + 2500;
       this._setTimer(() => {
-        // Fade out text
         lineEls.forEach((el, i) => {
           this._setTimer(() => el.classList.add('fading'), i * 200);
         });
@@ -170,18 +171,20 @@ export default class FallTransition {
   _phaseEcho() {
     return new Promise(resolve => {
       this._phaseResolve = resolve;
-      let layer = document.querySelector('.fall-transition-text-layer');
+      let layer = document.querySelector('[data-fall-text]');
       if (!layer) {
         layer = document.createElement('div');
-        layer.className = 'fall-transition-text-layer';
+        layer.className = 'ot-fullscreen';
+        layer.dataset.fallText = '';
+        layer.style.setProperty('--ot-blur', '4px');
+        layer.style.setProperty('--ot-ty', '8px');
+        layer.style.setProperty('--ot-line-duration', '1500ms');
         document.body.appendChild(layer);
         this._elements.push(layer);
       }
 
-      // Clear previous text
       layer.innerHTML = '';
 
-      // 创建回声的 3 行台词
       const echoData = [
         { text: ECHO_LINES[0], type: 'narration', delay: 200 },
         { text: ECHO_LINES[1], type: 'zhou', delay: 1500 },
@@ -190,26 +193,23 @@ export default class FallTransition {
 
       const els = echoData.map(data => {
         const el = document.createElement('div');
-        el.className = `fall-transition-echo-line fall-transition-echo-line--${data.type}`;
-        // 检测开引号，注入视觉避让类
+        el.className = `ot-line ot-${data.type}`;
         if (data.text.startsWith('「')) {
-          el.classList.add('quote-aligned');
+          el.classList.add('ot-quote-aligned');
         }
         el.textContent = data.text;
         layer.appendChild(el);
         return { el, delay: data.delay };
       });
 
-      // 依次延迟淡入
       els.forEach(item => {
         this._setTimer(() => item.el.classList.add('visible'), item.delay);
       });
 
-      // 停留并整体淡出
-      const fadeOutDelay = 7000; // 延长停留 1.2 秒，使最后一句旁白在余音淡出时有充足阅读时间
+      const fadeOutDelay = 7000;
       this._setTimer(() => {
         els.forEach(item => item.el.classList.add('fading'));
-        this._setTimer(resolve, 1500); // 留足 1.5s 淡出动画时间
+        this._setTimer(resolve, 1500);
       }, fadeOutDelay);
     });
   }
@@ -294,6 +294,6 @@ export default class FallTransition {
     this._elements = [];
 
     // Also clean up any orphaned transition elements
-    document.querySelectorAll('.fall-transition-desat, .fall-transition-painting-backdrop, .fall-transition-ink, .fall-transition-text-layer, .fall-transition-final').forEach(el => el.remove());
+    document.querySelectorAll('.fall-transition-desat, .fall-transition-painting-backdrop, .fall-transition-ink, [data-fall-text], .fall-transition-final').forEach(el => el.remove());
   }
 }

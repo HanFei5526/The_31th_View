@@ -3,6 +3,7 @@ import { NotebookFloating } from '../components/notebook-floating.js';
 import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 import { ITEM_TEMPLATES } from '../core/inventory.js';
+import { showInkSeep } from '../components/overlay-text.js';
 
 const SCENE_STATES = {
   TRUTH_SPACE: 'truth_space',
@@ -643,15 +644,24 @@ export default class FinaleScene {
     const echoContainer = this._paintingCompleteEl.querySelector('#finale-echo-text');
     const echoText = '"有人，终于看到了。"';
     echoContainer.innerHTML = '';
-    [...echoText].forEach((char, i) => {
+    echoContainer.style.setProperty('--ot-blur', '6px');
+    echoContainer.style.setProperty('--ot-scale', '1.15');
+    echoContainer.style.setProperty('--ot-final-opacity', '0.85');
+    echoContainer.style.setProperty('--ot-char-duration', '2500ms');
+    const chars = echoText.split('');
+    chars.forEach(ch => {
       const span = document.createElement('span');
-      span.className = 'finale-echo-char';
-      span.textContent = char;
-      span.style.animationDelay = `${i * 500}ms`;
+      span.className = 'ot-char ot-font-handwrite';
+      span.textContent = ch;
       echoContainer.appendChild(span);
     });
+    for (let i = 0; i < echoContainer.children.length; i++) {
+      if (this._exited) break;
+      echoContainer.children[i].classList.add('visible');
+      await this._delay(500);
+    }
 
-    await this._delay(echoText.length * 500 + 2500);
+    await this._delay(2500);
     if (this._exited) return;
 
     await this.narrationBar.playLine(null, '没有惊喜，没有悲伤。只是一句等了很久的确认。她不会知道是你，但因为有人来过，她当年那一问，不再悬空。');

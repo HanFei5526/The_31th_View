@@ -9,6 +9,7 @@ import { NotebookFloating } from '../components/notebook-floating.js';
 import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
 import { PoemCompare } from '../components/poem-compare.js';
+import { showReveal, showPaperReveal, showRipple, dismiss } from '../components/overlay-text.js';
 
 const SUB_SCENES = {
   INTRO: 'intro',
@@ -260,16 +261,10 @@ export default class Chapter2PaintScene {
 
     this._isNarrating = true;
 
-    const revealEl = document.createElement('div');
-    revealEl.className = 'ch2-reveal-overlay';
-    revealEl.innerHTML = `
-      <div class="ch2-reveal-chars">
-        ${diffs.map(c => `<span class="ch2-reveal-char">${c}</span>`).join('')}
-      </div>
-    `;
-    this._yuanxiangEl.appendChild(revealEl);
-    await this._delay(200);
-    revealEl.classList.add('active');
+    const revealEl = await showReveal(this._yuanxiangEl, {
+      chars: diffs,
+      charInterval: 500,
+    });
     await this._delay(1200);
 
     await this.narrationBar.playLine(null, '四个字悬在眼前，像是从墨迹中浮了出来。');
@@ -281,25 +276,20 @@ export default class Chapter2PaintScene {
     this.notebook.addClueRecord('[线索] 题诗异文 — 五首题诗中四处差异字组合为"画非一人"，似乎暗示这套画作并非一人完成');
     await this.narrationBar.playLine('系统提示', '已记录线索：题诗异文「画非一人」。可在【记录】页查看，也可在【对话】页继续讨论。');
 
-    revealEl.classList.add('fade-out');
-    await this._delay(1000);
-    revealEl.remove();
+    await dismiss(revealEl, { duration: 1000, mode: 'fade-out' });
 
     await this._showOldComment();
     this._isNarrating = false;
   }
 
   async _showOldComment() {
-    const commentEl = document.createElement('div');
-    commentEl.className = 'ch2-old-comment';
-    commentEl.innerHTML = `
-      <div class="ch2-old-comment-paper">
-        <p>"此页视点卑近，似非成稿。画心尚佳，惟边旁杂线、残字、旧签皆碍全册体例，宜配边压覆……"</p>
-      </div>
-    `;
-    this._yuanxiangEl.appendChild(commentEl);
-    await this._delay(100);
-    commentEl.classList.add('visible');
+    const commentEl = await showPaperReveal(this._yuanxiangEl, {
+      html: '<p>"此页视点卑近，似非成稿。画心尚佳，惟边旁杂线、残字、旧签皆碍全册体例，宜配边压覆……"</p>',
+      position: 'center',
+      duration: 2500,
+      scale: 0.95,
+      paperCard: true,
+    });
 
     await this.narrationBar.playLine(null, '你的目光被墙角一片几乎脱落的纸片吸引。是一则旧批注，字迹比题诗小得多，墨色也更淡。');
     await this.narrationBar.playLine(null, '"此页视点卑近，似非成稿。画心尚佳，惟边旁杂线、残字、旧签皆碍全册体例，宜配边压覆……"');
@@ -313,9 +303,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('系统提示', '已记录线索：「旧批注残片」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
 
-    commentEl.classList.remove('visible');
-    await this._delay(1000);
-    commentEl.remove();
+    await dismiss(commentEl, { duration: 1000 });
 
     this._enterLightDiscussion();
   }
@@ -417,23 +405,15 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '你俯身看向桥下的水面。忽然，水中泛起一圈暗色涟漪——没有风，但水面在动，像是有什么从水底浮上来。');
     await this.narrationBar.playLine(null, '涟漪扩散开去，在水面上留下痕迹。那些痕迹是墨迹。一个字，又一个字，从涟漪间隙中逐渐浮现。');
 
-    const rippleEl = document.createElement('div');
-    rippleEl.className = 'ch2-water-text';
-    rippleEl.innerHTML = `
-      <div class="ch2-old-comment-paper">
-        <p>……知我者，唯有此园。</p>
-      </div>
-    `;
-    this._xiaofeihongEl.appendChild(rippleEl);
-    await this._delay(100);
-    rippleEl.classList.add('visible');
+    const rippleEl = await showRipple(this._xiaofeihongEl, {
+      html: '<p>……知我者，唯有此园。</p>',
+      paperCard: true,
+    });
 
     await this.narrationBar.playLine(null, '「……知我者，唯有此园。」');
     await this.narrationBar.playLine(null, '字迹停留了片刻，然后像墨滴溶入水中一样，缓缓消散了。');
 
-    rippleEl.classList.add('dissolve');
-    await this._delay(1000);
-    rippleEl.remove();
+    await dismiss(rippleEl, { mode: 'dissolve' });
 
     await this.narrationBar.playLine('沈念', '"知我者，唯有此园"……谁会对一座园林说这样的话？这个人把什么寄托在了这里？', { portrait: '/images/common/shennian_1.png' });
 
