@@ -148,110 +148,24 @@
   transform: scale(1.15);
 }
 
-/* --- 渗字效果（UI组件卡片） --- */
-.ch3-seep-panel {
+/* --- 物件选择按钮组 --- */
+.ch3-item-select-controls {
   position: absolute;
-  z-index: 200;
-  opacity: 0;
-  transition: opacity 2.5s ease, transform 2.5s ease;
-  pointer-events: none;
-}
-
-.ch3-seep-panel.visible {
-  opacity: 1;
-}
-
-.ch3-seep-panel.ch3-seep-panel--center {
-  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
-}
-
-.ch3-seep-panel--center.visible {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.ch3-seep-panel.ch3-seep-panel--left {
-  top: 50%;
-  right: 58%;
-  transform: translateY(-50%) translateX(8px) scale(0.95);
-}
-
-.ch3-seep-panel--left.visible {
-  transform: translateY(-50%) translateX(0) scale(1);
-}
-
-.ch3-seep-panel-text {
-  width: max-content;
-  max-width: min(680px, 72vw);
-  box-sizing: border-box;
-  text-align: center;
-  white-space: pre-wrap;
-}
-
-.ch3-seep-panel-text .ch3-seep-char {
-  display: inline-block;
-  opacity: 0;
-  filter: blur(4px);
-  transform: scale(1.04);
-  transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease;
-}
-
-.ch3-seep-panel-text .ch3-seep-char.visible {
-  opacity: 1;
-  filter: blur(0);
-  transform: scale(1);
-}
-
-/* --- 渗字效果（场景内原位渐显 - 已废弃，保留兼容） --- */
-.ch3-seep-container {
-  position: absolute;
-  z-index: 5;
-  pointer-events: none;
-  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
-  color: rgba(42, 36, 28, 0.88);
-  font-size: 1.3rem;
-  letter-spacing: 0.2em;
-  line-height: 2;
-}
-
-.ch3-seep-char {
-  display: inline-block;
-  opacity: 0;
-  filter: blur(6px);
-  transform: scale(1.15);
-  transition: opacity 0.8s ease, filter 0.8s ease, transform 0.8s ease;
-}
-
-.ch3-seep-char.visible {
-  opacity: 0.82;
-  filter: blur(0);
-  transform: scale(1);
-}
-
-.ch3-seep-char.emphasis {
-  font-size: 1.8rem;
-  color: rgba(62, 48, 32, 0.95);
-  font-weight: 600;
-}
-
-/* --- 物件选择浮层 --- */
-.ch3-item-select-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
+  top: 53%;
+  transform: translate(-50%, -50%);
+  z-index: 9;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: transparent;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   pointer-events: none;
 }
 
-.ch3-item-select-overlay.active {
+.ch3-item-select-controls.active {
   opacity: 1;
-  pointer-events: auto;
+  transform: translate(-50%, -50%) translateY(-4px);
 }
 
 .ch3-item-select-options {
@@ -429,7 +343,7 @@
   inset: 0;
   z-index: 4;
   opacity: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 560'%3E%3Cg fill='none' stroke='%238d3b2c' stroke-linecap='round' stroke-linejoin='round' opacity='0.48'%3E%3Cpath d='M300 275 C390 230 508 215 650 238 C708 248 750 266 790 286' stroke-width='1.9'/%3E%3Cpath d='M315 318 C430 286 565 290 706 328' stroke-width='1.35' opacity='0.38'/%3E%3Cpath d='M365 195 C440 255 512 306 614 380' stroke-width='1.2' opacity='0.34'/%3E%3Cpath d='M328 370 C420 352 545 352 704 372' stroke-width='1.15' opacity='0.28'/%3E%3Cpath d='M705 160 C690 238 682 312 680 420' stroke-width='1' opacity='0.27'/%3E%3Cpath d='M475 172 C470 247 472 329 486 407' stroke-width='0.9' opacity='0.24'/%3E%3Cpath d='M598 172 C590 238 589 318 604 398' stroke-width='0.9' opacity='0.24'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 560'%3E%3Cg fill='none' stroke='%23b53d26' stroke-linecap='round' stroke-linejoin='round' opacity='0.40'%3E%3Cpath d='M300 275 C390 230 508 215 650 238 C708 248 750 266 790 286' stroke-width='0.8'/%3E%3Cpath d='M315 318 C430 286 565 290 706 328' stroke-width='0.8'/%3E%3Cpath d='M365 195 C440 255 512 306 614 380' stroke-width='0.8'/%3E%3Cpath d='M328 370 C420 352 545 352 704 372' stroke-width='0.8'/%3E%3Cpath d='M705 160 C690 238 682 312 680 420' stroke-width='0.8'/%3E%3Cpath d='M475 172 C470 247 472 329 486 407' stroke-width='0.8'/%3E%3Cpath d='M598 172 C590 238 589 318 604 398' stroke-width='0.8'/%3E%3C/g%3E%3C/svg%3E");
   background-position: center;
   background-size: cover;
   mix-blend-mode: multiply;

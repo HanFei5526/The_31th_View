@@ -8,6 +8,7 @@ import { NarrationBar } from '../components/narration-bar.js';
 import { NotebookFloating } from '../components/notebook-floating.js';
 import { HudBar } from '../components/hud-bar.js';
 import { InventoryPopup } from '../components/inventory-popup.js';
+import { showInkSeep, dismiss } from '../components/overlay-text.js';
 
 const SCENE_STATES = {
   YUANYANG_SOUTH: 'yuanyang_south',
@@ -60,6 +61,7 @@ export default class Chapter3PaintScene {
     this._isNarrating = false;
     this._exited = false;
     this._wallClickCount = 0;
+    this._resolveItemSelection = null;
     this._idleTimers = [];
     this._container = null;
     this._sceneRoot = null;
@@ -476,50 +478,55 @@ export default class Chapter3PaintScene {
   }
 
   async _showItemSelectOverlay() {
-    this._isNarrating = true;
     const playPromise = this.narrationBar.playLine('系统提示', '选择要使用的物件：');
 
-    const overlay = document.createElement('div');
-    overlay.className = 'ch3-item-select-overlay';
-    overlay.innerHTML = `
+    const controls = document.createElement('div');
+    controls.className = 'ch3-item-select-controls';
+    controls.innerHTML = `
       <div class="ch3-item-select-options">
         <button class="ch3-item-btn" data-item="inkstone">残砚</button>
         <button class="ch3-item-btn" data-item="hairpin">断簪</button>
       </div>
     `;
-    this._liutingEl.appendChild(overlay);
+    this._liutingEl.appendChild(controls);
     await this._nextFrame();
-    overlay.classList.add('active');
+    controls.classList.add('active');
 
     let resolveSelection;
     const selectPromise = new Promise(resolve => {
       resolveSelection = resolve;
+      this._resolveItemSelection = resolve;
     });
 
     const handleButtonClick = (e) => {
       const btn = e.target.closest('[data-item]');
       if (btn) {
-        resolveSelection(btn.dataset.item);
+        e.stopPropagation();
+        this._cancelItemSelection(btn.dataset.item);
       }
     };
-    overlay.addEventListener('click', handleButtonClick);
+    controls.addEventListener('click', handleButtonClick);
 
     const choice = await Promise.race([
       selectPromise,
       playPromise.then(() => 'cancel')
     ]);
 
-    overlay.removeEventListener('click', handleButtonClick);
-    overlay.classList.remove('active');
-    this.narrationBar.dismiss();
+    this._resolveItemSelection = null;
+    controls.removeEventListener('click', handleButtonClick);
+    controls.classList.remove('active');
+    if (choice !== 'external-cancel') {
+      this.narrationBar.dismiss();
+    }
     await this._delay(400);
-    overlay.remove();
+    controls.remove();
 
-    if (choice === 'cancel') {
+    if (choice === 'cancel' || choice === 'external-cancel') {
       this._isNarrating = false;
       return;
     }
 
+    this._isNarrating = true;
     if (!this.engine.gameProgress.redLinesRevealed) {
       // 第一步：需要残砚
       if (choice === 'inkstone') {
@@ -539,6 +546,14 @@ export default class Chapter3PaintScene {
         this._wallClickCount = 1;
       }
     }
+  }
+
+  _cancelItemSelection(reason = 'cancel') {
+    if (!this._resolveItemSelection) return false;
+    const resolve = this._resolveItemSelection;
+    this._resolveItemSelection = null;
+    resolve(reason);
+    return true;
   }
 
   async _useInkstone() {
@@ -854,9 +869,20 @@ export default class Chapter3PaintScene {
     spot.tabIndex = 0;
     spot.setAttribute('role', 'button');
     spot.setAttribute('aria-label', ariaLabel);
-    spot.addEventListener('click', onClick);
+    spot.addEventListener('click', async () => {
+      if (this._cancelItemSelection('external-cancel')) {
+        this.narrationBar.dismiss();
+      }
+      await onClick();
+    });
     spot.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (this._cancelItemSelection('external-cancel')) {
+          this.narrationBar.dismiss();
+        }
+        onClick();
+      }
     });
     return spot;
   }
@@ -871,9 +897,20 @@ export default class Chapter3PaintScene {
     arrow.tabIndex = 0;
     arrow.setAttribute('role', 'button');
     arrow.setAttribute('aria-label', ariaLabel);
-    arrow.addEventListener('click', onClick);
+    arrow.addEventListener('click', async () => {
+      if (this._cancelItemSelection('external-cancel')) {
+        this.narrationBar.dismiss();
+      }
+      await onClick();
+    });
     arrow.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (this._cancelItemSelection('external-cancel')) {
+          this.narrationBar.dismiss();
+        }
+        onClick();
+      }
     });
     return arrow;
   }
@@ -897,75 +934,24 @@ export default class Chapter3PaintScene {
    * @returns {Promise<HTMLElement>} 返回面板元素（调用方决定何时移除）
    */
   async _showSeepPanel(container, text, position = 'center', emphasis = false) {
-    const panel = document.createElement('div');
-    panel.className = `ch3-seep-panel ch3-seep-panel--${position}${emphasis ? ' ch3-seep-panel--emphasis' : ''}`;
-
-    const textEl = document.createElement('div');
-    textEl.className = 'ch2-old-comment-paper ch3-seep-panel-text';
-
-    const chars = text.split('');
-    chars.forEach(ch => {
-      const span = document.createElement('span');
-      span.className = 'ch3-seep-char';
-      span.textContent = ch;
-      textEl.appendChild(span);
+    return showInkSeep(container, {
+      text,
+      position,
+      charDelay: 250,
+      blur: 4,
+      scale: 1.04,
+      finalOpacity: 1,
+      duration: 600,
+      font: 'xingkai',
+      emphasis,
+      paperCard: true,
+      shouldExit: () => this._exited,
     });
-
-    panel.appendChild(textEl);
-    container.appendChild(panel);
-    await this._nextFrame();
-    panel.classList.add('visible');
-
-    // 逐字显现（250ms/字）
-    const charEls = textEl.querySelectorAll('.ch3-seep-char');
-    for (let i = 0; i < charEls.length; i++) {
-      if (this._exited) return panel;
-      charEls[i].classList.add('visible');
-      await this._delay(250);
-    }
-
-    return panel;
   }
 
   async _dismissSeepPanel(panel) {
     if (!panel) return;
-    panel.classList.remove('visible');
-    await this._delay(1000);
-    panel.remove();
-  }
-
-  async _showSeepText(container, text, xPercent, yPercent, emphasis = false) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'ch3-seep-container';
-    wrapper.style.left = `${xPercent}%`;
-    wrapper.style.top = `${yPercent}%`;
-    wrapper.style.transform = 'translate(-50%, -50%)';
-
-    const chars = text.split('');
-    chars.forEach(ch => {
-      const span = document.createElement('span');
-      span.className = 'ch3-seep-char' + (emphasis ? ' emphasis' : '');
-      span.textContent = ch;
-      wrapper.appendChild(span);
-    });
-
-    container.appendChild(wrapper);
-    await this._nextFrame();
-
-    // 逐字显现（300ms/字）
-    const charEls = wrapper.querySelectorAll('.ch3-seep-char');
-    for (let i = 0; i < charEls.length; i++) {
-      if (this._exited) return;
-      charEls[i].classList.add('visible');
-      await this._delay(300);
-    }
-
-    // 保留显示一段时间后移除
-    await this._delay(2000);
-    wrapper.style.transition = 'opacity 1.5s ease';
-    wrapper.style.opacity = '0';
-    await this._delay(1500);
-    wrapper.remove();
+    await dismiss(panel, { duration: 1000 });
   }
 
   _startIdleTimer(id, delay, callback) {

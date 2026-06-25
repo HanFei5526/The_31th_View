@@ -1,0 +1,289 @@
+/* =============================================
+   overlay-text.css — 画面居中显现文字 统一组件
+   =============================================
+   三种容器: fullscreen / center / anchor
+   三种动画预设: ink-seep / quiet-fade / paper-reveal
+   一种装饰: paper-card (纸张卡片背景)
+   一种特殊: ripple (水面涟漪, 仅第二章)
+   ============================================= */
+
+/* --- 容器层 --- */
+.ot-fullscreen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ot-gap, 1.45rem);
+  padding: 2rem;
+  z-index: var(--ot-z, 200);
+  pointer-events: none;
+}
+
+.ot-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(var(--ot-container-scale, 0.95));
+  z-index: var(--ot-z, 200);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--ot-container-duration, 2.5s) ease,
+              transform var(--ot-container-duration, 2.5s) ease;
+}
+
+.ot-center.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.ot-left {
+  position: absolute;
+  top: 50%;
+  right: 58%;
+  transform: translateY(-50%) translateX(8px) scale(var(--ot-container-scale, 0.95));
+  z-index: var(--ot-z, 200);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--ot-container-duration, 2.5s) ease,
+              transform var(--ot-container-duration, 2.5s) ease;
+}
+
+.ot-left.visible {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0) scale(1);
+}
+
+.ot-anchor {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: var(--ot-z, 5);
+  pointer-events: none;
+}
+
+/* --- 动画预设 A: ink-seep (逐字水墨渗出) --- */
+.ot-char {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(var(--ot-blur, 6px));
+  transform: scale(var(--ot-scale, 1.15));
+  transition: opacity var(--ot-char-duration, 0.8s) ease,
+              filter var(--ot-char-duration, 0.8s) ease,
+              transform var(--ot-char-duration, 0.8s) ease;
+}
+
+.ot-char.visible {
+  opacity: var(--ot-final-opacity, 0.85);
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.ot-char.emphasis {
+  font-size: 1.8rem;
+  color: rgba(62, 48, 32, 0.95);
+  font-weight: 600;
+}
+
+/* --- 动画预设 B: quiet-fade (逐行沉静浮现) --- */
+.ot-line {
+  opacity: 0;
+  filter: blur(var(--ot-blur, 0px));
+  transform: translateY(var(--ot-ty, 10px));
+  transition: opacity var(--ot-line-duration, 1.2s) ease,
+              filter var(--ot-line-duration, 1.2s) ease,
+              transform var(--ot-line-duration, 1.2s) ease;
+  text-align: center;
+}
+
+.ot-line.visible {
+  opacity: var(--ot-final-opacity, 0.85);
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.ot-line.fading {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(-8px);
+}
+
+/* --- 动画预设 C: paper-reveal (整体渐显) --- */
+/* 使用 .ot-center / .ot-left 的 opacity+scale transition 即可 */
+
+/* --- 纸张装饰 --- */
+.ot-paper-card {
+  max-width: 320px;
+  padding: 1.2rem 1.5rem;
+  background: rgba(245, 235, 210, 0.92);
+  border: 1px solid rgba(120, 90, 50, 0.25);
+  border-radius: 2px;
+  box-shadow: 2px 3px 12px rgba(80, 60, 30, 0.15);
+  font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif;
+  font-size: 0.9rem;
+  line-height: 1.9;
+  color: rgba(60, 43, 31, 0.7);
+  letter-spacing: 0.05em;
+}
+
+/* 面板文字容器（渗字面板内部） */
+.ot-panel-text {
+  width: max-content;
+  max-width: min(680px, 72vw);
+  box-sizing: border-box;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+/* --- 字体修饰 --- */
+.ot-font-handwrite {
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+}
+
+.ot-font-xingkai {
+  font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif;
+}
+
+.ot-font-serif {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+}
+
+/* --- 特殊: 逐字渗出用 CSS animation (第二章"画非一人") --- */
+.ot-char-anim {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(6px);
+  transform: scale(0.95);
+  animation: otCharReveal 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes otCharReveal {
+  0% { opacity: 0; filter: blur(6px); transform: scale(0.95); }
+  100% { opacity: 0.95; filter: blur(0); transform: scale(1); }
+}
+
+/* --- 特殊: 水面涟漪动画 (第二章水面文字) --- */
+.ot-ripple {
+  position: absolute;
+  bottom: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+}
+
+.ot-ripple.visible {
+  animation: otRippleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.ot-ripple.dissolve {
+  animation: otRippleDissolve 3.5s ease forwards;
+}
+
+@keyframes otRippleReveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.8) scaleX(0.95);
+    filter: blur(12px);
+    letter-spacing: -0.1em;
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(2px);
+    letter-spacing: 0.1em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1) scaleX(1);
+    filter: blur(0);
+    letter-spacing: 0.2em;
+  }
+}
+
+@keyframes otRippleDissolve {
+  0% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(10px); transform: translateX(-50%) scale(1.05); }
+}
+
+.ot-ripple span {
+  display: inline-block;
+  font-family: "STXingkai", "Xingkai SC", "Kaiti", "STKaiti", "楷体", serif;
+  font-size: 1.1rem;
+  color: rgba(60, 43, 31, 0.7);
+  animation: otWaterFloat 2s ease-in-out infinite alternate;
+}
+
+@keyframes otWaterFloat {
+  0% { transform: translateY(0); opacity: 0.8; }
+  100% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* --- 带背景遮罩的全屏容器 (用于"画非一人"揭示) --- */
+.ot-fullscreen-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 230, 200, 0.4);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 1.0s ease-in-out;
+}
+
+.ot-fullscreen-backdrop.active {
+  opacity: 1;
+}
+
+.ot-fullscreen-backdrop.fade-out {
+  opacity: 0;
+  transition: opacity 1.0s ease-in-out;
+}
+
+.ot-reveal-chars {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* --- 内心独白/角色样式修饰 --- */
+.ot-inner-voice {
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  color: #2b231d;
+  letter-spacing: 0.14em;
+}
+
+.ot-inner-voice.visible {
+  opacity: 0.95;
+}
+
+.ot-narration {
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-size: 1.16rem;
+  color: #5c4f42;
+  letter-spacing: 0.1em;
+}
+
+.ot-zhou {
+  font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  font-size: 1.22rem;
+  color: #2b231d;
+  letter-spacing: 0.14em;
+  margin: 0.9rem 0;
+  transition-duration: 2.0s;
+}
+
+.ot-zhou.visible {
+  opacity: 0.95;
+}
+
+/* 引号视觉对齐 */
+.ot-quote-aligned {
+  text-indent: -0.45em;
+}
