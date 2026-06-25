@@ -160,13 +160,13 @@ export default class Chapter3PaintScene {
     this._southEl.style.backgroundImage = `url('${this._bgSouth}')`;
 
     // 氛围热点：字画
-    const paintingSpot = this._createHotspot(30, 35, 10, async () => {
+    const paintingSpot = this._createHotspot(44.5, 36.5, 10, async () => {
       if (this._isNarrating) return;
       this.narrationBar.showFloating('端正、规矩。每一笔都有出处。和前两次见到的画没什么区别。');
     }, '字画');
 
     // 叙事触发：隔扇（通往北厅），用 nav-arrow 突出导航功能
-    this._screenArrow = this._createNavArrow(78, 50, 10, async () => {
+    this._screenArrow = this._createNavArrow(83, 54, 10, async () => {
       if (this._isNarrating) return;
       this._clearAllIdleTimers();
       this._isNarrating = true;
@@ -212,7 +212,7 @@ export default class Chapter3PaintScene {
     }, '画纸C');
 
     // 出口（渗字后解锁）
-    this._northExit = this._createNavArrow(92, 45, 8, async () => {
+    this._northExit = this._createNavArrow(17, 54, 8, async () => {
       if (this._isNarrating) return;
       this._switchToLiuting();
     }, '前往留听阁');
