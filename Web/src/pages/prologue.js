@@ -654,8 +654,7 @@ export default class PrologueScene extends GameSceneBase {
     const systemPrefix = options.systemPrefix || '线索';
     const formatNotebookReply = (text) => {
       if (!text) return text;
-      const zhouMatch = text.match(/^周鹤年：「([\s\S]*)」$/);
-      if (zhouMatch) return `${openingPrefix}：${zhouMatch[1]}`;
+      if (text.startsWith('（')) return text;
       if (text.startsWith(`${openingPrefix}：`)) return text;
       return `${openingPrefix}：${text}`;
     };
