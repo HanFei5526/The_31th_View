@@ -357,6 +357,15 @@ export default class Chapter1PaintScene {
     this._waterline.className = 'furong-waterline';
     this._waterline.innerHTML = `
       <svg class="furong-waterline-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <g class="furong-waterline-aura">
+          <path class="furong-waterline-aura-path" d="M0.0 57.2 L3.0 57.6 L6.0 58.0 L9.0 58.2 L13.0 58.8 L15.8 57.8" />
+          <path class="furong-waterline-aura-path" d="M13.5 58.5 L17.2 57.8" />
+          <path class="furong-waterline-aura-path" d="M19.2 57.8 L21.0 57.8 L24.0 57.8 L27.0 56.8 L31.3 55.5" />
+          <path class="furong-waterline-aura-path" d="M31.3 55.5 L34.0 54.8 L37.0 54.2" />
+          <path class="furong-waterline-aura-path" d="M29.5 64.0 L52.0 65.0" />
+          <path class="furong-waterline-aura-path" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
+          <path class="furong-waterline-aura-path" d="M96.0 61.5 L100.0 57.0" />
+        </g>
         <g class="furong-waterline-glow">
           <path class="furong-waterline-glow-path" d="M0.0 57.2 L3.0 57.6 L6.0 58.0 L9.0 58.2 L13.0 58.8 L15.8 57.8" />
           <path class="furong-waterline-glow-path" d="M13.5 58.5 L17.2 57.8" />

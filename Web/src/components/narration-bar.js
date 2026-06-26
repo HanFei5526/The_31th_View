@@ -117,6 +117,8 @@ export class NarrationBar {
 
       if ('portrait' in options && speaker !== null) {
         this.setPortrait(options.portrait);
+      } else if (speaker !== null && !('portrait' in options)) {
+        this.setPortrait(null);
       }
 
       this._emitNotebookGuidanceIfNeeded(speaker, text);

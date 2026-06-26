@@ -769,7 +769,11 @@ a {
   .ch1-nav-arrow,
   .ch1-nav-arrow::before,
   .ch1-nav-arrow::after { animation: none; }
-  .furong-waterline { animation: none; opacity: 0.5; }
+  .furong-waterline,
+  .furong-waterline-aura-path,
+  .furong-waterline-glow-path,
+  .furong-waterline-path { animation: none; }
+  .furong-waterline { opacity: 0.88; }
   .hairpin-gleam.visible { animation: none; opacity: 0.5; }
   .ch1-ripple { animation: none; opacity: 0; }
   .ch1-subscene { transition: none; }
@@ -1146,12 +1150,12 @@ a {
 .real-world .narration-options {
   position: fixed;
   left: 50%;
-  top: 43%;
+  top: 45%;
   transform: translate(-50%, -50%);
-  width: min(46vw, 760px);
+  width: min(90vw, 380px);
   flex-direction: column;
   flex-wrap: nowrap;
-  gap: 1.35rem;
+  gap: 1.0rem;
   margin: 0;
   padding: 0;
   z-index: 112;
@@ -1161,13 +1165,12 @@ a {
 .real-world .narration-option-btn {
   width: 100%;
   max-width: none;
-  min-height: 54px;
-  padding: 0.55rem 1.4rem;
-  font-size: 1.3rem;
-  line-height: 1.45;
-  white-space: nowrap;
-  overflow-wrap: normal;
-  text-overflow: clip;
+  min-height: 46px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {
@@ -1183,13 +1186,14 @@ a {
   }
 
   .real-world .narration-options {
-    width: min(82vw, 680px);
-    gap: 0.85rem;
+    width: min(90vw, 320px);
+    gap: 0.8rem;
   }
 
   .real-world .narration-option-btn {
-    min-height: 48px;
-    font-size: 1.15rem;
+    min-height: 42px;
+    font-size: 0.95rem;
+    padding: 0.5rem 1.0rem;
   }
 }
 
@@ -1407,7 +1411,7 @@ a {
   box-shadow: none;
   background: transparent;
   pointer-events: none;
-  animation: waterGleam 4s infinite ease-in-out;
+  animation: waterGleam 2.4s infinite ease-in-out;
 }
 
 .furong-waterline-svg {
@@ -1419,43 +1423,50 @@ a {
   pointer-events: none;
 }
 
+.furong-waterline-aura-path,
 .furong-waterline-glow-path,
 .furong-waterline-path,
 .furong-waterline-hit {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.furong-waterline-aura-path {
+  stroke: rgba(255, 230, 100, 0.35);
+  stroke-width: 2px;
+  opacity: 0.8;
+  filter: blur(12px);
+  animation: waterlineAuraPulse 2.4s infinite ease-in-out;
 }
 
 .furong-waterline-glow-path {
-  stroke: rgba(224, 181, 44, 0.36);
-  stroke-width: 1.22;
-  opacity: 0.52;
-  filter:
-    blur(0.55px)
-    drop-shadow(0 0 8px rgba(224, 181, 44, 0.35))
-    drop-shadow(0 0 14px rgba(224, 181, 44, 0.5));
+  stroke: rgba(255, 225, 80, 0.5);
+  stroke-width: 1.2px;
+  opacity: 0.9;
+  filter: blur(5px);
+  animation: waterlineGlowPulse 2.4s infinite ease-in-out;
 }
 
 .furong-waterline-path {
-  stroke: rgba(255, 223, 112, 0.28);
-  stroke-width: 0.32;
-  opacity: 0.72;
-  filter:
-    blur(0.18px)
-    drop-shadow(0 0 10px rgba(224, 181, 44, 0.35));
+  stroke: rgba(255, 245, 180, 0.9);
+  stroke-width: 0.1px;
+  opacity: 0.85;
+  filter: none;
+  animation: waterlineCorePulse 2.4s infinite ease-in-out;
 }
 
 .furong-waterline-path:nth-child(2),
 .furong-waterline-path:nth-child(4) {
-  stroke-opacity: 0.34;
+  stroke-opacity: 0.52;
 }
 
 .furong-waterline-hit {
   cursor: pointer;
   pointer-events: stroke;
   stroke: transparent;
-  stroke-width: 5.2;
+  stroke-width: 28px;
 }
 
 .furong-waterline:focus,
@@ -1466,12 +1477,37 @@ a {
 
 @keyframes waterGleam {
   0%, 100% {
-    opacity: 0.36;
-    filter: saturate(0.95) brightness(0.98);
+    opacity: 0.78;
   }
   50% {
-    opacity: 0.9;
-    filter: saturate(1.18) brightness(1.18);
+    opacity: 0.96;
+  }
+}
+
+@keyframes waterlineAuraPulse {
+  0%, 100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes waterlineGlowPulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes waterlineCorePulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
