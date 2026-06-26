@@ -1,12 +1,15 @@
 # 《卅一景》一体化服务端 Dockerfile
-# 放在项目根目录，云托管构建上下文 = 项目根
 
 # ====== 阶段 1：构建前端 ======
 FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/frontend
-COPY Web/package*.json ./
-RUN npm install
+
+# npm 淘宝镜像，避免国内构建超时
+RUN npm config set registry https://registry.npmmirror.com
+
+COPY Web/package.json Web/package-lock.json ./
+RUN npm ci
 
 COPY Web/index.html Web/vite.config.js ./
 COPY Web/src ./src
@@ -19,15 +22,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# 安装服务端依赖
-COPY Web/server/package*.json ./
-RUN npm install --production
+RUN npm config set registry https://registry.npmmirror.com
 
-# 复制服务端代码
-# 注意：DEEPSEEK_API_KEY 通过云托管环境变量注入，不要提交 .env 到仓库
+COPY Web/server/package.json Web/server/package-lock.json ./
+RUN npm ci --production
+
 COPY Web/server/index.js ./
 
-# 从前阶段拉取前端构建产物
 COPY --from=frontend-builder /app/frontend/dist ./dist
 
 EXPOSE 8787
