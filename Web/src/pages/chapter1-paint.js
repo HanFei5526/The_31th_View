@@ -219,7 +219,7 @@ export default class Chapter1PaintScene {
       await this.narrationBar.playLine(null, '你走近敞厅，抬头看向门楣上的匾额。');
       await this.narrationBar.playLine(null, '三个字——「兰雪堂」，落款是文徵明。字迹端正，墨色沉稳。');
       await this.narrationBar.playLine(null, '你本想移开视线，但不知为什么，目光停住了。你又看了一眼。');
-      await this.narrationBar.playLine('沈念', '「兰」字的草字头……下面好像多了一道横笔。很细，几乎要看不见。', { portrait: '/images/common/shennian_3.png' });
+      await this.narrationBar.playLine('沈念', '「兰」字的草字头……下面好像多了一道横笔。很细，几乎要看不见。', { portrait: '/images/common/shennian_2.png' });
       await this.narrationBar.playLine(null, '你凑近了一些。那一笔确实在那里——笔力很稳，墨色和主体一致，不像是无意的败笔。但它又不能单独解释成一个字。');
       await this.narrationBar.playLine('沈念', '奇怪。先记下来吧。', { portrait: '/images/common/shennian_2.png' });
 
@@ -319,7 +319,7 @@ export default class Chapter1PaintScene {
       await this.narrationBar.playLine(null, '你绕到峰石背后，注意到底部有一处极窄的石缝。');
       await this.narrationBar.playLine(null, '站着似乎看不到什么。你蹲下来，把视线压到石缝的高度。');
       await this.narrationBar.playLine(null, '缝隙里忽然露出远处水面的一线光——站着的时候完全看不见的光。');
-      await this.narrationBar.playLine('沈念', '奇怪……站着的时候明明什么都看不到。这个角度，好像藏着什么。', { portrait: '/images/common/shennian_3.png' });
+      await this.narrationBar.playLine('沈念', '奇怪……站着的时候明明什么都看不到。这个角度，好像藏着什么。', { portrait: '/images/common/shennian_2.png' });
 
       this.engine.gameProgress.zhuiyunExplored = true;
       this.notebook.addClueRecord('有些景，只从低处出现。');
@@ -591,7 +591,7 @@ export default class Chapter1PaintScene {
 
       await this.narrationBar.playLine(null, '你伸手，取下了那支断簪。银质已经发暗，簪头是半朵未开的芙蓉，做工细致。');
       await this.narrationBar.playLine(null, '你下意识翻过来看簪身背面——一个极小的字，刻在不显眼的位置。');
-      await this.narrationBar.playLine('沈念', '蘅。', { portrait: '/images/common/shennian_3.png' });
+      await this.narrationBar.playLine('沈念', '蘅。', { portrait: '/images/common/shennian_1.png' });
       await this.narrationBar.playLine('沈念', '刻在背面，这么小……不像题名，也不像工匠的标记。那是什么？', { portrait: '/images/common/shennian_2.png' });
 
       this.engine.collectItem({
@@ -725,17 +725,17 @@ export default class Chapter1PaintScene {
     this._isNarrating = true;
 
     await this.narrationBar.playLine(null, '你睁开眼。四周的一切都不对——不是工作室，不是扫描仪的冷光。自己站在一个陌生的地方。');
-    await this.narrationBar.playLine('沈念', '这是哪里？', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '这是哪里？', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine(null, '低下头，脚下是青石板路，微微发暖。空气里有一种说不出的气味——不是花香，更像旧纸和松烟墨混在一起的味道。抬起头，两侧翠竹如墙，在没有风的空气中轻轻摇动。');
     await this.narrationBar.playLine(null, '顺着石径看过去。前方有一座敞厅，像是某种入口建筑。');
-    await this.narrationBar.playLine('沈念', '等等……这个地方我见过。是拙政园东部的兰雪堂。但不对，它不是我在照片里看到的样子。它更旧，更轻——像是一笔还没有干透的线。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '不会吧。我在画里？', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '等等……这个地方我见过。是拙政园东部的兰雪堂。但不对，它不是我在照片里看到的样子。它更旧，更轻——像是一笔还没有干透的线。', { portrait: '/images/common/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '不会吧。我在画里？', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
 
     // 旁白结束后引导玩家使用笔记本与场景探索。
     this.notebook.showQuickThoughts([
-      '这里是兰雪堂，我该留意什么？',
-      '第三十一景和前面三十幅，感觉上有什么不同？',
+      '兰雪堂的匾额和建筑构件上有值得注意的细节吗？',
+      '第三十一景的构图视角和前三十幅有什么不同？',
       '为什么我看到的兰雪堂和照片里不一样？'
     ]);
     this.hudBar.show();
@@ -814,17 +814,19 @@ export default class Chapter1PaintScene {
     this._zhuiyunEl.style.zIndex = '';
 
     await this.narrationBar.playLine(null, '沿着石径往前走。转过一个弯，一块巨石挡住了去路——不，不是挡住，是立在路旁，像某种标记。');
-    await this.narrationBar.playLine('沈念', '缀云峰。我认得这块湖石。但亲眼见到又不一样——石头上的纹路像是有人用极细的笔，一笔一笔勾出来的。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '缀云峰。我认得这块湖石。但亲眼见到又不一样——石头上的纹路像是有人用极细的笔，一笔一笔勾出来的。', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
     // 提示玩家可探索或直接前进
     this.notebook.showQuickThoughts([
-      '这块石头的纹路为什么画得这么细？',
-      '峰石背后低处那点微光是什么？',
-      '这座峰石周围还藏着什么？'
+      '太湖石的观赏讲究多角度，低处可能藏着什么？',
+      '峰石纹路画得极细，这种画法有什么讲究？',
+      '缀云峰周围有不属于正式画面的痕迹吗？'
     ]);
-    this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。可在【记录】页查看，也可在【对话】页继续讨论。点击场景中的光点继续探索。');
+    this.notebook.expand();
+    await this.narrationBar.playLine('系统提示', '峰石背后的低处有一点微光；前方石径仍通向水声。可在【修复笔记本】中查看记录或继续讨论。点击场景中的光点继续探索。');
+    this.narrationBar.dismiss();
     this.notebook.collapse();
   }
 
@@ -851,15 +853,16 @@ export default class Chapter1PaintScene {
     await this.narrationBar.playLine('沈念', '芙蓉榭。拙政园东部最靠近水面的地方。', { portrait: '/images/common/shennian_1.png' });
     await this.narrationBar.playLine(null, '你走到栏杆前，往下看。水面很静，倒影清晰得像另一个世界——每一根栏杆、每一片瓦都被原样映在水里。');
     await this.narrationBar.playLine(null, '但看了一会儿，你发现不对。倒影里的栏杆上，好像多了什么东西。');
-    await this.narrationBar.playLine('沈念', '上面什么都没有。可水里……水里的栏杆上挂着一件东西。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '上面什么都没有。可水里……水里的栏杆上挂着一件东西。', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
     this._isNarrating = false;
 
     this.notebook.showQuickThoughts([
       '栏杆上没有东西，倒影里为什么多了一件？',
-      '水面上有一条光线在闪，我该点它看看吗？',
-      '倒影里挂着的那件东西，有办法看得更清楚吗？'
+      '倒影比实物多出的东西，是画面错误还是线索？',
+      '水面倒影在传统绘画中有什么特殊作用？'
     ]);
+    this.notebook.expand();
 
     // 旁白已经暗示了倒影中有东西，给出不剧透顺序的谜题提示。
     this._isNarrating = true;

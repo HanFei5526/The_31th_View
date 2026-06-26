@@ -98,6 +98,41 @@ export const KNOWLEDGE_SNIPPETS = [
 你现在看到的场景来自《拙政园三十一景图》第三十一景的画面内部。兰雪堂是拙政园东部的入口建筑，画中的样貌是文徵明绘制时的呈现，与后世照片中的实景不同——视角、比例和细节都经过了画家的取舍。在画中世界探索时，留意建筑构件、铭文、地面物件等细节，它们可能藏有正式画面之外的痕迹。`,
   },
   {
+    id: 'ch1_zhuiyun',
+    chapter: 1,
+    unlockCondition: ({ progress }) => Boolean(progress.plaqueNoted),
+    content: `【缀云峰与太湖石】
+缀云峰是拙政园东部的一座太湖石峰，以"瘦、漏、透、皱"著称。文徵明笔下的石纹极细致，每条纹理都经画家精心勾勒。太湖石的观赏讲究多角度——正面看是一种形态，绕到背后、从低处看可能发现不同的纹路和细节。画中的峰石周围可能藏有不属于正式画面内容的痕迹。`,
+  },
+  {
+    id: 'ch1_furong',
+    chapter: 1,
+    unlockCondition: ({ progress }) => Boolean(progress.zhuiyunExplored),
+    content: `【芙蓉榭与水面倒影】
+芙蓉榭是拙政园东部临水建筑，栏杆探入水面，倒影极清晰。在传统绘画中，倒影有时会保留不在实景中出现的物件。水面倒影是观察画面隐藏信息的重要角度——实物与倒影之间的差异可能指向某种被刻意留下的痕迹。`,
+  },
+  {
+    id: 'ch2_yuanxiang_scene',
+    chapter: 2,
+    unlockCondition: () => true,
+    content: `【远香堂与堂内题诗】
+远香堂是拙政园中部的核心建筑，四面环水。堂内悬挂有多首题诗，与园中景观相互呼应。这些题诗在流传中可能出现异文——不同版本之间的字词差异可能是传抄讹误，也可能隐含刻意留下的信息。逐字比对画中题诗与参考版本是发现异文的基本方法。`,
+  },
+  {
+    id: 'ch3_yuanyang_scene',
+    chapter: 3,
+    unlockCondition: () => true,
+    content: `【鸳鸯馆南北厅】
+鸳鸯馆是拙政园西部的主要建筑，分南北两厅。南厅正式、规整；北厅偏私密，常用于日常起居。画中世界里两厅的陈设差异可能反映不同的使用者或用途。留意墙面和案台上的痕迹——正式画作之外的私人记号往往出现在不起眼的位置。`,
+  },
+  {
+    id: 'ch3_liuting_scene',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText || progress.seenScatteredSketches),
+    content: `【留听阁与封墙】
+留听阁位于拙政园西部。画中世界里，阁内一面墙被重新抹过灰泥。重新抹灰在建筑维护中常见，但如果抹灰范围精确到只覆盖某个区域，可能是为了遮盖墙面上原有的内容。之前发现的朱砂残留（残砚）可以用于检验灰泥下方是否有被掩盖的朱砂线痕迹。`,
+  },
+  {
     id: 'ch1_heng',
     chapter: 1,
     unlockCondition: ({ progress }) => Boolean(progress.hasHairpin),

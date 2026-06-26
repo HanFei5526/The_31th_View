@@ -315,9 +315,9 @@ export default class Chapter3PaintScene {
 
     // 探索态
     this.notebook.showQuickThoughts([
-      '鸳鸯馆是什么地方？',
-      '刚才的研墨声是从哪里传来的？',
-      '南厅和北厅有什么区别？'
+      '鸳鸯馆南北厅的陈设差异说明什么？',
+      '研墨声意味着有人在附近作画吗？',
+      '南厅墙面和案台上有什么痕迹值得注意？'
     ]);
     this.hudBar.show();
     await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。【记录】页可查看已有线索，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
@@ -443,7 +443,7 @@ export default class Chapter3PaintScene {
     this.notebook.showQuickThoughts([
       '这面墙为什么被重新抹过？',
       '封墙下面可能藏着什么？',
-      '残砚和断簪在这里能派上什么用场？'
+      '残砚中的朱砂能检验灰泥下有没有痕迹吗？'
     ]);
     await this.narrationBar.playLine('系统提示', '留听阁内可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();

@@ -163,9 +163,9 @@ export default class Chapter2PaintScene {
     this.notebook.collapse();
 
     this.notebook.showQuickThoughts([
-      '墙上挂的题诗画作有什么值得注意的？',
+      '远香堂的题诗和公开文献里的版本一样吗？',
       '画案上的墨迹还没干，有人刚来过这里？',
-      '远处的红色廊桥通向哪里？'
+      '题诗中的字词差异可能藏着什么线索？'
     ]);
 
     this._addYuanxiangHotspots(scene);
@@ -386,8 +386,8 @@ export default class Chapter2PaintScene {
     this.notebook.collapse();
 
     this.notebook.showQuickThoughts([
-      '桥两侧水面好像有什么不对劲？',
-      '桥脚底下那个暗色的东西是什么？',
+      '小飞虹桥下的水面有什么异常？',
+      '桥脚石台上有一件旧物，它可能是什么？',
       '"画非一人"这四个字说明什么？'
     ]);
 

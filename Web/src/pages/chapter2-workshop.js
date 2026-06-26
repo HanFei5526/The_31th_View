@@ -138,9 +138,9 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师方法——版本比对与异文判断。可在【记录】页查看，也可在【对话】页继续讨论。');
 
     this.notebook.showQuickThoughts([
-      '异文判断还能用在什么地方？',
-      '朱砂底稿线长什么样？',
-      '"画非一人"一定是有人故意留下的吗？'
+      '朱砂底稿线在画面下方会留下什么样的痕迹？',
+      '"画非一人"和断簪上的"蘅"有联系吗？',
+      '"视点卑近"的批注说明了什么？'
     ]);
 
     await this.narrationBar.playLine(null, '窗外已经全黑了。你不知道自己在画里待了多久。');
