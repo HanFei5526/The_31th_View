@@ -107,7 +107,7 @@ export const KNOWLEDGE_SNIPPETS = [
   {
     id: 'ch1_furong',
     chapter: 1,
-    unlockCondition: ({ progress }) => Boolean(progress.zhuiyunExplored),
+    unlockCondition: ({ progress }) => Boolean(progress.plaqueNoted),
     content: `【芙蓉榭与水面倒影】
 芙蓉榭是拙政园东部临水建筑，栏杆探入水面，倒影极清晰。在传统绘画中，倒影有时会保留不在实景中出现的物件。水面倒影是观察画面隐藏信息的重要角度——实物与倒影之间的差异可能指向某种被刻意留下的痕迹。`,
   },

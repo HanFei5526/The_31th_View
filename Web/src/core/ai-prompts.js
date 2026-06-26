@@ -262,11 +262,6 @@ export function buildGateZhouPrompt(ctx, gateId, systemHint = '') {
       allowedInsight = '玩家可以谈装裱重做、题签裁切、旁注被压、辅助线被忽略，也可以说"有人故意把来源信息抹掉了"或"系统性遮蔽"。';
       forbiddenInsight = '不要说出"王蘅"，不要透露画中世界，不要直接替玩家给出最终结论，不要说具体是谁做的。';
       break;
-    case 'gate_ch1_hairpin':
-      gateTarget = '引导玩家自行得出：断簪背面的“蘅”字不是公开标识，更像有人有意留在不显眼处的一点私人痕迹。';
-      allowedInsight = '玩家可以谈“蘅”的字义、簪身背面的位置、字很小、需要翻看、目前不能确认身份。';
-      forbiddenInsight = '不要说出具体姓名。不要说留下者是画作者。不要主动把断簪和第三十一景、草图、后续章节联系起来。不要替玩家解释这个位置的目的或性质，只能追问字义、位置和证据边界。';
-      break;
     default:
       gateTarget = '引导玩家深入分析线索。';
   }

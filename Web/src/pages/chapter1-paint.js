@@ -686,6 +686,24 @@ export default class Chapter1PaintScene {
     setTimeout(() => ripple.remove(), 600);
   }
 
+  _showLightDiscussionSkipButton(onSkip) {
+    this._hideLightDiscussionSkipButton();
+    if (!this._uiLayer) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ch1-discussion-skip-btn';
+    btn.textContent = '跳过讨论';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.disabled = true;
+      onSkip?.();
+    });
+
+    this._lightDiscussionSkipBtn = btn;
+    this._uiLayer.appendChild(btn);
+  }
+
   _hideLightDiscussionSkipButton() {
     if (this._lightDiscussionSkipBtn) {
       this._lightDiscussionSkipBtn.remove();
@@ -865,28 +883,38 @@ export default class Chapter1PaintScene {
     this.notebook.switchTab('chat');
     this.notebook.expand();
 
-    this.notebook.showSystemMessage('（梳理开始。先从字义、刻痕位置和证据边界三个角度写下判断。）');
-    this.notebook.showNPCMessage('（周老师的批注）"蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。这个字刻在簪身背面，字很小，要翻过来才看得见。先别急着给它安上身份：这里能确认的，是字义、位置，以及它不在常见的正面标识处。你怎么看这个位置？');
+    this.notebook.showSystemMessage('（轻量梳理开始，你可以随时跳过）');
+    this.notebook.showNPCMessage('（周老师的批注）"蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。刻在簪身背面，不是正面——如果是工匠标记，通常会在簪头或底座。这更像是物主自己留给自己的。那么，是谁把自己的名字藏在了一支断簪上？');
 
     this.notebook.showQuickThoughts([
-      '「蘅」字在这里能说明到哪一步？',
-      '簪身背面这个位置有什么值得注意？',
-      '现在能不能直接判断留下者身份？'
+      '「蘅」字可能指什么？',
+      '为什么刻在断簪背面？',
+      '一个字能说明是谁留下的吗？'
     ]);
 
     const answeredThoughts = new Set();
-    const discussionHistory = [];
     const responses = {
-      '「蘅」字在这里能说明到哪一步？': '“蘅”可指杜衡，是一种香草，也常被借来形容女子。到这一步，只能记录字义和它可能带有人的意味，还不能推出具体身份。',
-      '簪身背面这个位置有什么值得注意？': '先记录它的位置：背面、字小、需要翻看才出现。位置本身很重要，但它说明什么，需要你把观察和判断连起来。',
-      '现在能不能直接判断留下者身份？': '不能。现在只能谈这支簪、这个字和它出现的位置；至于是谁、为什么留下，还需要更多线索互相印证。'
+      '「蘅」字可能指什么？': '“蘅”可指杜衡，是一种香草，古人也常借它比喻品性高洁的女子。这里只能先记下字义，不能直接推出身份。',
+      '为什么刻在断簪背面？': '背面更隐蔽，不像公开署名，更像私人的记号。这个位置值得记下，但还不能单独定论。',
+      '一个字能说明是谁留下的吗？': '不能。一个字只能说明有人留下过痕迹，至于是谁、为什么留下，还需要更多线索互相印证。'
     };
+    this.notebook.onQuickThought((text) => {
+      if (answeredThoughts.has(text)) return;
+      answeredThoughts.add(text);
+      this.notebook.showPlayerMessage(text);
+      this.notebook.showNPCMessage(responses[text] || '这个问题可以先记下，等更多线索出现后再一起判断。');
+      if (answeredThoughts.size >= 3) {
+        setTimeout(() => {
+          if (!this._discussionEnded) endDiscussion();
+        }, 2500);
+      }
+    });
 
     const endDiscussion = async () => {
       if (this._discussionEnded) return;
       this._discussionEnded = true;
+      this._hideLightDiscussionSkipButton();
       this.notebook.hideConfirmButton();
-      this.notebook.hideQuickThoughts();
       this.notebook.setLightweightMode(false);
       this.notebook.collapse();
       this.narrationBar.dismiss();
@@ -900,112 +928,19 @@ export default class Chapter1PaintScene {
       await this._startFadeTransition();
     };
 
-    const analyzeHairpinInsight = (text) => {
-      const input = String(text || '').toLowerCase();
-      const hasIntentional = [
-        '故意', '刻意', '有意', '特意', '不是随便', '不是偶然', '有目的'
-      ].some(keyword => input.includes(keyword));
-      const hasHiddenPlacement = [
-        '藏', '藏在', '藏起来', '背面', '不显眼', '隐蔽', '偷偷', '暗处', '很小', '小得'
-      ].some(keyword => input.includes(keyword));
-      const hasPrivateTrace = [
-        '私人', '个人', '物主', '自己的', '自己', '记号', '痕迹', '留痕', '留下', '留下一点', '留一点'
-      ].some(keyword => input.includes(keyword));
-      const rejectsOfficialMark = [
-        '不是署名', '不像署名', '不是题名', '不像题名', '不是工匠', '不像工匠', '不是标记', '不公开', '公开署名', '正名'
-      ].some(keyword => input.includes(keyword));
-
-      return (hasIntentional && hasHiddenPlacement)
-        || (hasIntentional && hasPrivateTrace)
-        || (hasIntentional && rejectsOfficialMark)
-        || (hasHiddenPlacement && hasPrivateTrace)
-        || (hasPrivateTrace && rejectsOfficialMark);
-    };
-
-    const showReadyToConfirm = () => {
-      if (this._hairpinInsightReady || this._discussionEnded) return;
-      this._hairpinInsightReady = true;
-      this.notebook.showNPCMessage('（周老师的批注）这个判断可以成立：它不是公开署名，更像被有意放在背面的私人痕迹。先不要急着给出身份，把“有人在不显眼处留下过痕迹”记住就够了。');
-      this.notebook.hideQuickThoughts();
-      this.notebook.showConfirmButton(() => endDiscussion());
-    };
-
-    const safeHairpinGuidance = '（周老师的批注）先别替这个字安上身份。把三件事并在一起看：它是什么字、它在簪子的什么位置、它现在还不能证明什么。你能把这三点整理成一句判断吗？';
-
-    const isHairpinReplyTooRevealing = (reply) => {
-      const text = String(reply || '').trim();
-      if (text.length < 8) return true;
-      if (!/[。？！?）”」]$/.test(text)) return true;
-      return [
-        '王蘅',
-        '私人',
-        '物主',
-        '署名',
-        '题名',
-        '工匠标记',
-        '公开',
-        '故意',
-        '刻意',
-        '有意',
-        '隐藏',
-        '藏着',
-        '藏在',
-        '藏起来',
-        '意图',
-        '不该刻',
-        '位置本身',
-      ].some(keyword => text.includes(keyword));
-    };
-
-    const handleDiscussionInput = async (text, { fromQuick = false } = {}) => {
-      if (!text || this._discussionEnded) return;
-      if (fromQuick && answeredThoughts.has(text)) return;
-      if (fromQuick) answeredThoughts.add(text);
-
-      this.notebook.showPlayerMessage(text);
-      discussionHistory.push({ role: 'user', content: text });
-
-      if (!fromQuick && analyzeHairpinInsight(text)) {
-        showReadyToConfirm();
-        return;
-      }
-
-      if (fromQuick) {
-        const reply = responses[text] || '这个问题可以先记下，等更多线索出现后再一起判断。';
-        discussionHistory.push({ role: 'assistant', content: reply });
-        this.notebook.showNPCMessage(reply);
-        return;
-      }
-
-      this.notebook.setLoading(true);
-      try {
-        const reply = await this.engine.aiService.discussWithZhou(
-          'gate_ch1_hairpin',
-          text,
-          discussionHistory,
-          '本轮玩家尚未说出通过判断。请只围绕“蘅”的字义、断簪背面的位置、目前不能确认身份来引导。不要解释这个位置的目的，不要替玩家下结论。'
-        );
-        const safeReply = isHairpinReplyTooRevealing(reply) ? safeHairpinGuidance : reply;
-        const formattedReply = safeReply.startsWith('（') ? safeReply : `（周老师的批注）${safeReply}`;
-        discussionHistory.push({ role: 'assistant', content: formattedReply });
-        this.notebook.showNPCMessage(formattedReply);
-      } catch (err) {
-        console.error('[Chapter1Paint] 断簪讨论 AI 回复失败:', err);
-        const fallback = safeHairpinGuidance;
-        discussionHistory.push({ role: 'assistant', content: fallback });
-        this.notebook.showNPCMessage(fallback);
-      } finally {
-        this.notebook.setLoading(false);
-      }
-    };
-
     this._discussionEnded = false;
-    this._hairpinInsightReady = false;
 
+    // 跳过按钮放在叙事框上方，不占用笔记本内容区。
     this.notebook.hideConfirmButton();
-    this.notebook.onQuickThought((text) => handleDiscussionInput(text, { fromQuick: true }));
-    this.notebook.onSubmit((text) => handleDiscussionInput(text));
-    this.notebook.onCollapse(null);
+    this._showLightDiscussionSkipButton(() => endDiscussion());
+
+    // 监听面板收起也触发转场
+    this._collapseHandler = () => {
+      if (this.state === SCENE_STATES.LIGHT_DISCUSSION && !this._discussionEnded) {
+        endDiscussion();
+      }
+    };
+    this.notebook.onCollapse(this._collapseHandler);
   }
 
   async _startFadeTransition() {
