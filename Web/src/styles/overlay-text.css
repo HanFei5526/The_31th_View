@@ -256,6 +256,7 @@
 /* --- 内心独白/角色样式修饰 --- */
 .ot-inner-voice {
   font-family: var(--font-handwrite, 'LXGW WenKai', serif);
+  font-size: 1.22rem;
   color: #2b231d;
   letter-spacing: 0.14em;
 }

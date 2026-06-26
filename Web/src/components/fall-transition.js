@@ -138,9 +138,10 @@ export default class FallTransition {
 
       const lineEls = TRANSITION_LINES.map((text, idx) => {
         const el = document.createElement('div');
-        el.className = 'ot-line ot-font-serif';
         if (idx === 3) {
-          el.classList.add('ot-inner-voice');
+          el.className = 'ot-line ot-inner-voice';
+        } else {
+          el.className = 'ot-line ot-narration';
         }
         if (text.startsWith('「')) {
           el.classList.add('ot-quote-aligned');

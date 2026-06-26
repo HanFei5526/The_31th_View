@@ -49,6 +49,13 @@ export const KNOWLEDGE_SNIPPETS = [
 侧光照射是将光源从侧面低角度打在画面上的检查方法。侧光能让纸面上肉眼不易察觉的凹凸变得明显，比如被覆盖的旧字痕迹、压印、刻痕或底层墨线。它特别适合检查装裱层下方是否隐藏着被遮盖的文字或标记。`,
   },
   {
+    id: 'prologue_exploration',
+    chapter: 0,
+    unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
+    content: `【画面线索探索】
+三种检查工具全部使用完毕后，进入线索探索阶段。此时需要在画面上不同位置点击，寻找隐藏的异常痕迹。画面中共有三处异常线索，点击到正确位置会触发反馈。找齐三处线索后即可进入综合研讨。点击画面是为了定位异常痕迹，不是再使用工具。`,
+  },
+  {
     id: 'clue_margin_label',
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_margin'),
@@ -82,6 +89,13 @@ export const KNOWLEDGE_SNIPPETS = [
     unlockCondition: ({ progress }) => Boolean(progress.synthesisPassed),
     content: `【来源信息被遮蔽的常见手段】
 来源信息可能通过裁切题签、覆盖旁注、重配边框、重新归档或忽略辅助痕迹等方式被遮蔽。这类处理不会必然改变画心，却会改变后来者理解作品来源的路径。`,
+  },
+  {
+    id: 'ch1_painting_world',
+    chapter: 1,
+    unlockCondition: ({ progress }) => Boolean(progress.prologueComplete || progress.prologue_completed || progress.prologue),
+    content: `【画中世界与兰雪堂】
+你现在看到的场景来自《拙政园三十一景图》第三十一景的画面内部。兰雪堂是拙政园东部的入口建筑，画中的样貌是文徵明绘制时的呈现，与后世照片中的实景不同——视角、比例和细节都经过了画家的取舍。在画中世界探索时，留意建筑构件、铭文、地面物件等细节，它们可能藏有正式画面之外的痕迹。`,
   },
   {
     id: 'ch1_heng',

@@ -186,9 +186,16 @@ export default class PrologueScene extends GameSceneBase {
 
     if (this.engine.currentCheckpointId === CHECKPOINTS.SYNTHESIS) {
       this._grantNotebookAccess({ saveCheckpoint: false });
-      this._recordedClues = new Set(this.engine.gameProgress.cluesFound || Object.keys(CLUE_DATA));
       this._enterPaintingPhase();
+
+      // 先清空再逐个标记，避免 _markClueRecorded 因 Set 已含该 ID 而跳过 paintingViewer 同步
+      this._recordedClues = new Set();
       Object.keys(CLUE_DATA).forEach((clueId) => this._markClueRecorded(clueId));
+
+      this._notebook.hideToolSection();
+      this._notebook.hideQuickThoughts();
+      this._notebook.setPlaceholder('在此输入针对该线索的判断或讨论……');
+
       this._showSynthesisEntryButton();
       return;
     }

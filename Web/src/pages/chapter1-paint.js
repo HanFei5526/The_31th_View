@@ -225,6 +225,11 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.plaqueNoted = true;
       this.notebook.addClueRecord('[线索] 匾额多余笔画 — 兰雪堂匾额"兰"字草字头下多了一道极细横笔，笔力稳定，墨色一致，非败笔');
+      this.notebook.showQuickThoughts([
+        '这道横笔是自然笔误还是有人刻意加的？',
+        '笔力稳定、墨色一致，这说明什么？',
+        '这道横笔属于匾额题字的一部分吗？'
+      ]);
       await this.narrationBar.playLine('系统提示', '已记录线索：「匾额多余笔画」。可在【记录】页查看，也可在【对话】页继续讨论。');
 
       await this.narrationBar.playLine('沈念', '这座厅后面还有路。石径延伸过去，像是有什么在更深处等着。', { portrait: '/images/common/shennian_1.png' });
