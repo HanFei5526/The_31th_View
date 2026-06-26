@@ -486,36 +486,26 @@
   transition: opacity 1.5s ease, transform 1.5s ease;
 }
 
-.intro-transition-overlay--chapter3 {
-  background: transparent;
-}
-
 .intro-transition-overlay--chapter3::before {
-  content: none;
-}
-
-.ch3-transition-bg {
+  content: '';
   position: absolute;
-  inset: -4% 0;
+  top: -2%;
+  bottom: -2%;
+  left: 0;
   width: 130%;
-  z-index: 0;
+  z-index: -1;
   background-image: url('/images/chapter3/chapter3-transition-bg.png');
   background-size: cover;
-  background-position: center;
-  opacity: 0.85;
-  filter: contrast(0.9) saturate(0.8);
+  background-position: left center;
+  opacity: 0.65;
+  filter: blur(2px) contrast(0.95) sepia(0.1);
   transform: translateX(0);
-  animation: ch3BgPan 10s linear forwards;
+  transition: transform 10s linear;
 }
 
-@keyframes ch3BgPan {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-15%); }
-}
-
-.intro-transition-overlay--chapter3.fade-out .ch3-transition-bg {
-  opacity: 0;
-  transition: opacity 1s ease;
+.intro-transition-overlay--chapter3.active::before,
+.intro-transition-overlay--chapter3.fade-out::before {
+  transform: translateX(-15%);
 }
 
 .intro-transition-overlay--chapter3 .intro-title-group {
@@ -575,13 +565,9 @@
 
   .intro-transition-overlay--prologue::before,
   .intro-transition-overlay--chapter1::before,
-  .intro-transition-overlay--chapter2::before {
+  .intro-transition-overlay--chapter2::before,
+  .intro-transition-overlay--chapter3::before {
     transition-duration: 0.3s;
-    transform: none !important;
-  }
-
-  .ch3-transition-bg {
-    animation: none;
     transform: none !important;
   }
 

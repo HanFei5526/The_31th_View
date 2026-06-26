@@ -624,7 +624,6 @@ export default class MenuScene {
       const preloadImg = '/images/chapter3/chapter3-yuanyang-south.png';
 
       overlay.innerHTML = `
-        <div class="ch3-transition-bg"></div>
         <div class="prologue-transition-layout">
           <div class="intro-title-group">
             <div class="intro-prologue-title">${titleStr}</div>

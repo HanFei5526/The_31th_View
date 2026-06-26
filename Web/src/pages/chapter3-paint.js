@@ -385,16 +385,16 @@ export default class Chapter3PaintScene {
     await this._delay(800);
     await this.narrationBar.playLine(null, '字迹忽然停住了。纸面安静了很久。');
     await this._dismissSeepPanel(seep1);
-    await this.narrationBar.playLine(null, '突然，你的脚边另一张画纸上，缓缓渗出三个字：');
+    await this.narrationBar.playLine(null, '突然，你的脚边另一张画纸上，缓缓渗出四个字：');
     const seep2 = await this._showSeepPanel(this._northEl, '看得到吗', 'center', true);
     await this._delay(600);
-    await this.narrationBar.playLine(null, '三个字没有问号。像不敢用太大的力气去问。');
+    await this.narrationBar.playLine(null, '四个字没有问号。像不敢用太大的力气去问。');
     await this._dismissSeepPanel(seep2);
     await this.narrationBar.playLine('沈念', '……谁在问？是问我吗？', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('系统提示', '留听阁的方向传来微弱的声响。');
 
     this.engine.gameProgress.seenBleedingText = true;
-    this.notebook.addClueRecord('[线索] 渗字"看得到吗" — 画纸上自行渗出的墨字，三个字没有问号，像不敢用太大的力气去问');
+    this.notebook.addClueRecord('[线索] 渗字"看得到吗" — 画纸上自行渗出的墨字，四个字没有问号，像不敢用太大的力气去问');
     await this.narrationBar.playLine('系统提示', '已记录线索：「渗字"看得到吗"」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
     this._isNarrating = false;

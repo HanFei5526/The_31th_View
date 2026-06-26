@@ -173,7 +173,6 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     ];
 
     overlay.innerHTML = `
-      <div class="ch3-transition-bg"></div>
       <div class="prologue-transition-layout">
         <div class="intro-title-group">
           <div class="intro-prologue-title">第三章 · 西园</div>
