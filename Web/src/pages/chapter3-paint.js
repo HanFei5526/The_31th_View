@@ -736,14 +736,13 @@ export default class Chapter3PaintScene {
     });
     this.engine.gameProgress.hasLetter = true;
     this.notebook.addClueRecord('[物件] 王蘅的信 — "不必有名，不必有形。只要有痕迹。"');
+    this.notebook.showQuickThoughts([
+      '王蘅的信说"不必有名，不必有形，只要有痕迹"，这句话意味着什么？',
+      '王蘅为什么选择留下痕迹而不是署名？',
+      '王蘅的信和渗字"看得到吗"表达的是同一个愿望吗？'
+    ]);
     await this.narrationBar.playLine('系统提示', '已获得物件「王蘅的信」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
-
-    this.notebook.showQuickThoughts([
-      '这封信是写给谁的？',
-      '"不必有名，不必有形"——她为什么这么说？',
-      '草图、信件、断簪……它们之间的关系是什么？'
-    ]);
 
     this._isNarrating = false;
 
@@ -793,6 +792,11 @@ export default class Chapter3PaintScene {
     this.notebook.showSystemMessage?.('（周老师的批注浮现了）');
     this.notebook.showNPCMessage('（周老师的批注）底层痕迹还原：同源材料在画中世界的呼应，本质上是修复学中"材料溯源"的游戏化表达。朱砂认朱砂，刻痕认刻痕——物与物之间的记忆，有时比文字更可靠。');
 
+    this.notebook.showQuickThoughts([
+      '残砚的朱砂和墙面透出的红线属于同一条材料线索吗？',
+      '周老师说的"材料溯源"和第二章的"版本比对"方法有什么区别？',
+      '残砚的朱砂和北厅散落的草图之间有什么关联？'
+    ]);
     await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师的批注。可在【对话】页继续讨论，或跳过继续。');
     this.narrationBar.dismiss();
 

@@ -342,9 +342,7 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: 50% 8%;
-  transform: scale(2.2);
-  transform-origin: 50% 8%;
+  object-position: center top;
   filter: sepia(0.16) saturate(0.82) contrast(0.86) brightness(1.22);
 }
 
