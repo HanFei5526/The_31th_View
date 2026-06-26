@@ -146,6 +146,8 @@ export default class Chapter2PaintScene {
     this._sceneRoot.appendChild(scene);
     this._yuanxiangEl = scene;
 
+    this.hudBar.show();
+
     await this._delay(600);
     if (this._exited) return;
 
@@ -157,16 +159,15 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '画案上有刚研过的墨迹……但周围空无一人。是谁刚才在这里？', { portrait: '/images/common/shennian_2.png' });
     this._isNarrating = false;
 
-    this.hudBar.show();
+    this.notebook.showQuickThoughts([
+      '远香堂在拙政园里是什么位置？',
+      '周老师说要留意题跋，墙上这些题诗算吗？',
+      '堂内的题诗和园中景观有什么联系？'
+    ]);
+    this.notebook.expand();
     await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【记录】页可查看已获得的线索，【对话】页可写下疑问与周老师批注讨论。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
     this.notebook.collapse();
-
-    this.notebook.showQuickThoughts([
-      '远香堂的题诗和公开文献里的版本一样吗？',
-      '画案上的墨迹还没干，有人刚来过这里？',
-      '题诗中的字词差异可能藏着什么线索？'
-    ]);
 
     this._addYuanxiangHotspots(scene);
     this._resetIdleTimer('yuanxiang');
@@ -192,6 +193,7 @@ export default class Chapter2PaintScene {
     if (this._isNarrating) return;
     this._isNarrating = true;
     this._clearIdleTimer();
+    this.engine.gameProgress.poemCompareStarted = true;
 
     await this.narrationBar.playLine(null, '你走近左侧墙壁。竖轴上每一幅都是园中某处景致的小画，旁边配有一首题诗。');
     await this.narrationBar.playLine('沈念', '这些诗……我见过。文徵明为拙政园三十一景各写的题诗，存世版本一直在各种诗集里流传。', { portrait: '/images/common/shennian_2.png' });
@@ -203,7 +205,7 @@ export default class Chapter2PaintScene {
     this._isNarrating = false;
 
     this.notebook.showQuickThoughts([
-      '版本比对的方法是什么？',
+      '题诗在书画鉴定中有什么作用？',
       '如果有字不同，说明什么？',
       '为什么要逐字对比而不是凭记忆？'
     ]);
@@ -321,8 +323,8 @@ export default class Chapter2PaintScene {
     this.notebook.showNPCMessage('（周老师的批注）"画非一人"——你是第一个这么读的人。大多数研究者把这些差异当作传抄讹误，但你把它们并在一起读出了一个句子。这个方法叫"异文串读"。现在的问题是：这句话是谁留下的？它在对谁说？');
     this.notebook.showQuickThoughts([
       '四个差异字是有人故意留下的吗？',
-      '"视点卑近"和低处视角有关系吗？',
-      '留下"蘅"字的人，和这四个字有关吗？'
+      '旧批注为什么说"似非成稿"？整理者在意什么？',
+      '目前"蘅"、异文、旧批注之间能确定什么关联？'
     ]);
 
     this._lightDiscussionSkipBtn = document.createElement('button');
@@ -381,15 +383,15 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '你走到桥中央。四周很静，只有水面偶尔泛起的涟漪。');
     this._isNarrating = false;
 
-    await this.narrationBar.playLine('系统提示', '小飞虹周围可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
-    this.narrationBar.dismiss();
-    this.notebook.collapse();
-
     this.notebook.showQuickThoughts([
       '小飞虹桥下的水面有什么异常？',
       '桥脚石台上有一件旧物，它可能是什么？',
       '"画非一人"这四个字说明什么？'
     ]);
+    this.notebook.expand();
+    await this.narrationBar.playLine('系统提示', '小飞虹周围可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
+    this.narrationBar.dismiss();
+    this.notebook.collapse();
 
     this._addXiaofeihongHotspots(newScene);
     this._resetIdleTimer('xiaofeihong');
