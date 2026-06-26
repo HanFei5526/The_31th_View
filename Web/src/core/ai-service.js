@@ -20,9 +20,14 @@ import {
 } from './ai-prompts.js';
 
 /**
- * API 配置。前端只请求本地/同源代理，不持有真实 DeepSeek Key。
+ * API 配置。
+ * 开发环境：连接独立后端 (localhost:8787)
+ * 生产环境：前后端同容器，使用空字符串走同源请求
  */
-const AI_BACKEND_URL = (import.meta.env?.VITE_AI_BACKEND_URL || '').replace(/\/$/, '');
+const AI_BACKEND_URL = (import.meta.env.PROD
+  ? ''
+  : (import.meta.env.VITE_AI_BACKEND_URL || 'http://localhost:8787')
+).replace(/\/$/, '');
 const HEALTH_ENDPOINT = `${AI_BACKEND_URL}/api/health`;
 const CHAT_ENDPOINT = `${AI_BACKEND_URL}/api/chat`;
 

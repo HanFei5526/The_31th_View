@@ -420,7 +420,12 @@ export class NotebookFloating {
       btn.textContent = t;
       btn.addEventListener('click', () => {
         btn.disabled = true;
-        if (this._onQuickThoughtCb) this._onQuickThoughtCb(t);
+        if (this._onQuickThoughtCb) {
+          this._onQuickThoughtCb(t, {
+            isPresetQuestion: true,
+            source: 'quick-thought',
+          });
+        }
       });
       this._quickThoughtsEl.appendChild(btn);
     });
