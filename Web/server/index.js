@@ -27,7 +27,11 @@ import fs from 'fs';
 import 'dotenv/config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DIST_DIR = path.join(__dirname, '..', 'dist');
+// 本地开发: index.js 在 Web/server/，dist 在 Web/dist/ → ../dist
+// Docker 容器: index.js 和 dist/ 同为 /app/ 下同级 → 优先判断
+const DIST_DIR = fs.existsSync(path.join(__dirname, 'dist'))
+  ? path.join(__dirname, 'dist')
+  : path.join(__dirname, '..', 'dist');
 
 const app = express();
 const PORT = process.env.PORT || 8787;
