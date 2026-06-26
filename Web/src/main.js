@@ -8,7 +8,6 @@
 import './styles/index.css'
 import './styles/transitions.css'
 import './styles/painting-viewer.css'
-import './styles/gate-panel.css'
 import './styles/narration-bar.css'
 import './styles/notebook-floating.css'
 import './styles/hud-bar.css'

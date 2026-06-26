@@ -20,7 +20,6 @@ import { SceneManager } from './scene-manager.js';
 import { Inventory, ITEM_TEMPLATES } from './inventory.js';
 import { HintSystem } from './hint-system.js';
 import { DiscussionGateManager } from './discussion-gate.js';
-import { GatePanel } from '../components/gate-panel.js';
 import { DialogueSystem } from './dialogue.js';
 import { SaveSystem } from './save-system.js';
 import { AIService } from './ai-service.js';
@@ -159,9 +158,6 @@ export class GameEngine {
 
     /** #app 根元素 */
     this._appElement = null;
-
-    /* ---- UI 组件 ---- */
-    this.gatePanel = new GatePanel(this);
 
     /* ---- 状态 ---- */
     this._transitionEl = null;

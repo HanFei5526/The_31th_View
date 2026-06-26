@@ -270,7 +270,6 @@ export default class PrologueScene extends GameSceneBase {
       this._synthesisGateOff();
       this._synthesisGateOff = null;
     }
-    this.engine.gatePanel?.unmount();
     // 清理"查看古画"按钮
     const promptBtn = document.getElementById('view-painting-prompt');
     if (promptBtn) promptBtn.remove();
