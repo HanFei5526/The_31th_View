@@ -9,14 +9,6 @@
 
 import { getGateConfig, analyzePlayerInput, analyzePlayerInputAccumulated } from './gate-config.js';
 
-// 简单否定词检测——用于识别玩家说反了的情况
-const NEGATION_PATTERNS = ['没有', '不是', '不对', '不', '没', '无', '并非', '决不', '绝不'];
-
-function _hasNegation(input) {
-  const lower = input.toLowerCase();
-  return NEGATION_PATTERNS.some((p) => lower.includes(p));
-}
-
 export class DiscussionGateManager {
   constructor(engine) {
     this.engine = engine;
@@ -284,7 +276,7 @@ export class DiscussionGateManager {
     const concepts = this.insightProgress.get(gateId) || new Set();
     let pool = config.hintPool;
 
-    if (_hasNegation(text)) {
+    if (analysis.blockedByNegation) {
       pool = config.correctionPool;
     } else if (analysis.matchedConcepts.length > 0 || concepts.size > 0) {
       pool = config.affirmPool;
@@ -310,19 +302,24 @@ export class DiscussionGateManager {
   }
 
   _buildSynthesisHint(config, concepts, matchedConcepts) {
-    const hasActorOrSystem = concepts.has('systematic') || concepts.has('intentional_act');
-    const hasOriginOrEvidence = concepts.has('conceal_origin') || concepts.has('erase_evidence');
+    const hasHumanObscure = concepts.has('human_obscure');
+    const hasSourceExplanation = concepts.has('source_explanation');
+    const hasSharedPattern = concepts.has('shared_pattern');
+    const hasNotPaintLoss = concepts.has('not_paint_loss');
 
-    if (hasActorOrSystem && !hasOriginOrEvidence) {
-      return '玩家已经意识到不是偶然或有人为处理。请继续引导其说出：被处理的是来源信息、出处记录或证据痕迹。不要直接给出最终结论。';
+    if (hasHumanObscure) {
+      return '玩家已经接近"后来处理造成遮蔽"这一方向。请只要求其回到旧题签、残字、底层细线三处证据做确认；不要说出人物、地点、低位视角或完整结论。';
     }
-    if (!hasActorOrSystem && hasOriginOrEvidence) {
-      return '玩家已经提到来源信息或证据痕迹。请继续引导其判断这不是自然磨损，而是有人系统性或刻意处理。不要直接给出最终结论。';
+    if (hasSourceExplanation) {
+      return '玩家已经注意到说明性痕迹。请引导其判断这些痕迹的状态是自然形成，还是后来的装裱与整理处理造成；不要直接给出完整结论。';
+    }
+    if (hasSharedPattern || hasNotPaintLoss) {
+      return '玩家已经注意到三处痕迹的共同点或排除了画心丢失。请继续引导其观察这些痕迹为何都在边缘、装裱层或底层；不要替玩家下结论。';
     }
     if (matchedConcepts.length > 0) {
       return '玩家方向部分正确。请简短肯定，并用问题引导其把三处痕迹综合起来。不要直接给出最终结论。';
     }
-    return '玩家尚未抓住核心。请把注意力拉回旧题签、残字、辅助线三者都和来源说明有关。不要直接给出最终结论。';
+    return '玩家尚未抓住核心。请把注意力拉回旧题签、残字、底层细线的位置共同点：边缘、装裱层、底层、画心之外。不要直接断言这是后来处理造成的，只能用问题引导。';
   }
 
   _isSynthesisPassed(config, concepts, rounds) {

@@ -633,7 +633,7 @@ export default class PrologueScene extends GameSceneBase {
       this.engine.gameProgress.synthesisPassed = true;
 
       // 将研讨结论摘要记入笔记本记录Tab，供后续章节查阅
-      this._notebook.addClueRecord('[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息');
+      this._notebook.addClueRecord('[结论] 三处痕迹共同指向：这页画的来源说明被后来的整理和装裱处理遮蔽了');
 
       this._notebook.setSynthesisMode(false);
       this._notebook.unlock();

@@ -609,6 +609,11 @@ export default class Chapter1PaintScene {
 
       this.notebook.addClueRecord('[物件] 断簪 — 银质断簪，簪头半朵芙蓉，簪身背面刻有极小的"蘅"字');
       this.notebook.addClueRecord('[线索] "蘅"字刻痕 — 刻在簪身背面，不像题名或工匠标记，用途不明');
+      this.notebook.showQuickThoughts([
+        '「蘅」字可能指什么？',
+        '为什么刻在断簪背面？',
+        '一个字能说明是谁留下的吗？'
+      ]);
       this.notebook.setLightweightMode(true);
       this.notebook.switchTab('chat');
       this.notebook.expand();
