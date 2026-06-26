@@ -13,5 +13,23 @@ Desktop.ini
 # Claude Code
 .claude/
 
+# Vite cache
+.vite/
+
+# Process images / temp references
+TestPic/
+
+# Design & planning docs (kept locally, not in repo)
+总分工文档/
+分章节实现文档/
+当前改动计划/
+非剧情文档/
+
+# Tool artifacts
+Web/.impeccable/
+Web/menu-test.html
+Web/implementation_plan.md
+
 # Local planning / generated docs
 卅一景_游戏开发文档.md
+PRODUCT.md
