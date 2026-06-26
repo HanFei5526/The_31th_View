@@ -275,7 +275,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '四个字，分散在五首诗里。如果只看到一处，会以为是抄错。但四处合在一起……', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('沈念', '断簪上的"蘅"……会是同一个人吗？留下名字，又在诗里藏了一句话？', { portrait: '/images/common/shennian_1.png' });
 
-    this.notebook.addClueRecord('[线索] 题诗异文 — 五首题诗中四处差异字组合为"画非一人"，似乎暗示这套画作并非一人完成');
+    this.notebook.addClueRecord('[线索] 题诗异文 — 五首题诗中四处差异字组合为"画非一人"，提示作品来源或观看来源存在疑问');
     await this.narrationBar.playLine('系统提示', '已记录线索：题诗异文「画非一人」。可在【记录】页查看，也可在【对话】页继续讨论。');
 
     await dismiss(revealEl, { duration: 1000, mode: 'fade-out' });
