@@ -306,6 +306,7 @@ export default class Chapter3PaintScene {
     if (this._exited) return;
 
     // 南厅入场叙事
+    this.hudBar.show();
     this._isNarrating = true;
     await this.narrationBar.playLine(null, '你顺着声音走。研墨声和翻纸声从前方传来，忽近忽远，像有人在某间屋子里反复忙碌。');
     await this.narrationBar.playLine(null, '推开一扇门，声音停了。你站在一间宽敞的厅堂里。四壁挂着字画，桌椅端正——一切都很齐整，像被人刻意维护过。');
@@ -316,10 +317,9 @@ export default class Chapter3PaintScene {
     // 探索态
     this.notebook.showQuickThoughts([
       '鸳鸯馆南北厅的陈设差异说明什么？',
-      '研墨声意味着有人在附近作画吗？',
-      '南厅墙面和案台上有什么痕迹值得注意？'
+      '残砚中的朱砂年代久远后会在画面上留下什么样的痕迹？',
+      '目前的证据链还缺什么才能证明"她做了什么"？'
     ]);
-    this.hudBar.show();
     this.notebook.expand();
     await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。【记录】页可查看已有线索，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
@@ -362,9 +362,9 @@ export default class Chapter3PaintScene {
 
     // 探索态
     this.notebook.showQuickThoughts([
-      '这些画纸上的视角为什么和正常的不一样？',
-      '画的比例为什么不对？',
-      '"画非一人"和这些草图有关系吗？'
+      '北厅散落草图的笔力和正式画心相比怎么样？',
+      '这些草图能证明留下它们的人完成了正式的画吗？',
+      '残砚中的朱砂和这些草图之间有什么关联？'
     ]);
     this.notebook.expand();
     await this.narrationBar.playLine('系统提示', '北厅散落着大量画纸，可以仔细看看。【记录】页可查看已有线索，【对话】页可继续讨论。');
@@ -399,6 +399,11 @@ export default class Chapter3PaintScene {
 
     this.engine.gameProgress.seenBleedingText = true;
     this.notebook.addClueRecord('[线索] 渗字"看得到吗" — 画纸上自行渗出的墨字，四个字没有问号，像不敢用太大的力气去问');
+    this.notebook.showQuickThoughts([
+      '渗字"看得到吗"这句话的重点是"被见证"还是在问某个具体的人？',
+      '水面回声"知我者，唯有此园"和渗字"看得到吗"，这两处声音之间有什么关联？',
+      '断簪、题诗异文、残砚、草图——这些痕迹汇聚在一起指向什么？'
+    ]);
     await this.narrationBar.playLine('系统提示', '已记录线索：「渗字"看得到吗"」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
     this.notebook.collapse();
@@ -406,12 +411,6 @@ export default class Chapter3PaintScene {
 
     // 解锁出口
     this._northExit.style.display = '';
-
-    this.notebook.showQuickThoughts([
-      '纸上渗出的字是谁写的？',
-      '"看得到吗"——这是在问谁？',
-      '这些草图和断簪上的"蘅"有关系吗？'
-    ]);
 
     // 渐进提示：20s未点击出口
     this._startIdleTimer('northExit', 20000, () => {
@@ -443,9 +442,9 @@ export default class Chapter3PaintScene {
     this.narrationBar.dismiss();
 
     this.notebook.showQuickThoughts([
-      '这面墙为什么被重新抹过？',
-      '封墙下面可能藏着什么？',
-      '残砚中的朱砂能检验灰泥下有没有痕迹吗？'
+      '这面墙被重新抹过灰泥，和旧批注"宜配边压覆"是不是同一种遮蔽逻辑？',
+      '周老师说缺的是朱砂底稿线这样的物质证据，灰泥下面有没有可能藏着？',
+      '鸳鸯馆北厅是私密区域，这种地方为什么更容易留下私人痕迹？'
     ]);
     this.notebook.expand();
     await this.narrationBar.playLine('系统提示', '留听阁内可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
@@ -473,9 +472,9 @@ export default class Chapter3PaintScene {
       await this.narrationBar.playLine('沈念', '只摸到一条线不够。我得再仔细感受一下这面墙。', { portrait: '/images/common/shennian_1.png' });
       this.notebook.addClueRecord('[线索] 封墙下的隐藏线条 — 灰泥表面下有弧线刻痕，非随手划痕，疑似被封住的图案');
       this.notebook.showQuickThoughts([
-        '灰泥下的弧线刻痕可能是什么？',
-        '这条线和残砚里的朱砂有关系吗？',
-        '谁会把图案封在墙里？'
+        '封墙下的弧线会不会就是残砚朱砂画出的底稿线？',
+        '旧批注说要"配边压覆"来遮蔽痕迹，封墙是不是另一种遮蔽手段？',
+        '目前还缺什么物质证据才能证明那个人实际参与了作画？'
       ]);
       await this.narrationBar.playLine('系统提示', '已记录线索：「封墙下的隐藏线条」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
@@ -673,15 +672,14 @@ export default class Chapter3PaintScene {
     });
     this.engine.gameProgress.hasRubbing = true;
     this.notebook.addClueRecord('[物件] 草图拓片 — 留听阁墙面低位视角草图，证实王蘅的空间观看能力');
+    this.notebook.showQuickThoughts([
+      '草图拓片上的低位视角和旧批注说的"视点卑近"是同一回事吗？',
+      '蹲到低位线高度后"三景同入一眼"，留下草图的人发现了什么？',
+      '这幅草图能证明留下它的人完成了正式画心吗？'
+    ]);
     await this.narrationBar.playLine('系统提示', '已获得物件「草图拓片」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
     this.notebook.collapse();
-
-    this.notebook.showQuickThoughts([
-      '这幅草图为什么留在墙上而不是撕掉？',
-      '题字说"三景同入一眼"，是什么意思？',
-      '这个低位视角和第三十一景有什么关系？'
-    ]);
 
     this._isNarrating = false;
 

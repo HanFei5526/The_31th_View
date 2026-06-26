@@ -196,6 +196,20 @@ export const KNOWLEDGE_SNIPPETS = [
 小飞虹桥下浮现文字"知我者，唯有此园"。这句话暗示留下痕迹的人将园林本身视为唯一的理解者——此人的观看不被他人所知，但园林的空间结构保存了这个视角。`,
   },
   {
+    id: 'ch2_evidence_gap',
+    chapter: 2,
+    unlockCondition: ({ progress }) => Boolean(progress.hasInkstone),
+    content: `【证据链的缺口与下一步方向】
+目前掌握的断簪、题诗异文、残砚只能证明有人存在过并留下了痕迹，但还不能证明这个人做了什么——也就是说，还缺少她实际参与作画的物质证据。周老师指出：残砚砚池中有朱砂残留，朱砂在传统绘画中用于打底稿线、定位标记和辅助构图线，成稿后通常被覆盖或洗去。如果这个人确实用残砚在画面上作过画，那么年代久远后部分朱砂线可能重新透出纸面，呈现极淡的红色残留痕迹。下一步应在画面上寻找这种底稿线或辅助线的物质痕迹。`,
+  },
+  {
+    id: 'ch3_inkstone_and_sketches',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenScatteredSketches),
+    content: `【残砚与草图的关联】
+残砚砚池中残留朱砂，朱砂用于打底稿线和辅助构图线。北厅散落的草图是反复试画园中景物的练习痕迹。两者共同指向一个推论：持有这方残砚的人曾在园中反复练习作画，用朱砂打底稿、做标记。草图是练习过程的痕迹，残砚是作画工具的痕迹——它们从不同角度印证了同一个人的创作活动。`,
+  },
+  {
     id: 'ch3_scattered_sketches',
     chapter: 3,
     unlockCondition: ({ progress }) => Boolean(progress.seenScatteredSketches),
@@ -206,8 +220,29 @@ export const KNOWLEDGE_SNIPPETS = [
     id: 'ch3_bleeding_text',
     chapter: 3,
     unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText),
-    content: `【“看得到吗”】
+    content: `【渗字”看得到吗”】
 画纸上渗出的”看得到吗”不是对当下某个人的直接指认，而像一句长期悬置的询问：留下这句话的人希望有人确认这些痕迹确实存在。这里的重点是”被见证”，不是被召唤或被正名。`,
+  },
+  {
+    id: 'ch3_concealment_methods',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText),
+    content: `【遮蔽的多种手段】
+旧批注中"宜配边压覆"是用装裱边框覆盖画面边旁的杂线、残字、旧签——这是针对纸面作品的遮蔽。留听阁那面被重新抹过灰泥的墙则是另一种遮蔽手段：用灰泥覆盖墙面上的痕迹。两者的逻辑相同——都是后人整理时将"不符合体例"或不便公开的内容用物理覆盖的方式隐藏，而非销毁。手段不同（边框/灰泥），目的一致（规范化遮蔽）。`,
+  },
+  {
+    id: 'ch3_two_voices',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText),
+    content: `【两处声音的关联】
+水面回声”知我者，唯有此园”和渗字”看得到吗”语气不同但指向同一个人。前者是对园林的倾诉——将园林视为唯一的理解者；后者是对未来观看者的试探——不确定自己留下的痕迹是否还能被辨认。两句话共同勾勒出这个人的处境：她的观看不被同时代的人所知，只能寄望于空间本身和未来的发现者。`,
+  },
+  {
+    id: 'ch3_sealed_wall_line',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.seenBleedingText),
+    content: `【封墙下的弧线与朱砂底稿线】
+留听阁封墙灰泥下触摸到的弧线刻痕有方向、有弧度，不像随手划痕。结合残砚砚池中的朱砂残留，这条弧线很可能就是朱砂画出的底稿线或辅助构图线——周老师说的那种被覆盖后年久透出的物质痕迹。如果灰泥完全剥开后能看到完整的朱砂线条，那就是证据链中一直缺少的"她实际参与作画"的物质证据。`,
   },
   {
     id: 'ch3_red_lines',
@@ -222,6 +257,13 @@ export const KNOWLEDGE_SNIPPETS = [
     unlockCondition: ({ progress }) => Boolean(progress.sketchRevealed),
     content: `【留听阁墙面草图】
 灰泥下露出的不是成熟画作，而是一幅被保留下来的低位视角草图。它与北厅散落草图一样拙，但这一次没有被撕掉或放弃，而是被藏在墙面里，说明留下者希望这个观看位置能被保存。`,
+  },
+  {
+    id: 'ch3_viewpoint_connection',
+    chapter: 3,
+    unlockCondition: ({ progress }) => Boolean(progress.hasRubbing),
+    content: `【"视点卑近"与草图拓片的低位视角】
+旧批注说画的"视点卑近，似非成稿"——整理者认为视角太低不像正式作品。草图拓片恰好证实了这个低位视角的来源：留下草图的人确实从一个很低的位置观看园林，这不是失误，而是一个刻意选择的观看位置。旧批注中的"视点卑近"和草图拓片的低位视角是同一回事——只是整理者把它当成了缺陷，而画面保留了这个视角。`,
   },
   {
     id: 'ch3_low_viewpoint_confirmed',

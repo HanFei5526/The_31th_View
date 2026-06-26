@@ -135,13 +135,12 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     this.notebook.addClueRecord('[周老师的方法] 版本比对与异文判断：逐字对照不同版本的同一文本，找出差异字。一个字是巧合，一句话是线索，一条证据链才是判断的依据。下一步：找物质证据——朱砂底稿线。');
 
     this.hudBar.show();
-    await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师方法——版本比对与异文判断。可在【记录】页查看，也可在【对话】页继续讨论。');
-
     this.notebook.showQuickThoughts([
-      '朱砂底稿线在画面下方会留下什么样的痕迹？',
-      '"画非一人"和断簪上的"蘅"有联系吗？',
-      '"视点卑近"的批注说明了什么？'
+      '周老师说的"版本比对与异文判断"是什么方法？',
+      '为什么周老师说现有证据"还不够"，还需要什么？',
+      '朱砂底稿线和辅助线在成品画面上怎么辨认？'
     ]);
+    await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师方法——版本比对与异文判断。可在【记录】页查看，也可在【对话】页继续讨论。');
 
     await this.narrationBar.playLine(null, '窗外已经全黑了。你不知道自己在画里待了多久。');
     await this.narrationBar.playLine('沈念', '画非一人。如果这是真的，那个人用了五百年等一个读者——等一个不会把这四个字当作传抄错误的人。', { portrait: '/images/common/shennian_2.png' });
