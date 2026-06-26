@@ -469,6 +469,11 @@ export default class Chapter3PaintScene {
       await this.narrationBar.playLine('沈念', '有方向，有弧度……不像随手划的。灰泥底下有东西。有人把什么封在了里面。', { portrait: '/images/common/shennian_1.png' });
       await this.narrationBar.playLine('沈念', '只摸到一条线不够。我得再仔细感受一下这面墙。', { portrait: '/images/common/shennian_1.png' });
       this.notebook.addClueRecord('[线索] 封墙下的隐藏线条 — 灰泥表面下有弧线刻痕，非随手划痕，疑似被封住的图案');
+      this.notebook.showQuickThoughts([
+        '灰泥下的弧线刻痕可能是什么？',
+        '这条线和残砚里的朱砂有关系吗？',
+        '谁会把图案封在墙里？'
+      ]);
       await this.narrationBar.playLine('系统提示', '已记录线索：「封墙下的隐藏线条」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
       this.notebook.collapse();

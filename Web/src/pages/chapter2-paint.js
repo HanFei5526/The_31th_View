@@ -423,6 +423,11 @@ export default class Chapter2PaintScene {
 
     this.engine.gameProgress.heardVoice = true;
     this.notebook.addClueRecord('[线索] 水面回声 — 小飞虹桥下墨涟漪浮现文字"知我者，唯有此园"。像是某个人留在水里的声音');
+    this.notebook.showQuickThoughts([
+      '"知我者，唯有此园"是什么意思？',
+      '水面上浮现的文字是谁留下的？',
+      '这段文字和断簪上的"蘅"有联系吗？'
+    ]);
 
     await this.narrationBar.playLine('系统提示', '已记录线索：「水面回声」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();

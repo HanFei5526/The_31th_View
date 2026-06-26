@@ -323,6 +323,11 @@ export default class Chapter1PaintScene {
 
       this.engine.gameProgress.zhuiyunExplored = true;
       this.notebook.addClueRecord('有些景，只从低处出现。');
+      this.notebook.showQuickThoughts([
+        '为什么站着看不到，蹲下来才看得到？',
+        '低处视角和匾额上的多余笔画有关系吗？',
+        '"有些景只从低处出现"说明了什么？'
+      ]);
       await this.narrationBar.playLine('系统提示', '已记录线索：「有些景，只从低处出现」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
       this.notebook.collapse();
@@ -820,9 +825,9 @@ export default class Chapter1PaintScene {
 
     // 提示玩家可探索或直接前进
     this.notebook.showQuickThoughts([
-      '太湖石的观赏讲究多角度，低处可能藏着什么？',
+      '为什么太湖石要从多个角度观察？',
       '峰石纹路画得极细，这种画法有什么讲究？',
-      '缀云峰周围有不属于正式画面的痕迹吗？'
+      '匾额上有多余的一笔，这里会不会也藏着类似的痕迹？'
     ]);
     this.notebook.expand();
     await this.narrationBar.playLine('系统提示', '峰石背后的低处有一点微光；前方石径仍通向水声。可在【修复笔记本】中查看记录或继续讨论。点击场景中的光点继续探索。');
