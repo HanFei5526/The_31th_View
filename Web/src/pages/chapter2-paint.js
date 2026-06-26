@@ -278,6 +278,11 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '断簪上的"蘅"……会是同一个人吗？留下名字，又在诗里藏了一句话？', { portrait: '/images/common/shennian_1.png' });
 
     this.notebook.addClueRecord('[线索] 题诗异文 — 五首题诗中四处差异字组合为"画非一人"，提示作品来源或观看来源存在疑问');
+    this.notebook.showQuickThoughts([
+      '"画非一人"是有人故意藏在题诗里的吗？',
+      '断簪上的"蘅"和诗中的异文有关联吗？',
+      '为什么要把信息藏在差异字里而不是直接写？'
+    ]);
     await this.narrationBar.playLine('系统提示', '已记录线索：题诗异文「画非一人」。可在【记录】页查看，也可在【对话】页继续讨论。');
 
     await dismiss(revealEl, { duration: 1000, mode: 'fade-out' });
@@ -303,6 +308,11 @@ export default class Chapter2PaintScene {
 
     this.notebook.addClueRecord('[线索] 旧批注残片 — "此页视点卑近，似非成稿……宜配边压覆"。不是恶意的销毁，而是规范化的遮蔽');
     this.engine.gameProgress.foundOldComment = true;
+    this.notebook.showQuickThoughts([
+      '旧批注说"似非成稿"，整理者为什么这么判断？',
+      '"宜配边压覆"说明被遮蔽的东西原本在画面边缘？',
+      '这和第一章发现的装裱接缝残角是同一种遮蔽吗？'
+    ]);
 
     await this.narrationBar.playLine('系统提示', '已记录线索：「旧批注残片」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
@@ -322,8 +332,8 @@ export default class Chapter2PaintScene {
 
     this.notebook.showNPCMessage('（周老师的批注）"画非一人"——你是第一个这么读的人。大多数研究者把这些差异当作传抄讹误，但你把它们并在一起读出了一个句子。这个方法叫"异文串读"。现在的问题是：这句话是谁留下的？它在对谁说？');
     this.notebook.showQuickThoughts([
-      '四个差异字是有人故意留下的吗？',
-      '旧批注为什么说"似非成稿"？整理者在意什么？',
+      '题诗异文组成"画非一人"，是有人故意藏在诗里的吗？',
+      '旧批注说"视点卑近，似非成稿"，整理者的判断依据是什么？',
       '目前"蘅"、异文、旧批注之间能确定什么关联？'
     ]);
 
@@ -384,9 +394,9 @@ export default class Chapter2PaintScene {
     this._isNarrating = false;
 
     this.notebook.showQuickThoughts([
-      '小飞虹桥下的水面有什么异常？',
-      '桥脚石台上有一件旧物，它可能是什么？',
-      '"画非一人"这四个字说明什么？'
+      '小飞虹在拙政园里连接了哪些区域？它和远香堂是什么关系？',
+      '旧批注的整理者和留下"蘅"字的人，对这套画的态度有什么不同？',
+      '从断簪的"蘅"到题诗异文，留下这些痕迹的人想被发现吗？'
     ]);
     this.notebook.expand();
     await this.narrationBar.playLine('系统提示', '小飞虹周围可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
@@ -455,8 +465,6 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '"园深不知处，花落有谁怜。画里青山在，无人识旧年。"');
     await this.narrationBar.playLine('沈念', '"画里青山在，无人识旧年"……写这首词的人，似乎在担心什么。担心自己留下的东西不会被人认出来？', { portrait: '/images/common/shennian_1.png' });
 
-    this._showItemLabel(overlay, '获得物件：残砚');
-
     this.engine.collectItem({
       id: 'inkstone',
       name: '残砚',
@@ -466,16 +474,15 @@ export default class Chapter2PaintScene {
     this.engine.gameProgress.hasInkstone = true;
 
     this.notebook.addClueRecord('[物件] 残砚 — 小型端砚，砚池残留朱砂。砚背刻有小词："园深不知处，花落有谁怜。画里青山在，无人识旧年。"不是正式作画工具，更像一个人的私人用砚');
+    this.notebook.showQuickThoughts([
+      '残砚砚池里的朱砂在古画修复中有什么用途？',
+      '砚背小词"画里青山在，无人识旧年"透露了什么心态？',
+      '断簪、题诗异文、残砚——这三样东西指向同一个人吗？'
+    ]);
 
     await this.narrationBar.playLine('系统提示', '已记录线索：「残砚·砚背小词」。可在【记录】页查看，也可在【对话】页继续讨论。');
 
     this._hideItemDisplay(overlay);
-
-    this.notebook.showQuickThoughts([
-      '砚池里的朱砂是用来做什么的？',
-      '砚背的词透露了什么？',
-      '断簪、异文、残砚指向同一个人吗？'
-    ]);
 
     if (this._inkstoneSpot) { this._inkstoneSpot.remove(); this._inkstoneSpot = null; }
 
