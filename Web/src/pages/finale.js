@@ -301,12 +301,11 @@ export default class FinaleScene {
         <button class="finale-location-label" data-loc="liutingge" style="left:83%;top:60%">留听阁</button>
       </div>
       <div class="finale-canvas-container" id="finale-canvas-container" aria-hidden="true">
-        <div class="finale-canvas-layer finale-canvas-layer--foreground" id="canvas-layer-foreground"></div>
-        <div class="finale-canvas-layer finale-canvas-layer--frame" id="canvas-layer-frame"></div>
-        <div class="finale-canvas-layer finale-canvas-layer--center" id="canvas-layer-center"></div>
-        <div class="finale-canvas-layer finale-canvas-layer--2" id="canvas-layer-bridge"></div>
-        <div class="finale-canvas-layer finale-canvas-layer--3" id="canvas-layer-bamboo"></div>
-        <div class="finale-canvas-layer finale-canvas-layer--4" id="canvas-layer-full"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--s1" id="canvas-layer-s1"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--s2" id="canvas-layer-s2"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--s3" id="canvas-layer-s3"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--s4" id="canvas-layer-s4"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--s5" id="canvas-layer-s5"></div>
       </div>
       <div class="finale-question-panel" id="finale-qpanel"></div>
     `;
@@ -364,7 +363,7 @@ export default class FinaleScene {
       canvas?.classList.add('visible');
       await this._delay(600);
       if (this._exited) return;
-      this._revealCanvasLayers(['foreground']);
+      this._revealCanvasLayers(['s1']);
       await this.narrationBar.playLine(null, '画面微微亮了一层——一幅线稿浮现，脚下的栏杆与地面渐渐染上淡淡的色泽。');
       if (this._exited) return;
       this._questionsEl.classList.remove('canvas-active');
@@ -414,7 +413,7 @@ export default class FinaleScene {
       canvas?.classList.add('visible');
       await this._delay(600);
       if (this._exited) return;
-      this._revealCanvasLayers(['frame']);
+      this._revealCanvasLayers(['s2']);
       await this.narrationBar.playLine(null, '左侧的廊柱渐渐着色——画面的框架开始成形。');
       if (this._exited) return;
       this._questionsEl.classList.remove('canvas-active');
@@ -480,7 +479,7 @@ export default class FinaleScene {
           canvas?.classList.add('visible');
           await this._delay(500);
           if (this._exited) { resolve(); return; }
-          this._revealCanvasLayers(['center']);
+          this._revealCanvasLayers(['s3']);
           await this.narrationBar.playLine(null, '从芙蓉榭的位置向远处延伸出一束淡墨视线——远香堂的轮廓在对岸渐渐清晰。');
           if (this._exited) { resolve(); return; }
           this._isNarrating = false;
@@ -566,7 +565,7 @@ export default class FinaleScene {
       if (isCorrect) {
         this._isNarrating = true;
         panel.innerHTML = '';
-        this._revealCanvasLayers(['bridge', 'bamboo']);
+        this._revealCanvasLayers(['s4']);
         await this.narrationBar.playLine(null, '三处景物同时着色——倒影、弧线、竹影在画面中浮现，相互照应。第三十一景几乎完成了。');
         if (this._exited) return;
         this._isNarrating = false;
