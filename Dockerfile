@@ -24,8 +24,8 @@ COPY Web/server/package*.json ./
 RUN npm install --production
 
 # 复制服务端代码
+# 注意：DEEPSEEK_API_KEY 通过云托管环境变量注入，不要提交 .env 到仓库
 COPY Web/server/index.js ./
-COPY Web/server/.env ./
 
 # 从前阶段拉取前端构建产物
 COPY --from=frontend-builder /app/frontend/dist ./dist
