@@ -111,7 +111,7 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     await this.narrationBar.playLine(null, '周鹤年坐在对面，没有抬头。过了一会儿，他开口了。');
     await this.narrationBar.playLine('周鹤年', '我年轻时，也见过一个"蘅"字。', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine('周鹤年', '在旧扫描图的边缘，很淡，像题签残笔。我没有写进报告。', { portrait: '/images/common/zhou_henian_2.png' });
-    await this.narrationBar.playLine('沈念', '为什么？', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '为什么？', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('周鹤年', '因为一个字不能证明一个人。一条线也不能证明一个视角。', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine('周鹤年', '修复报告不是小说。你写下的每一个字，都要负责。', { portrait: '/images/common/zhou_henian_2.png' });
     await this.narrationBar.playLine('周鹤年', '但你不写，也是一种判断。', { portrait: '/images/common/zhou_henian_2.png' });
@@ -121,10 +121,10 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
 
     await this.narrationBar.playLine(null, '那天晚上，你又把那封信读了一遍。');
     await this.narrationBar.playLine(null, '"不必有名，不必有形。只要有痕迹。"');
-    await this.narrationBar.playLine('沈念', '我忽然明白了。这句话不是她不想被记住。是她太清楚——在那个年代，一个寄居的女子，连"要求被记住"的资格都没有。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '她不是不想要，是不敢要。于是把愿望压到最低：只求别被彻底抹去。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '我也想起自己受过的训练：只写可证之事，不写无据之人。我一直以为那是严谨。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '可此刻我第一次意识到——所谓谨慎，有时是在保护真相，有时，也是在保护沉默。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '我忽然明白了。这句话不是她不想被记住。是她太清楚——在那个年代，一个寄居的女子，连"要求被记住"的资格都没有。', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '她不是不想要，是不敢要。于是把愿望压到最低：只求别被彻底抹去。', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '我也想起自己受过的训练：只写可证之事，不写无据之人。我一直以为那是严谨。', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '可此刻我第一次意识到——所谓谨慎，有时是在保护真相，有时，也是在保护沉默。', { portrait: '/images/common/shennian_1.png' });
     this.narrationBar.dismiss();
 
     this._chapterTransitionTimers.push(setTimeout(() => {

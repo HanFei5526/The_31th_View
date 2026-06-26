@@ -89,10 +89,6 @@
   z-index: 99;
 }
 
-.narration-portrait-container.portrait-reach {
-  left: 5%;
-}
-
 .narration-portrait-container.visible {
   opacity: 1;
 }

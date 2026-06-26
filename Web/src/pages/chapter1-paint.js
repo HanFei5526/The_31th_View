@@ -358,31 +358,31 @@ export default class Chapter1PaintScene {
     this._waterline.innerHTML = `
       <svg class="furong-waterline-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
         <g class="furong-waterline-glow">
-          <path class="furong-waterline-glow-path" d="M0.0 60.4 C2.0 60.9 3.8 61.1 4.8 60.2 C5.7 59.4 4.9 58.4 6.0 58.1 C8.4 58.1 10.7 58.5 13.0 59.1 C14.0 59.4 14.9 59.6 15.8 59.5" />
-          <path class="furong-waterline-glow-path" d="M13.5 59.5 C14.7 59.5 16.0 59.6 17.2 59.8" />
-          <path class="furong-waterline-glow-path" d="M19.2 58.8 C20.8 58.8 22.0 58.6 22.6 58.3 C23.5 57.8 24.3 59.6 25.4 59.8 C26.7 60.1 27.1 58.9 28.2 58.5 C29.2 58.1 30.2 58.5 31.3 58.1" />
-          <path class="furong-waterline-glow-path" d="M31.3 58.1 C33.2 57.2 33.6 56.8 35.7 56.5 C37.0 56.3 38.0 56.0 39.4 54.9" />
-          <path class="furong-waterline-glow-path" d="M32.6 66.2 C35.3 65.8 37.2 65.8 39.5 65.8 C41.1 65.8 41.7 65.3 43.2 65.1 C45.3 64.9 47.0 65.6 49.1 65.3 C50.1 65.2 50.8 65.2 51.8 65.0" />
+          <path class="furong-waterline-glow-path" d="M0.0 57.2 L3.0 57.6 L6.0 58.0 L9.0 58.2 L13.0 58.8 L15.8 57.8" />
+          <path class="furong-waterline-glow-path" d="M13.5 58.5 L17.2 57.8" />
+          <path class="furong-waterline-glow-path" d="M19.2 57.8 L21.0 57.8 L24.0 57.8 L27.0 56.8 L31.3 55.5" />
+          <path class="furong-waterline-glow-path" d="M31.3 55.5 L34.0 54.8 L37.0 54.2" />
+          <path class="furong-waterline-glow-path" d="M29.5 64.0 L52.0 65.0" />
           <path class="furong-waterline-glow-path" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
-          <path class="furong-waterline-glow-path" d="M96.1 60.7 C97.8 60.0 98.9 60.5 100.0 60.5" />
+          <path class="furong-waterline-glow-path" d="M96.0 61.5 L100.0 57.0" />
         </g>
         <g class="furong-waterline-visible">
-          <path class="furong-waterline-path" d="M0.0 60.4 C2.0 60.9 3.8 61.1 4.8 60.2 C5.7 59.4 4.9 58.4 6.0 58.1 C8.4 58.1 10.7 58.5 13.0 59.1 C14.0 59.4 14.9 59.6 15.8 59.5" />
-          <path class="furong-waterline-path" d="M13.5 59.5 C14.7 59.5 16.0 59.6 17.2 59.8" />
-          <path class="furong-waterline-path" d="M19.2 58.8 C20.8 58.8 22.0 58.6 22.6 58.3 C23.5 57.8 24.3 59.6 25.4 59.8 C26.7 60.1 27.1 58.9 28.2 58.5 C29.2 58.1 30.2 58.5 31.3 58.1" />
-          <path class="furong-waterline-path" d="M31.3 58.1 C33.2 57.2 33.6 56.8 35.7 56.5 C37.0 56.3 38.0 56.0 39.4 54.9" />
-          <path class="furong-waterline-path" d="M32.6 66.2 C35.3 65.8 37.2 65.8 39.5 65.8 C41.1 65.8 41.7 65.3 43.2 65.1 C45.3 64.9 47.0 65.6 49.1 65.3 C50.1 65.2 50.8 65.2 51.8 65.0" />
+          <path class="furong-waterline-path" d="M0.0 57.2 L3.0 57.6 L6.0 58.0 L9.0 58.2 L13.0 58.8 L15.8 57.8" />
+          <path class="furong-waterline-path" d="M13.5 58.5 L17.2 57.8" />
+          <path class="furong-waterline-path" d="M19.2 57.8 L21.0 57.8 L24.0 57.8 L27.0 56.8 L31.3 55.5" />
+          <path class="furong-waterline-path" d="M31.3 55.5 L34.0 54.8 L37.0 54.2" />
+          <path class="furong-waterline-path" d="M29.5 64.0 L52.0 65.0" />
           <path class="furong-waterline-path" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
-          <path class="furong-waterline-path" d="M96.1 60.7 C97.8 60.0 98.9 60.5 100.0 60.5" />
+          <path class="furong-waterline-path" d="M96.0 61.5 L100.0 57.0" />
         </g>
         <g class="furong-waterline-hits">
-          <path class="furong-waterline-hit" d="M0.0 60.4 C2.0 60.9 3.8 61.1 4.8 60.2 C5.7 59.4 4.9 58.4 6.0 58.1 C8.4 58.1 10.7 58.5 13.0 59.1 C14.0 59.4 14.9 59.6 15.8 59.5" />
-          <path class="furong-waterline-hit" d="M13.5 59.5 C14.7 59.5 16.0 59.6 17.2 59.8" />
-          <path class="furong-waterline-hit" d="M19.2 58.8 C20.8 58.8 22.0 58.6 22.6 58.3 C23.5 57.8 24.3 59.6 25.4 59.8 C26.7 60.1 27.1 58.9 28.2 58.5 C29.2 58.1 30.2 58.5 31.3 58.1" />
-          <path class="furong-waterline-hit" d="M31.3 58.1 C33.2 57.2 33.6 56.8 35.7 56.5 C37.0 56.3 38.0 56.0 39.4 54.9" />
-          <path class="furong-waterline-hit" d="M32.6 66.2 C35.3 65.8 37.2 65.8 39.5 65.8 C41.1 65.8 41.7 65.3 43.2 65.1 C45.3 64.9 47.0 65.6 49.1 65.3 C50.1 65.2 50.8 65.2 51.8 65.0" />
+          <path class="furong-waterline-hit" d="M0.0 57.2 L3.0 57.6 L6.0 58.0 L9.0 58.2 L13.0 58.8 L15.8 57.8" />
+          <path class="furong-waterline-hit" d="M13.5 58.5 L17.2 57.8" />
+          <path class="furong-waterline-hit" d="M19.2 57.8 L21.0 57.8 L24.0 57.8 L27.0 56.8 L31.3 55.5" />
+          <path class="furong-waterline-hit" d="M31.3 55.5 L34.0 54.8 L37.0 54.2" />
+          <path class="furong-waterline-hit" d="M29.5 64.0 L52.0 65.0" />
           <path class="furong-waterline-hit" d="M76.1 66.0 C78.8 65.6 81.6 65.6 84.4 65.3" />
-          <path class="furong-waterline-hit" d="M96.1 60.7 C97.8 60.0 98.9 60.5 100.0 60.5" />
+          <path class="furong-waterline-hit" d="M96.0 61.5 L100.0 57.0" />
         </g>
       </svg>
     `;

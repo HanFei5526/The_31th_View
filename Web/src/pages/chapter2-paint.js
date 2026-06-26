@@ -154,7 +154,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '远香堂。拙政园的核心建筑。我在文献里读过无数次这个名字。', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine(null, '你还没走近，就闻到一股异香。不是荷花香——是墨香，浓烈而新鲜，像有人刚刚在这里磨过墨。');
     await this.narrationBar.playLine(null, '走进敞厅，四壁空旷，只有左侧墙壁挂着数幅竖轴——是有题诗的画作，一首一幅，墨迹端正。');
-    await this.narrationBar.playLine('沈念', '画案上有刚研过的墨迹……但周围空无一人。是谁刚才在这里？', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '画案上有刚研过的墨迹……但周围空无一人。是谁刚才在这里？', { portrait: '/images/common/shennian_2.png' });
     this._isNarrating = false;
 
     this.hudBar.show();
@@ -195,7 +195,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine(null, '你走近左侧墙壁。竖轴上每一幅都是园中某处景致的小画，旁边配有一首题诗。');
     await this.narrationBar.playLine('沈念', '这些诗……我见过。文徵明为拙政园三十一景各写的题诗，存世版本一直在各种诗集里流传。', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine(null, '你从袖中取出随身携带的参考抄本，展开来与墙上的题诗对照。乍一看并无不同——但你是做文物修复的人，逐字对比是基本功。');
-    await this.narrationBar.playLine('沈念', '等等。这里有一个字……和传世版本不一样。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '等等。这里有一个字……和传世版本不一样。', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('系统提示', '已进入诗词比对。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
     this._isNarrating = false;
@@ -269,7 +269,7 @@ export default class Chapter2PaintScene {
 
     await this.narrationBar.playLine(null, '四个字悬在眼前，像是从墨迹中浮了出来。');
     await this.narrationBar.playLine(null, '画。非。一。人。');
-    await this.narrationBar.playLine('沈念', '画非一人……这套画，不是一个人画的？', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '画非一人……这套画，不是一个人画的？', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('沈念', '四个字，分散在五首诗里。如果只看到一处，会以为是抄错。但四处合在一起……', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('沈念', '断簪上的"蘅"……会是同一个人吗？留下名字，又在诗里藏了一句话？', { portrait: '/images/common/shennian_1.png' });
 

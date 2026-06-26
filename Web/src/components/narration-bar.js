@@ -134,15 +134,8 @@ export class NarrationBar {
       this._portraitImg.onload = () => {
         this._portraitContainer.classList.add('visible');
       };
-      if (src.includes('shennian_3')) {
-        this._portraitContainer.classList.add('portrait-reach');
-      } else {
-        this._portraitContainer.classList.remove('portrait-reach');
-      }
     } else {
       this._portraitContainer.classList.remove('visible');
-      // 隐藏时不立即移出 portrait-reach，防止淡出时产生瞬移。
-      // 它会在下一次载入新立绘时，根据新立绘的 src 自动 add/remove 该类。
     }
   }
 

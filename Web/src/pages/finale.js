@@ -22,8 +22,9 @@ const CHECKPOINTS = {
 };
 
 const PORTRAITS = {
-  zhou: '/images/common/zhou_henian_1.png',
+  zhou: '/images/common/zhou_henian_2.png',
   shennian: '/images/common/shennian_1.png',
+  shennian2: '/images/common/shennian_2.png',
 };
 
 export default class FinaleScene {
@@ -404,7 +405,7 @@ export default class FinaleScene {
 
     if (choice === 'A') {
       this._isNarrating = true;
-      await this.narrationBar.playLine('沈念', '对。她提供的不是笔，不是构图方案，而是一个从未被采纳过的观看位置。他用自己的手保存了她的眼睛。', { portrait: PORTRAITS.shennian });
+      await this.narrationBar.playLine('沈念', '对。她提供的不是笔，不是构图方案，而是一个从未被采纳过的观看位置。他用自己的手保存了她的眼睛。', { portrait: PORTRAITS.shennian2 });
       if (this._exited) return;
       const canvas = this._questionsEl.querySelector('#finale-canvas-container');
       this._questionsEl.classList.add('canvas-active');
@@ -656,19 +657,19 @@ export default class FinaleScene {
 
     await this.narrationBar.playLine(null, '一幅完整的画在你面前展开：从芙蓉榭栏杆下望出去，远香堂的倒影、小飞虹的弧线、梧竹幽居的竹影，全都在同一个画面里。');
     if (this._exited) return;
-    await this.narrationBar.playLine('沈念', '这个角度……和留听阁墙上那幅拙劣的草图一模一样。水面太重，桥线太弯，亭阁压得太低——当时觉得哪里都不对的画面，原来是从这里看过去的。', { portrait: PORTRAITS.shennian });
+    await this.narrationBar.playLine('沈念', '这个角度……和留听阁墙上那幅拙劣的草图一模一样。水面太重，桥线太弯，亭阁压得太低——当时觉得哪里都不对的画面，原来是从这里看过去的。', { portrait: PORTRAITS.shennian2 });
     if (this._exited) return;
     await this.narrationBar.playLine('沈念', '但眼前这幅画不拙。笔墨成熟、稳定，每一笔都是文徵明的手。', { portrait: PORTRAITS.shennian });
     if (this._exited) return;
-    await this.narrationBar.playLine('沈念', '这就是第三十一景。他没有用她的画法，而是站在她标出的那个位置上，用自己的笔重新画了一遍她看见的东西。', { portrait: PORTRAITS.shennian });
+    await this.narrationBar.playLine('沈念', '这就是第三十一景。他没有用她的画法，而是站在她标出的那个位置上，用自己的笔重新画了一遍她看见的东西。', { portrait: PORTRAITS.shennian2 });
     if (this._exited) return;
     await this.narrationBar.playLine('沈念', '他为什么要这样做？……也许他知道，以她的笔力，这个视角永远不会被收入任何正式图册。如果他不画，这个角度就消失了。', { portrait: PORTRAITS.shennian });
     if (this._exited) return;
     await this.narrationBar.playLine('沈念', '可他也没有办法写下"这是另一个人的眼睛"。在那套图册的体例里，根本没有一行能容纳这件事。他大概想过，又放下了笔。', { portrait: PORTRAITS.shennian });
     if (this._exited) return;
-    await this.narrationBar.playLine('沈念', '所以它就这样留了下来——笔墨精良，体例完整，像前三十景一样被归入文徵明名下。后来的人看见这一页的视角很低、很怪，但画心如此完美，谁会怀疑它背后还有别的来历？', { portrait: PORTRAITS.shennian });
+    await this.narrationBar.playLine('沈念', '所以它就这样留了下来——笔墨精良，体例完整，像前三十景一样被归入文徵明名下。后来的人看见这一页的视角很低、很怪，但画心如此完美，谁会怀疑它背后还有别的来历？', { portrait: PORTRAITS.shennian2 });
     if (this._exited) return;
-    await this.narrationBar.playLine('沈念', '那些本可以说明来历的边注、辅助线、残字，在一次又一次的重装和归档中被"整理"掉了。它们在规范面前不够体面。', { portrait: PORTRAITS.shennian });
+    await this.narrationBar.playLine('沈念', '那些本可以说明来历的边注、辅助线、残字，在一次又一次的重装和归档中被"整理"掉了。它们在规范面前不够体面。', { portrait: PORTRAITS.shennian2 });
     if (this._exited) return;
     await this.narrationBar.playLine('沈念', '芙蓉榭倒影里的断簪、远香堂下的残砚、留听阁墙上的草图、兰雪堂匾额上那道多余的笔画……它们散在园子各处，谁也不挨着谁。可现在我明白了——它们出自同一只手、同一种心思，在五百年里一遍遍极轻地说着同一句话：我也在这里看过。', { portrait: PORTRAITS.shennian });
     if (this._exited) return;
@@ -867,6 +868,7 @@ export default class FinaleScene {
     el.className = 'finale-subscene finale-ending-screen';
     el.innerHTML = `
       <div class="finale-ending-screen-bg" id="finale-ending-bg"></div>
+      <div class="finale-ending-overlay" id="finale-ending-overlay"></div>
       <div class="finale-ending-screen-content" id="finale-ending-content"></div>
     `;
     return el;
@@ -1047,6 +1049,9 @@ export default class FinaleScene {
       </div>
     `;
 
+    const overlay = this._endingScreenEl.querySelector('#finale-ending-overlay');
+    overlay?.classList.add('visible');
+
     // 渐显整个大内容面板
     await this._delay(300);
     content.classList.add('visible');
@@ -1167,6 +1172,8 @@ export default class FinaleScene {
       const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
       bg.classList.remove('visible');
       bg.style.backgroundImage = '';
+      const ov = this._endingScreenEl.querySelector('#finale-ending-overlay');
+      ov?.classList.remove('visible');
       this._sceneRoot.classList.remove('real-world');
       this._sceneRoot.classList.add('paint-world');
       if (this._container) {
@@ -1177,6 +1184,8 @@ export default class FinaleScene {
     }, { once: true });
 
     creditsView.querySelector('#finale-btn-menu').addEventListener('click', () => {
+      const ov = this._endingScreenEl.querySelector('#finale-ending-overlay');
+      ov?.classList.remove('visible');
       this.engine.switchScene('menu');
     }, { once: true });
   }

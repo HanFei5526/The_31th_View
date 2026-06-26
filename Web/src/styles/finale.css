@@ -988,6 +988,20 @@
   opacity: 1;
 }
 
+.finale-ending-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 204, 0.45);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.finale-ending-overlay.visible {
+  opacity: 1;
+}
+
 .finale-ending-screen-content {
   position: relative;
   z-index: 1;
@@ -1054,10 +1068,13 @@
 
 .finale-ending-screen-final {
   font-family: var(--font-handwrite);
-  font-size: 1.7rem; /* 大幅放大手写结语，作为核心视觉焦点 */
-  color: #963625; /* 中国画经典朱砂印红 */
+  font-size: 1.32rem;
+  color: #963625;
   letter-spacing: 0.15em;
-  margin: 2.2rem 0; /* 留出充足的气口呼吸 */
+  margin: 2.2rem 0;
+  white-space: nowrap;
+  text-indent: -0.35em;
+  padding-right: 0.35em;
 }
 
 /* 子视图基础类及渐变转场 */

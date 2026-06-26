@@ -207,7 +207,7 @@ export default class PaintingViewer {
   triggerConvergence() {
     if (!this._allRecorded || this._convergenceShown) return;
 
-    this._showFeedback('已成功推理得出结论。可在【记录】页查看，也可在【对话】页继续讨论。点击古画中央的闪烁光点，即可继续剧情。');
+    this._showFeedback('已成功推理得出结论。可在【记录】页查看，也可在【对话】页继续讨论。点击古画边缘的闪烁光点，即可继续剧情。');
 
     setTimeout(() => {
       this._playConvergence();
@@ -279,7 +279,7 @@ export default class PaintingViewer {
 
           setTimeout(() => {
             this._showFeedback('三项基础检测已经全部做完了。现在你可以直接在古画画面中仔细寻找并点击异常线索。找到的线索可以留意画幅下方的指示灯，等全部收集完再一起研讨。');
-          }, 6000);
+          }, 5000);
 
           this._toolResetTimer = null;
         }, 2000);
@@ -662,12 +662,15 @@ export default class PaintingViewer {
       this._statusEl.style.display = 'none';
     }
 
-    // 交会点坐标：改为“所见残字”光点位置，如果不存则兜底为 cx=6.5, cy=75.5
+    // 移除已有的线索标记点（金色小圆），由汇聚动画光点接替
+    this._markersLayer.querySelectorAll('.pv-marker').forEach(m => m.remove());
+
+    // 交会点坐标：改为”所见残字”光点位置，如果不存则兜底为 cx=6.5, cy=75.5
     const targetClue = this._clues.clue_text || { x: 6.5, y: 75.5 };
     const cx = targetClue.x;
     const cy = targetClue.y;
 
-    // ── 三个光点向“所见残字”处飞去或在此处等待 ──
+    // ── 三个光点向”所见残字”处飞去或在此处等待 ──
     const clueEntries = Object.values(this._clues);
     clueEntries.forEach((clue) => {
       const dot = document.createElement('div');

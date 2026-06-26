@@ -309,8 +309,8 @@ export default class Chapter3PaintScene {
     this._isNarrating = true;
     await this.narrationBar.playLine(null, '你顺着声音走。研墨声和翻纸声从前方传来，忽近忽远，像有人在某间屋子里反复忙碌。');
     await this.narrationBar.playLine(null, '推开一扇门，声音停了。你站在一间宽敞的厅堂里。四壁挂着字画，桌椅端正——一切都很齐整，像被人刻意维护过。');
-    await this.narrationBar.playLine('沈念', '鸳鸯馆。南厅。看起来和其他地方没什么不同……但刚才的声音是从哪里来的？', { portrait: '/images/common/shennian_1.png' });
-    await this.narrationBar.playLine('沈念', '隔扇后面——北厅那边，好像还有动静。', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '鸳鸯馆。南厅。看起来和其他地方没什么不同……但刚才的声音是从哪里来的？', { portrait: '/images/common/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '隔扇后面——北厅那边，好像还有动静。', { portrait: '/images/common/shennian_2.png' });
     this.narrationBar.dismiss();
 
     // 探索态
@@ -636,7 +636,7 @@ export default class Chapter3PaintScene {
     await this.narrationBar.playLine(null, '你后退两步，蹲下来。视线降到墙上标出的那条低位线的高度。');
     await this.narrationBar.playLine(null, '忽然，所有"不对"都对了。');
     await this.narrationBar.playLine(null, '你想起刚才捡起的那张画——水面太重，桥线太弯，亭阁压得太低。那张画和眼前这幅草图的视角几乎一样。从这个高度看过去，远香堂的倒影、小飞虹的弧线、梧竹幽居的竹影，真的会同时出现在一个画面里。');
-    await this.narrationBar.playLine('沈念', '她画得不好。但她看得很准。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '她画得不好。但她看得很准。', { portrait: '/images/common/shennian_1.png' });
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.understoodNotPainter = true;
@@ -711,7 +711,7 @@ export default class Chapter3PaintScene {
     await this._showLetterOverlay();
     if (this._sketchOverlay) this._sketchOverlay.classList.add('visible');
 
-    await this.narrationBar.playLine('沈念', '"不必有名，不必有形。只要有痕迹。"', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '"不必有名，不必有形。只要有痕迹。"', { portrait: '/images/common/shennian_1.png' });
 
     this.engine.collectItem({
       id: 'letter',
@@ -841,9 +841,9 @@ export default class Chapter3PaintScene {
 
     await this._delay(800);
 
-    await this.narrationBar.playLine('沈念', '墙上的题字，断簪背面的「蘅」，还有匾额上那道多余的笔画。现在我几乎可以确定：它们出自同一只手，同一种心思。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '她不是要署名，也不是要我破解什么。只是在一块连她名字都放不下的匾额上，悄悄留了一道「我也在这里看过」。', { portrait: '/images/common/shennian_3.png' });
-    await this.narrationBar.playLine('沈念', '它从来不是一个待解的字。它是一个人留给五百年后的记号。', { portrait: '/images/common/shennian_3.png' });
+    await this.narrationBar.playLine('沈念', '墙上的题字，断簪背面的「蘅」，还有匾额上那道多余的笔画。现在我几乎可以确定：它们出自同一只手，同一种心思。', { portrait: '/images/common/shennian_2.png' });
+    await this.narrationBar.playLine('沈念', '她不是要署名，也不是要我破解什么。只是在一块连她名字都放不下的匾额上，悄悄留了一道「我也在这里看过」。', { portrait: '/images/common/shennian_1.png' });
+    await this.narrationBar.playLine('沈念', '它从来不是一个待解的字。它是一个人留给五百年后的记号。', { portrait: '/images/common/shennian_1.png' });
     this.narrationBar.dismiss();
 
     this.engine.gameProgress.plaqueRecognized = true;

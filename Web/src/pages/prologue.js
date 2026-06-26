@@ -529,7 +529,7 @@ export default class PrologueScene extends GameSceneBase {
       // 延迟在画面下方显示"进入综合研讨"按钮（等线索提示完全消失后）
       setTimeout(() => {
         this._showSynthesisEntryButton();
-      }, 8000);
+      }, 6500);
       return;
     }
 
@@ -731,9 +731,9 @@ export default class PrologueScene extends GameSceneBase {
     this.engine.gameProgress.foundMarginTrace = true;
 
     await this._narrationBar.playLine(null, '你的手指在交会处停了一下。');
-    await this._narrationBar.playLine('沈念', '「所见」……什么意思？', { portrait: '/images/common/shennian_3.png' });
+    await this._narrationBar.playLine('沈念', '「所见」……什么意思？', { portrait: '/images/common/shennian_2.png' });
     await this._narrationBar.playLine(null, '屏幕上的墨迹好像动了一下。');
-    await this._narrationBar.playLine('沈念', '……是动了吗？不对，扫描件不会动。', { portrait: '/images/common/shennian_3.png' });
+    await this._narrationBar.playLine('沈念', '……是动了吗？不对，扫描件不会动。', { portrait: '/images/common/shennian_2.png' });
     await this._narrationBar.playLine(null, '你下意识想把手移开，但画面已经变了。');
     this._narrationBar.dismiss();
 
