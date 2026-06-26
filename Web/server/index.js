@@ -39,30 +39,18 @@ const API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const API_URL = process.env.DEEPSEEK_API_URL || 'https://api.deepseek.com/chat/completions';
 const MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
-/* ---- CORS 白名单 ----
- * 只允许 CORS_ORIGIN 里列出的来源（逗号分隔）。
- * 不配置时默认本地开发端口（Vite 默认 5173）。
- */
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN ||
-  'http://localhost:5173,http://127.0.0.1:5173')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-app.use(cors({
-  origin(origin, cb) {
-    // 无 origin（同源请求、curl、健康检查探针）放行
-    if (!origin) return cb(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS 拒绝: ${origin} 不在白名单内`));
-  },
-}));
 app.use(express.json({ limit: '256kb' }));
 
 // 信任反向代理的 X-Forwarded-For，让限流按真实客户端 IP 计数
 app.set('trust proxy', 1);
 
-/* ---- 前端静态文件 ---- */
+/* ---- CORS：仅用于 API 路由，静态文件不走 CORS 检查 ---- */
+const apiCors = cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+});
+
+/* ---- 前端静态文件（无 CORS 限制） ---- */
 if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR, {
     maxAge: '1d',
@@ -568,12 +556,12 @@ async function callDeepSeek(messages, options = {}) {
 }
 
 /* ---- 健康检查 ---- */
-app.get('/api/health', (req, res) => {
+app.get('/api/health', apiCors, (req, res) => {
   res.json({ ok: true, configured: Boolean(API_KEY), model: MODEL });
 });
 
 /* ---- 修复笔记本语义接口 ---- */
-app.post('/api/notebook/message', chatLimiter, async (req, res) => {
+app.post('/api/notebook/message', apiCors, chatLimiter, async (req, res) => {
   if (!API_KEY) {
     return res.status(503).json({ error: 'API Key 未配置' });
   }
@@ -637,7 +625,7 @@ app.post('/api/notebook/message', chatLimiter, async (req, res) => {
 });
 
 /* ---- 对话转发 ---- */
-app.post('/api/chat', chatLimiter, async (req, res) => {
+app.post('/api/chat', apiCors, chatLimiter, async (req, res) => {
   if (!API_KEY) {
     return res.status(503).json({ error: 'API Key 未配置' });
   }
