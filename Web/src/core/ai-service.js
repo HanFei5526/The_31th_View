@@ -161,6 +161,8 @@ export class AIService {
   async queryNotebook(question) {
     const ctx = this.engine.getAIContext();
     const systemPrompt = buildNotebookQueryPrompt(ctx, this.engine.gameProgress);
+    const contextualFallback = this._getNotebookQueryFallback(question, ctx);
+    const genericFallback = '（翻了翻，相关记录没有形成清晰答复。可以换个线索名再问一次。）';
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -172,10 +174,20 @@ export class AIService {
       max_tokens: 280,
       retryOnEmpty: true,
       retryOnShort: true,
-      fallbackText: '（翻了翻，相关记录没有形成清晰答复。可以换个线索名再问一次。）',
+      fallbackText: contextualFallback || genericFallback,
+      unavailableText: contextualFallback,
+      networkFallbackText: contextualFallback,
     });
 
-    return this._sanitizeNotebookReply(reply);
+    const sanitized = this._sanitizeNotebookReply(reply);
+    if (
+      contextualFallback
+      && /没有找到相关记录|没有形成清晰答复|暂时没有回应/.test(sanitized)
+    ) {
+      return contextualFallback;
+    }
+
+    return sanitized;
   }
 
   /**
@@ -346,6 +358,31 @@ export class AIService {
       .replace(/作品来源或观看来源存在疑问，也可能是作品来源或观看来源存在疑问或作品来源或观看来源存在疑问/g, '作品来源或观看来源存在疑问')
       .replace(/作品来源或观看来源存在疑问，也可能是作品来源或观看来源存在疑问/g, '作品来源或观看来源存在疑问')
       .replace(/作品来源或观看来源存在疑问或作品来源或观看来源存在疑问/g, '作品来源或观看来源存在疑问');
+  }
+
+  _getNotebookQueryFallback(question, ctx = {}) {
+    const text = String(question || '');
+    const progress = ctx.progress || {};
+
+    if (!progress.zhuiyunExplored) return '';
+
+    if (text.includes('站着看不到') || text.includes('蹲下来')) {
+      return '（笔记本边注）这一处更像是在提示观察高度。低下来之后出现的微光，说明画中有些痕迹需要换到更低的位置才会显现；此时它还不是结论，只是一种观察方法。';
+    }
+
+    if (
+      progress.plaqueNoted
+      && text.includes('低处微光')
+      && text.includes('匾额')
+    ) {
+      return '（修复记录）可以先并列记录：它们都不是普通游览视线里最先注意到的内容，也都像正式画面之外的异常痕迹。但现在还不能把它们直接连成来源判断。';
+    }
+
+    if (text.includes('有些景') && text.includes('低处')) {
+      return '（笔记本边注）它目前说明的是一种看法：有些痕迹需要从低处、偏处、不那么正式的位置才会显现。它提醒继续换角度观察，还不能直接推出是谁留下了这些痕迹。';
+    }
+
+    return '';
   }
 
   _isInvalidFinalNote(content) {
