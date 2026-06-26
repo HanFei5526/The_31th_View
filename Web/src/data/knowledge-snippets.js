@@ -28,6 +28,27 @@ export const KNOWLEDGE_SNIPPETS = [
 当前笔记本已解锁的内容包括：《拙政园三十一景图》的公开信息、文徵明简介、册页装裱常识，以及后续由玩家亲自发现并记录的线索。它不是全知资料库；未发现的线索、后续章节内容和最终真相不会提前出现在笔记本里。`,
   },
   {
+    id: 'tool_magnifier',
+    chapter: 0,
+    unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
+    content: `【放大镜检查】
+放大镜用于对画面进行高倍率目视检查。在古画修复中，放大镜能看清装裱接缝处是否有重叠痕迹、边框是否压住了旧有标记、纸面是否有细微的裂纹或修补痕迹。它是最基础的检查工具，适合观察画面表层的物理状态。`,
+  },
+  {
+    id: 'tool_fiber',
+    chapter: 0,
+    unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
+    content: `【纸质分析】
+纸质分析通过观察纸张纤维结构来判断用纸类型和年代。在册页修复中，如果某一页的背纸纤维与其他页不一致，说明该页可能经历过单独重装。纸质分析能区分画心本身与后来添加的装裱层，帮助判断作品是否经过二次处理。`,
+  },
+  {
+    id: 'tool_sidelight',
+    chapter: 0,
+    unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
+    content: `【侧光照射】
+侧光照射是将光源从侧面低角度打在画面上的检查方法。侧光能让纸面上肉眼不易察觉的凹凸变得明显，比如被覆盖的旧字痕迹、压印、刻痕或底层墨线。它特别适合检查装裱层下方是否隐藏着被遮盖的文字或标记。`,
+  },
+  {
     id: 'clue_margin_label',
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_margin'),

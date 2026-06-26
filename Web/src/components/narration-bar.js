@@ -115,7 +115,12 @@ export class NarrationBar {
         this.setPortrait(null); // 旁白状态下，自动隐藏立绘
       }
 
-      if ('portrait' in options && speaker !== null) {
+      if (speaker === '系统提示') {
+        const wasLocked = this._portraitLocked;
+        this._portraitLocked = false;
+        this.setPortrait(null);
+        this._portraitLocked = wasLocked;
+      } else if ('portrait' in options && speaker !== null) {
         this.setPortrait(options.portrait);
       } else if (speaker !== null && !('portrait' in options)) {
         this.setPortrait(null);
