@@ -154,7 +154,7 @@ export class NarrationBar {
     this._portraitLocked = false;
   }
 
-  showOptions(options, { mountToBody = false } = {}) {
+  showOptions(options, { mountToBody = false, className = '' } = {}) {
     return new Promise((resolve) => {
       this._resolveOptions = resolve;
 
@@ -163,7 +163,7 @@ export class NarrationBar {
       }
 
       this._optionsEl = document.createElement('div');
-      this._optionsEl.className = 'narration-options';
+      this._optionsEl.className = `narration-options ${className}`.trim();
 
       options.forEach(opt => {
         const btn = document.createElement('button');
@@ -212,7 +212,7 @@ export class NarrationBar {
     }, 4000);
   }
 
-  showFloating(text) {
+  showFloating(text, { persist = false } = {}) {
     if (!this._barEl) return;
     if (this._floatingTimer) clearTimeout(this._floatingTimer);
     if (this._typingTimer) clearTimeout(this._typingTimer);
@@ -221,7 +221,7 @@ export class NarrationBar {
     this._showContinue();
 
     if (this._container) {
-      this._container.classList.add('visible'); // 浮现时显示对话框
+      this._container.classList.add('visible');
     }
 
     this._barEl.className = 'narration-bar state-narration';
@@ -229,15 +229,17 @@ export class NarrationBar {
     this._textEl.textContent = text;
     this._emitNotebookGuidanceIfNeeded(null, text);
 
-    this._floatingTimer = setTimeout(() => {
-      this._textEl.textContent = '';
-      this._floatingTimer = null;
-      this._isFloating = false;
-      this._hideContinue();
-      if (this._container) {
-        this._container.classList.remove('visible'); // 自动淡出隐藏
-      }
-    }, 4000);
+    if (!persist) {
+      this._floatingTimer = setTimeout(() => {
+        this._textEl.textContent = '';
+        this._floatingTimer = null;
+        this._isFloating = false;
+        this._hideContinue();
+        if (this._container) {
+          this._container.classList.remove('visible');
+        }
+      }, 4000);
+    }
   }
 
   dismiss() {

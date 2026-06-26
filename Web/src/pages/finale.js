@@ -379,12 +379,10 @@ export default class FinaleScene {
         C: '他画了这幅画。但视角是他自己发现的吗？',
         D: '装裱师是后来者。这个视角比装裱早了几百年。',
       };
-      this.narrationBar.showFeedback?.(feedback[choice] || '再想想。');
-      if (this._q1Errors >= 3) {
-        await this._delay(1500);
-      } else {
-        await this._delay(1200);
-      }
+      this._isNarrating = true;
+      await this.narrationBar.playLine(null, feedback[choice] || '再想想。');
+      if (this._exited) return;
+      this._isNarrating = false;
       await this._runQ1Layer1();
     }
   }
@@ -429,14 +427,14 @@ export default class FinaleScene {
         B: '回想留听阁墙上那幅草图——线条犹豫，比例失准。她的手不足以画出第三十一景的笔墨。',
         C: '构图和立意仍是文徵明的判断。她提供的比"设计"更基础——是一个位置，一种看法。',
       };
-      this.narrationBar.showFeedback?.(feedback[choice] || '再想想。');
+      this._isNarrating = true;
+      await this.narrationBar.playLine(null, feedback[choice] || '再想想。');
+      if (this._exited) return;
       if (this._q1L2Errors >= 3) {
-        await this._delay(1500);
-        this.narrationBar.showFeedback?.('她的价值不在画技，也不在构思——在于"看见"。');
-        await this._delay(1500);
-      } else {
-        await this._delay(1200);
+        await this.narrationBar.playLine(null, '她的价值不在画技，也不在构思——在于"看见"。');
+        if (this._exited) return;
       }
+      this._isNarrating = false;
       await this._runQ1Layer2();
     }
   }
@@ -465,6 +463,7 @@ export default class FinaleScene {
       const labels = this._questionsEl.querySelectorAll('.finale-location-label');
       const handler = async (e) => {
         if (this._exited) { resolve(); return; }
+        if (this._isNarrating) return;
         const loc = e.currentTarget.dataset.loc;
 
         if (loc === 'furongxie') {
@@ -487,8 +486,11 @@ export default class FinaleScene {
         } else {
           this._q2Errors++;
           e.currentTarget.classList.add('wrong');
-          this.narrationBar.showFeedback?.(feedbacks[loc] || '不是那里。');
-          await this._delay(800);
+          this._isNarrating = true;
+          await this.narrationBar.playLine(null, feedbacks[loc] || '不是那里。');
+          if (this._exited) { resolve(); return; }
+          this._isNarrating = false;
+          this.narrationBar.dismiss?.();
           e.currentTarget.classList.remove('wrong');
           if (this._q2Errors >= 3) {
             const correctLabel = this._questionsEl.querySelector('.finale-location-label[data-loc="furongxie"]');
@@ -558,7 +560,7 @@ export default class FinaleScene {
     confirmBtn.textContent = '确认';
 
     confirmBtn.addEventListener('click', async () => {
-      if (this._exited) return;
+      if (this._exited || this._isNarrating) return;
       const correctIds = new Set(options.filter(o => o.correct).map(o => o.id));
       const isCorrect = selected.size === correctIds.size && [...selected].every(id => correctIds.has(id));
 
@@ -573,11 +575,15 @@ export default class FinaleScene {
         await this._runQ4();
       } else {
         this._q3Errors++;
+        this._isNarrating = true;
         if (this._q3Errors >= 3) {
-          this.narrationBar.showFeedback?.('只有三景。"水桥竹影，三景同入一眼。"');
+          await this.narrationBar.playLine(null, '只有三景。"水桥竹影，三景同入一眼。"');
         } else {
-          this.narrationBar.showFeedback?.('回想草图上画了什么——"水桥竹影，三景同入一眼"。');
+          await this.narrationBar.playLine(null, '回想草图上画了什么——"水桥竹影，三景同入一眼"。');
         }
+        if (this._exited) return;
+        this._isNarrating = false;
+        this.narrationBar.dismiss?.();
       }
     });
 
@@ -619,8 +625,10 @@ export default class FinaleScene {
         C: '画心从未被重画。第三十一景的画面一直在那里，问题出在画面之外。',
         D: '不是没人注意到——旧批注写了"视点卑近"。他注意到了，只是用"配边压覆"把它处理掉了。',
       };
-      this.narrationBar.showFeedback?.(feedback[choice] || '再想想。');
-      await this._delay(1200);
+      this._isNarrating = true;
+      await this.narrationBar.playLine(null, feedback[choice] || '再想想。');
+      if (this._exited) return;
+      this._isNarrating = false;
       await this._runQ4();
     }
   }
@@ -716,12 +724,13 @@ export default class FinaleScene {
     await this._delay(3000);
     if (this._exited) return;
 
-    this.narrationBar.showFloating?.('三条路代表三种立场。没有绝对对错，只有你如何承担自己的解释。');
+    this.narrationBar.showFloating?.('前方有三种选择，每一种通向不同的结局。准备好后，点击「做出选择」。', { persist: true });
 
     const btn = this._paintingCompleteEl.querySelector('#finale-choose-btn');
     btn.classList.add('visible');
     btn.addEventListener('click', () => {
       btn.classList.remove('visible');
+      this.narrationBar.dismiss?.();
       this._showEndingChoices();
     }, { once: true });
   }
@@ -827,7 +836,7 @@ export default class FinaleScene {
       const confirm = await this.narrationBar.showOptions([
         { label: '确认选择', value: 'yes' },
         { label: '返回', value: 'no' },
-      ], { mountToBody: true });
+      ], { mountToBody: true, className: 'finale-ending-confirm-options' });
       if (this._exited) return;
 
       if (confirm === 'yes') {
