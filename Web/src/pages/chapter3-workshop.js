@@ -153,11 +153,8 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     ];
 
     overlay.innerHTML = `
-      <div class="finale-transition-bg"></div>
       <div class="prologue-transition-layout">
-        <div class="intro-title-group">
-          <div class="intro-prologue-title">终章 · 第三十一景</div>
-        </div>
+        <div class="intro-prologue-title">终章 · 第三十一景</div>
         <div class="intro-prologue-text" id="intro-finale-from-workshop-text"></div>
       </div>
     `;
@@ -184,10 +181,10 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
       this._chapterTransitionOverlay = null;
       await this.engine.switchScene('finale', true);
 
-      overlay.style.transition = fast ? 'opacity 0.4s ease' : 'opacity 1.2s ease';
+      overlay.style.transition = fast ? 'opacity 0.4s ease' : 'opacity 1s ease';
       overlay.classList.remove('active');
       overlay.classList.add('fade-out');
-      setTimeout(() => overlay.remove(), fast ? 450 : 1300);
+      setTimeout(() => overlay.remove(), fast ? 450 : 1100);
     };
 
     this._chapterTransitionKeyHandler = (e) => {
@@ -242,11 +239,19 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     }
   }
 
-  _preloadImage(src) {
+  _preloadImage(src, timeout = 3000) {
     return new Promise((resolve) => {
       const img = new Image();
-      img.onload = resolve;
-      img.onerror = resolve;
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(done, timeout);
+      img.onload = done;
+      img.onerror = done;
       img.src = src;
     });
   }

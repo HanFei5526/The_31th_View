@@ -508,54 +508,27 @@
   transform: translateX(-15%);
 }
 
-.intro-transition-overlay--chapter3 .intro-title-group {
-  border-right-color: rgba(44, 36, 22, 0.2);
-}
-
 /* --- 终章过渡页 --- */
-.intro-transition-overlay--finale {
-  background: var(--wash-paper-mid);
-}
-
 .intro-transition-overlay--finale::before {
-  content: none;
-}
-
-.finale-transition-bg {
+  content: '';
   position: absolute;
-  inset: -4% 0;
+  top: -2%;
+  bottom: -2%;
+  left: 0;
   width: 130%;
-  z-index: 0;
+  z-index: -1;
   background-image: url('/images/prologue/过渡页0.png');
   background-size: cover;
-  background-position: center;
-  opacity: 0;
-  filter: contrast(0.95) saturate(0.7) sepia(0.15);
+  background-position: left center;
+  opacity: 0.65;
+  filter: blur(2px) contrast(0.95) sepia(0.1);
   transform: translateX(0);
-  animation: finaleBgPan 10s linear forwards;
+  transition: transform 10s linear;
 }
 
-@keyframes finaleBgPan {
-  0% { transform: translateX(0); opacity: 0; }
-  8% { opacity: 0.65; }
-  100% { transform: translateX(-15%); opacity: 0.65; }
-}
-
-.intro-transition-overlay--finale.fade-out .finale-transition-bg {
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
-
-.intro-transition-overlay--finale .intro-title-group {
-  border-right-color: rgba(44, 36, 22, 0.15);
-}
-
-.intro-transition-overlay--finale .intro-prologue-title {
-  color: #1a1510;
-}
-
-.intro-transition-overlay--finale .intro-prologue-text span {
-  color: rgba(30, 24, 16, 0.88);
+.intro-transition-overlay--finale.active::before,
+.intro-transition-overlay--finale.fade-out::before {
+  transform: translateX(-15%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -566,7 +539,8 @@
   .intro-transition-overlay--prologue::before,
   .intro-transition-overlay--chapter1::before,
   .intro-transition-overlay--chapter2::before,
-  .intro-transition-overlay--chapter3::before {
+  .intro-transition-overlay--chapter3::before,
+  .intro-transition-overlay--finale::before {
     transition-duration: 0.3s;
     transform: none !important;
   }

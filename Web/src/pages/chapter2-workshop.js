@@ -174,9 +174,7 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
 
     overlay.innerHTML = `
       <div class="prologue-transition-layout">
-        <div class="intro-title-group">
-          <div class="intro-prologue-title">第三章 · 西园</div>
-        </div>
+        <div class="intro-prologue-title">第三章 · 西园</div>
         <div class="intro-prologue-text" id="intro-chapter3-from-workshop-text"></div>
       </div>
     `;
@@ -261,11 +259,19 @@ export default class Chapter2WorkshopScene extends GameSceneBase {
     }
   }
 
-  _preloadImage(src) {
+  _preloadImage(src, timeout = 3000) {
     return new Promise((resolve) => {
       const img = new Image();
-      img.onload = resolve;
-      img.onerror = resolve;
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(done, timeout);
+      img.onload = done;
+      img.onerror = done;
       img.src = src;
     });
   }

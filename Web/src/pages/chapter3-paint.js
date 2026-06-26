@@ -322,6 +322,7 @@ export default class Chapter3PaintScene {
     this.hudBar.show();
     await this.narrationBar.playLine('系统提示', '鸳鸯馆南厅内可以探索。【记录】页可查看已有线索，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     this._showSpots(this._southSpots);
@@ -366,6 +367,7 @@ export default class Chapter3PaintScene {
     ]);
     await this.narrationBar.playLine('系统提示', '北厅散落着大量画纸，可以仔细看看。【记录】页可查看已有线索，【对话】页可继续讨论。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     this._showSpots(this._northSpots);
@@ -397,6 +399,7 @@ export default class Chapter3PaintScene {
     this.notebook.addClueRecord('[线索] 渗字"看得到吗" — 画纸上自行渗出的墨字，四个字没有问号，像不敢用太大的力气去问');
     await this.narrationBar.playLine('系统提示', '已记录线索：「渗字"看得到吗"」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     // 解锁出口
@@ -444,6 +447,7 @@ export default class Chapter3PaintScene {
     ]);
     await this.narrationBar.playLine('系统提示', '留听阁内可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     this._showSpots(this._liutingSpots);
@@ -467,6 +471,7 @@ export default class Chapter3PaintScene {
       this.notebook.addClueRecord('[线索] 封墙下的隐藏线条 — 灰泥表面下有弧线刻痕，非随手划痕，疑似被封住的图案');
       await this.narrationBar.playLine('系统提示', '已记录线索：「封墙下的隐藏线条」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
+      this.notebook.collapse();
       this._isNarrating = false;
 
       this._startIdleTimer('wallSecond', 20000, () => {
@@ -568,6 +573,7 @@ export default class Chapter3PaintScene {
 
     await this.narrationBar.playLine('系统提示', '红线已显现。再次点击封墙，尝试用物件沿线剥离灰泥。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     this._startIdleTimer('afterInkstone', 30000, () => {
@@ -614,6 +620,7 @@ export default class Chapter3PaintScene {
 
     await this.narrationBar.playLine('系统提示', '试试后退一步，蹲下来看。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     // 显示蹲下按钮
@@ -660,6 +667,7 @@ export default class Chapter3PaintScene {
     this.notebook.addClueRecord('[物件] 草图拓片 — 留听阁墙面低位视角草图，证实王蘅的空间观看能力');
     await this.narrationBar.playLine('系统提示', '已获得物件「草图拓片」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
 
     this.notebook.showQuickThoughts([
       '这幅草图为什么留在墙上而不是撕掉？',
@@ -672,6 +680,7 @@ export default class Chapter3PaintScene {
     // 显示凹槽热点
     await this.narrationBar.playLine('系统提示', '草图右下角似乎有一处凹陷，点击查看。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._slotSpot.style.display = '';
 
     this._startIdleTimer('slot', 20000, () => {

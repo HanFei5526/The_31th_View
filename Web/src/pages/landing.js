@@ -174,11 +174,10 @@ export default class LandingScene {
       let finished = false;
       const timers = [];
 
-      const finish = (fast = false) => {
+      const finish = async (fast = false) => {
         if (finished) return;
         finished = true;
 
-        // 清理所有定时器
         timers.forEach(clearTimeout);
         document.removeEventListener('keydown', onKey);
 
@@ -187,7 +186,7 @@ export default class LandingScene {
           p.style.transform = 'translateY(0)';
         });
 
-        this.engine.switchScene('menu', true); // Skip default transition
+        await this.engine.switchScene('menu', true);
 
         if (fast) {
           overlay.style.transition = 'opacity 0.4s ease';
@@ -195,19 +194,20 @@ export default class LandingScene {
           overlay.classList.add('fade-out');
           setTimeout(() => overlay.remove(), 450);
         } else {
+          overlay.style.transition = 'opacity 1s ease';
           overlay.classList.remove('active');
           overlay.classList.add('fade-out');
-          setTimeout(() => overlay.remove(), 3000);
+          setTimeout(() => overlay.remove(), 1100);
         }
       };
 
       const onKey = (e) => {
-        if (e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ') {
+        if (e.key === ' ' || e.key === 'Enter' || e.code === 'Space' || e.code === 'KeyZ' || e.key?.toLowerCase() === 'z') {
           const activeEl = document.activeElement;
           const isInput = activeEl && (
-            activeEl.tagName === 'INPUT' || 
-            activeEl.tagName === 'TEXTAREA' || 
-            activeEl.tagName === 'SELECT' || 
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
             activeEl.isContentEditable
           );
           if (!isInput) {
@@ -238,8 +238,8 @@ export default class LandingScene {
           const p = document.createElement('span');
           p.textContent = line;
           p.style.opacity = '0';
-          p.style.transform = 'translateY(10px)';
-          p.style.transition = 'opacity 1.2s ease, transform 1.2s ease';
+          p.style.transform = 'translateY(15px)';
+          p.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
           p.style.display = 'block';
           textContainer.appendChild(p);
           
@@ -250,7 +250,7 @@ export default class LandingScene {
         });
         
         // Wait for all lines to appear + 2 seconds hold time
-        const totalDuration = (lines.length - 1) * 1200 + 1200 + 2000;
+        const totalDuration = (lines.length - 1) * 1200 + 1200 + 3000;
         
         timers.push(setTimeout(() => {
           finish(false);

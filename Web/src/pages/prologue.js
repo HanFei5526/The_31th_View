@@ -632,6 +632,7 @@ export default class PrologueScene extends GameSceneBase {
       this._notebook.unlock();
       this._notebook.setPlaceholder('在此输入针对线索整理的疑问或判断……');
       this._notebook.hideQuickThoughts();
+      this._notebook.collapse();
 
       // 隐藏研讨持久提示
       this._paintingViewer?.hideFeedback();
@@ -794,7 +795,7 @@ export default class PrologueScene extends GameSceneBase {
   _playChapter1IntroTransition(onReveal) {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
-      overlay.className = 'intro-transition-overlay intro-transition-overlay--prologue';
+      overlay.className = 'intro-transition-overlay intro-transition-overlay--chapter1';
 
       const lines = [
         '兰雪堂，拙政园东部的入口。',
@@ -881,7 +882,7 @@ export default class PrologueScene extends GameSceneBase {
   }
 
   _isFastForwardKey(e) {
-    return e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ';
+    return e.key === ' ' || e.key === 'Enter' || e.code === 'Space' || e.code === 'KeyZ' || e.key?.toLowerCase() === 'z';
   }
 
   _preloadImage(src, timeout = 3000) {

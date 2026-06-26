@@ -340,7 +340,9 @@ export default class MenuScene {
       const textContainer = overlay.querySelector('#intro-prologue-text');
       let finished = false;
 
-      const finish = (fast = false) => {
+      const prologueReady = this._preloadImage('/images/prologue/过渡页0.png');
+
+      const finish = async (fast = false) => {
         if (finished) return;
         finished = true;
         this._clearTransitionTimers();
@@ -356,7 +358,9 @@ export default class MenuScene {
           this._transitionOverlay = null;
         }
 
-        this.engine.switchScene(scene, true);
+        await prologueReady;
+        await this.engine.switchScene(scene, true);
+        await this._nextFrame();
 
         if (fast) {
           overlay.style.transition = 'opacity 0.4s ease';
@@ -364,9 +368,10 @@ export default class MenuScene {
           overlay.classList.add('fade-out');
           setTimeout(() => overlay.remove(), 450);
         } else {
+          overlay.style.transition = 'opacity 1s ease';
           overlay.classList.remove('active');
           overlay.classList.add('fade-out');
-          setTimeout(() => overlay.remove(), 3000);
+          setTimeout(() => overlay.remove(), 1100);
         }
       };
 
@@ -625,9 +630,7 @@ export default class MenuScene {
 
       overlay.innerHTML = `
         <div class="prologue-transition-layout">
-          <div class="intro-title-group">
-            <div class="intro-prologue-title">${titleStr}</div>
-          </div>
+          <div class="intro-prologue-title">${titleStr}</div>
           <div class="intro-prologue-text" id="intro-chapter3-text"></div>
         </div>
       `;
@@ -726,11 +729,8 @@ export default class MenuScene {
       const preloadImg = '/images/finale/finale-truth-space.png';
 
       overlay.innerHTML = `
-        <div class="finale-transition-bg"></div>
         <div class="prologue-transition-layout">
-          <div class="intro-title-group">
-            <div class="intro-prologue-title">${titleStr}</div>
-          </div>
+          <div class="intro-prologue-title">${titleStr}</div>
           <div class="intro-prologue-text" id="intro-finale-text"></div>
         </div>
       `;
@@ -766,10 +766,10 @@ export default class MenuScene {
           overlay.classList.add('fade-out');
           setTimeout(() => overlay.remove(), 450);
         } else {
-          overlay.style.transition = 'opacity 1.2s ease';
+          overlay.style.transition = 'opacity 1s ease';
           overlay.classList.remove('active');
           overlay.classList.add('fade-out');
-          setTimeout(() => overlay.remove(), 1300);
+          setTimeout(() => overlay.remove(), 1100);
         }
       };
 
@@ -840,7 +840,7 @@ export default class MenuScene {
   }
 
   _isFastForwardKey(e) {
-    return e.key === ' ' || e.key?.toLowerCase() === 'z' || e.code === 'KeyZ';
+    return e.key === ' ' || e.key === 'Enter' || e.code === 'Space' || e.code === 'KeyZ' || e.key?.toLowerCase() === 'z';
   }
 
   _isTextInputActive() {

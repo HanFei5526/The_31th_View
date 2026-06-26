@@ -160,6 +160,7 @@ export default class Chapter2PaintScene {
     this.hudBar.show();
     await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【记录】页可查看已获得的线索，【对话】页可写下疑问与周老师批注讨论。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
 
     this.notebook.showQuickThoughts([
       '墙上挂的题诗画作有什么值得注意的？',
@@ -198,6 +199,7 @@ export default class Chapter2PaintScene {
     await this.narrationBar.playLine('沈念', '等等。这里有一个字……和传世版本不一样。', { portrait: '/images/common/shennian_2.png' });
     await this.narrationBar.playLine('系统提示', '已进入诗词比对。左栏是画上题诗，右栏是参考版本——逐字对比，点击你认为不同的字。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
 
     this.notebook.showQuickThoughts([
@@ -380,6 +382,7 @@ export default class Chapter2PaintScene {
 
     await this.narrationBar.playLine('系统提示', '小飞虹周围可以继续探索。【修复笔记本】的【记录】页已有之前的发现，【对话】页可继续讨论。点击场景中的光点查看可交互的位置。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
 
     this.notebook.showQuickThoughts([
       '桥两侧水面好像有什么不对劲？',
@@ -422,6 +425,7 @@ export default class Chapter2PaintScene {
 
     await this.narrationBar.playLine('系统提示', '已记录线索：「水面回声」。可在【记录】页查看，也可在【对话】页继续讨论。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
   }
 

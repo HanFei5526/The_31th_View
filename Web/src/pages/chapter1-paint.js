@@ -211,6 +211,7 @@ export default class Chapter1PaintScene {
       if (this._isNarrating) return;
       if (this.engine.gameProgress.plaqueNoted) {
         this.narrationBar.showFloating('兰雪堂匾额上，那道极细的横笔已经记在【修复笔记本】里。');
+        this.notebook.collapse();
         await this._markLanxueSpotVisited('plaque', { delayBeforeCompletion: 900 });
         return;
       }
@@ -228,6 +229,7 @@ export default class Chapter1PaintScene {
 
       await this.narrationBar.playLine('沈念', '这座厅后面还有路。石径延伸过去，像是有什么在更深处等着。', { portrait: '/images/common/shennian_1.png' });
       this.narrationBar.dismiss();
+      this.notebook.collapse();
       this._isNarrating = false;
       await this._markLanxueSpotVisited('plaque');
     }, '匾额');
@@ -271,6 +273,7 @@ export default class Chapter1PaintScene {
     this._isNarrating = true;
     await this.narrationBar.playLine('系统提示', '兰雪堂周围几处可疑细节已经看过了。可在【记录】页查看，也可在【对话】页继续讨论。也可以直接点击画面中央的光点，沿石径前往下一处场景。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
   }
 
@@ -303,6 +306,7 @@ export default class Chapter1PaintScene {
         await this.narrationBar.playLine(null, '你再次蹲低，看向峰石背后的缝隙。那一线光仍在那里，只有把视线压到足够低时才会出现。');
         await this.narrationBar.playLine('系统提示', '已记录线索：「有些景，只从低处出现」。可在【记录】页查看，也可在【对话】页继续讨论。');
         this.narrationBar.dismiss();
+        this.notebook.collapse();
         this._isNarrating = false;
         return;
       }
@@ -316,6 +320,7 @@ export default class Chapter1PaintScene {
       this.notebook.addClueRecord('有些景，只从低处出现。');
       await this.narrationBar.playLine('系统提示', '已记录线索：「有些景，只从低处出现」。可在【记录】页查看，也可在【对话】页继续讨论。');
       this.narrationBar.dismiss();
+      this.notebook.collapse();
       this._isNarrating = false;
 
     }, '石缝');
@@ -730,6 +735,7 @@ export default class Chapter1PaintScene {
     this.hudBar.show();
     await this.narrationBar.playLine('系统提示', '右下角可打开【修复笔记本】：【记录】页可查看已获得的线索，【对话】页可写下疑问与周老师批注讨论。准备好后，点击场景中的景物即可开始探索。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
     this._showLanxueHotspots();
   }
@@ -813,6 +819,7 @@ export default class Chapter1PaintScene {
       '这座峰石周围还藏着什么？'
     ]);
     this.narrationBar.showFloating('峰石背后的低处有一点微光；前方石径仍通向水声。可在【记录】页查看，也可在【对话】页继续讨论。点击场景中的光点继续探索。');
+    this.notebook.collapse();
   }
 
   async _switchToFurong() {
@@ -852,6 +859,7 @@ export default class Chapter1PaintScene {
     this._isNarrating = true;
     await this.narrationBar.playLine('系统提示', '已进入倒影谜题。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
+    this.notebook.collapse();
     this._isNarrating = false;
     this._resetIdleTimer('initial');
   }
