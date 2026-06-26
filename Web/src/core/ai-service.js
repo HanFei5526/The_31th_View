@@ -167,13 +167,15 @@ export class AIService {
       { role: 'user', content: question },
     ];
 
-    return this._callAPI(messages, {
+    const reply = await this._callAPI(messages, {
       temperature: 0.2,
       max_tokens: 280,
       retryOnEmpty: true,
       retryOnShort: true,
       fallbackText: '（翻了翻，相关记录没有形成清晰答复。可以换个线索名再问一次。）',
     });
+
+    return this._sanitizeNotebookReply(reply);
   }
 
   /**
@@ -330,6 +332,19 @@ export class AIService {
     return !/[。！？.!?”"）】]$/.test(text);
   }
 
+  _sanitizeNotebookReply(content) {
+    return String(content || '')
+      .replace(/ch\d+_[A-Za-z0-9_]+/g, '相关记录')
+      .replace(/prologue_[A-Za-z0-9_]+/g, '相关记录')
+      .replace(/clue_[A-Za-z0-9_]+/g, '相关线索')
+      .replace(/finale_[A-Za-z0-9_]+/g, '相关记录')
+      .replace(/不能直接等同于并非一人独绘/g, '不能直接当作成稿归属的定论')
+      .replace(/不能直接证明并非一人独绘/g, '不能直接证明成稿归属改变')
+      .replace(/并非一人独绘/g, '成稿归属改变')
+      .replace(/多人执笔/g, '成稿归属改变')
+      .replace(/共同成稿/g, '成稿归属改变');
+  }
+
   _isInvalidFinalNote(content) {
     const text = String(content || '').trim();
     if (!text) return true;
@@ -344,10 +359,32 @@ export class AIService {
       '绝非文徵明',
       '不属于文徵明',
       '不是文徵明的',
+      '无法归于文徵明',
+      '不能归于文徵明',
       '这幅画里不止文徵明',
       '不是画者的位置',
       '不是成稿之手',
       '仅仅归于文徵明',
+      '视角不属于文徵明',
+      '观看位置不属于文徵明',
+      '观看位置不属于他',
+      '视角不属于他',
+      '不是文徵明之眼',
+      '仅由一人之眼',
+      '仅由一人之眼完成',
+      '文徵明其他画稿',
+      '文徵明的其他画稿',
+      '落笔习惯与文徵明',
+      '笔迹鉴定',
+      '画稿风格',
+      '技法风格无异常',
+      '不该出现在文徵明视线高度',
+      '并非一人独绘',
+      '共同成稿',
+      '多人执笔',
+      '别人成稿',
+      '他不是在要求署名',
+      '他用观看留下痕迹',
       '摹手',
       '附会',
       '足够确认',
@@ -357,6 +394,12 @@ export class AIService {
 
     const body = text.replace(/^【修复记录终页】\s*/, '').trim();
     const bodyLength = Array.from(body).length;
+    const paragraphCount = body
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean).length;
+    if (paragraphCount > 2) return true;
+
     return bodyLength < 120 || bodyLength > 220;
   }
 

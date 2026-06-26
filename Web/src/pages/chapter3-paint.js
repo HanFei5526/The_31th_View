@@ -780,8 +780,9 @@ export default class Chapter3PaintScene {
 
   async _startLightDiscussion() {
     this.state = SCENE_STATES.LIGHT_DISCUSSION;
-    this.notebook.expand();
     this.notebook.setLightweightMode?.(true);
+    this.notebook.switchTab?.('chat');
+    this.notebook.expand();
 
     this.notebook.showSystemMessage?.('（周老师的批注浮现了）');
     this.notebook.showNPCMessage('（周老师的批注）底层痕迹还原：同源材料在画中世界的呼应，本质上是修复学中"材料溯源"的游戏化表达。朱砂认朱砂，刻痕认刻痕——物与物之间的记忆，有时比文字更可靠。');

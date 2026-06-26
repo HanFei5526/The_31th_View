@@ -315,6 +315,7 @@ export default class Chapter2PaintScene {
   _enterLightDiscussion() {
     this.state = SUB_SCENES.LIGHT_DISCUSSION;
     this.notebook.setLightweightMode(true);
+    this.notebook.switchTab('chat');
     this.notebook.expand();
 
     this.notebook.showNPCMessage('（周老师的批注）"画非一人"——你是第一个这么读的人。大多数研究者把这些差异当作传抄讹误，但你把它们并在一起读出了一个句子。这个方法叫"异文串读"。现在的问题是：这句话是谁留下的？它在对谁说？');

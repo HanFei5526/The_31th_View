@@ -38,6 +38,6 @@ export function formatAvailableKnowledge(gameProgress = {}) {
   }
 
   return snippets
-    .map((snippet) => `# ${snippet.id}\n${snippet.content}`)
+    .map((snippet, index) => `# 已解锁资料 ${index + 1}\n${snippet.content}`)
     .join('\n\n---\n\n');
 }

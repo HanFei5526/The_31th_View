@@ -102,6 +102,11 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
 
     const data = await upstream.json();
     const content = data.choices?.[0]?.message?.content?.trim() || '';
+    if (!content) {
+      console.error('[server] 上游返回空内容:', JSON.stringify(data).slice(0, 500));
+      return res.status(502).json({ error: '上游 API 返回空内容' });
+    }
+
     res.json({ content });
   } catch (err) {
     console.error('[server] 请求异常:', err);

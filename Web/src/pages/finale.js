@@ -72,6 +72,7 @@ export default class FinaleScene {
     container.appendChild(this._uiLayer);
 
     this._wireComponents();
+    this.hudBar.show?.();
 
     if (this.engine.currentCheckpointId === CHECKPOINTS.QUESTIONS) {
       this._startFourQuestions();
@@ -202,8 +203,6 @@ export default class FinaleScene {
     this._switchSubscene(this._truthSpaceEl);
     await this._delay(600);
     if (this._exited) return;
-
-    this.hudBar.show?.();
 
     await this._delay(800);
     if (this._exited) return;
