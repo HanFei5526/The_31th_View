@@ -105,7 +105,7 @@ export default class FinaleScene {
   _buildUI() {
     this._uiLayer = document.createElement('div');
     this._uiLayer.className = 'scene-ui-layer';
-    this._uiLayer.style.cssText = 'position:absolute;inset:0;z-index:10;pointer-events:none;';
+    this._uiLayer.style.cssText = 'position:absolute;inset:0;z-index:10;pointer-events:none;overflow:hidden;';
 
     this.narrationBar.mount(this._uiLayer);
     this.notebook.mount(this._uiLayer);
@@ -283,25 +283,27 @@ export default class FinaleScene {
     el.className = 'finale-subscene finale-questions';
     el.innerHTML = `
       <div class="finale-highlight-layer">
-        <div class="finale-highlight-spot" data-spot="furongxie" style="left:8%;top:48%"></div>
-        <div class="finale-highlight-spot" data-spot="wuzhuyouju" style="left:26%;top:50%"></div>
-        <div class="finale-highlight-spot" data-spot="lanxuetang" style="left:49%;top:29%"></div>
+        <div class="finale-highlight-spot" data-spot="lanxuetang" style="left:8%;top:48%"></div>
+        <div class="finale-highlight-spot" data-spot="furongxie" style="left:26%;top:50%"></div>
+        <div class="finale-highlight-spot" data-spot="wuzhuyouju" style="left:35%;top:52%"></div>
         <div class="finale-highlight-spot" data-spot="yuanxiang" style="left:48%;top:54%"></div>
         <div class="finale-highlight-spot" data-spot="xiaofeihong" style="left:42%;top:68%"></div>
-        <div class="finale-highlight-spot" data-spot="zhuiyunfeng" style="left:73%;top:25%"></div>
-        <div class="finale-highlight-spot" data-spot="yuanyangguan" style="left:83%;top:55%"></div>
+        <div class="finale-highlight-spot" data-spot="yuanyangguan" style="left:49%;top:29%"></div>
+        <div class="finale-highlight-spot" data-spot="liutingge" style="left:83%;top:60%"></div>
       </div>
       <div class="finale-location-labels">
-        <button class="finale-location-label" data-loc="furongxie" style="left:8%;top:48%">芙蓉榭</button>
-        <button class="finale-location-label" data-loc="wuzhuyouju" style="left:26%;top:50%">梧竹幽居</button>
-        <button class="finale-location-label" data-loc="lanxuetang" style="left:49%;top:29%">兰雪堂</button>
+        <button class="finale-location-label" data-loc="lanxuetang" style="left:8%;top:48%">兰雪堂</button>
+        <button class="finale-location-label" data-loc="furongxie" style="left:26%;top:50%">芙蓉榭</button>
+        <button class="finale-location-label" data-loc="wuzhuyouju" style="left:35%;top:52%">梧竹幽居</button>
         <button class="finale-location-label" data-loc="yuanxiang" style="left:48%;top:54%">远香堂</button>
         <button class="finale-location-label" data-loc="xiaofeihong" style="left:42%;top:68%">小飞虹</button>
-        <button class="finale-location-label" data-loc="zhuiyunfeng" style="left:73%;top:25%">缀云峰</button>
-        <button class="finale-location-label" data-loc="yuanyangguan" style="left:83%;top:55%">卅六鸳鸯馆</button>
+        <button class="finale-location-label" data-loc="yuanyangguan" style="left:49%;top:29%">卅六鸳鸯馆</button>
+        <button class="finale-location-label" data-loc="liutingge" style="left:83%;top:60%">留听阁</button>
       </div>
       <div class="finale-canvas-container" id="finale-canvas-container" aria-hidden="true">
-        <div class="finale-canvas-layer finale-canvas-layer--1" id="canvas-layer-reflection"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--foreground" id="canvas-layer-foreground"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--frame" id="canvas-layer-frame"></div>
+        <div class="finale-canvas-layer finale-canvas-layer--center" id="canvas-layer-center"></div>
         <div class="finale-canvas-layer finale-canvas-layer--2" id="canvas-layer-bridge"></div>
         <div class="finale-canvas-layer finale-canvas-layer--3" id="canvas-layer-bamboo"></div>
         <div class="finale-canvas-layer finale-canvas-layer--4" id="canvas-layer-full"></div>
@@ -325,11 +327,6 @@ export default class FinaleScene {
     await this._delay(800);
     if (this._exited) return;
     await this._runQ1Layer1();
-  }
-
-  _highlightSpot(spotId) {
-    const spot = this._questionsEl.querySelector(`.finale-highlight-spot[data-spot="${spotId}"]`);
-    if (spot) spot.classList.add('lit');
   }
 
   _enableLocationLabels(enable) {
@@ -362,7 +359,17 @@ export default class FinaleScene {
 
     if (choice === 'B') {
       this._isNarrating = true;
-      await this.narrationBar.playLine(null, '画面微微亮了一层——俯瞰线图中，芙蓉榭的位置浮现出淡淡的墨迹。');
+      const canvas = this._questionsEl.querySelector('#finale-canvas-container');
+      this._questionsEl.classList.add('canvas-active');
+      canvas?.classList.add('visible');
+      await this._delay(600);
+      if (this._exited) return;
+      this._revealCanvasLayers(['foreground']);
+      await this.narrationBar.playLine(null, '画面微微亮了一层——一幅线稿浮现，脚下的栏杆与地面渐渐染上淡淡的色泽。');
+      if (this._exited) return;
+      this._questionsEl.classList.remove('canvas-active');
+      canvas?.classList.remove('visible');
+      await this._delay(800);
       if (this._exited) return;
       this._isNarrating = false;
       await this._runQ1Layer2();
@@ -402,8 +409,19 @@ export default class FinaleScene {
       this._isNarrating = true;
       await this.narrationBar.playLine('沈念', '对。她提供的不是笔，不是构图方案，而是一个从未被采纳过的观看位置。他用自己的手保存了她的眼睛。', { portrait: PORTRAITS.shennian });
       if (this._exited) return;
+      const canvas = this._questionsEl.querySelector('#finale-canvas-container');
+      this._questionsEl.classList.add('canvas-active');
+      canvas?.classList.add('visible');
+      await this._delay(600);
+      if (this._exited) return;
+      this._revealCanvasLayers(['frame']);
+      await this.narrationBar.playLine(null, '左侧的廊柱渐渐着色——画面的框架开始成形。');
+      if (this._exited) return;
+      this._questionsEl.classList.remove('canvas-active');
+      canvas?.classList.remove('visible');
+      await this._delay(800);
+      if (this._exited) return;
       this._isNarrating = false;
-      this._highlightSpot('furongxie');
       await this._delay(1000);
       await this._runQ2();
     } else {
@@ -437,7 +455,9 @@ export default class FinaleScene {
       yuanxiang: '站在远香堂只能看见正前方的荷塘。三景不会同时出现。',
       xiaofeihong: '桥上看得远，但视线太高。回想草图标注的那条线——它很低。',
       wuzhuyouju: '竹林遮蔽了远处。要看到三景，得在开阔处。',
-      zhuiyunfeng: '从高处俯瞰是文人画常见的观法。但这幅画的特殊之处恰恰是：视角很低。',
+      lanxuetang: '这里是东园最左侧，离中园池水太远，且有层叠的竹林遮挡，无法看到远处的桥与倒影。',
+      yuanyangguan: '这是西园的主体建筑。在此处向东看，视线会被小飞虹的桥廊遮挡，且视线偏高。',
+      liutingge: '留听阁地处西园最西南角，视角极偏，且有重重山石林木，无法望见中东园水景。',
     };
 
     this._enableLocationLabels(true);
@@ -454,11 +474,16 @@ export default class FinaleScene {
           e.currentTarget.classList.add('correct');
           this._isNarrating = true;
           await this._delay(600);
-          await this.narrationBar.playLine(null, '从芙蓉榭的位置向远处延伸出一束淡墨视线。远香堂、小飞虹、梧竹幽居三处的轮廓渐渐清晰。');
+          this._enableLocationLabels(false);
+          const canvas = this._questionsEl.querySelector('#finale-canvas-container');
+          this._questionsEl.classList.add('canvas-active');
+          canvas?.classList.add('visible');
+          await this._delay(500);
+          if (this._exited) { resolve(); return; }
+          this._revealCanvasLayers(['center']);
+          await this.narrationBar.playLine(null, '从芙蓉榭的位置向远处延伸出一束淡墨视线——远香堂的轮廓在对岸渐渐清晰。');
           if (this._exited) { resolve(); return; }
           this._isNarrating = false;
-          this._highlightSpot('xiaofeihong');
-          await this._showLowViewCanvas();
           resolve();
         } else {
           this._q2Errors++;
@@ -541,11 +566,10 @@ export default class FinaleScene {
       if (isCorrect) {
         this._isNarrating = true;
         panel.innerHTML = '';
-        this._revealCanvasLayers(['reflection', 'bridge', 'bamboo']);
+        this._revealCanvasLayers(['bridge', 'bamboo']);
         await this.narrationBar.playLine(null, '三处景物同时着色——倒影、弧线、竹影在画面中浮现，相互照应。第三十一景几乎完成了。');
         if (this._exited) return;
         this._isNarrating = false;
-        this._highlightSpot('yuanxiang');
         await this._delay(1000);
         await this._runQ4();
       } else {
@@ -587,7 +611,6 @@ export default class FinaleScene {
       await this.narrationBar.playLine(null, '最后一笔落下。');
       if (this._exited) return;
       this._isNarrating = false;
-      this._highlightSpot('wuzhuyouju');
       await this._delay(1800);
       await this._showPaintingComplete();
     } else {
@@ -716,14 +739,32 @@ export default class FinaleScene {
         <button class="finale-ending-card-btn" data-ending="archive">
           <span class="finale-ending-card-btn-text">"我会在修复报告里记下这个可能性。"</span>
           <span class="finale-ending-card-btn-sub">── 历史正义 ──</span>
+          <div class="finale-ending-card-seal">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <rect x="12" y="12" width="76" height="76" rx="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="50" y="64" font-family="var(--font-serif)" font-size="44" text-anchor="middle" fill="currentColor">史</text>
+            </svg>
+          </div>
         </button>
         <button class="finale-ending-card-btn" data-ending="secret">
           <span class="finale-ending-card-btn-text">"有些痕迹，被看见就够了。"</span>
           <span class="finale-ending-card-btn-sub">── 私人守护 ──</span>
+          <div class="finale-ending-card-seal">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <rect x="12" y="12" width="76" height="76" rx="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="50" y="64" font-family="var(--font-serif)" font-size="44" text-anchor="middle" fill="currentColor">隐</text>
+            </svg>
+          </div>
         </button>
         <button class="finale-ending-card-btn" data-ending="continue">
           <span class="finale-ending-card-btn-text">"我想画一幅新的画。"</span>
           <span class="finale-ending-card-btn-sub">── 当代续写 ──</span>
+          <div class="finale-ending-card-seal">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <rect x="12" y="12" width="76" height="76" rx="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="50" y="64" font-family="var(--font-serif)" font-size="44" text-anchor="middle" fill="currentColor">拓</text>
+            </svg>
+          </div>
         </button>
       </div>
     `;
@@ -825,8 +866,38 @@ export default class FinaleScene {
 
   async _playEnding(endingId) {
     this.state = SCENE_STATES.ENDING_SCREEN;
+    
+    // 提前在淡入前切好主题并挂载背景图，防止出现长达 1.2s 的死黑或断层
+    const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
+    if (endingId === 'archive' || endingId === 'secret') {
+      this._sceneRoot.classList.remove('paint-world');
+      this._sceneRoot.classList.add('real-world');
+      if (this._container) {
+        this._container.classList.remove('paint-world');
+        this._container.classList.add('real-world');
+      }
+      bg.style.backgroundImage = `url('/images/prologue/prologue-workshop.png')`;
+    } else {
+      this._sceneRoot.classList.remove('real-world');
+      this._sceneRoot.classList.add('paint-world');
+      if (this._container) {
+        this._container.classList.remove('real-world');
+        this._container.classList.add('paint-world');
+      }
+      bg.style.backgroundImage = `url('/images/finale/finale-ending3-garden.png')`;
+    }
+    bg.classList.remove('visible');
+
     this._switchSubscene(this._endingScreenEl);
-    await this._delay(800);
+    
+    // 仅延迟 300ms，开始平滑淡入背景图，免去大段黑屏
+    await this._delay(300);
+    if (this._exited) return;
+
+    bg.classList.add('visible');
+    
+    // 再延迟 300ms 使得背景有一定轮廓后开始出现台词，衔接极为顺滑
+    await this._delay(300);
     if (this._exited) return;
 
     this._isNarrating = true;
@@ -839,17 +910,12 @@ export default class FinaleScene {
     this._isNarrating = false;
     this.narrationBar.dismiss?.();
 
-    await this._delay(2000);
+    await this._delay(1000);
     if (this._exited) return;
     await this._showEndingCard(endingId);
   }
 
   async _playEndingArchive() {
-    const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-    bg.style.backgroundImage = `url('/images/prologue/prologue-workshop.png')`;
-    await this._delay(400);
-    bg.classList.add('visible');
-
     await this.narrationBar.playLine(null, '你回到工作室。修复报告窗口仍然打开，光标停在"附注"一栏。');
     if (this._exited) return;
     await this.narrationBar.playLine(null, '你写下：');
@@ -865,11 +931,6 @@ export default class FinaleScene {
   }
 
   async _playEndingSecret() {
-    const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-    bg.style.backgroundImage = `url('/images/prologue/prologue-workshop.png')`;
-    await this._delay(400);
-    bg.classList.add('visible');
-
     await this.narrationBar.playLine(null, '你回到工作室。你在报告中写道：');
     if (this._exited) return;
     await this.narrationBar.playLine(null, '"残页已修复，表层图像稳定。页边残痕暂不具备独立判断条件，留待后续观察。"');
@@ -889,11 +950,6 @@ export default class FinaleScene {
   }
 
   async _playEndingContinue() {
-    const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-    bg.style.backgroundImage = `url('/images/finale/finale-ending3-garden.png')`;
-    await this._delay(400);
-    bg.classList.add('visible');
-
     await this.narrationBar.playLine(null, '你没有把她写成定论。也没有让她完全回到沉默。');
     if (this._exited) return;
     await this.narrationBar.playLine(null, '你铺开一张新纸，拿起笔。');
@@ -923,115 +979,198 @@ export default class FinaleScene {
       archive: {
         label: '结局一',
         title: '存档',
-        final: '"有人看到了。"',
-        card: '她等了五百年。你在档案里为她留了一行字。\n也许没有人会读到。但从此，沉默不再是唯一的记录。',
+        final: '“有人看到了。”',
+        card: '她等了五百年。你在档案里为她留了一行字。<br>也许没有人会读到。但从此，沉默不再是唯一的记录。',
       },
       secret: {
         label: '结局二',
         title: '守密',
-        final: '"有人来过。够了。"',
-        card: '你看见了她。她不会知道。\n但"有人来过"这件事本身，已经改变了五百年的沉默。',
+        final: '“有人来过。够了。”',
+        card: '你看见了她。她不会知道。<br>但“有人来过”这件事本身，已经改变了五百年的沉默。',
       },
       continue: {
         label: '结局三',
         title: '续笔',
-        final: '"三十一景之后，还有第三十二景。"',
-        card: '第三十一景画了她看见的园。第三十二景画了看见园的她。\n五百年前她不敢有形。五百年后你还给了她一个轮廓。',
+        final: '“三十一景之后，还有第三十二景。”',
+        card: '第三十一景画了她看见的园。第三十二景画了看见园的她。<br>五百年前她不敢有形。五百年后你还给了她一个轮廓。',
       },
     };
 
     const data = endings[endingId];
     const content = this._endingScreenEl.querySelector('#finale-ending-content');
+    
+    // 初始化 HTML：只显示结局卡片基本内容，其它内容默认隐藏（带 hidden 类）
     content.innerHTML = `
-      <span class="finale-ending-screen-label">${data.label}</span>
-      <h2 class="finale-ending-screen-title">${data.title}</h2>
-      <div class="finale-ending-screen-body">${data.card.replace(/\n/g, '<br>')}</div>
-      <div class="finale-ending-screen-final">${data.final}</div>
-      <div class="finale-credits" id="finale-credits">
-        <p>"王蘅为虚构人物。"</p>
-        <p>"文徵明为拙政园画过三十一景，流传下来的只有他整理过的八景。其余散佚了，没人确切知道原因。我们就在想：连画都能消失，那当年和他一起待在这座园子里的人呢？"</p>
-        <p>"三十一景是不是全由他一人完成的？没有人能确切知道了。但一座园那么大，画了那么久，有没有谁陪他走过、帮他看过角度、说过'这里好看'——谁也说不准。只是如果有，那个人大概没机会把名字留在画旁边。也许因为身份，也许因为体例，也许只是因为那个时代根本没有一栏留给这样的人。"</p>
-        <p>"我们没办法替真实的历史补上那些名字。但我们可以虚构一个故事，去想象那种处境：一个人的观看被保存了，名字却在规范面前慢慢变成了沉默的一部分。"</p>
-        <p>"如果玩完这个游戏，你偶尔会想起那些没留下名字的人，下次走进园林时多看看四周、低头看一眼水面——那就够了。"</p>
-        <p>"谨以此作，向那些曾改变事物被看见的方式、却没有留下名字的人致意。"</p>
-        <div class="finale-credits-sign">《卅一景》项目组全体：夏虫、翰飛、一只鱼、Vespera.l，敬上。</div>
+      <!-- 阶段 1：结局展示卡片 -->
+      <div class="finale-ending-card-view" id="finale-card-view">
+        <span class="finale-ending-screen-label">${data.label}</span>
+        <h2 class="finale-ending-screen-title">${data.title}</h2>
+        <div class="finale-ending-screen-body">${data.card}</div>
+        <div class="finale-ending-screen-final">${data.final}</div>
+        <button class="finale-action-btn" id="finale-btn-write-note">写下结案笔记</button>
       </div>
-      <div class="finale-final-note" id="finale-final-note">
-        <button class="finale-final-note-btn" id="finale-final-note-btn">写下结案笔记</button>
-        <div class="finale-final-note-status" id="finale-final-note-status" aria-live="polite"></div>
-        <article class="finale-final-note-paper hidden" id="finale-final-note-paper">
-          <h3>修复记录终页</h3>
+      
+      <!-- 阶段 2：结案笔记生成与阅读 -->
+      <div class="finale-note-view hidden" id="finale-note-view">
+        <article class="finale-final-note-paper" id="finale-final-note-paper">
+          <h3>修复记录终页 · ${data.title}</h3>
+          <div class="finale-final-note-status" id="finale-final-note-status" aria-live="polite"></div>
           <div class="finale-final-note-text" id="finale-final-note-text"></div>
         </article>
+        <button class="finale-action-btn hidden" id="finale-btn-read-credits" style="opacity: 0; transition: opacity 0.5s ease;">翻阅余音 (致谢)</button>
       </div>
-      <div class="finale-end-buttons" id="finale-end-buttons">
-        <button class="finale-end-btn" id="finale-btn-rechoose">回到选择前</button>
-        <button class="finale-end-btn" id="finale-btn-menu">返回菜单</button>
+
+      <!-- 阶段 3：补充说明与制作组致谢 -->
+      <div class="finale-credits-view hidden" id="finale-credits-view">
+        <h3 class="finale-credits-title">── 项目说明与致谢 ──</h3>
+        <div class="finale-credits-content">
+          <p>“王蘅为虚构人物。”</p>
+          <p>“文徵明为拙政园画过三十一景，流传下来的只有他整理过的八景。其余散佚了，没人确切知道原因。我们就在想：连画都能消失，那当年和他一起待在这座园子里的人呢？”</p>
+          <p>“三十一景是不是全由他一人完成的？没有人能确切知道了。但一座园那么大，画了那么久，有没有谁陪他走过、帮他看过角度、说过'这里好看'——谁也说不准。只是如果有，那个人大概没机会把名字留在画旁边。也许因为身份，也许因为体例，也许只是因为那个时代根本没有一栏留给这样的人。”</p>
+          <p>“我们没办法替真实的历史补上那些名字。但我们可以虚构一个故事，去想象那种处境：一个人的观看被保存了，名字却在规范面前慢慢变成了沉默的一部分。”</p>
+          <p>“如果玩完这个游戏，你偶尔会想起那些没留下名字的人，下次走进园林时多看看四周、低头看一眼水面——那就够了。”</p>
+          <p>“谨以此作，向那些曾改变事物被看见的方式、却没有留下名字的人致意。”</p>
+          <div class="finale-credits-sign">—— 《卅一景》项目组全体：夏虫、翰飛、一只鱼、Vespera.l，敬上。</div>
+        </div>
+        <div class="finale-end-buttons">
+          <button class="finale-end-btn" id="finale-btn-rechoose">回到选择前</button>
+          <button class="finale-end-btn" id="finale-btn-menu">返回菜单</button>
+        </div>
       </div>
     `;
 
+    // 渐显整个大内容面板
     await this._delay(300);
     content.classList.add('visible');
+    
+    // 初始化卡片子层状态
+    const cardView = content.querySelector('#finale-card-view');
+    cardView.classList.add('active');
+    cardView.style.opacity = '1';
+    cardView.style.transform = 'scale(1)';
 
-    await this._delay(3000);
-    if (this._exited) return;
-    const credits = content.querySelector('#finale-credits');
-    credits.classList.add('visible');
-
-    await this._delay(2000);
-    if (this._exited) return;
-    const buttons = content.querySelector('#finale-end-buttons');
-    buttons.classList.add('visible');
-
-    content.querySelector('#finale-btn-rechoose').addEventListener('click', () => {
-      content.classList.remove('visible');
-      credits.classList.remove('visible');
-      buttons.classList.remove('visible');
-      const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
-      bg.classList.remove('visible');
-      bg.style.backgroundImage = '';
-      this._showEndingChoices();
-    });
-
-    content.querySelector('#finale-btn-menu').addEventListener('click', () => {
-      this.engine.switchScene('menu');
-    });
-
-    content.querySelector('#finale-final-note-btn')?.addEventListener('click', () => {
-      this._generateFinalNote(endingId, content);
-    });
+    // 第一步：绑定“写下结案笔记”按钮
+    cardView.querySelector('#finale-btn-write-note').addEventListener('click', () => {
+      this._transitionToNote(endingId, content);
+    }, { once: true });
   }
 
-  async _generateFinalNote(endingId, content) {
-    const btn = content.querySelector('#finale-final-note-btn');
-    const status = content.querySelector('#finale-final-note-status');
-    const paper = content.querySelector('#finale-final-note-paper');
-    const textEl = content.querySelector('#finale-final-note-text');
-    if (!btn || !status || !paper || !textEl) return;
+  // 转换到结案笔记视图
+  async _transitionToNote(endingId, content) {
+    if (this._exited) return;
+    const cardView = content.querySelector('#finale-card-view');
+    const noteView = content.querySelector('#finale-note-view');
+    if (!cardView || !noteView) return;
 
-    btn.disabled = true;
-    btn.textContent = '正在书写……';
-    status.textContent = '笔记本末页正在浮现新的字迹……';
-    paper.classList.add('hidden');
+    // 先将整个卡片容器淡隐，消除高度重排闪动
+    content.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    content.style.opacity = '0';
+    content.style.transform = 'scale(0.98)';
+
+    await this._delay(250);
+    if (this._exited) return;
+
+    cardView.classList.remove('active');
+    cardView.classList.add('hidden');
+    noteView.classList.remove('hidden');
+    
+    // 初始化子面板状态
+    noteView.style.opacity = '1';
+    noteView.style.transform = 'scale(1)';
+    noteView.classList.add('active');
+
+    // 重新将卡片容器淡入
+    content.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    content.style.opacity = '1';
+    content.style.transform = 'scale(1)';
+
+    // 自动书写结案笔记
+    await this._generateFinalNoteFlow(endingId, content);
+  }
+
+  // 执行 AI 结案笔记书写流程
+  async _generateFinalNoteFlow(endingId, content) {
+    const status = content.querySelector('#finale-final-note-status');
+    const textEl = content.querySelector('#finale-final-note-text');
+    const readCreditsBtn = content.querySelector('#finale-btn-read-credits');
+    if (!status || !textEl || !readCreditsBtn) return;
+
+    status.textContent = '正在书写…… 笔记本末页正缓缓浮现新的字迹……';
     textEl.textContent = '';
+    readCreditsBtn.classList.add('hidden');
+    readCreditsBtn.style.opacity = '0';
 
     try {
       const note = await this.engine.aiService.generateFinalNote(endingId);
       if (this._exited) return;
       status.textContent = '';
       textEl.textContent = note || '（笔记本末页暂时没有新的字迹浮现。）';
-      paper.classList.remove('hidden');
-      btn.textContent = '重新书写结案笔记';
     } catch (err) {
       console.error('[Finale] 结案笔记生成失败:', err);
       if (this._exited) return;
       status.textContent = '';
       textEl.textContent = '（笔记本末页暂时没有新的字迹浮现。）';
-      paper.classList.remove('hidden');
-      btn.textContent = '重新书写结案笔记';
-    } finally {
-      btn.disabled = false;
     }
+
+    // 笔记展示完毕后，浮现“翻阅致谢”按钮
+    readCreditsBtn.classList.remove('hidden');
+    readCreditsBtn.offsetHeight;
+    readCreditsBtn.style.opacity = '1';
+
+    // 绑定“翻阅致谢”按钮
+    readCreditsBtn.addEventListener('click', () => {
+      this._transitionToCredits(content);
+    }, { once: true });
+  }
+
+  // 转换到项目致谢视图
+  async _transitionToCredits(content) {
+    if (this._exited) return;
+    const noteView = content.querySelector('#finale-note-view');
+    const creditsView = content.querySelector('#finale-credits-view');
+    if (!noteView || !creditsView) return;
+
+    // 先将整个卡片容器淡隐，消除高度重排闪动
+    content.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    content.style.opacity = '0';
+    content.style.transform = 'scale(0.98)';
+
+    await this._delay(250);
+    if (this._exited) return;
+
+    noteView.classList.remove('active');
+    noteView.classList.add('hidden');
+    creditsView.classList.remove('hidden');
+
+    // 初始化子面板状态
+    creditsView.style.opacity = '1';
+    creditsView.style.transform = 'scale(1)';
+    creditsView.classList.add('active');
+
+    // 重新将卡片容器淡入
+    content.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    content.style.opacity = '1';
+    content.style.transform = 'scale(1)';
+
+    // 最终事件绑定
+    creditsView.querySelector('#finale-btn-rechoose').addEventListener('click', () => {
+      content.classList.remove('visible');
+      creditsView.classList.remove('active');
+      const bg = this._endingScreenEl.querySelector('#finale-ending-bg');
+      bg.classList.remove('visible');
+      bg.style.backgroundImage = '';
+      this._sceneRoot.classList.remove('real-world');
+      this._sceneRoot.classList.add('paint-world');
+      if (this._container) {
+        this._container.classList.remove('real-world');
+        this._container.classList.add('paint-world');
+      }
+      this._showEndingChoices();
+    }, { once: true });
+
+    creditsView.querySelector('#finale-btn-menu').addEventListener('click', () => {
+      this.engine.switchScene('menu');
+    }, { once: true });
   }
 
   /* ==================== 工具方法 ==================== */
@@ -1045,32 +1184,15 @@ export default class FinaleScene {
   }
 
   _resetQuestionView() {
-    this._questionsEl.classList.remove('low-view-active');
+    this._questionsEl.classList.remove('canvas-active');
     this._questionsEl.querySelector('.finale-location-labels')?.classList.remove('visible', 'fade-out');
     this._questionsEl.querySelectorAll('.finale-location-label').forEach(label => {
       label.classList.remove('interactive', 'correct', 'wrong', 'hint-pulse');
-    });
-    this._questionsEl.querySelectorAll('.finale-highlight-spot').forEach(spot => {
-      spot.classList.remove('lit');
     });
     this._questionsEl.querySelector('#finale-canvas-container')?.classList.remove('visible', 'full');
     this._questionsEl.querySelectorAll('.finale-canvas-layer').forEach(layer => {
       layer.classList.remove('revealed', 'full');
     });
-  }
-
-  async _showLowViewCanvas() {
-    const labels = this._questionsEl.querySelector('.finale-location-labels');
-    const canvas = this._questionsEl.querySelector('#finale-canvas-container');
-
-    labels?.classList.add('fade-out');
-    this._questionsEl.classList.add('low-view-active');
-
-    await this._delay(500);
-    if (this._exited) return;
-
-    canvas?.classList.add('visible');
-    await this._delay(900);
   }
 
   _revealCanvasLayers(layerNames) {
