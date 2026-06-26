@@ -1,25 +1,33 @@
 /**
- * 《卅一景》序章小后端
+ * 《卅一景》一体化服务端
  *
- * 作用：把 DeepSeek API Key 留在服务端，前端只跟本地后端通信。
- * 避免在浏览器里暴露 API Key。
+ * 同时提供：
+ *   1. 前端静态文件（从 ../dist/ serve）
+ *   2. DeepSeek API 代理（密钥留在服务端）
  *
  * 端点：
- *   POST /api/notebook/message — 修复笔记本语义接口
- *   POST /api/chat             — 兼容转发 messages 到 DeepSeek
- *   GET  /api/health           — 健康检查
+ *   GET  /                     → index.html（前端入口）
+ *   GET  /assets/*             → 静态资源（JS/CSS/字体/图片）
+ *   GET  /images/*             → 图片资源
+ *   GET  /api/health           → 健康检查
+ *   POST /api/notebook/message → 修复笔记本语义接口
+ *   POST /api/chat             → 兼容转发 messages 到 DeepSeek
  *
  * 启动：
- *   cd Web/server
- *   npm install
- *   cp .env.example .env   # 填入 DEEPSEEK_API_KEY
- *   npm start
+ *   cd Web && npm run build    # 先构建前端
+ *   cd server && npm start     # 启动一体化服务
  */
 
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import 'dotenv/config';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DIST_DIR = path.join(__dirname, '..', 'dist');
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -49,6 +57,21 @@ app.use(express.json({ limit: '256kb' }));
 
 // 信任反向代理的 X-Forwarded-For，让限流按真实客户端 IP 计数
 app.set('trust proxy', 1);
+
+/* ---- 前端静态文件 ---- */
+if (fs.existsSync(DIST_DIR)) {
+  app.use(express.static(DIST_DIR, {
+    maxAge: '1d',
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js') || filePath.endsWith('.css') || filePath.endsWith('.woff2')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  }));
+  console.log(`[server] 静态文件目录: ${DIST_DIR}`);
+} else {
+  console.warn(`[server] 警告: dist 目录不存在 (${DIST_DIR})，将不 serve 前端文件`);
+}
 
 /* ---- 限流：每 IP 每分钟最多 N 次 /api/chat ---- */
 const chatLimiter = rateLimit({
@@ -629,7 +652,20 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
   }
 });
 
+/* ---- SPA 回退：所有非 API 路由返回 index.html ---- */
+app.get('*', (req, res, next) => {
+  // API 路由不拦截，留给 Express 路由处理（如果没命中就是 404）
+  if (req.path.startsWith('/api')) return next();
+
+  const indexPath = path.join(DIST_DIR, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('前端未构建。请先运行: cd Web && npm run build');
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`[server] 序章后端已启动 → http://localhost:${PORT}`);
+  console.log(`[server] 一体化服务已启动 → http://localhost:${PORT}`);
   console.log(`[server] 模型: ${MODEL} | API Key: ${API_KEY ? '已配置' : '未配置'}`);
 });
