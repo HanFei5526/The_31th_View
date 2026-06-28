@@ -66,7 +66,7 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     this.hudBar.onInventoryClick(() => this.inventoryPopup.open());
 
     this.notebook.onSubmit(async (text) => await this._askNotebook(text));
-    this.notebook.onQuickThought(async (text) => await this._askNotebook(text));
+    this.notebook.onQuickThought(async (text, meta) => await this._askNotebook(text, meta));
 
     if (this.engine.currentCheckpointId !== CHAPTER3_WORKSHOP_CHECKPOINT) {
       this.engine.saveCheckpoint?.(CHAPTER3_WORKSHOP_CHECKPOINT, {
@@ -80,16 +80,19 @@ export default class Chapter3WorkshopScene extends GameSceneBase {
     this._startDialogue();
   }
 
-  async _askNotebook(text) {
+  async _askNotebook(text, meta = {}) {
     if (!text?.trim()) return;
     this.notebook.showPlayerMessage(text);
     this.notebook.setLoading(true);
     try {
-      const reply = await this.engine.aiService.queryNotebook(text);
+      const reply = await this.engine.aiService.queryNotebook(text, {
+        sceneState: 'chapter3-workshop',
+        chapterScene: 'chapter3-workshop',
+      }, meta);
       this.notebook.showNPCMessage(reply);
     } catch (err) {
       console.error('[Chapter3Workshop] 笔记本查询失败:', err);
-      this.notebook.showNPCMessage('（翻了翻，没有找到相关记录）');
+      this.notebook.showNPCMessage('周老师批注：翻了翻，没有找到相关记录。');
     } finally {
       this.notebook.setLoading(false);
     }
