@@ -16,7 +16,7 @@ const NOTEBOOK_RECORD_SEEDS = [
   },
   {
     type: 'clue',
-    text: '[结论] 三处痕迹共同指向：画本身还在，画面之外的来源说明被后来的整理和装裱压住了',
+    text: '[结论] 三处痕迹共同指向：画本身还在，画面之外的来源说明被后续装裱压住了',
     when: (progress) => Boolean(progress.synthesisPassed),
   },
   {
