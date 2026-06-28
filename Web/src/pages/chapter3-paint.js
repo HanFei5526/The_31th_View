@@ -67,6 +67,7 @@ export default class Chapter3PaintScene {
     this._container = null;
     this._sceneRoot = null;
     this._uiLayer = null;
+    this._transitionStarted = false;
   }
 
   /* ==================== 生命周期 ==================== */
@@ -879,6 +880,8 @@ export default class Chapter3PaintScene {
   }
 
   async _startFadeTransition() {
+    if (this._transitionStarted) return;
+    this._transitionStarted = true;
     // 使用和前几章一样的褪色转场，切换到独立工作室场景
     this.engine.saveCheckpoint?.(CHECKPOINTS.WORKSHOP, {
       chapter: 3,
@@ -901,19 +904,24 @@ export default class Chapter3PaintScene {
     spot.tabIndex = 0;
     spot.setAttribute('role', 'button');
     spot.setAttribute('aria-label', ariaLabel);
-    spot.addEventListener('click', async () => {
+    let busy = false;
+    const activate = async () => {
+      if (busy) return;
+      busy = true;
       if (this._cancelItemSelection('external-cancel')) {
         this.narrationBar.dismiss();
       }
-      await onClick();
-    });
+      try {
+        await onClick?.();
+      } finally {
+        busy = false;
+      }
+    };
+    spot.addEventListener('click', activate);
     spot.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (this._cancelItemSelection('external-cancel')) {
-          this.narrationBar.dismiss();
-        }
-        onClick();
+        activate();
       }
     });
     return spot;
@@ -929,19 +937,24 @@ export default class Chapter3PaintScene {
     arrow.tabIndex = 0;
     arrow.setAttribute('role', 'button');
     arrow.setAttribute('aria-label', ariaLabel);
-    arrow.addEventListener('click', async () => {
+    let busy = false;
+    const activate = async () => {
+      if (busy) return;
+      busy = true;
       if (this._cancelItemSelection('external-cancel')) {
         this.narrationBar.dismiss();
       }
-      await onClick();
-    });
+      try {
+        await onClick?.();
+      } finally {
+        busy = false;
+      }
+    };
+    arrow.addEventListener('click', activate);
     arrow.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (this._cancelItemSelection('external-cancel')) {
-          this.narrationBar.dismiss();
-        }
-        onClick();
+        activate();
       }
     });
     return arrow;

@@ -54,6 +54,8 @@ export default class Chapter2PaintScene {
     this._uiLayer = null;
     this._exited = false;
     this._lightDiscussionSkipBtn = null;
+    this._transitionStarted = false;
+    this._endingLightDiscussion = false;
   }
 
   /* ==================== 生命周期 ==================== */
@@ -345,6 +347,8 @@ export default class Chapter2PaintScene {
   }
 
   async _endLightDiscussion() {
+    if (this._endingLightDiscussion) return;
+    this._endingLightDiscussion = true;
     this.notebook.setLightweightMode(false);
     this.notebook.collapse();
     if (this._lightDiscussionSkipBtn) {
@@ -535,6 +539,8 @@ export default class Chapter2PaintScene {
   /* ==================== 转场与工具方法 ==================== */
 
   _startFadeTransition() {
+    if (this._transitionStarted) return;
+    this._transitionStarted = true;
     this.engine.saveCheckpoint?.(CHECKPOINTS.WORKSHOP, {
       chapter: 2,
       scene: 'chapter2-workshop',
@@ -551,9 +557,20 @@ export default class Chapter2PaintScene {
     spot.setAttribute('aria-label', label);
     spot.style.cssText = `left:${x}%;top:${y}%;width:${r * 2}%;height:${r * 2}%;transform:translate(-50%,-50%);`;
     spot.innerHTML = '<div class="ch2-hotspot-glow"></div>';
-    spot.addEventListener('click', onClick);
+    let busy = false;
+    const activate = async (event) => {
+      event?.stopPropagation?.();
+      if (busy) return;
+      busy = true;
+      try {
+        await onClick?.(event);
+      } finally {
+        busy = false;
+      }
+    };
+    spot.addEventListener('click', activate);
     spot.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(e); }
     });
     parent.appendChild(spot);
     return spot;

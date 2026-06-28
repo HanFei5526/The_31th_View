@@ -197,10 +197,8 @@ export default class PaintingViewer {
    * @param {string} clueId
    */
   markClueRecorded(clueId) {
-    // 已在 _autoConfirmClue 中完成，此处做兼容兜底
-    if (!this._clues[clueId]?.recorded) {
-      this._autoConfirmClue(clueId);
-    }
+    // 兼容外部恢复/补记：无论当前 found 状态如何，都统一补齐为已发现且已确认。
+    this._autoConfirmClue(clueId, { silent: true });
   }
 
   /** 由外部调用：综合研讨通过后触发汇聚动画 */
@@ -219,9 +217,15 @@ export default class PaintingViewer {
    * @param {string} clueId
    * @private
    */
-  _autoConfirmClue(clueId) {
+  _autoConfirmClue(clueId, { silent = false } = {}) {
     const clue = this._clues[clueId];
-    if (!clue || clue.recorded) return;
+    if (!clue) return;
+
+    const wasFound = clue.found;
+    const wasRecorded = clue.recorded;
+    if (wasFound && wasRecorded) return;
+
+    clue.found = true;
     clue.recorded = true;
 
     // 在标记层添加持久标记点
@@ -229,7 +233,9 @@ export default class PaintingViewer {
     this._updateStatus();
 
     // 即时反馈
-    this._showFeedback(`发现了「${clue.title}」的相关线索。可在【记录】页查看，也可在【对话】页继续讨论。`);
+    if (!silent && !wasRecorded) {
+      this._showFeedback(`发现了「${clue.title}」的相关线索。可在【记录】页查看，也可在【对话】页继续讨论。`);
+    }
 
     // 判断是否触发汇聚
     this._checkConvergence();
@@ -457,6 +463,8 @@ export default class PaintingViewer {
 
   /** 古画区域点击事件 */
   _onPaintingClick(e) {
+    this._repairPartialClues();
+
     // 阻止因拖拽导致的意外点击
     if (this._preventNextClick) {
       this._preventNextClick = false;
@@ -495,16 +503,13 @@ export default class PaintingViewer {
     if (hitId) {
       // ── 命中线索 ──
       this._showRipple(px, py, 'gold');
-      this._clues[hitId].found = true;
       this._wrongClicks = 0; // 重置错误计数
-      this._updateStatus();
 
       // 清除该线索的呼吸光斑（如果有）
       this._removeHintSpot(hitId);
 
-      // 明确反馈
-      const clueTitle = this._clues[hitId].title;
-      this._showFeedback(`找到了线索「${clueTitle}」，已记录下来`);
+      // 命中即确认，避免 found / recorded 两段状态中途断开。
+      this._autoConfirmClue(hitId);
 
       // 回调
       this._opt.onClueFound?.(hitId);
@@ -516,6 +521,14 @@ export default class PaintingViewer {
       this._showFeedback('这地方看起来挺正常的，再去别的位置找找看。');
       this._checkHintTrigger();
     }
+  }
+
+  _repairPartialClues() {
+    Object.entries(this._clues).forEach(([id, clue]) => {
+      if (clue.found && !clue.recorded) {
+        this._autoConfirmClue(id, { silent: true });
+      }
+    });
   }
 
   /** 在指定百分比坐标处显示涟漪动画 */
@@ -711,8 +724,12 @@ export default class PaintingViewer {
       point.appendChild(pulse);
 
       // 交会点点击 → 触发最终回调
+      let activated = false;
       point.addEventListener('click', (event) => {
         event.stopPropagation();
+        if (activated) return;
+        activated = true;
+        point.style.pointerEvents = 'none';
         point.classList.add('pv-explode');
         setTimeout(() => {
           this._opt.onConvergence?.();

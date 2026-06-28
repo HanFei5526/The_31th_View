@@ -43,6 +43,8 @@ export class DialogueSystem {
 
     /** 点击推进的 resolve 函数 */
     this._advanceResolve = null;
+    this._lastAdvanceAt = 0;
+    this._advanceCooldownMs = 120;
   }
 
   /**
@@ -108,7 +110,10 @@ export class DialogueSystem {
 
       // 点击处理
       const clickHandler = () => {
+        if (!this._canHandleAdvance()) return;
         if (!this._waitingForClick) return; // 淡入未完成时点击无效
+        this._waitingForClick = false;
+        this._indicatorEl.style.display = 'none';
         this._boxEl.removeEventListener('click', clickHandler);
         resolve();
       };
@@ -229,5 +234,14 @@ export class DialogueSystem {
     this._speakerEl = speaker;
     this._contentEl = content;
     this._indicatorEl = indicator;
+  }
+
+  _canHandleAdvance() {
+    const now = performance.now();
+    if (now - this._lastAdvanceAt < this._advanceCooldownMs) {
+      return false;
+    }
+    this._lastAdvanceAt = now;
+    return true;
   }
 }

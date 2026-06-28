@@ -51,6 +51,7 @@ export default class Chapter1PaintScene {
     this._isFlipping = false;
     this._idleTimer = null;
     this._isNarrating = false;
+    this._transitionStarted = false;
 
     this._container = null;
     this._sceneRoot = null;
@@ -651,11 +652,22 @@ export default class Chapter1PaintScene {
     spot.tabIndex = 0;
     spot.setAttribute('role', 'button');
     spot.setAttribute('aria-label', ariaLabel);
-    spot.addEventListener('click', onClick);
+    let busy = false;
+    const activate = async (event) => {
+      event?.stopPropagation?.();
+      if (busy) return;
+      busy = true;
+      try {
+        await onClick?.(event);
+      } finally {
+        busy = false;
+      }
+    };
+    spot.addEventListener('click', activate);
     spot.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        onClick();
+        activate(e);
       }
     });
     return spot;
@@ -672,11 +684,22 @@ export default class Chapter1PaintScene {
     arrow.tabIndex = 0;
     arrow.setAttribute('role', 'button');
     arrow.setAttribute('aria-label', ariaLabel);
-    arrow.addEventListener('click', onClick);
+    let busy = false;
+    const activate = async (event) => {
+      event?.stopPropagation?.();
+      if (busy) return;
+      busy = true;
+      try {
+        await onClick?.(event);
+      } finally {
+        busy = false;
+      }
+    };
+    arrow.addEventListener('click', activate);
     arrow.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        onClick();
+        activate(e);
       }
     });
     return arrow;
@@ -949,6 +972,8 @@ export default class Chapter1PaintScene {
   }
 
   async _startFadeTransition() {
+    if (this._transitionStarted) return;
+    this._transitionStarted = true;
     this.state = 'TRANSITION';
     this.engine.saveCheckpoint?.(CHECKPOINTS.WORKSHOP, {
       chapter: 1,

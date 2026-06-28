@@ -110,6 +110,7 @@ export default class PrologueScene extends GameSceneBase {
     this._synthesisGateOff = null;
     this._synthesisBtnShown = false;
     this._recordedClues = new Set(); // 防重复标记
+    this._transitionStarted = false;
   }
 
   /* ==================== 生命周期 ==================== */
@@ -500,11 +501,6 @@ export default class PrologueScene extends GameSceneBase {
       return;
     }
 
-    // 同一线索已在处理中，忽略重复触发
-    if (this._activeGateId === gateId) return;
-    if (this.engine.discussionManager.isGateCompleted(gateId)) return;
-    this._activeGateId = gateId;
-
     // === 发现即确认：不等待玩家推理，直接标记线索 ===
     // 研讨降级为辅助讨论，关键信息已在命中时反馈给玩家
     this._markClueRecorded(clueId);
@@ -519,6 +515,15 @@ export default class PrologueScene extends GameSceneBase {
       this._notebook.setPlaceholder('在此输入针对该线索的判断或讨论……');
       this._notebook.showQuickThoughts([clueData.askText]);
     }
+
+    // 同一线索已在处理中或已完成时，只保留记录，不重复启动辅助讨论。
+    if (this._activeGateId === gateId || this.engine.discussionManager.isGateCompleted(gateId)) {
+      if (this._recordedClues.size >= 3) {
+        this._showSynthesisEntryButton();
+      }
+      return;
+    }
+    this._activeGateId = gateId;
 
     // 如果三条线索都找齐了，仍然启动辅助讨论，但在画面下方显示进入研讨按钮
     if (this._recordedClues.size >= 3) {
@@ -711,8 +716,9 @@ export default class PrologueScene extends GameSceneBase {
    * @private
    */
   _markClueRecorded(clueId) {
-    if (this._recordedClues.has(clueId)) return;
-    this._recordedClues.add(clueId);
+    if (!this._recordedClues.has(clueId)) {
+      this._recordedClues.add(clueId);
+    }
     this.engine.gameProgress.cluesFound = Array.from(this._recordedClues);
     if (this._paintingViewer) {
       this._paintingViewer.markClueRecorded(clueId);
@@ -726,6 +732,8 @@ export default class PrologueScene extends GameSceneBase {
    * @private
    */
   async _onConvergenceClick() {
+    if (this._transitionStarted) return;
+    this._transitionStarted = true;
     this._phase = PHASE.TRANSITION;
 
     // 解除立绘锁定，后续对话可正常切换立绘

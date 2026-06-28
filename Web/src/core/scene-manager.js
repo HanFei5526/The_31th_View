@@ -35,6 +35,9 @@ export class SceneManager {
 
     /** 场景渲染容器 @type {HTMLElement|null} */
     this._container = null;
+
+    /** 当前正在执行的场景切换 Promise */
+    this._switchPromise = null;
   }
 
   /**
@@ -66,6 +69,19 @@ export class SceneManager {
    * @returns {Promise<void>}
    */
   async switchTo(name, skipTransition = false) {
+    if (this._switchPromise) {
+      return this._switchPromise;
+    }
+
+    this._switchPromise = this._switchToInternal(name, skipTransition);
+    try {
+      return await this._switchPromise;
+    } finally {
+      this._switchPromise = null;
+    }
+  }
+
+  async _switchToInternal(name, skipTransition = false) {
     const SceneClass = this._registry.get(name);
     if (!SceneClass) {
       console.error(`[SceneManager] 未找到场景: "${name}"`);
@@ -136,9 +152,17 @@ export class SceneManager {
    * @returns {Promise<void>}
    */
   async switchWithInkSpread(targetScene) {
-    await this.transition.inkSpread(2000);
-    this._doSwitch(targetScene);
-    await this.transition.clearInk(1500);
+    if (this._switchPromise) return this._switchPromise;
+    this._switchPromise = (async () => {
+      await this.transition.inkSpread(2000);
+      this._doSwitch(targetScene);
+      await this.transition.clearInk(1500);
+    })();
+    try {
+      return await this._switchPromise;
+    } finally {
+      this._switchPromise = null;
+    }
   }
 
   /**
@@ -148,11 +172,19 @@ export class SceneManager {
    * @returns {Promise<void>}
    */
   async switchWithScroll(targetScene, chapterInfo) {
-    const scrollDone = this.transition.scrollTransition(chapterInfo, 3500);
-    // 在卷轴合拢的 1s 后执行场景切换
-    await new Promise(r => setTimeout(r, 1200));
-    this._doSwitch(targetScene);
-    await scrollDone;
+    if (this._switchPromise) return this._switchPromise;
+    this._switchPromise = (async () => {
+      const scrollDone = this.transition.scrollTransition(chapterInfo, 3500);
+      // 在卷轴合拢的 1s 后执行场景切换
+      await new Promise(r => setTimeout(r, 1200));
+      this._doSwitch(targetScene);
+      await scrollDone;
+    })();
+    try {
+      return await this._switchPromise;
+    } finally {
+      this._switchPromise = null;
+    }
   }
 
   /**
@@ -161,7 +193,8 @@ export class SceneManager {
    * @returns {Promise<void>}
    */
   async switchWithFadeToSepia(targetScene) {
-    return new Promise((resolve) => {
+    if (this._switchPromise) return this._switchPromise;
+    this._switchPromise = new Promise((resolve) => {
       const overlay = document.createElement('div');
       overlay.className = 'fade-to-sepia-overlay';
       document.body.appendChild(overlay);
@@ -233,6 +266,11 @@ export class SceneManager {
         }, 500);
       }, 2200);
     });
+    try {
+      return await this._switchPromise;
+    } finally {
+      this._switchPromise = null;
+    }
   }
 
   /**

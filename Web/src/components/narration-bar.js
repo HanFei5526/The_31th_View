@@ -20,6 +20,8 @@ export class NarrationBar {
     this._optionsEl = null;
     this._resolveOptions = null;
     this._portraitLocked = false;
+    this._lastAdvanceAt = 0;
+    this._advanceCooldownMs = 120;
 
     this._boundOnClick = this._onClick.bind(this);
     this._boundOnKeyDown = this._onKeyDown.bind(this);
@@ -281,6 +283,8 @@ export class NarrationBar {
   }
 
   _onClick() {
+    if (!this._canHandleAdvance()) return;
+
     // 如果有选项正在显示，禁止点击通过
     if (this._resolveOptions) return;
 
@@ -320,6 +324,15 @@ export class NarrationBar {
     if (!el) return false;
     const tag = el.tagName;
     return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  }
+
+  _canHandleAdvance() {
+    const now = performance.now();
+    if (now - this._lastAdvanceAt < this._advanceCooldownMs) {
+      return false;
+    }
+    this._lastAdvanceAt = now;
+    return true;
   }
 
   _showContinue() {

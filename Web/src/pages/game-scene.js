@@ -31,6 +31,8 @@ export default class GameSceneBase {
     this._typewriterTimer = null;
     this._typewriterText = '';
     this._isTyping = false;
+    this._lastNarrationAdvanceAt = 0;
+    this._narrationAdvanceCooldownMs = 120;
   }
 
   /* ==================== 生命周期 ==================== */
@@ -179,11 +181,15 @@ export default class GameSceneBase {
       this._narrationPanel.classList.add('gs-narration--visible');
       this._narrationIndicator.style.display = 'none';
       this._startTypewriter(text);
+      let resolved = false;
 
       const advanceHandler = () => {
+        if (!this._canHandleNarrationAdvance()) return;
         if (this._isTyping) {
           this._completeTypewriter();
         } else {
+          if (resolved) return;
+          resolved = true;
           this._narrationPanel.removeEventListener('click', advanceHandler);
           resolve();
         }
@@ -312,6 +318,15 @@ export default class GameSceneBase {
     if (!el) return false;
     const tag = el.tagName;
     return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  }
+
+  _canHandleNarrationAdvance() {
+    const now = performance.now();
+    if (now - this._lastNarrationAdvanceAt < this._narrationAdvanceCooldownMs) {
+      return false;
+    }
+    this._lastNarrationAdvanceAt = now;
+    return true;
   }
 
   /* ==================== 样式注入 ==================== */
