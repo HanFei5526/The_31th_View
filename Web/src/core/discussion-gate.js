@@ -26,6 +26,8 @@ export class DiscussionGateManager {
     this.synthesisWrongDirectionCount = new Map(); // gateId -> number
     this.synthesisTimerIds = new Map(); // gateId -> number
     this.synthesisAssistedPassTriggered = new Set();
+    this.synthesisInfoProgress = new Map(); // gateId -> Set(infoTag)
+    this.lastSynthesisQuickThought = new Map(); // gateId -> quick thought text
   }
 
   isGateCompleted(gateId) {
@@ -49,6 +51,8 @@ export class DiscussionGateManager {
     this.synthesisPromptStages.delete(gateId);
     this.synthesisWrongDirectionCount.delete(gateId);
     this.synthesisAssistedPassTriggered.delete(gateId);
+    this.synthesisInfoProgress.delete(gateId);
+    this.lastSynthesisQuickThought.delete(gateId);
 
     // 通知外部
     this.engine.emit('gate-completed', { gateId: completedId });
@@ -125,6 +129,8 @@ export class DiscussionGateManager {
     this.synthesisPromptStages.set(gateId, new Set());
     this.synthesisWrongDirectionCount.set(gateId, 0);
     this.synthesisAssistedPassTriggered.delete(gateId);
+    this.synthesisInfoProgress.set(gateId, new Set());
+    this.lastSynthesisQuickThought.delete(gateId);
     this._startSynthesisTimer(gateId, config);
 
     if (container.mount) {
@@ -207,6 +213,7 @@ export class DiscussionGateManager {
     this.dialogueHistory.get(gateId).push({ role: 'user', content: text });
 
     if (isQuickThought) {
+      this._recordSynthesisInfoFromQuickThought(gateId, config, text);
       const presetReply = config.quickThoughtReplies?.[text];
       if (presetReply) {
         this.dialogueHistory.get(gateId).push({ role: 'assistant', content: presetReply });
@@ -266,6 +273,17 @@ export class DiscussionGateManager {
       return;
     }
 
+    const guidedReply = this._getSynthesisGuidedReply(gateId, config, text, analysis);
+    if (guidedReply) {
+      this.dialogueHistory.get(gateId).push({ role: 'assistant', content: guidedReply });
+      this.uiCallback.showNPCMessage(guidedReply);
+      if (failedRounds >= 5 && config.fallbackQuickThoughts) {
+        this.uiCallback.showQuickThoughts(config.fallbackQuickThoughts);
+      }
+      this._maybeShowSynthesisStageCue(gateId, config, failedRounds);
+      return;
+    }
+
     this.uiCallback.setLoading(true);
     try {
       if (this.engine.aiService && this.engine.aiService.isAvailable) {
@@ -275,7 +293,10 @@ export class DiscussionGateManager {
       }
     } catch (err) {
       console.error('综合研讨处理错误:', err);
-      this.uiCallback.showNPCMessage('（笔记本页边的墨迹暂时模糊了。先回到证据：三处痕迹都和来源说明有关。）');
+      const fallbackReply = this._getSynthesisGuidedReply(gateId, config, text, analysis, { force: true })
+        || '（周老师批注）先回到三处证据：旧标签被裁，残字被压，细线没进正式记录。它们为什么会同时变得不容易看见？';
+      this.dialogueHistory.get(gateId)?.push({ role: 'assistant', content: fallbackReply });
+      this.uiCallback.showNPCMessage(fallbackReply);
     } finally {
       this.uiCallback.setLoading(false);
     }
@@ -319,7 +340,7 @@ export class DiscussionGateManager {
   async _handleSynthesisAI(gateId, config, text, analysis) {
     const concepts = this.insightProgress.get(gateId) || new Set();
     const systemHint = this._buildSynthesisHint(config, concepts, analysis);
-    const response = await this.engine.aiService.discussWithZhou(
+    let response = await this.engine.aiService.discussWithZhou(
       gateId,
       text,
       this.dialogueHistory.get(gateId),
@@ -327,12 +348,23 @@ export class DiscussionGateManager {
     );
 
     if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
+    if (this._isLowValueSynthesisReply(response)) {
+      response = this._getSynthesisGuidedReply(gateId, config, text, analysis, { force: true }) || response;
+    }
     this.dialogueHistory.get(gateId).push({ role: 'assistant', content: response });
     this.uiCallback.showNPCMessage(response);
   }
 
   async _handleSynthesisOffline(gateId, config, text, analysis) {
     await this._delay(400 + Math.random() * 200);
+
+    const guidedReply = this._getSynthesisGuidedReply(gateId, config, text, analysis, { force: true });
+    if (guidedReply) {
+      if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
+      this.dialogueHistory.get(gateId)?.push({ role: 'assistant', content: guidedReply });
+      this.uiCallback.showNPCMessage(guidedReply);
+      return;
+    }
 
     const concepts = this.insightProgress.get(gateId) || new Set();
     let pool = config.hintPool;
@@ -347,6 +379,96 @@ export class DiscussionGateManager {
     const idx = this._getFallbackIndex(gateId, poolType, pool.length);
     if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
     this.uiCallback.showNPCMessage(pool[idx]);
+  }
+
+  _recordSynthesisInfoFromQuickThought(gateId, config, text) {
+    const tags = config.quickThoughtInfoTags?.[text] || [];
+    if (!this.synthesisInfoProgress.has(gateId)) {
+      this.synthesisInfoProgress.set(gateId, new Set());
+    }
+    const progress = this.synthesisInfoProgress.get(gateId);
+    tags.forEach((tag) => progress.add(tag));
+    this.lastSynthesisQuickThought.set(gateId, text);
+  }
+
+  _recordSynthesisInfoTags(gateId, tags = []) {
+    if (!tags.length) return;
+    if (!this.synthesisInfoProgress.has(gateId)) {
+      this.synthesisInfoProgress.set(gateId, new Set());
+    }
+    const progress = this.synthesisInfoProgress.get(gateId);
+    tags.forEach((tag) => progress.add(tag));
+  }
+
+  _getSynthesisGuidedReply(gateId, config, text, analysis = {}, options = {}) {
+    if (gateId !== 'gate_prologue_synthesis') return '';
+    const replyConfig = config.synthesisGuidedReplies;
+    if (!replyConfig) return '';
+
+    const input = String(text || '').toLowerCase().trim();
+    const progress = this.synthesisInfoProgress.get(gateId) || new Set();
+    const wrongDirection = this._matchSynthesisReplyRule(input, replyConfig.wrongDirectionRules || []);
+    if (wrongDirection) {
+      this._recordSynthesisInfoTags(gateId, wrongDirection.tags);
+      return wrongDirection.reply;
+    }
+
+    const matched = this._matchSynthesisReplyRule(input, replyConfig.rules || []);
+
+    if (matched) {
+      this._recordSynthesisInfoTags(gateId, matched.tags);
+      return matched.reply;
+    }
+
+    const lastQuickThought = this.lastSynthesisQuickThought.get(gateId);
+    const followUp = this._matchSynthesisReplyRule(input, replyConfig.followUps?.[lastQuickThought] || []);
+    if (followUp) {
+      this._recordSynthesisInfoTags(gateId, followUp.tags);
+      return followUp.reply;
+    }
+
+    if (replyConfig.vaguePatterns?.some((pattern) => pattern.test(input))) {
+      const next = this._getNextSynthesisInfoReply(replyConfig.nextByMissingTag || [], progress);
+      if (next) {
+        this._recordSynthesisInfoTags(gateId, next.tags);
+        return next.reply;
+      }
+    }
+
+    if (analysis.blockedByNegation || analysis.wrongDirection) {
+      return replyConfig.correctionReply || '';
+    }
+
+    if (options.force) {
+      const next = this._getNextSynthesisInfoReply(replyConfig.nextByMissingTag || [], progress);
+      if (next) {
+        this._recordSynthesisInfoTags(gateId, next.tags);
+        return next.reply;
+      }
+      return replyConfig.defaultReply || '';
+    }
+
+    return '';
+  }
+
+  _matchSynthesisReplyRule(input, rules) {
+    return rules.find((rule) => {
+      const keywordMatched = rule.keywords?.some((keyword) => input.includes(keyword));
+      const patternMatched = rule.patterns?.some((pattern) => pattern.test(input));
+      return keywordMatched || patternMatched;
+    });
+  }
+
+  _getNextSynthesisInfoReply(candidates, progress) {
+    return candidates.find((candidate) =>
+      candidate.tags?.some((tag) => !progress.has(tag))
+    ) || candidates[candidates.length - 1] || null;
+  }
+
+  _isLowValueSynthesisReply(response) {
+    const text = String(response || '').trim();
+    if (!text) return true;
+    return /暂时没有回应|稍后再试|没有形成清晰答复|没有找到相关记录|字迹暂时散开|墨迹暂时模糊/.test(text);
   }
 
   _handleSynthesisPass(gateId, config) {
