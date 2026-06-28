@@ -85,24 +85,7 @@ export default class Chapter2PaintScene {
     });
     this.hudBar.onInventoryClick(() => this.inventoryPopup.open());
 
-    this.notebook.onSubmit(async (text) => {
-      this.notebook.showPlayerMessage(text);
-      this.notebook.setLoading(true);
-      try {
-        const reply = await this.engine.aiService.queryNotebook(text);
-        this.notebook.showNPCMessage(reply);
-      } catch { this.notebook.showNPCMessage('（笔记本暂时无法回应）'); }
-      this.notebook.setLoading(false);
-    });
-    this.notebook.onQuickThought(async (text) => {
-      this.notebook.showPlayerMessage(text);
-      this.notebook.setLoading(true);
-      try {
-        const reply = await this.engine.aiService.queryNotebook(text);
-        this.notebook.showNPCMessage(reply);
-      } catch { this.notebook.showNPCMessage('（笔记本暂时无法回应）'); }
-      this.notebook.setLoading(false);
-    });
+    this._bindNotebookQueryHandlers();
 
     this._sceneRoot = document.createElement('div');
     this._sceneRoot.className = 'ch2-scene-root';
@@ -121,6 +104,25 @@ export default class Chapter2PaintScene {
       });
       this._enterYuanxiang();
     }
+  }
+
+  _bindNotebookQueryHandlers() {
+    const ask = async (text) => {
+      if (!text?.trim()) return;
+      this.notebook.showPlayerMessage(text);
+      this.notebook.setLoading(true);
+      try {
+        const reply = await this.engine.aiService.queryNotebook(text);
+        this.notebook.showNPCMessage(reply);
+      } catch {
+        this.notebook.showNPCMessage('（笔记本暂时无法回应）');
+      } finally {
+        this.notebook.setLoading(false);
+      }
+    };
+
+    this.notebook.onSubmit(ask);
+    this.notebook.onQuickThought(ask);
   }
 
   exit() {
@@ -339,6 +341,17 @@ export default class Chapter2PaintScene {
       '目前"蘅"、异文、旧批注之间能确定什么关联？'
     ]);
 
+    const responses = {
+      '题诗异文组成"画非一人"，是有人故意藏在诗里的吗？': '（周老师批注）现在只能说：四个差异字连起来能读成一句话，这不像普通抄错。但它还不能直接证明另一个人完成了画。',
+      '旧批注说"视点卑近，似非成稿"，整理者的判断依据是什么？': '（周老师批注）整理者看到的是视点太低、边旁痕迹太多，于是觉得它不像标准成稿。这是他的判断，不等于真相。',
+      '目前"蘅"、异文、旧批注之间能确定什么关联？': '（周老师批注）目前只能并列记录：有私人记号，有藏在题诗里的异文，也有后人压住边旁痕迹的批注。它们相关，但还不能推出身份。'
+    };
+
+    this.notebook.onQuickThought((text) => {
+      this.notebook.showPlayerMessage(text);
+      this.notebook.showNPCMessage(responses[text] || '（周老师批注）这个问题可以先记下，等更多证据出现后再判断。');
+    });
+
     this._lightDiscussionSkipBtn = document.createElement('button');
     this._lightDiscussionSkipBtn.className = 'ch2-discussion-skip-btn';
     this._lightDiscussionSkipBtn.textContent = '跳过讨论';
@@ -355,6 +368,7 @@ export default class Chapter2PaintScene {
       this._lightDiscussionSkipBtn.remove();
       this._lightDiscussionSkipBtn = null;
     }
+    this._bindNotebookQueryHandlers();
 
     this._isNarrating = true;
     await this.narrationBar.playLine(null, '你合上参考抄本，把它小心地收起来。四个字仍然浮在脑海里，像一个尚未回答的问题。');

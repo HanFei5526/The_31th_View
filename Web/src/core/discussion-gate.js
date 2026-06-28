@@ -22,6 +22,10 @@ export class DiscussionGateManager {
     this.insightProgress = new Map(); // gateId -> Set(conceptIds)
     this.roundCount = new Map(); // gateId -> number
     this.failedRoundCount = new Map(); // gateId -> number
+    this.synthesisPromptStages = new Map(); // gateId -> Set(stageId)
+    this.synthesisWrongDirectionCount = new Map(); // gateId -> number
+    this.synthesisTimerIds = new Map(); // gateId -> number
+    this.synthesisAssistedPassTriggered = new Set();
   }
 
   isGateCompleted(gateId) {
@@ -31,6 +35,7 @@ export class DiscussionGateManager {
   markGateCompleted(gateId) {
     this.gatesCompleted.add(gateId);
     const completedId = this.activeGate;
+    this._clearSynthesisTimer(gateId);
     this.activeGate = null;
     this.activeGateMode = null;
     this.uiCallback = null;
@@ -41,6 +46,9 @@ export class DiscussionGateManager {
     this.insightProgress.delete(gateId);
     this.roundCount.delete(gateId);
     this.failedRoundCount.delete(gateId);
+    this.synthesisPromptStages.delete(gateId);
+    this.synthesisWrongDirectionCount.delete(gateId);
+    this.synthesisAssistedPassTriggered.delete(gateId);
 
     // 通知外部
     this.engine.emit('gate-completed', { gateId: completedId });
@@ -114,6 +122,10 @@ export class DiscussionGateManager {
     this.insightProgress.set(gateId, new Set());
     this.roundCount.set(gateId, 0);
     this.failedRoundCount.set(gateId, 0);
+    this.synthesisPromptStages.set(gateId, new Set());
+    this.synthesisWrongDirectionCount.set(gateId, 0);
+    this.synthesisAssistedPassTriggered.delete(gateId);
+    this._startSynthesisTimer(gateId, config);
 
     if (container.mount) {
       container.mount(
@@ -172,13 +184,15 @@ export class DiscussionGateManager {
   /**
    * 处理综合门槛输入：关键词跨轮累积，AI/离线回复只负责引导
    * @param {string} text 玩家输入的文本
+   * @param {Object} options 输入来源配置
    */
-  async handleSynthesisInput(text) {
+  async handleSynthesisInput(text, options = {}) {
     if (!this.activeGate || this.activeGateMode !== 'synthesis' || !text.trim()) return;
 
     const gateId = this.activeGate;
     const config = getGateConfig(gateId);
     if (!config) return;
+    const isQuickThought = options.source === 'quick-thought';
 
     // 显示玩家消息
     this.uiCallback.showPlayerMessage(text);
@@ -191,6 +205,42 @@ export class DiscussionGateManager {
     }
 
     this.dialogueHistory.get(gateId).push({ role: 'user', content: text });
+
+    if (isQuickThought) {
+      const presetReply = config.quickThoughtReplies?.[text];
+      if (presetReply) {
+        this.dialogueHistory.get(gateId).push({ role: 'assistant', content: presetReply });
+        this.uiCallback.showNPCMessage(presetReply);
+        return;
+      }
+
+      this.uiCallback.setLoading(true);
+      try {
+        if (this.engine.aiService && this.engine.aiService.isAvailable) {
+          await this._handleSynthesisAI(gateId, config, text, {
+            matchedConcepts: [],
+            accumulatedConcepts: Array.from(this.insightProgress.get(gateId) || []),
+            blockedByNegation: false,
+            wrongDirection: false,
+            fromQuickThought: true,
+          });
+        } else {
+          await this._handleSynthesisOffline(gateId, config, text, {
+            matchedConcepts: [],
+            accumulatedConcepts: Array.from(this.insightProgress.get(gateId) || []),
+            blockedByNegation: false,
+            wrongDirection: false,
+            fromQuickThought: true,
+          });
+        }
+      } catch (err) {
+        console.error('综合研讨快捷提示处理错误:', err);
+        this.uiCallback.showNPCMessage('（笔记本页边的墨迹暂时模糊了。先回到三处痕迹本身。）');
+      } finally {
+        this.uiCallback.setLoading(false);
+      }
+      return;
+    }
 
     const currentRounds = (this.roundCount.get(gateId) || 0) + 1;
     this.roundCount.set(gateId, currentRounds);
@@ -206,6 +256,15 @@ export class DiscussionGateManager {
 
     const failedRounds = (this.failedRoundCount.get(gateId) || 0) + 1;
     this.failedRoundCount.set(gateId, failedRounds);
+    if (analysis.blockedByNegation || analysis.wrongDirection) {
+      const wrongCount = (this.synthesisWrongDirectionCount.get(gateId) || 0) + 1;
+      this.synthesisWrongDirectionCount.set(gateId, wrongCount);
+    }
+
+    if (this._shouldTriggerFinalFallback(gateId, config, failedRounds)) {
+      this._handleSynthesisAssistedPass(gateId, config);
+      return;
+    }
 
     this.uiCallback.setLoading(true);
     try {
@@ -224,6 +283,7 @@ export class DiscussionGateManager {
     if (failedRounds >= 5 && config.fallbackQuickThoughts) {
       this.uiCallback.showQuickThoughts(config.fallbackQuickThoughts);
     }
+    this._maybeShowSynthesisStageCue(gateId, config, failedRounds);
   }
 
   /**
@@ -258,7 +318,7 @@ export class DiscussionGateManager {
 
   async _handleSynthesisAI(gateId, config, text, analysis) {
     const concepts = this.insightProgress.get(gateId) || new Set();
-    const systemHint = this._buildSynthesisHint(config, concepts, analysis.matchedConcepts);
+    const systemHint = this._buildSynthesisHint(config, concepts, analysis);
     const response = await this.engine.aiService.discussWithZhou(
       gateId,
       text,
@@ -266,6 +326,7 @@ export class DiscussionGateManager {
       systemHint
     );
 
+    if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
     this.dialogueHistory.get(gateId).push({ role: 'assistant', content: response });
     this.uiCallback.showNPCMessage(response);
   }
@@ -284,10 +345,13 @@ export class DiscussionGateManager {
 
     const poolType = pool === config.correctionPool ? 'correction' : pool === config.affirmPool ? 'affirm' : 'hint';
     const idx = this._getFallbackIndex(gateId, poolType, pool.length);
+    if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
     this.uiCallback.showNPCMessage(pool[idx]);
   }
 
   _handleSynthesisPass(gateId, config) {
+    this._clearSynthesisTimer(gateId);
+    this.activeGateMode = 'synthesis-passed';
     this.dialogueHistory.get(gateId)?.push({ role: 'assistant', content: config.passResponse });
     this.uiCallback.showNPCMessage(config.passResponse);
     this.uiCallback.hideConfirmButton?.();
@@ -301,25 +365,103 @@ export class DiscussionGateManager {
     });
   }
 
-  _buildSynthesisHint(config, concepts, matchedConcepts) {
+  _handleSynthesisAssistedPass(gateId, config) {
+    if (this.synthesisAssistedPassTriggered.has(gateId)) return;
+    if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
+
+    this.synthesisAssistedPassTriggered.add(gateId);
+    const message = config.assistedFallback?.finalMessage;
+    if (message) {
+      this.dialogueHistory.get(gateId)?.push({ role: 'assistant', content: message });
+      this.uiCallback.showNPCMessage(message);
+    }
+    this._handleSynthesisPass(gateId, config);
+  }
+
+  _buildSynthesisHint(config, concepts, analysis = {}) {
+    const matchedConcepts = analysis.matchedConcepts || [];
+    if (analysis.fromQuickThought) {
+      return '玩家点击的是笔记本提供的快捷问题，不代表玩家已经自己得出结论。请只把它当成一个思考方向，用白话解释相关证据，并提醒需要玩家自己写下判断；不要总结为已经通过。';
+    }
+
     const hasHumanObscure = concepts.has('human_obscure');
     const hasSourceExplanation = concepts.has('source_explanation');
     const hasSharedPattern = concepts.has('shared_pattern');
     const hasNotPaintLoss = concepts.has('not_paint_loss');
 
     if (hasHumanObscure) {
-      return '玩家已经接近"后来处理造成遮蔽"这一方向。请只要求其回到旧题签、残字、底层细线三处证据做确认；不要说出人物、地点、低位视角或完整结论。';
+      return '玩家已经接近"后来处理造成遮蔽"这一方向。请回到旧题签、残字、底层细线三处证据做确认；白话优先，不要说出人物、地点、低位视角或完整结论。';
     }
     if (hasSourceExplanation) {
-      return '玩家已经注意到说明性痕迹。请引导其判断这些痕迹的状态是自然形成，还是后来的装裱与整理处理造成；不要直接给出完整结论。';
+      return '玩家已经注意到这些痕迹像是在说明这页画的来历。请引导其判断这些痕迹是自然坏掉，还是被后来的装裱与整理压住；不要直接给出完整结论。';
     }
     if (hasSharedPattern || hasNotPaintLoss) {
-      return '玩家已经注意到三处痕迹的共同点或排除了画心丢失。请继续引导其观察这些痕迹为何都在边缘、装裱层或底层；不要替玩家下结论。';
+      return '玩家已经注意到三处痕迹的共同点，或已经排除画本身丢失。请继续引导其观察旧题签、残字、细线为什么都在画面边缘、装裱层或下方；不要替玩家下结论。';
     }
     if (matchedConcepts.length > 0) {
       return '玩家方向部分正确。请简短肯定，并用问题引导其把三处痕迹综合起来。不要直接给出最终结论。';
     }
-    return '玩家尚未抓住核心。请把注意力拉回旧题签、残字、底层细线的位置共同点：边缘、装裱层、底层、画心之外。不要直接断言这是后来处理造成的，只能用问题引导。';
+    return '玩家尚未抓住核心。请把注意力拉回旧题签、残字、底层细线的位置共同点：它们都不在画面主体里。不要直接断言这是后来处理造成的，只能用问题引导。';
+  }
+
+  _maybeShowSynthesisStageCue(gateId, config, failedRounds) {
+    const fallback = config.assistedFallback;
+    if (!fallback) return;
+
+    const shown = this.synthesisPromptStages.get(gateId) || new Set();
+    let stageId = null;
+    let message = '';
+
+    if (failedRounds >= 5 && fallback.round5Message) {
+      stageId = 'round5';
+      message = fallback.round5Message;
+    } else if (failedRounds >= 3 && fallback.round3Message) {
+      stageId = 'round3';
+      message = fallback.round3Message;
+    }
+
+    if (!stageId || shown.has(stageId) || !message) return;
+    shown.add(stageId);
+    this.synthesisPromptStages.set(gateId, shown);
+    this.dialogueHistory.get(gateId)?.push({ role: 'assistant', content: message });
+    this.uiCallback.showNPCMessage(message);
+  }
+
+  _shouldTriggerFinalFallback(gateId, config, failedRounds) {
+    const fallback = config.assistedFallback;
+    if (!fallback) return false;
+
+    if (failedRounds >= (fallback.finalAfterFailedRounds || Infinity)) {
+      return true;
+    }
+
+    const wrongCount = this.synthesisWrongDirectionCount.get(gateId) || 0;
+    const wrongConfig = fallback.finalAfterWrongDirection || {};
+    return failedRounds >= (wrongConfig.failedRounds || Infinity)
+      && wrongCount >= (wrongConfig.count || Infinity);
+  }
+
+  _startSynthesisTimer(gateId, config) {
+    this._clearSynthesisTimer(gateId);
+    const timeoutMs = config.assistedFallback?.timeoutMs;
+    if (!timeoutMs || typeof window === 'undefined') return;
+
+    const timerId = window.setTimeout(() => {
+      if (this.activeGate !== gateId || this.activeGateMode !== 'synthesis') return;
+      const latestConfig = getGateConfig(gateId);
+      if (!latestConfig) return;
+      this._handleSynthesisAssistedPass(gateId, latestConfig);
+    }, timeoutMs);
+
+    this.synthesisTimerIds.set(gateId, timerId);
+  }
+
+  _clearSynthesisTimer(gateId) {
+    const timerId = this.synthesisTimerIds.get(gateId);
+    if (timerId && typeof window !== 'undefined') {
+      window.clearTimeout(timerId);
+    }
+    this.synthesisTimerIds.delete(gateId);
   }
 
   _isSynthesisPassed(config, concepts, rounds) {
@@ -359,8 +501,9 @@ export class DiscussionGateManager {
    * @param {string} text 快捷按钮文本
    */
   async handleQuickThought(text) {
+    if (this.activeGateMode === 'synthesis-passed') return;
     if (this.activeGateMode === 'synthesis') {
-      await this.handleSynthesisInput(text);
+      await this.handleSynthesisInput(text, { source: 'quick-thought' });
     } else {
       await this.handlePlayerInput(text);
     }

@@ -618,7 +618,7 @@ export default class Chapter1PaintScene {
       this.notebook.setLightweightMode(true);
       this.notebook.switchTab('chat');
       this.notebook.expand();
-      await this.narrationBar.playLine('系统提示', '已获得物件「断簪」。可在【记录】页查看，也可在【梳理】页轻量讨论。');
+      await this.narrationBar.playLine('系统提示', '已获得物件「断簪」。可在【记录】页查看，也可在【轻量讨论】页继续讨论。');
 
       this._isNarrating = false;
       this._startLightDiscussion();
@@ -899,7 +899,7 @@ export default class Chapter1PaintScene {
 
     // 旁白已经暗示了倒影中有东西，给出不剧透顺序的谜题提示。
     this._isNarrating = true;
-    await this.narrationBar.playLine('系统提示', '已进入倒影谜题。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要梳理时，可打开【修复笔记本】的【对话】页提问。');
+    await this.narrationBar.playLine('系统提示', '已进入倒影谜题。场景中的栏杆、水面与倒影都可以尝试点击；不同的顺序和次数会触发不同反馈。需要讨论时，可打开【修复笔记本】的【对话】页提问。');
     this.narrationBar.dismiss();
     this.notebook.collapse();
     this._isNarrating = false;
@@ -911,7 +911,7 @@ export default class Chapter1PaintScene {
     this.notebook.switchTab('chat');
     this.notebook.expand();
 
-    this.notebook.showSystemMessage('（轻量梳理开始，你可以随时跳过）');
+    this.notebook.showSystemMessage('（轻量讨论开始，你可以随时跳过）');
     this.notebook.showNPCMessage('（周老师的批注）"蘅"，杜衡。是一种香草，古人也用来比喻品性高洁的女子。刻在簪身背面，不是正面——如果是工匠标记，通常会在簪头或底座。这更像是物主自己留给自己的。那么，是谁在一支断簪的背面留下了这个记号？');
 
     this.notebook.showQuickThoughts([

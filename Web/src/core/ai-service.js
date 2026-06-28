@@ -145,7 +145,8 @@ export class AIService {
 
     return this._callAPI(messages, {
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 220,
+      retryOnShort: true,
     });
   }
 

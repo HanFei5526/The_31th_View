@@ -1,12 +1,12 @@
 const NOTEBOOK_RECORD_SEEDS = [
   {
     type: 'clue',
-    text: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+    text: '[线索] 装裱接缝残角 — 旧标签被裁去，只剩被新边框压住的一角',
     when: (progress) => progress.cluesFound?.includes('clue_margin'),
   },
   {
     type: 'clue',
-    text: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+    text: '[线索] "……所见"残字 — 装裱层下被压住的边上小字',
     when: (progress) => progress.cluesFound?.includes('clue_text'),
   },
   {
@@ -16,7 +16,7 @@ const NOTEBOOK_RECORD_SEEDS = [
   },
   {
     type: 'clue',
-    text: '[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息',
+    text: '[结论] 三处痕迹共同指向：画本身还在，画面之外的来源说明被后来的整理和装裱压住了',
     when: (progress) => Boolean(progress.synthesisPassed),
   },
   {
@@ -240,7 +240,7 @@ export class NotebookFloating {
     if (!this._container) return;
     if (active) {
       this._container.classList.add('lightweight-mode');
-      if (this._tabs['chat']) this._tabs['chat'].textContent = '梳理';
+      if (this._tabs['chat']) this._tabs['chat'].textContent = '轻量讨论';
     } else {
       this._container.classList.remove('lightweight-mode');
       if (this._tabs['chat']) this._tabs['chat'].textContent = '对话';
@@ -661,7 +661,7 @@ export class NotebookFloating {
     btn.style.background = 'transparent';
     btn.style.color = 'var(--paint-text)';
     btn.style.borderColor = 'var(--paint-border)';
-    btn.innerHTML = '<span>跳过梳理 ⏭</span>';
+    btn.innerHTML = '<span>跳过讨论 ⏭</span>';
     btn.addEventListener('click', () => {
       btn.disabled = true;
       cb?.();

@@ -98,8 +98,7 @@ export default class Chapter3PaintScene {
     });
     this.hudBar.onInventoryClick(() => this.inventoryPopup.open());
 
-    this.notebook.onSubmit(async (text) => await this._askNotebook(text));
-    this.notebook.onQuickThought(async (text) => await this._askNotebook(text));
+    this._bindNotebookQueryHandlers();
 
     // 场景根节点
     this._sceneRoot = document.createElement('div');
@@ -798,6 +797,15 @@ export default class Chapter3PaintScene {
       '周老师说的"材料溯源"和第二章的"版本比对"方法有什么区别？',
       '残砚的朱砂和北厅散落的草图之间有什么关联？'
     ]);
+    const responses = {
+      '残砚的朱砂和墙面透出的红线属于同一条材料线索吗？': '（周老师批注）可以先这样记录：残砚里有朱砂，墙面也透出朱砂线。两者互相呼应，但仍要以已经看见的线痕为证据。',
+      '周老师说的"材料溯源"和第二章的"版本比对"方法有什么区别？': '（周老师批注）版本比对看文字差异，材料溯源看材料和痕迹是否互相呼应。两种方法都只能帮助建立证据链。',
+      '残砚的朱砂和北厅散落的草图之间有什么关联？': '（周老师批注）残砚是工具痕迹，草图是练习痕迹。它们共同说明有人曾尝试作画，但不能等同于完成正式画面。'
+    };
+    this.notebook.onQuickThought((text) => {
+      this.notebook.showPlayerMessage(text);
+      this.notebook.showNPCMessage(responses[text] || '（周老师批注）这个问题可以先记下，回到已经看见的痕迹上判断。');
+    });
     await this.narrationBar.playLine('系统提示', '【修复笔记本】记录更新：周老师的批注。可在【对话】页继续讨论，或跳过继续。');
     this.narrationBar.dismiss();
 
@@ -832,6 +840,7 @@ export default class Chapter3PaintScene {
     this._hideDiscussionSkipButton();
     this.notebook.setLightweightMode?.(false);
     this.notebook.collapse?.();
+    this._bindNotebookQueryHandlers();
     this.engine.gameProgress.ch3DiscussionDone = true;
 
     await this._delay(500);
@@ -925,6 +934,11 @@ export default class Chapter3PaintScene {
       }
     });
     return spot;
+  }
+
+  _bindNotebookQueryHandlers() {
+    this.notebook.onSubmit(async (text) => await this._askNotebook(text));
+    this.notebook.onQuickThought(async (text) => await this._askNotebook(text));
   }
 
   _createNavArrow(x, y, r, onClick, ariaLabel = '前进') {

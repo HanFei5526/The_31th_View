@@ -18,7 +18,7 @@ export const KNOWLEDGE_SNIPPETS = [
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
     content: `【册页装裱常识】
-册页重装可能出于修复破损、统一尺幅、保护画心等目的。装裱、边框、题签和旁注都属于作品的物质信息，能帮助判断作品流转和整理过程。`,
+册页后来重新装裱，可能是为了修补破损、统一大小，或保护画本身。边框、旧标签和边上的小字也很重要，因为它们常常能说明一页画曾经怎样被整理过。`,
   },
   {
     id: 'prologue_notebook_scope',
@@ -32,21 +32,21 @@ export const KNOWLEDGE_SNIPPETS = [
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
     content: `【放大镜检查】
-放大镜用于对画面进行高倍率目视检查。在古画修复中，放大镜能看清装裱接缝处是否有重叠痕迹、边框是否压住了旧有标记、纸面是否有细微的裂纹或修补痕迹。它是最基础的检查工具，适合观察画面表层的物理状态。`,
+放大镜用来看清肉眼容易错过的小痕迹。它适合检查边框接缝、旧标签残角、细小裂纹，以及有没有东西被新边框压住。`,
   },
   {
     id: 'tool_fiber',
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
     content: `【纸质分析】
-纸质分析通过观察纸张纤维结构来判断用纸类型和年代。在册页修复中，如果某一页的背纸纤维与其他页不一致，说明该页可能经历过单独重装。纸质分析能区分画心本身与后来添加的装裱层，帮助判断作品是否经过二次处理。`,
+纸质分析用来看纸张和背纸是否一致。如果这一页背后的纸和其他页不同，说明它可能后来被单独重新装裱过。它能帮助区分画本身和后来加上的装裱层。`,
   },
   {
     id: 'tool_sidelight',
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.hasNotebook),
     content: `【侧光照射】
-侧光照射是将光源从侧面低角度打在画面上的检查方法。侧光能让纸面上肉眼不易察觉的凹凸变得明显，比如被覆盖的旧字痕迹、压印、刻痕或底层墨线。它特别适合检查装裱层下方是否隐藏着被遮盖的文字或标记。`,
+侧光照射就是从侧面打光，让纸面上很浅的凹凸和压痕显出来。它适合寻找被边框压住的旧字、压印、刻痕或很淡的底层线。`,
   },
   {
     id: 'prologue_exploration',
@@ -60,35 +60,35 @@ export const KNOWLEDGE_SNIPPETS = [
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_margin'),
     content: `【题签功能说明】
-题签常用于标识册页、页次、题名或相关来源信息。若旧题签只剩被新装裱压住的一角，且边缘有裁切痕迹，说明它曾被保留过、又在后续整理中被大幅移除。`,
+题签可以理解成贴在册页边上的旧标签，常用来写页次、题名或来源信息。现在它只剩被新边框压住的一角，边缘还有裁切痕迹，说明它曾经在这里，后来整理时被裁掉了大部分。`,
   },
   {
     id: 'clue_text_annotation',
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_text'),
     content: `【旁注惯例】
-旁注通常记录观看、校勘、来源或制作相关的信息，不一定属于正式题跋。残留的“所见”二字指向一种观看记录，说明原本可能存在更完整的边注说明。`,
+旁注就是写在边上的小字，不一定是正式题字。残留的“所见”二字和“看见”有关，说明这里原本可能有一段更完整的边上说明。`,
   },
   {
     id: 'clue_line_draft',
     chapter: 0,
     unlockCondition: ({ cluesFound }) => cluesFound.has('clue_line'),
     content: `【底层细线异常】
-画面下方的细线比裂纹规整，又不像装裱产生的痕迹。它更像是某种被保留下来的定位痕迹，但仅凭这一处还不能判断它的具体用途。`,
+画面下方的细线比裂纹更直，也不像普通折痕。它像是很早以前留下的一条辅助痕迹，但只凭这一条线，还不能判断它具体用来做什么。`,
   },
   {
     id: 'synthesis_remounting_purpose',
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.synthesisPassed),
     content: `【二次装裱的目的】
-二次装裱既可能为了保护画心，也可能在统一册页体例时改变边缘信息的可见性。若题签、旁注和底层细线同时被压住或忽略，重点不在画面是否缺失，而在来源说明被整理掉。`,
+后来重新装裱，可能会保护画本身，也可能把边上的旧标签、小字和细线压住。三处痕迹一起看，重点是：画还在，但说明这页画来历的痕迹被整理掉了。`,
   },
   {
     id: 'synthesis_conceal_methods',
     chapter: 0,
     unlockCondition: ({ progress }) => Boolean(progress.synthesisPassed),
     content: `【来源信息被遮蔽的常见手段】
-来源信息可能通过裁切题签、覆盖旁注、重配边框、重新归档或忽略辅助痕迹等方式被遮蔽。这类处理不会必然改变画心，却会改变后来者理解作品来源的路径。`,
+一页画的来历说明，可能被裁掉旧标签、盖住边上的小字、重配边框或忽略辅助线。这样做不一定改变画本身，却会让后来的人更难知道这些痕迹原本在说明什么。`,
   },
   {
     id: 'ch1_painting_world',

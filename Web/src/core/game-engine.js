@@ -43,11 +43,11 @@ const DEPRECATED_NOTEBOOK_RECORDS = [
 const PROLOGUE_CARRYOVER_RECORDS = [
   {
     type: 'clue',
-    text: '[线索] 装裱接缝残角 — 旧题签被刻意裁去，只留被覆盖的一角',
+    text: '[线索] 装裱接缝残角 — 旧标签被裁去，只剩被新边框压住的一角',
   },
   {
     type: 'clue',
-    text: '[线索] "……所见"残字 — 装裱层下的陌生笔迹旁注',
+    text: '[线索] "……所见"残字 — 装裱层下被压住的边上小字',
   },
   {
     type: 'clue',
@@ -55,7 +55,7 @@ const PROLOGUE_CARRYOVER_RECORDS = [
   },
   {
     type: 'clue',
-    text: '[结论] 三处痕迹指向同一事实：有人在重新装裱时系统性地遮蔽了这幅画的来源信息',
+    text: '[结论] 三处痕迹共同指向：画本身还在，画面之外的来源说明被后来的整理和装裱压住了',
   },
 ];
 
